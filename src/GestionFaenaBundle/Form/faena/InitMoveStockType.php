@@ -46,16 +46,23 @@ class InitMoveStockType extends AbstractType
                                         $options = null === $movimiento ? array() : $movimiento->getConceptos($repository->findAll());
 
                                         $form->add('concepto', EntityType::class, array(
-                                            'class'       => ConceptoMovimiento::class,
-                                            'placeholder' => '',
-                                            'choices'     => $options,
-                                        ));
+                                                    'class'       => ConceptoMovimiento::class,
+                                                    'choices'     => $options,
+                                                  ));
+
+
                                     };
                 $builder->addEventListener(
                     FormEvents::PRE_SET_DATA,
                     function (FormEvent $event) use ($formModifier) {
                         $data = $event->getData();
                         $formModifier($event->getForm(), $data);
+                        $event->getForm()->add('artProcFaena', 
+                                                  EntityType::class, 
+                                                  [
+                                                  'class' => ArticuloProcesoFaena::class,
+                                                  'choices' => $data->getProcesoFnDay()->getProcesoFaena()->getArticulos()
+                                                    ]);
                     }
                 );
                 $builder->get('movimiento')->addEventListener(

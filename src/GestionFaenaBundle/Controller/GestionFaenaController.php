@@ -193,6 +193,7 @@ class GestionFaenaController extends Controller
         //  return new Response(var_dump($values['gestionfaenabundle_faena_initmovest']['movimiento']));
           $clase = $values['gestionfaenabundle_faena_initmovest']['movimiento'];
           $movimiento = new $clase;//$data['movimiento'];
+          $movimiento->setProcesoFnDay($proceso);
           $form = $this->getFormBeginMovStockAction($proceso, $movimiento);
           $form->handleRequest($request);
           if ($form->isValid())
@@ -209,7 +210,9 @@ class GestionFaenaController extends Controller
           }
           return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView()));
         }
-        $form = $this->getFormBeginMovStockAction($proceso, new EntradaStock());
+        $entrada = new EntradaStock();
+        $entrada->setProcesoFnDay($proceso);
+        $form = $this->getFormBeginMovStockAction($proceso, $entrada);
         return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView()));
     }
 

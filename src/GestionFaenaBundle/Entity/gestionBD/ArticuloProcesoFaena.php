@@ -112,7 +112,7 @@ class ArticuloProcesoFaena
 
     public function __toString()
     {
-        return $this->articulo->getNombre();
+        return $this->articulo->getNombre().'('.$this->proceso.')';
     }
 
     /**

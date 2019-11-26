@@ -114,7 +114,7 @@ class GestionBDController extends Controller
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($articulo);
             $entityManager->flush();
-            return $this->redirectToRoute('addArtProcFan');
+            return $this->redirectToRoute('bd_add_articulo_proceso_faena');
         }
         return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('form' => $form->createView()));
     }
