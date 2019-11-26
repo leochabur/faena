@@ -1,0 +1,56 @@
+<p class="h4 mb-4 text-center">{{ article }}</p>
+
+				<div class="card">
+				  <div class="card-header">
+				    Atributos
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+						  <thead>
+						    <tr>
+						      <th scope="col">#</th>
+						      <th scope="col">Detalle</th>
+						      <th scope="col">Tipo</th>
+						      <th scope="col">Manual/Automatico</th>
+						      <th scope="col">Unidad Medida</th>
+						      <th scope="col">Calculo</th>
+						      <th scope="col">Factor Ajuste</th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	{% for attr in article.atributos %}
+						  		<tr>
+						  			<td>{{ loop.index }}</td>
+						  			<td>{{ attr.atributo }}</td>
+						  			<td>{{ attr.atributo.tipo }}</td>
+						  			<td>{{ attr.atributo.carga }}</td>
+						  			<td>{{ attr.atributo.unidadMedida }}</td>
+						  			<td>{{ attr.atributo.calculo }}</td>
+						  			<td>{{ attr.atributo.ajuste }}</td>
+						  		</tr>
+						  	{% endfor %}
+						  </tbody>
+						</table>
+				  </div>
+				</div>
+				{{ form_start(form, {'attr': {'class': 'sender'}}) }}
+				{{ form_widget(form) }}
+				{{ form_end(form) }}
+<script type="text/javascript">
+	$('.sender').submit(function(event){
+										event.preventDefault();
+										var form = $(this);
+										alert(form.attr('action'));
+										$.post(form.attr('action'),
+											   form.serialize(),
+											   function(data){
+											   					if (data.status){
+											   						$('#viewArticle').modal('hide');
+											   					}
+											   					else{
+											   						alert(data.message);
+											   					}
+											   });
+										
+	});
+</script>

@@ -1,0 +1,209 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<br>
+<hr>
+<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ proceso.faenaDiaria }}</p>
+<hr>
+{% if fatr is not defined %}
+	{{ form_start(form) }}
+	<div class="row container">
+		<div class="col">
+				{{ form_label(form.movimiento) }}
+				{{ form_widget(form.movimiento, {'attr' : {'class' : 'movimientos'}}) }}
+		</div>
+		<div class="col">
+				{{ form_label(form.concepto) }}
+				{{ form_widget(form.concepto, {'attr' : {'class' : 'conceptos'}}) }}
+		</div>
+		<div class="col">
+				{{ form_label(form.artProcFaena) }}
+				{{ form_widget(form.artProcFaena) }}
+		</div>
+	</div>
+	<div class="row container">
+		<div class="col">
+				{{ form_widget(form.guardar) }}
+		</div>
+	</div>
+	{{ form_end(form) }}
+{% endif %}
+
+{% if fatr is defined %}
+<div class="card">
+  <div class="card-header">
+    Registrar movimiento
+  </div>
+  <div class="card-body">
+	{{ form_start(fatr, {'attr':{'class' : 'container', 'novalidate':'novalidate'}}) }}
+		<ul>
+		<li>{{  form_widget(fatr.procesoFnDay, {'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
+
+		<li>{{  form_widget(fatr.artProcFaena, {'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
+
+		<li>{{  form_widget(fatr.concepto, {'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
+	</ul>
+
+	{{ form_label(fatr.valores, 'Valores') }}
+    {% for f in fatr.valores %}
+    	<div class="form-row">
+    		{{  form_widget(f.atributo) }}
+    		{%  if f.unidadMedida is defined %}
+    			{{  form_widget(f.unidadMedida) }}
+    		{% endif %}
+    		{%  if f.entidadExterna is defined %}
+    			{{  form_widget(f.entidadExterna) }}
+    		{% endif %}
+    		{%  if f.valor is defined %}
+    			{{  form_widget(f.valor) }}
+    		{% endif %}
+    	</div>            	
+    {% endfor %}
+    <div class="row">
+    	<div class="col">
+    		{{ form_widget(fatr.guardar) }}
+    		<a href="{{ path('bd_adm_proc_fan_day',{'proc': proceso.id }) }}" class="btn btn-danger">Cancelar</a>
+    	</div>
+    </div>
+	{{ form_end(fatr) }}
+</div>
+</div>
+{% endif %}
+	{% if movimientos is defined %}
+						{% set proced = 0 %}
+				    	{% set movim = 0 %}
+				    	{% set artic = 0 %}
+		<table class="table table-striped table-bordered table-hover table-sm ">
+			<thead>
+				<tr>
+					<th>#</th>
+				{% for mov in conceptos %}
+					<th>{{ mov.atributo }}</th>
+				{% endfor %}
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+		    {% for key, value in movs %}
+		    	<tr>
+			    		<td>{{ loop.index }}</td>
+					    {% for k, v in conceptos %}
+					    	
+					    	{% if datos[key][k] is defined %}
+							    <td>{{ datos[key][k].data }}</td>
+								{% set proced =  datos[key][k].proc %}
+						    	{% set movim =  datos[key][k].mov %}
+						    	{% set artic =  datos[key][k].art %}
+							{% else %}
+								<td></td>
+							{% endif %}
+					    	
+					    {% endfor %}
+					    <td class="align-middle">
+					    	<a href="{{ path('bd_adm_mov_st_edit',{'mov': movim, 'proc': proced, 'art' : artic }) }}" class="btn btn-sm btn-success">Editar</a>
+					    </td>
+					    <td class="align-middle">
+					    						{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
+										    	{{ form_widget(formsDelete[value].delete, {'attr' : {'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
+										    	{{ form_end(formsDelete[value]) }}
+					    </td>
+			</tr>
+		    {% endfor %}
+		    <tr class="table-warning h5">
+		    	<td>TOTALES</td>
+		    {% for k, v in conceptos %}
+			    <td>
+			    	{% if totales[k] is defined %}
+			    		{{ (totales[k].total/totales[k].cant)|number_format(v.decimales, ',', '') }}
+			    	{% endif %}
+			    </td>
+			 {% endfor %}
+			 <td></td>
+			 <td></td>
+			</tr>
+			</tbody>
+		</table>
+		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : proceso.faenaDiaria.id}) }}" class="btn btn-warning"><< Volver</a>
+	{% endif %}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+	var $sport = $('.movimientos');
+	// When sport gets selected ...
+	$sport.change(function() {
+	  // ... Obtener el formulario.
+	  var $form = $(this).closest('form');
+	  // Datos del formulario, pero sólo incluir el valor del deporte seleccionado.
+	  var data = {};
+	  data[$sport.attr('name')] = $sport.val();
+	  // Enviar los datos con AJAX al directorio de acción del formulario.
+	  $.ajax({
+	    url : $form.attr('action'),
+	    type: $form.attr('method'),
+	    data : data,
+	    success: function(html) {
+	      // Reemplazar la posición actual ...
+	      $('.conceptos').replaceWith(
+	        // ... con la devuelta por la respuesta AJAX.
+	        $(html).find('.conceptos')
+	      );
+	      // Position field ya muestra las posiciones correctas.
+	    }
+	  });
+	});
+	$('.btnDelete').click(function(event){
+											event.preventDefault();
+											var btn = $(this);
+											bootbox.confirm({
+										    message: "Seguro eliminar el item "+btn.data('index')+"?",
+										    buttons: {
+										        confirm: {
+										            label: 'Si',
+										            className: 'btn-success'
+										        },
+										        cancel: {
+										            label: 'No',
+										            className: 'btn-danger'
+										        }
+										    },
+										    callback: function (result) {
+										        if (result){
+										        	btn.parent().submit();
+										        }
+										    }
+										});
+	});
+
+	$('.view-art').click(function(){
+									var url = "{{ path('bd_view_art_proc_fan', {'articulo' : 'id_article'}) }}"; 
+									url = url.replace('id_article', $(this).data('id'));
+									$('.modal-body-article').load(url);
+									$('#viewArticle').modal('show');
+	});
+
+	$('.sender').submit(function (event){
+										 event.preventDefault();
+										 var form = $(this);
+										 $.post(form.attr('action'),
+										 		form.serialize(),
+										 		function(data){
+										 						if (data.status)
+										 						{
+
+										 						}
+										 						else
+										 						{
+
+										 						}
+
+
+										 		});
+										
+	});
+</script>
+
+{% endblock %}

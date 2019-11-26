@@ -1,0 +1,85 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<br>
+<p class="h4 mb-5">Nueva definicion de atributos de articulos</p>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+      aria-selected="true">Atributo Medible Manual</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+      aria-selected="false">Atributo Medible Automatico</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="manual-tab" data-toggle="tab" href="#manual" role="tab" aria-controls="manual"
+      aria-selected="false">Atributo Informable Externo</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+      aria-selected="false">Atributo Informable Manual</a>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active container" id="home" role="tabpanel" aria-labelledby="home-tab">
+  	<br>
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_label(form.atributoMedible.atributo.nombre) }}
+	{{ form_widget(form.atributoMedible.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(form.atributoMedible.unidadMedida) }}
+	{{ form_widget(form.atributoMedible.unidadMedida, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(form.atributoMedible.ajustable, 'Ajustable') }}
+	{{ form_widget(form.atributoMedible.ajustable) }}
+	{{ form_label(form.atributoMedible.factorAjuste) }}
+	{{ form_widget(form.atributoMedible.factorAjuste, {'attr': {'class': 'col-2'}}) }}
+	{{ form_widget(form.guardar) }}
+	{{ form_end(form) }}
+
+  </div>
+  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+  	<br>
+	{{ form_start(formAMA, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_label(formAMA.atributoMedible.atributo.nombre) }}
+	{{ form_widget(formAMA.atributoMedible.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(formAMA.atributoMedible.unidadMedida) }}
+	{{ form_widget(formAMA.atributoMedible.unidadMedida, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(formAMA.operacion) }}
+	{{ form_widget(formAMA.operacion, {'attr': {'class': 'col-2'}}) }}
+	<div class="row">
+	{{ form_label(formAMA.factor1) }}
+	{{ form_widget(formAMA.factor1, {'attr': {'class': 'col-2'}}) }}
+	{{ form_label(formAMA.factor2) }}
+	{{ form_widget(formAMA.factor2, {'attr': {'class': 'col-2'}}) }}
+	</div>
+
+
+				{{ form_widget(formAMA.atributoMedible.ajustable) }}
+				{{ form_label(formAMA.atributoMedible.factorAjuste) }}
+				{{ form_widget(formAMA.atributoMedible.factorAjuste, {'attr': {'class': 'col-2'}}) }}
+	{{ form_widget(formAMA.guardar) }}
+	{{ form_end(formAMA) }}
+  </div>
+  <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">
+  	<br>
+	{{ form_start(formAI, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_label(formAI.atributoInformable.atributo.nombre) }}
+	{{ form_widget(formAI.atributoInformable.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(formAI.claseExterna) }}
+	{{ form_widget(formAI.claseExterna, {'attr': {'class': 'col-4'}}) }}
+	{{ form_widget(formAI.guardar) }}
+	{{ form_end(formAI) }}
+  </div>
+  <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+  	<br>
+	{{ form_start(formAIM, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_label(formAIM.atributo.nombre) }}
+	{{ form_widget(formAIM.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
+	{{ form_widget(formAIM.guardar) }}
+	{{ form_end(formAIM) }}
+  </div>
+</div>
+	<br>
+
+{% endblock fos_user_content %}

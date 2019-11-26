@@ -1,0 +1,110 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<br>
+	<p class="h5">Listado de faenas generadas</p>
+	<table class="table table-striped table-bordered table-hover table-sm ">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Fecha Faena</th>
+					<th>Estado</th>
+					<th>Fecha/Hora Apertura</th>
+					<th>Usuario Inicio</th>
+					<th>Fecha/Hora Cierre</th>
+					<th>Usuario Cierre</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				
+				{% for f in faenas %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ f }}</td>	
+						<td>{{ f.state }}</td>						
+						<td>{{ f.fechaAlta is empty ? "" : f.fechaAlta|date("d/m/Y - H:i") }}</td>
+						<td>{{ f.userCreate }}</td>
+						<td>{{ f.fechaCierre is empty ? "" : f.fechaCierre|date("d/m/Y - H:i") }}</td>
+						<td>{{ f.userClose }}</td>
+						<td>
+							<a href="{{ path('bd_view_procesos_faena_diaria', {fan:f.id}) }}" class="btn btn-success btn-sm " >Gestionar...</a>
+							<a href="{{ path('bd_fan_day_close', {id:f.id}) }}" data-action="cerrar" class="btn btn-warning btn-sm btn-close" data-index="{{ loop.index }}">Cerrar</a>
+							<a href="{{ path('bd_fan_day_delete', {id:f.id}) }}" data-action="eliminar" class="btn btn-danger btn-sm btn-close" data-index="{{ loop.index }}">Eliminar</a>
+						</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+
+
+
+
+
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+
+	$('.btn-close').click(function(event){
+											event.preventDefault();
+											var btn = $(this);
+											bootbox.confirm({
+											    message: "Seguro "+btn.data('action')+" la faena # "+btn.data('index')+"?",
+											    buttons: {
+											        confirm: {
+											            label: 'Si',
+											            className: 'btn-success'
+											        },
+											        cancel: {
+											            label: 'No',
+											            className: 'btn-danger'
+											        }
+											    },
+											    callback: function (result) {
+											        if (result){
+											        	$.post(btn.attr('href'),
+											        		   function(data){
+											        		   		if (data.status)
+											        		   			location.reload();
+											        		   		else
+											        		   			bootbox.alert(data.msge);
+											        		   });
+											        }
+											    }
+											});
+	});
+
+
+	$('.view-art').click(function(){
+									var url = "{{ path('bd_view_art_proc_fan', {'articulo' : 'id_article'}) }}"; 
+									url = url.replace('id_article', $(this).data('id'));
+									$('.modal-body-article').load(url);
+									$('#viewArticle').modal('show');
+	});
+
+	$('.sender').submit(function (event){
+										 event.preventDefault();
+										 var form = $(this);
+										 $.post(form.attr('action'),
+										 		form.serialize(),
+										 		function(data){
+										 						if (data.status)
+										 						{
+
+										 						}
+										 						else
+										 						{
+
+										 						}
+
+
+										 		});
+										
+	});
+</script>
+
+{% endblock %}

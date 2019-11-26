@@ -1,0 +1,11 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<br>
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_label(form.fechaFaena) }}
+	{{ form_widget(form.fechaFaena, {'attr' : {'class' : 'col-4'}}) }}
+	{{ form_end(form) }}
+
+{% endblock fos_user_content %}

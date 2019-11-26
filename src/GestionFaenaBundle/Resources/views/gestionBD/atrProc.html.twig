@@ -1,0 +1,83 @@
+{% block fos_user_content %}
+
+{{ form_start(form, {'attr': {'novalidate':'novalidate', 'class' : 'editForm'}}) }}
+  <div class="form-row">
+    <div class="col-3">
+      {{  form_label(form.atributo) }}
+      {{ form_widget(form.atributo, {'attr' :{'class' : 'form-control-plaintext'}}) }}
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="col-2">
+      {{  form_label(form.orden) }}
+      {{ form_widget(form.orden) }}
+    </div>
+    <div class="col-2">
+      {{  form_label(form.decimales) }}
+      {{ form_widget(form.decimales) }}
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="col-2 form-check">
+      {{  form_label(form.mostrar) }}
+      {{ form_widget(form.mostrar) }}
+    </div>
+    <div class="col-2 form-check">
+	      {{  form_label(form.controlaStock) }}
+	      {{ form_widget(form.controlaStock) }}
+    </div>
+    <div class="col-2 form-check">
+	      {{  form_label(form.acumula) }}
+	      {{ form_widget(form.acumula) }}
+    </div>
+    <div class="col-2 form-check">
+	      {{  form_label(form.promedia) }}
+	      {{ form_widget(form.promedia) }}
+    </div>
+  </div>
+    <div class="form-row">
+    <div class="col">
+      {{ form_widget(form.guardar) }}
+    </div>
+  </div>
+{{ form_end(form) }}
+
+{% endblock fos_user_content %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $('.editForm').submit(function(event){
+    								event.preventDefault();
+                                    var form = $(this);
+									bootbox.confirm({
+									    message: "Seguro realizar la modificacion?",
+									    buttons: {
+									        confirm: {
+									            label: 'Si',
+									            className: 'btn-success'
+									        },
+									        cancel: {
+									            label: 'No',
+									            className: 'btn-danger'
+									        }
+									    },
+									    callback: function (result) {
+									        if (result){
+														$.post(form.attr('action'), 
+									                           form.serialize(),
+									                           function(data){
+									                           					if (data.status)							                           					
+									                           					{
+									                           						bootbox.alert({
+																								    message: "Modificacion realizada con exito!"
+																								});
+
+									                           					}
+									                                    	  });
+									        }
+									    }
+									});
+    });
+
+</script>
+{% endblock %}

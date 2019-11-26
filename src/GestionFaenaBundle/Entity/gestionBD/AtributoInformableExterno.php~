@@ -1,0 +1,22 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\gestionBD;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * AtributoInformableExterno
+ *
+ * @ORM\Table(name="sp_gst_atr_inf_ext")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\AtributoInformableExternoRepository")
+ */
+class AtributoInformableExterno extends AtributoInformable
+{
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="claseExterna", type="string")
+     */
+    private $claseExterna;
+}
+

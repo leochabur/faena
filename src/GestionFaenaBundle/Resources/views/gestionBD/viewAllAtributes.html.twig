@@ -1,0 +1,55 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+
+
+
+						<table class="table table-striped table-bordered table-hover table-sm ">
+						  <thead>
+						    <tr>
+						      <th scope="col">#</th>
+						      <th scope="col">Detalle</th>
+						      <th scope="col">Tipo</th>
+						      <th scope="col">Manual/Automatico</th>
+						      <th scope="col">Unidad Medida</th>
+						      <th scope="col">Calculo</th>
+						      <th scope="col">Factor Ajuste</th>
+						      <th scope="col"></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	{% for attr in atributos %}
+						  		<tr>
+						  			<td>{{ loop.index }}</td>
+						  			<td>{{ attr }}</td>
+						  			<td>{{ attr.tipo }}</td>
+						  			<td>{{ attr.carga }}</td>
+						  			<td>{{ attr.unidadMedida }}</td>
+						  			<td>{{ attr.calculo }}</td>
+						  			<td>{{ attr.ajuste }}</td>
+						  			<td><a href="{{path('bd_atributos_show',{'atr': attr.id})}}" class="btn btn-sm btn-warning">Editar</a></td>
+						  		</tr>
+						  	{% endfor %}
+						  </tbody>
+						</table>
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+<script type="text/javascript">
+	$('.sender').submit(function(event){
+										event.preventDefault();
+										var form = $(this);
+										alert(form.attr('action'));
+										$.post(form.attr('action'),
+											   form.serialize(),
+											   function(data){
+											   					if (data.status){
+											   						$('#viewArticle').modal('hide');
+											   					}
+											   					else{
+											   						alert(data.message);
+											   					}
+											   });
+										
+	});
+</script>
+{% endblock %}

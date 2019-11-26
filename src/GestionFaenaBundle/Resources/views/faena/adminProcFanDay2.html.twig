@@ -1,0 +1,105 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+<br>
+<p class="h5 card-title">{{ proceso }}</p>
+
+
+{{ form_start(form) }}
+  	 <div class="row">
+  		<div class="col-4">
+				{{ form_label(form.atributo1) }}
+				{{ form_widget(form.atributo1) }}
+  		</div>
+  		<div class="col-4">
+				{{ form_label(form.galpon, 'Galpon') }}
+				{{ form_widget(form.galpon) }}
+  		</div>  		
+  		<div class="col-4">
+  				{{ form_label(form.atributo2) }}
+				{{ form_widget(form.atributo2) }}
+  		</div>    		
+  </div>
+
+
+  <div class="row">
+  		<div class="col-2">
+				{{ form_label(form.movimiento.cantidad1, 'Cantidad 1') }}
+				{{ form_widget(form.movimiento.cantidad1) }}
+  		</div>
+  		<div class="col-4">
+				{{ form_label(form.movimiento.unidadMedida1, 'Unidad de Medida 1') }}
+				{{ form_widget(form.movimiento.unidadMedida1) }}
+  		</div>  		
+  		<div class="col-2">
+				{{ form_label(form.movimiento.cantidad2, 'Cantidad 2') }}
+				{{ form_widget(form.movimiento.cantidad2) }}
+  		</div>
+  		<div class="col-4">
+				{{ form_label(form.movimiento.unidadMedida2, 'Unidad de Medida 2') }}
+				{{ form_widget(form.movimiento.unidadMedida2) }}
+  		</div>  		
+  </div>
+  <div class="row">
+  		<div class="col-4">
+				{{ form_label(form.movimiento.procesoFnDay, 'Proceso') }}
+				{{ form_widget(form.movimiento.procesoFnDay) }}
+  		</div>
+  		<div class="col-4">
+				{{ form_label(form.movimiento.articulo, 'Articulo') }}
+				{{ form_widget(form.movimiento.articulo) }}
+  		</div>  		
+  		<div class="col-4">
+				{{ form_label(form.movimiento.concepto, 'Concepto') }}
+				{{ form_widget(form.movimiento.concepto) }}
+  		</div>  
+  </div>
+  <div class="row">
+  		<div class="col-4">
+				{{ form_label(form.oc, 'O/C') }}
+				{{ form_widget(form.oc) }}
+  		</div>
+		
+  		<div class="col-4">
+				{{ form_label(form.dte, 'DT-e') }}
+				{{ form_widget(form.dte) }}
+  		</div>  
+  </div>
+
+{{ form_end(form) }}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+	$('.view-art').click(function(){
+									var url = "{{ path('bd_view_art_proc_fan', {'articulo' : 'id_article'}) }}"; 
+									url = url.replace('id_article', $(this).data('id'));
+									$('.modal-body-article').load(url);
+									$('#viewArticle').modal('show');
+	});
+
+	$('.sender').submit(function (event){
+										 event.preventDefault();
+										 var form = $(this);
+										 $.post(form.attr('action'),
+										 		form.serialize(),
+										 		function(data){
+										 						if (data.status)
+										 						{
+
+										 						}
+										 						else
+										 						{
+
+										 						}
+
+
+										 		});
+										
+	});
+</script>
+
+{% endblock %}

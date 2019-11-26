@@ -1,0 +1,16 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\faena;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * EntradaStock
+ *
+ * @ORM\Table(name="sp_st_ent_st")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\EntradaStockRepository")
+ */
+class EntradaStock extends MovimientoStock
+{
+
+}

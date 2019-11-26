@@ -1,0 +1,20 @@
+<?php
+
+namespace GestionFaenaBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ProcesoMedio
+ *
+ * @ORM\Table(name="sp_proc_mid")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\ProcesoMedioRepository")
+ */
+class ProcesoMedio extends ProcesoFaena
+{
+    public function getType()
+    {
+        return "Proceso Manufactura";
+    }
+}
+

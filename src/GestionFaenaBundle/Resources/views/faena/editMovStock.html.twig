@@ -1,0 +1,81 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<br>
+<p class="h5 card-title">Fecha de Faena: {{ proceso.faenaDiaria }}</p>
+
+
+
+{% if fatr is defined %}
+<div class="card">
+  <div class="card-header">
+    Editar movimiento
+  </div>
+  <div class="card-body">
+	{{ form_start(fatr, {'atr':{'class' : 'container', 'novalidate':'novalidate'}}) }}
+	<div class="form-row">
+		{{ form_label(fatr.procesoFnDay, 'Proceso') }}
+		{{  form_widget(fatr.procesoFnDay) }}
+		
+	</div>
+	<div class="form-row">
+		{{ form_label(fatr.artProcFaena, 'Articulo') }}
+		{{  form_widget(fatr.artProcFaena) }}
+	</div>
+	{{ form_label(fatr.valores, 'Valores') }}
+    {% for f in fatr.valores %}
+    	<div class="form-row">
+    		{{  form_widget(f.atributo) }}
+    		{%  if f.unidadMedida is defined %}
+    			{{  form_widget(f.unidadMedida) }}
+    		{% endif %}
+    		{%  if f.entidadExterna is defined %}
+    			{{  form_widget(f.entidadExterna) }}
+    		{% endif %}
+    		{%  if f.valor is defined %}
+    			{{  form_widget(f.valor, {'atr':{'placeholder' : 'Ingrese el valor'}}) }}
+    		{% endif %}
+    	</div>
+				
+
+            	
+    {% endfor %}
+	{{ form_end(fatr) }}
+</div>
+</div>
+{% endif %}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+	$('.view-art').click(function(){
+									var url = "{{ path('bd_view_art_proc_fan', {'articulo' : 'id_article'}) }}"; 
+									url = url.replace('id_article', $(this).data('id'));
+									$('.modal-body-article').load(url);
+									$('#viewArticle').modal('show');
+	});
+
+	$('.sender').submit(function (event){
+										 event.preventDefault();
+										 var form = $(this);
+										 $.post(form.attr('action'),
+										 		form.serialize(),
+										 		function(data){
+										 						if (data.status)
+										 						{
+
+										 						}
+										 						else
+										 						{
+
+										 						}
+
+
+										 		});
+										
+	});
+</script>
+
+{% endblock %}

@@ -1,0 +1,95 @@
+<nav class="navbar navbar-expand-lg navbar-dark primary-color">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse container" id="navbarTogglerDemo01">
+    <ul class="navbar-nav mr-auto">
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Configuracion Sistema
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Admin. Procesos</a>
+            <ul class="dropdown-menu">
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir Proceso</a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':1})}}">Proceso Inicio</a></li>
+                  <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':2})}}">Proceso Medio</a></li>
+                  <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':3})}}">Proceso Fin</a></li>
+                </ul>
+              </li>
+              <li><a class="dropdown-item" href="{{ path('bd_view_procesos') }}">Ver Procesos</a></li>
+              <li><a class="dropdown-item" href="{{ path('bd_add_articulo_proceso_faena') }}">Definir Articulos</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones BD</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{path('bd_add_atributo')}}">Nuevo Atributo Articulo</a></li>
+              <li><a class="dropdown-item" href="{{path('bd_atributos_view_all')}}">Ver Atributos Generados</a></li>
+               <li><a class="dropdown-item" href="{{path('bd_config_atr_proceso')}}">Configurar Atributos Conceptos</a></li>
+              <li><a class="dropdown-item" href="#">Nueva Unidad Medida</a></li>
+              <li><a class="dropdown-item" href="{{ path('bd_add_entity_externa') }}">Nueva Entidad Externa</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+        <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Faena Diaria
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Administrar</a>
+            <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{ path('bd_add_faena_diaria') }}">Iniciar Nueva</a></li>
+                  <li><a class="dropdown-item" href="{{ path('bd_view_faena') }}">Ver Faenas</a></li>
+                  <li><a class="dropdown-item" href="#">Ver Stock Parcial</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Estado del dia</a></li>
+              <li><a class="dropdown-item" href="#">Estado historico</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+        <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Informes
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir informes</a>
+            <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Informe I</a></li>
+                  <li><a class="dropdown-item" href="#">Informe II</a></li>
+                  <li><a class="dropdown-item" href="#">Informe III</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir alertas</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Alerta I</a></li>
+              <li><a class="dropdown-item" href="#">Alerta II</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-auto nav-flex-icons">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-user"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right dropdown-default"
+          aria-labelledby="navbarDropdownMenuLink-333">
+          <a class="dropdown-item" href="{{ path('fos_user_security_logout')}}">Cerrar sesion</a>
+          <a class="dropdown-item" href="{{ path('fos_user_profile_show') }}">Ver perfil</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>

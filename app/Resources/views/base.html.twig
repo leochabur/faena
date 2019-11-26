@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+    {% block stylesheets %}{% endblock %}
+
+    <title>{% block title %}FOSUserBundle Tutorial{% endblock %}</title>
+
+    <!-- Latest compiled and minified CSS -->
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="{{ asset('resources/css/bootstrap.min.css') }}" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link rel="stylesheet" href="{{ asset('resources/css/mdb.min.css') }}" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link rel="stylesheet" href="{{ asset('resources/css/style.css') }}" rel="stylesheet">
+  
+  <link href="{{ asset('resources/css/addons/datatables.min.css') }}" rel="stylesheet">
+    
+    <!-- Latest compiled and minified JavaScript -->
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+      .dropdown-submenu {
+        position: relative;
+      }
+
+      .dropdown-submenu a::after {
+        transform: rotate(-90deg);
+        position: absolute;
+        right: 6px;
+        top: .8em;
+      }
+
+      .dropdown-submenu .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-left: .1rem;
+        margin-right: .1rem;
+      }
+    </style>
+</head>
+
+<body>
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    {% include '::topnav.html.twig' %}
+{% endif %}
+
+<div class="container content">
+    {% block content %}{% endblock %}
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{{ asset('resources/js/jquery-3.4.1.min.js') }}"></script>
+<script src="{{ asset('resources/js/popper.min.js') }}"></script>
+<script src="{{ asset('resources/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('resources/js/mdb.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('resources/js/addons/datatables.min.js') }}"></script>
+<script src="{{ asset('resources/js/bootbox.all.min.js') }}"></script>
+
+{% block javascripts %}{% endblock %}
+<script type="text/javascript">
+$('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+  if (!$(this).next().hasClass('show')) {
+    $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+  }
+  var $subMenu = $(this).next(".dropdown-menu");
+  $subMenu.toggleClass('show');
+
+
+  $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+    $('.dropdown-submenu .show').removeClass("show");
+  });
+
+
+  return false;
+});
+    {% for js in app.session.flashbag.get('javascript') %}
+    {% autoescape false %}{{ js }}{% endautoescape %}
+    {% endfor %}
+</script>
+</body>
+</html>

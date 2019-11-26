@@ -1,0 +1,29 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+
+{{ form_start(form) }}
+{{ form_widget(form) }}
+{{ form_end(form) }}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+<script type="text/javascript">
+	$('.sender').submit(function(event){
+										event.preventDefault();
+										var form = $(this);
+										alert(form.attr('action'));
+										$.post(form.attr('action'),
+											   form.serialize(),
+											   function(data){
+											   					if (data.status){
+											   						$('#viewArticle').modal('hide');
+											   					}
+											   					else{
+											   						alert(data.message);
+											   					}
+											   });
+										
+	});
+</script>
+{% endblock %}

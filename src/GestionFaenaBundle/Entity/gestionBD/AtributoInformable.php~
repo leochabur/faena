@@ -1,0 +1,20 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\gestionBD;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * AtributoInformable
+ *
+ * @ORM\Table(name="sp_gst_atr_inf")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\AtributoInformableRepository")
+ */
+abstract class AtributoInformable extends Atributo
+{
+
+    public function getTipo()
+    {
+    	return 'Informable';
+    }
+}

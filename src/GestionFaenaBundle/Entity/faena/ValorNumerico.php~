@@ -1,0 +1,51 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\faena;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ValorNumerico
+ *
+ * @ORM\Table(name="sp_st_mov_val_nro")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\ValorNumericoRepository")
+ */
+class ValorNumerico extends ValorAtributo
+{
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="valor", type="float")
+     */
+    private $valor;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\UnidadMedida") 
+    * @ORM\JoinColumn(name="id_unt_med", referencedColumnName="id")
+    */      
+    private $unidadMedida;
+
+    /**
+     * Set valor
+     *
+     * @param float $valor
+     *
+     * @return ValorNumerico
+     */
+    public function setValor($valor)
+    {
+        $this->valor = $valor;
+
+        return $this;
+    }
+
+    /**
+     * Get valor
+     *
+     * @return float
+     */
+    public function getValor()
+    {
+        return $this->valor;
+    }
+}

@@ -1,0 +1,85 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+
+		<br>
+<p class="h4 mb-5">Editar Atributo Articulo</p>
+    {% for flash_message in app.session.flashbag.get('errorForm') %}
+            <div class="alert alert-danger" role="alert">
+                {{ flash_message }}
+            </div>
+    {% endfor %}
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_widget(form) }}
+	{{ form_end(form) }}
+    <div id="atributo">
+
+    </div>
+{% endblock fos_user_content %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $('.proceso').change(function(){
+                                    var proceso = $(this);
+                                    $('.articulo').empty();
+                                    $('.atributo').empty();
+                                    $.ajax({
+                                        url: "{{ path('bd_get_articles_for_proccess') }}",
+                                        type: "GET",
+                                        dataType: "JSON",
+                                        data: {
+                                            prid: proceso.val()
+                                        },
+                                        success: function (data) {                                                        
+                                                            $.each(data, function (key, value) {
+                                                                    $('.articulo').append('<option value="' + value.key + '">' + value.value + '</option>');
+                                                            });
+                                        },
+                                        error: function (err) {
+                                                                $('.articulo').empty();
+                                                                $('.atributo').empty();
+                                        }
+                                    });
+    });
+    $('.articulo').change(function(){
+                                    var articulo = $(this);
+                                    $('.atributo').empty();
+                                    $.ajax({
+                                        url: "{{ path('bd_get_atributes_for_articles') }}",
+                                        type: "GET",
+                                        dataType: "JSON",
+                                        data: {
+                                            artid: articulo.val()
+                                        },
+                                        success: function (data) {                                                        
+                                                            $.each(data, function (key, value) {
+                                                                    $('.atributo').append('<option value="' + value.key + '">' + value.value + '</option>');
+                                                            });
+                                        },
+                                        error: function (err) {
+                                                                $('.atributo').empty();
+                                        }
+                                    });
+    });
+    $('.atributo').change(function(){
+                                    var atributo = $(this);
+                                    $("#atributo").html('');
+                                    $.ajax({
+                                        url: "{{ path('bd_get_atribute') }}",
+                                        type: "GET",
+                                        data: {
+                                            atrid: atributo.val()
+                                        },
+                                        success: function (data) {                                                  
+                                                            $("#atributo").html(data);
+                                        },
+                                        error: function (err) {
+                                                            $("#atributo").html('');
+                                        }
+                                    });
+    });
+</script>
+{% endblock %}
+
+
