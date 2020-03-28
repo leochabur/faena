@@ -6,6 +6,7 @@
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 	{{ form_label(form.proceso.nombre, label) }}
 	{{ form_widget(form.proceso.nombre, {'attr' : {'class' : 'col-4'}}) }}
+	{{ form_widget(form.proceso.permanente, {'attr' : {'class' : 'col-4'}}) }}
 	{{ form_end(form) }}
 
 {% endblock fos_user_content %}

@@ -4,11 +4,13 @@ namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Articulo
  *
  * @ORM\Table(name="sp_gst_art")
+ * @UniqueEntity("nombre", message="Articulo existente en la base de datos")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\ArticuloRepository")
  */
 class Articulo
@@ -30,6 +32,10 @@ class Articulo
      */
     private $nombre;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ArticuloAtributoConcepto", mappedBy="articulo")
+     */
+    private $artsAtrConc;
 
     /**
      * Get id
@@ -68,5 +74,46 @@ class Articulo
     public function __toString()
     {
         return $this->nombre;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->artsAtrConc = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add artsAtrConc
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc
+     *
+     * @return Articulo
+     */
+    public function addArtsAtrConc(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc)
+    {
+        $this->artsAtrConc[] = $artsAtrConc;
+
+        return $this;
+    }
+
+    /**
+     * Remove artsAtrConc
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc
+     */
+    public function removeArtsAtrConc(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc)
+    {
+        $this->artsAtrConc->removeElement($artsAtrConc);
+    }
+
+    /**
+     * Get artsAtrConc
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getArtsAtrConc()
+    {
+        return $this->artsAtrConc;
     }
 }

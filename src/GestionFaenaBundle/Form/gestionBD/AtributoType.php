@@ -13,7 +13,8 @@ class AtributoType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('nombre');
+        $builder->add('atributoAbstracto')
+                ->add('nombre');
     }/**
      * {@inheritdoc}
      */

@@ -20,19 +20,37 @@
                 </ul>
               </li>
               <li><a class="dropdown-item" href="{{ path('bd_view_procesos') }}">Ver Procesos</a></li>
-              <li><a class="dropdown-item" href="{{ path('bd_add_articulo_proceso_faena') }}">Definir Articulos</a></li>
+                       
+            </ul>
+          </li>
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Gestionar Articulos</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{path('bd_add_articulo')}}">Nuevo Articulo</a></li>
+              <li><a class="dropdown-item" href="{{ path('bd_add_articulo_atributo_concepto') }}">Definir Articulos</a></li>
+              <li><a class="dropdown-item" href="{{ path('bd_editar_articulo') }}">Configurar Articulos</a></li>
+            </ul>
+          </li>
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones BD</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{path('bd_add_atributo_abstracto')}}">Nuevo Atributo Abstracto</a></li>
+              <li><a class="dropdown-item" href="{{ path('bd_add_concepto_movimiento') }}">Nuevo Concepto Movimiento</a></li>
+               <!--li><a class="dropdown-item" href="{{path('bd_editar_atributo_articulo')}}">Configurar Atributos por proceso</a></li-->
+              <li><a class="dropdown-item" href="{{path('bd_add_concepto_movimiento_proceso')}}">Asignar Concepto a proceso</a></li>
+              <li><a class="dropdown-item" href="{{path('bd_view_concepto_movimiento_proceso')}}">Ver Definicion de Conceptos</a></li>
+              <!--li><a class="dropdown-item" href=" path('bd_editar_atr_concepto') ">Configurar atributos por concepto</a></li-->
+              <!--li><a class="dropdown-item" href="{{ path('bd_editar_articulo_proceso') }}">Definicion de articulos por proceso</a></li-->
+              
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones del Sistema</a>
+                <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{{ path('bd_add_unidad_medida') }}">Nueva Unidad de Medida</a></li>
+                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_granja') }}">Nueva Granja</a></li>
+                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_transportista') }}">Nuevo Transportista</a></li>
+                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_ciudad') }}">Nueva Ciudad</a></li>
+                </ul>
+              </li>
             </ul>
           </li>
 
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones BD</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{{path('bd_add_atributo')}}">Nuevo Atributo Articulo</a></li>
-              <li><a class="dropdown-item" href="{{path('bd_atributos_view_all')}}">Ver Atributos Generados</a></li>
-               <li><a class="dropdown-item" href="{{path('bd_config_atr_proceso')}}">Configurar Atributos Conceptos</a></li>
-              <li><a class="dropdown-item" href="#">Nueva Unidad Medida</a></li>
-              <li><a class="dropdown-item" href="{{ path('bd_add_entity_externa') }}">Nueva Entidad Externa</a></li>
-            </ul>
-          </li>
         </ul>
       </li>
         <li class="nav-item dropdown">
@@ -44,7 +62,6 @@
             <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="{{ path('bd_add_faena_diaria') }}">Iniciar Nueva</a></li>
                   <li><a class="dropdown-item" href="{{ path('bd_view_faena') }}">Ver Faenas</a></li>
-                  <li><a class="dropdown-item" href="#">Ver Stock Parcial</a></li>
             </ul>
           </li>
 
@@ -61,18 +78,10 @@
           Informes
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir informes</a>
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Administrar Usuarios</a>
             <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Informe I</a></li>
-                  <li><a class="dropdown-item" href="#">Informe II</a></li>
-                  <li><a class="dropdown-item" href="#">Informe III</a></li>
-            </ul>
-          </li>
-
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir alertas</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Alerta I</a></li>
-              <li><a class="dropdown-item" href="#">Alerta II</a></li>
+                  <li><a class="dropdown-item" href="{{ path('fos_user_registration_register') }}">Nuevo Usuario</a></li>
+                  <li><a class="dropdown-item" href="{{path('conf_add_proc_user')}}">Asignar Procesos</a></li>
             </ul>
           </li>
         </ul>

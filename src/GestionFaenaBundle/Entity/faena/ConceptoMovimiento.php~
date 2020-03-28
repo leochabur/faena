@@ -3,6 +3,8 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * ConceptoMovimiento
@@ -25,20 +27,29 @@ class ConceptoMovimiento
      * @var string
      *
      * @ORM\Column(name="concepto", type="string", length=255)
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $concepto;
 
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="esa", type="integer")
-     */
-    private $esa; ///indica si el concepto se aplica al ingreso, egreso o ambos movimientos de stock
 
-    /**
-     * @ORM\OneToMany(targetEntity="AtributoConcepto", mappedBy="concepto")
-     */
-    private $atributos;
+    public function getAtributoConcepto(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $apf)
+    {
+        foreach ($this->atributos as $atr) {
+            if ($atr->getArticulo() === $apf)
+                return $atr;
+        }
+        return null;
+    }
+
+    public function manejaAtributo(\GestionFaenaBundle\Entity\gestionBD\AtributoProceso $atributo)
+    {
+        foreach ($this->atributos as $atributoConcepto) {
+            if ($atributoConcepto->existeAtributo($atributo))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Get id
      *
@@ -73,32 +84,9 @@ class ConceptoMovimiento
         return $this->concepto;
     }
 
-    /**
-     * Set esa
-     *
-     * @param integer $esa
-     *
-     * @return ConceptoMovimiento
-     */
-    public function setEsa($esa)
-    {
-        $this->esa = $esa;
-
-        return $this;
-    }
-
-    /**
-     * Get esa
-     *
-     * @return integer
-     */
-    public function getEsa()
-    {
-        return $this->esa;
-    }
-
     public function __toString()
     {
         return $this->concepto;
     }
+
 }

@@ -17,5 +17,38 @@ class ValorExterno extends ValorAtributo
     * @ORM\JoinColumn(name="id_etntity_extern", referencedColumnName="id")
     */      
     private $entidadExterna;
-}
 
+    /**
+     * Set entidadExterna
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidadExterna
+     *
+     * @return ValorExterno
+     */
+    public function setEntidadExterna(\GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidadExterna = null)
+    {
+        $this->entidadExterna = $entidadExterna;
+
+        return $this;
+    }
+
+    /**
+     * Get entidadExterna
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\EntidadExterna
+     */
+    public function getEntidadExterna()
+    {
+        return $this->entidadExterna;
+    }
+    
+    public function calcularValor($movimiento, $promedio = 0)
+    {
+        
+    }
+
+    public function getData()
+    {
+        return $this->entidadExterna.'';
+    }
+}

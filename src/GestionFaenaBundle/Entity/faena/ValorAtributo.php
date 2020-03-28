@@ -25,7 +25,7 @@ abstract class ValorAtributo
     private $id;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoProceso") 
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo", inversedBy="valoresAtributos") 
     * @ORM\JoinColumn(name="id_atributo", referencedColumnName="id")
     */      
     private $atributo;
@@ -36,6 +36,23 @@ abstract class ValorAtributo
      */
     private $movimiento;
 
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atributo_abstracto", referencedColumnName="id")
+    */      
+    private $atributoAbstracto;
+
+    /**
+     *
+     * @ORM\Column(name="posicion", type="integer", options={"default":0}, nullable=true)
+     */
+    private $posicion;
+
+    /**
+     *
+     * @ORM\Column(name="mostrar", type="boolean", options={"default":true}, nullable=true)
+     */
+    private $mostrar;
 
  /*   public function __toString()
     {
@@ -76,18 +93,18 @@ abstract class ValorAtributo
         return $this->movimiento;
     }
 
-    public abstract function calcularValor($movimiento, $promedio = 0);
+    public abstract function calcularValor($movimiento, $entityManager, $promedio = 0);
 
     public abstract function getData();
 
     /**
      * Set atributo
      *
-     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoProceso $atributo
+     * @param \GestionFaenaBundle\Entity\gestionBD\Atributo $atributo
      *
      * @return ValorAtributo
      */
-    public function setAtributo(\GestionFaenaBundle\Entity\gestionBD\AtributoProceso $atributo = null)
+    public function setAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo = null)
     {
         $this->atributo = $atributo;
 
@@ -97,10 +114,82 @@ abstract class ValorAtributo
     /**
      * Get atributo
      *
-     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoProceso
+     * @return \GestionFaenaBundle\Entity\gestionBD\Atributo
      */
     public function getAtributo()
     {
         return $this->atributo;
+    }
+
+    /**
+     * Set atributoAbstracto
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoAbstracto
+     *
+     * @return ValorAtributo
+     */
+    public function setAtributoAbstracto(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoAbstracto = null)
+    {
+        $this->atributoAbstracto = $atributoAbstracto;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoAbstracto
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto
+     */
+    public function getAtributoAbstracto()
+    {
+        return $this->atributoAbstracto;
+    }
+
+    /**
+     * Set posicion
+     *
+     * @param integer $posicion
+     *
+     * @return ValorAtributo
+     */
+    public function setPosicion($posicion)
+    {
+        $this->posicion = $posicion;
+
+        return $this;
+    }
+
+    /**
+     * Get posicion
+     *
+     * @return integer
+     */
+    public function getPosicion()
+    {
+        return $this->posicion;
+    }
+
+    /**
+     * Set mostrar
+     *
+     * @param boolean $mostrar
+     *
+     * @return ValorAtributo
+     */
+    public function setMostrar($mostrar)
+    {
+        $this->mostrar = $mostrar;
+
+        return $this;
+    }
+
+    /**
+     * Get mostrar
+     *
+     * @return boolean
+     */
+    public function getMostrar()
+    {
+        return $this->mostrar;
     }
 }

@@ -3,7 +3,7 @@
 namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use GestionFaenaBundle\Entity\faena\ValorTexto;
 /**
  * AtributoInformableArbitrario
  *
@@ -12,12 +12,16 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class AtributoInformableArbitrario extends AtributoInformable
 {
-
-    public function getEntityValorAtributo()
+    
+    public function getEntityValorAtributo($atributo)
     {
-        $value = new ValorTexto();
-        $value->setAtributo($this);
+        $value = new ValorTexto($atributo);
+        $value->setAtributo($atributo->getAtributoAbstracto());
         return $value;
     }
-}
 
+    public function getClass()
+    {
+        return get_class($this);
+    }
+}

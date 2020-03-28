@@ -1,9 +1,74 @@
 {% extends "FOSUserBundle::layout.html.twig" %}
         
+{% block stylesheets %}
 
+<style type="text/css">
+    fieldset 
+	{
+		border: 1px solid #ddd !important;
+		margin: 0;
+		xmin-width: 0;
+		padding: 10px;       
+		position: relative;
+		border-radius:4px;
+		background-color:#f5f5f5;
+		padding-left:10px!important;
+	}	
+	
+		legend
+		{
+			font-size:14px;
+			font-weight:bold;
+			margin-bottom: 0px; 
+			width: 35%; 
+			border: 1px solid #ddd;
+			border-radius: 4px; 
+			padding: 5px 5px 5px 10px; 
+			background-color: #ffffff;
+		}
+</style>
+
+{% endblock %}
 {% block fos_user_content %}
 	<br>
-<p class="h4 mb-5">Nueva definicion de atributos de articulos</p>
+	<hr>
+<spam class="h5 mb-5">Nueva definicion de atributos de articulos</spam>
+<hr>
+{% if articulo is defined %}
+	<ul>
+		<li class="h6">Proceso : {{ articulo.concepto.procesoFaena }}</li>
+		<li class="h6">Concepto : {{ articulo.concepto.concepto }}</li>
+		<li class="h6">Articulo : {{ articulo.articulo }}</li>
+		{% if transf is defined %}
+			<li class="h6">Articulo origen de transformacion: {% if articulo.concepto.articuloOrigenTransformacion is not null %} {{ articulo.concepto.articuloOrigenTransformacion }} {% else %}<small class="form-text text-muted">Sin configurar</small> {% endif %}</li>
+		{% endif %}
+	</ul>
+	<hr>
+{% endif %}
+{% if transf is defined %}
+	
+	{{ form_start(transf, {'attr' : {'novalidate' : 'novalidate', 'class' : 'assign'}}) }}
+	<span class="h6 container">Asignar articulo origen</span>
+	<div class="form-row container align-items-center">
+		<div class="col">{{ form_widget(transf.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
+		<small id="defaultRegisterFormPasswordHelpBlock" class="form-text text-muted">
+        	Los articulos se configuran desde <a href="{{ path('bd_edit_procesos', {proccess: articulo.concepto.procesoFaena.id})}}">aqui</a>
+    </small></div>
+		<div class="col">{{ form_widget(transf.agregar, {'attr' : {'class' : 'btn-sm btn-success'}}) }}
+		<small id="defaultRegisterFormPasswordHelpBlock" class="form-text text-muted">
+         .
+    </small>
+	</div>
+	</div>
+	<hr>
+	{{ form_end(transf) }}
+	
+{% endif %}
+{% for message in app.flashes('errors') %}
+	<div class="alert alert-danger" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item">
     <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
@@ -26,46 +91,148 @@
   <div class="tab-pane fade show active container" id="home" role="tabpanel" aria-labelledby="home-tab">
   	<br>
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-	{{ form_label(form.atributoMedible.atributo.nombre) }}
-	{{ form_widget(form.atributoMedible.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
-	{{ form_label(form.atributoMedible.unidadMedida) }}
-	{{ form_widget(form.atributoMedible.unidadMedida, {'attr': {'class': 'col-4'}}) }}
-	{{ form_label(form.atributoMedible.ajustable, 'Ajustable') }}
-	{{ form_widget(form.atributoMedible.ajustable) }}
-	{{ form_label(form.atributoMedible.factorAjuste) }}
-	{{ form_widget(form.atributoMedible.factorAjuste, {'attr': {'class': 'col-2'}}) }}
+	<div class='form-row'>
+		<div class="col-4">
+			{{ form_label(form.atributoMedible.atributo.atributoAbstracto) }}
+			{{ form_widget(form.atributoMedible.atributo.atributoAbstracto) }}
+			{{ form_errors(form.atributoMedible.atributo.atributoAbstracto) }}
+		</div>
+		<div class="col-4">
+			{{ form_label(form.atributoMedible.atributo.nombre, 'Mostrar como...') }}
+			{{ form_widget(form.atributoMedible.atributo.nombre) }}
+			{{ form_errors(form.atributoMedible.atributo.nombre) }}
+		</div>
+		<div class="col-4">
+			{{ form_label(form.atributoMedible.unidadMedida) }}
+			{{ form_widget(form.atributoMedible.unidadMedida) }}
+			{{ form_errors(form.atributoMedible.unidadMedida) }}
+		</div>
+	</div>
+	<div class='form-row'>
+		<div class="col-4">
+			{{ form_label(form.atributoMedible.decimales) }}
+			{{ form_widget(form.atributoMedible.decimales) }}
+			{{ form_errors(form.atributoMedible.decimales) }}
+		</div>
+	</div>
+	<div class='form-row'>
+		<div class="col-3">
+			{{ form_label(form.atributoMedible.acumula) }}
+			{{ form_widget(form.atributoMedible.acumula) }}
+			{{ form_errors(form.atributoMedible.acumula) }}
+		</div>
+		<div class="col-3">
+			{{ form_label(form.atributoMedible.promedia) }}
+			{{ form_widget(form.atributoMedible.promedia) }}
+			{{ form_errors(form.atributoMedible.promedia) }}
+		</div>
+	</div>
 	{{ form_widget(form.guardar) }}
 	{{ form_end(form) }}
 
   </div>
   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
   	<br>
-	{{ form_start(formAMA, {'attr': {'novalidate': 'novalidate'}}) }}
-	{{ form_label(formAMA.atributoMedible.atributo.nombre) }}
-	{{ form_widget(formAMA.atributoMedible.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
-	{{ form_label(formAMA.atributoMedible.unidadMedida) }}
-	{{ form_widget(formAMA.atributoMedible.unidadMedida, {'attr': {'class': 'col-4'}}) }}
-	{{ form_label(formAMA.operacion) }}
-	{{ form_widget(formAMA.operacion, {'attr': {'class': 'col-2'}}) }}
-	<div class="row">
-	{{ form_label(formAMA.factor1) }}
-	{{ form_widget(formAMA.factor1, {'attr': {'class': 'col-2'}}) }}
-	{{ form_label(formAMA.factor2) }}
-	{{ form_widget(formAMA.factor2, {'attr': {'class': 'col-2'}}) }}
-	</div>
-
-
-				{{ form_widget(formAMA.atributoMedible.ajustable) }}
-				{{ form_label(formAMA.atributoMedible.factorAjuste) }}
-				{{ form_widget(formAMA.atributoMedible.factorAjuste, {'attr': {'class': 'col-2'}}) }}
-	{{ form_widget(formAMA.guardar) }}
-	{{ form_end(formAMA) }}
+		{{ form_start(formAMA, {'attr': {'novalidate': 'novalidate'}}) }}
+			<div class='form-row'>
+				<div class="col-4">
+					{{ form_label(formAMA.atributoMedible.atributo.atributoAbstracto) }}
+					{{ form_widget(formAMA.atributoMedible.atributo.atributoAbstracto) }}
+				</div>
+				<div class="col-4">
+					{{ form_label(formAMA.atributoMedible.atributo.nombre, 'Mostrar como...') }}
+					{{ form_widget(formAMA.atributoMedible.atributo.nombre) }}
+				</div>
+				<div class="col-4">
+					{{ form_label(formAMA.atributoMedible.unidadMedida) }}
+					{{ form_widget(formAMA.atributoMedible.unidadMedida) }}
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="card">
+				  <div class="card-body">
+				  	<h4 class="card-title h5">Definir operacion de calculo</h4>
+				  	<div class="row">
+					   	<fieldset class="col-md-2">    	
+								<legend class="h6">Operacion</legend>
+									<div class="form-row">
+										<div class="col">
+										{{ form_label(formAMA.operacion) }}
+										{{ form_widget(formAMA.operacion, {'attr' : {'class' : 'form-control-sm col-8'}}) }}
+										</div>
+									</div>
+						</fieldset>
+					   	<fieldset class="col-md-2">    	
+								<legend class="h6">Ajuste</legend>
+									<div class="form-row">
+										<div class="col">
+										{{ form_label(formAMA.factorAjuste, 'Valor') }}
+										{{ form_widget(formAMA.factorAjuste, {'attr' : {'class' : 'form-control-sm col-8'}}) }}
+										</div>
+									</div>
+						</fieldset>
+						<fieldset class="col-md-4">  
+								<legend class="h6">Factor 1</legend>
+									<div class="form-row">
+										<div class="col">
+										{{ form_label(formAMA.factor1.atributo) }}
+										{{ form_widget(formAMA.factor1.atributo, {'attr' : {'class' : 'form-control-sm'}}) }}
+										</div>
+										<div class="col">
+										{{ form_label(formAMA.factor1.articulo) }}
+										{{ form_widget(formAMA.factor1.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
+										</div>
+										<div class="col">
+										{{ form_label(formAMA.factor1.tipoCalculo) }}
+										{{ form_widget(formAMA.factor1.tipoCalculo, {'attr' : {'class' : 'form-control-sm'}}) }}
+										</div>
+									</div>
+						</fieldset>
+						<fieldset class="col-md-4">    	
+								<legend class="h6">Factor 2</legend>
+								<div class="form-row">				 
+									<div class="col">
+									{{ form_label(formAMA.factor2.atributo) }}
+									{{ form_widget(formAMA.factor2.atributo, {'attr' : {'class' : 'form-control-sm'}}) }}
+									</div>
+									<div class="col">
+									{{ form_label(formAMA.factor2.articulo) }}
+									{{ form_widget(formAMA.factor2.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
+									</div>
+									<div class="col">
+									{{ form_label(formAMA.factor2.tipoCalculo) }}
+									{{ form_widget(formAMA.factor2.tipoCalculo, {'attr' : {'class' : 'form-control-sm'}}) }}
+									</div>
+								</div>
+						</fieldset>
+					</div>
+				  </div>
+				</div>
+			</div>
+			<div class='form-row'>
+				<div class="col-3">
+					{{ form_label(formAMA.atributoMedible.decimales) }}
+					{{ form_widget(formAMA.atributoMedible.decimales) }}
+				</div>
+				<div class="col-2">
+					{{ form_label(formAMA.atributoMedible.acumula) }}
+					{{ form_widget(formAMA.atributoMedible.acumula) }}
+				</div>
+				<div class="col-2">
+					{{ form_label(formAMA.atributoMedible.promedia) }}
+					{{ form_widget(formAMA.atributoMedible.promedia) }}
+				</div>
+			</div>
+			{{ form_widget(formAMA.guardar) }}
+			{{ form_end(formAMA) }}
   </div>
   <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">
   	<br>
 	{{ form_start(formAI, {'attr': {'novalidate': 'novalidate'}}) }}
-	{{ form_label(formAI.atributoInformable.atributo.nombre) }}
+	{{ form_label(formAI.atributoInformable.atributo.nombre, 'Mostrar como...') }}
 	{{ form_widget(formAI.atributoInformable.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(formAI.atributoInformable.atributo.atributoAbstracto) }}
+	{{ form_widget(formAI.atributoInformable.atributo.atributoAbstracto, {'attr': {'class': 'col-4'}}) }}
 	{{ form_label(formAI.claseExterna) }}
 	{{ form_widget(formAI.claseExterna, {'attr': {'class': 'col-4'}}) }}
 	{{ form_widget(formAI.guardar) }}
@@ -74,8 +241,10 @@
   <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
   	<br>
 	{{ form_start(formAIM, {'attr': {'novalidate': 'novalidate'}}) }}
-	{{ form_label(formAIM.atributo.nombre) }}
+	{{ form_label(formAIM.atributo.nombre, 'Mostrar como...') }}
 	{{ form_widget(formAIM.atributo.nombre, {'attr': {'class': 'col-4'}}) }}
+	{{ form_label(formAIM.atributo.atributoAbstracto) }}
+	{{ form_widget(formAIM.atributo.atributoAbstracto, {'attr': {'class': 'col-4'}}) }}
 	{{ form_widget(formAIM.guardar) }}
 	{{ form_end(formAIM) }}
   </div>

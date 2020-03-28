@@ -24,44 +24,44 @@ class AtributoProceso
     /**
      * @var int
      *
-     * @ORM\Column(name="orden", type="integer")
+     * @ORM\Column(name="orden", type="integer", nullable=true, options={"default"=0})
      */
-    private $orden;
+    private $orden = 0;
 
     /**
      * @var int
      *
      * @ORM\Column(name="decimales", type="integer", options={"default"=-1})
      */
-    private $decimales;
+    private $decimales = -1;
 
     /**
      * @var boolean
      *
      * @ORM\Column(name="mostrar", type="boolean")
      */
-    private $mostrar;
+    private $mostrar = true;
 
     /**
      * @var boolean
      *
      * @ORM\Column(name="acumula", type="boolean")
      */
-    private $acumula;
+    private $acumula = false;
 
     /**
      * @var boolean
      *
      * @ORM\Column(name="promedia", type="boolean")
      */
-    private $promedia;
+    private $promedia = false;
 
     /**
      * @var boolean
      *
      * @ORM\Column(name="controlaStock", type="boolean")
      */
-    private $controlaStock;
+    private $controlaStock = false;
     
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo") 
@@ -227,5 +227,29 @@ class AtributoProceso
     public function getPromedia()
     {
         return $this->promedia;
+    }
+
+    /**
+     * Set decimales
+     *
+     * @param integer $decimales
+     *
+     * @return AtributoProceso
+     */
+    public function setDecimales($decimales)
+    {
+        $this->decimales = $decimales;
+
+        return $this;
+    }
+
+    /**
+     * Get decimales
+     *
+     * @return integer
+     */
+    public function getDecimales()
+    {
+        return $this->decimales;
     }
 }

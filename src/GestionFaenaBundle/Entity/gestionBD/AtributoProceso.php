@@ -24,9 +24,9 @@ class AtributoProceso
     /**
      * @var int
      *
-     * @ORM\Column(name="orden", type="integer")
+     * @ORM\Column(name="orden", type="integer", nullable=true, options={"default"=0})
      */
-    private $orden;
+    private $orden = 0;
 
     /**
      * @var int
@@ -40,7 +40,7 @@ class AtributoProceso
      *
      * @ORM\Column(name="mostrar", type="boolean")
      */
-    private $mostrar;
+    private $mostrar = true;
 
     /**
      * @var boolean
@@ -61,7 +61,7 @@ class AtributoProceso
      *
      * @ORM\Column(name="controlaStock", type="boolean")
      */
-    private $controlaStock;
+    private $controlaStock = false;
     
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo") 

@@ -3,11 +3,13 @@
 namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * UnidadMedida
  *
  * @ORM\Table(name="sp_gst_unt_med")
+ * @UniqueEntity("unidad", message="Unidad de medida existente en la base de datos")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\UnidadMedidaRepository")
  */
 class UnidadMedida
@@ -25,6 +27,7 @@ class UnidadMedida
      * @var string
      *
      * @ORM\Column(name="unidad", type="string", length=255, unique=true)
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $unidad;
 

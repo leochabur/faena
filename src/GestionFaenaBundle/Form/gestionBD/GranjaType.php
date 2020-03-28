@@ -5,6 +5,7 @@ namespace GestionFaenaBundle\Form\gestionBD;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class GranjaType extends AbstractType
 {
@@ -13,8 +14,14 @@ class GranjaType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('propia');
-    }/**
+        $builder->add('entidad', EntidadExternaType::class, array(
+                                    'data_class' => 'GestionFaenaBundle\Entity\gestionBD\Granja',
+                                ))
+                ->add('renspa')
+                ->add('ciudad')
+                ->add('guardar', SubmitType::class);
+    }
+    /**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)

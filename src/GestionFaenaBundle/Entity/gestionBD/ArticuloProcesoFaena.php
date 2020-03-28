@@ -3,6 +3,7 @@
 namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -10,6 +11,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="sp_art_proc_fa")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\ArticuloProcesoFaenaRepository")
+  * @UniqueEntity(
+ *     fields={"proceso", "articulo"},
+ *     message="Ya existe un producto creado para el proceso"
+ * )
  */
 class ArticuloProcesoFaena
 {
@@ -44,6 +49,13 @@ class ArticuloProcesoFaena
      *      )
      */
     private $atributos;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="activo", type="boolean", options={"default":true})
+     */
+    private $activo = true; 
 
     /**
      * Get id
@@ -112,7 +124,7 @@ class ArticuloProcesoFaena
 
     public function __toString()
     {
-        return $this->articulo->getNombre().'('.$this->proceso.')';
+        return $this->articulo->getNombre()."(".$this->proceso.")";
     }
 
     /**
@@ -147,5 +159,29 @@ class ArticuloProcesoFaena
     public function getAtributos()
     {
         return $this->atributos;
+    }
+
+    /**
+     * Set activo
+     *
+     * @param boolean $activo
+     *
+     * @return ArticuloProcesoFaena
+     */
+    public function setActivo($activo)
+    {
+        $this->activo = $activo;
+
+        return $this;
+    }
+
+    /**
+     * Get activo
+     *
+     * @return boolean
+     */
+    public function getActivo()
+    {
+        return $this->activo;
     }
 }

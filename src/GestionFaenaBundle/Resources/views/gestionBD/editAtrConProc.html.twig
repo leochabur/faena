@@ -1,0 +1,86 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Asignar atributos por concepto</span>
+<hr>
+<small id="defaultRegisterFormPasswordHelpBlock" class="form-text text-muted mb-4">
+        Desde aqui se configuran cuales son los atributos -de cada articulo- que se manejaran para cada concepto
+    </small>
+    {% for flash_message in app.session.flashbag.get('errorForm') %}
+            <div class="alert alert-danger" role="alert">
+                {{ flash_message }}
+            </div>
+    {% endfor %}
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_widget(form) }}
+	{{ form_end(form) }}
+    <div id="atributos">
+
+    </div>
+{% endblock fos_user_content %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $('.proceso').change(function(){
+                                    var proceso = $(this);
+                                    var url = "{{ path('bd_get_conceptos_proceso', { proc : '_PROC'}) }}";
+                                    url = url.replace('_PROC', proceso.val());
+                                    $('.concepto').empty();
+                                    $.ajax({
+                                        url: url,
+                                        type: "POST",
+                                        dataType: "JSON",
+                                        success: function (data) {     
+
+                                                            $.each(data, function (key, value) {
+                                                                
+                                                                    $('.concepto').append('<option value="' + key+ '">'+value+'</option>');
+                                                            });
+                                        },
+                                        error: function (err) {
+                                                                alert(err);
+                                        }
+                                    });
+    });
+    $('.concepto').change(function(){
+                                    var concepto = $(this);
+                                    var url = "{{ path('bd_get_atributos_concepto', { con : '_PROC'}) }}";
+                                    url = url.replace('_PROC', concepto.val());
+                                    $.ajax({
+                                        url: url,
+                                        type: "POST",
+                                        dataType: "JSON",
+                                        success: function (data) {
+                                                            $('.atrCon').empty();                                                        
+                                                            $.each(data, function (key, value) {
+                                                                    $('.atrCon').append('<option value="' + key + '">' + value + '</option>');
+                                                            });
+                                        },
+                                        error: function (err) {
+                                                                alert(err);
+                                        }
+                                    });
+    });
+    $('.atrCon').change(function(){
+                                    var atributo = $(this);
+                                    var url = "{{ path('bd_get_atributos_atributo_concepto', { ac : '_PROC'}) }}";
+                                    url = url.replace('_PROC', atributo.val());
+                                    $("#atributo").html('');
+                                    $.ajax({
+                                        url: url,
+                                        type: "POST",
+                                        success: function (data) {                                                  
+                                                            $("#atributos").html(data);
+                                        },
+                                        error: function (err) {
+                                                            $("#atributos").html('');
+                                        }
+                                    });
+    });
+</script>
+{% endblock %}
+
+

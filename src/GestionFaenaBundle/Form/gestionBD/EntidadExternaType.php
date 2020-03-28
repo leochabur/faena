@@ -22,32 +22,15 @@ class EntidadExternaType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('claseExterna', ChoiceType::class, ['choices' => ['Granja'=> Granja::class , 'Transportista' => Transportista::class]]);
-
-        $formModifier = function (FormInterface $form, $data){
-
-
-                                        $form->add('concepto', EntityType::class, array(
-                                            'class'       => ConceptoMovimiento::class,
-                                            'label' => 'TATATAT'.($data['claseExterna'])
-                                        ));
-                                    };
-                $builder->addEventListener(
-                    FormEvents::PRE_SET_DATA,
-                    function (FormEvent $event) use ($formModifier) {
-                        $data = $event->getData();
-                        $formModifier($event->getForm(), $data);
-                    }
-                );
+        $builder->add('valor');
     }
-
     /**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => null
+            'inherit_data' => true,
         ));
     }
 

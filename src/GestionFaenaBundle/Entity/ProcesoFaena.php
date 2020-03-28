@@ -53,13 +53,55 @@ abstract class ProcesoFaena
      */
     private $procesosDestino;
 
+    /**
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso", mappedBy="procesoFaena")
+     */
+    private $conceptos;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="activo", type="boolean", nullable=true, options={"default":true})
+     * @ORM\Column(name="activo", type="boolean", options={"default":true})
      */
-    private $activo; 
+    private $activo = true; 
+
+
+    /**
+     *
+     * @ORM\Column(name="permanente", type="boolean", options={"default":false})
+     */
+    private $permanente = false; //indica si se debe instanciar cada vez que se crea una faena nueva, caso contrario, se instancia una sola vez (por ej la Camara que acopia productos de todas las faenas o el proceso de Deposito En Transito que se almacena para ser procesado al otro dia) 
+
+    /**
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\User", mappedBy="procesos")
+     */
+    private $usuarios;
+
+
+    /**
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria", mappedBy="procesoFaena")
+     */
+    private $procesosFaenaDiaria;
+
+
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\FactorCalculo")
+     * @ORM\JoinTable(name="sp_man_stock_proc_fan",
+     *      joinColumns={@ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_fact_op", referencedColumnName="id")}
+     *      )
+     */
+    private $manejosStock;
+    
+    //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock
+    public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    {
+        foreach ($this->manejosStock as $stock) {
+            if ($stock->getArticulo() == $articulo)
+                return $stock;
+        }
+        return null;
+    }
 
     public abstract function getType();
 
@@ -212,6 +254,8 @@ abstract class ProcesoFaena
         $this->articulos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->procesosOrigen = new \Doctrine\Common\Collections\ArrayCollection();
         $this->procesosDestino = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->conceptos = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->manejosStock = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -236,5 +280,186 @@ abstract class ProcesoFaena
     public function getActivo()
     {
         return $this->activo;
+    }
+
+    public function getArticulosActivos()
+    {
+        $articulos = new \Doctrine\Common\Collections\ArrayCollection();
+        foreach ($this->articulos as $art) {
+            if ($art->getActivo())
+                $articulos[] = $art;
+        }
+        return $articulos;
+    }
+
+    /**
+     * Add concepto
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto
+     *
+     * @return ProcesoFaena
+     */
+    public function addConcepto(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto)
+    {
+        $this->conceptos[] = $concepto;
+
+        return $this;
+    }
+
+    /**
+     * Remove concepto
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto
+     */
+    public function removeConcepto(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto)
+    {
+        $this->conceptos->removeElement($concepto);
+    }
+
+    /**
+     * Get conceptos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getConceptos()
+    {
+        return $this->conceptos;
+    }
+
+    /**
+     * Add usuario
+     *
+     * @param \AppBundle\Entity\User $usuario
+     *
+     * @return ProcesoFaena
+     */
+    public function addUsuario(\AppBundle\Entity\User $usuario)
+    {
+        $this->usuarios[] = $usuario;
+
+        return $this;
+    }
+
+    /**
+     * Remove usuario
+     *
+     * @param \AppBundle\Entity\User $usuario
+     */
+    public function removeUsuario(\AppBundle\Entity\User $usuario)
+    {
+        $this->usuarios->removeElement($usuario);
+    }
+
+    /**
+     * Get usuarios
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUsuarios()
+    {
+        return $this->usuarios;
+    }
+
+    /**
+     * Add procesosFaenaDiarium
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesosFaenaDiarium
+     *
+     * @return ProcesoFaena
+     */
+    public function addProcesosFaenaDiarium(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesosFaenaDiarium)
+    {
+        $this->procesosFaenaDiaria[] = $procesosFaenaDiarium;
+
+        return $this;
+    }
+
+    /**
+     * Remove procesosFaenaDiarium
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesosFaenaDiarium
+     */
+    public function removeProcesosFaenaDiarium(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesosFaenaDiarium)
+    {
+        $this->procesosFaenaDiaria->removeElement($procesosFaenaDiarium);
+    }
+
+    /**
+     * Get procesosFaenaDiaria
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getProcesosFaenaDiaria()
+    {
+        return $this->procesosFaenaDiaria;
+    }
+
+    
+
+    /**
+     * Add manejosStock
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\FactorCalculo $manejosStock
+     *
+     * @return ProcesoFaena
+     */
+    public function addManejosStock(\GestionFaenaBundle\Entity\gestionBD\FactorCalculo $manejosStock)
+    {
+        $this->manejosStock[] = $manejosStock;
+
+        return $this;
+    }
+
+    /**
+     * Remove manejosStock
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\FactorCalculo $manejosStock
+     */
+    public function removeManejosStock(\GestionFaenaBundle\Entity\gestionBD\FactorCalculo $manejosStock)
+    {
+        $this->manejosStock->removeElement($manejosStock);
+    }
+
+    /**
+     * Get manejosStock
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getManejosStock()
+    {
+        return $this->manejosStock;
+    }
+
+    public function getArticulosStock()
+    {
+        $articulos = array();
+        foreach ($this->manejosStock as $fatcor) {
+            $articulos[] = $fatcor->getArticulo();
+        }
+        return $articulos;
+    }
+
+    /**
+     * Set permanente
+     *
+     * @param boolean $permanente
+     *
+     * @return ProcesoFaena
+     */
+    public function setPermanente($permanente)
+    {
+        $this->permanente = $permanente;
+
+        return $this;
+    }
+
+    /**
+     * Get permanente
+     *
+     * @return boolean
+     */
+    public function getPermanente()
+    {
+        return $this->permanente;
     }
 }

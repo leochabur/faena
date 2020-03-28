@@ -3,6 +3,7 @@
 namespace GestionFaenaBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -60,7 +61,11 @@ class FaenaDiaria
     private $finalizada;
 
     /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria", mappedBy="faenaDiaria", cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria")
+     * @ORM\JoinTable(name="sp_proc_for_fan_day",
+     *      joinColumns={@ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id")}
+     *      )
      */
     private $procesos;
 
@@ -76,6 +81,27 @@ class FaenaDiaria
     */      
     private $userClose;
 
+
+    /*Dado un ProcesoFaena devuelve el correspondiente ProcesoFaenaDiaria de la faena
+    public function getProcesoDiario(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+    {
+        foreach ($this->procesos as $proc) 
+        {
+            if ($proc->getProcesoFaena() == $proceso)
+                return $proc;
+        }
+        return null;
+    }*/
+
+    public function getProceso($id)
+    {
+        foreach ($this->procesos as $proc) {
+            if ( $proc->getProcesoFaena()->getId() == $id)
+                return $proc;
+        }
+        return null;
+    }
+
     /**
      * @ORM\PrePersist
      */
@@ -83,6 +109,7 @@ class FaenaDiaria
     {
         $this->fechaAlta = new \DateTime();
         $this->isActive = true;
+        $this->finalizada = false;
     }
 
     /**
@@ -264,5 +291,62 @@ class FaenaDiaria
     public function getState()
     {
         return $this->finalizada?'Finalizada':'Pendiente';
+    }
+
+    /**
+     * Set fechaCierre
+     *
+     * @param \DateTime $fechaCierre
+     *
+     * @return FaenaDiaria
+     */
+    public function setFechaCierre($fechaCierre)
+    {
+        $this->fechaCierre = $fechaCierre;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaCierre
+     *
+     * @return \DateTime
+     */
+    public function getFechaCierre()
+    {
+        return $this->fechaCierre;
+    }
+
+    /**
+     * Set userClose
+     *
+     * @param \AppBundle\Entity\User $userClose
+     *
+     * @return FaenaDiaria
+     */
+    public function setUserClose(\AppBundle\Entity\User $userClose = null)
+    {
+        $this->userClose = $userClose;
+
+        return $this;
+    }
+
+    /**
+     * Get userClose
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUserClose()
+    {
+        return $this->userClose;
+    }
+
+    public function faenaSinMovimientos() ///determina si la faena tiene movimientos para agluno de sus proceso, de tenerlos no se puede elimimnar
+    {
+        foreach ($this->procesos as $proc) {
+            if (!$proc->getMovimientos()->isEmpty())
+                return false;
+        }
+        return true;
     }
 }

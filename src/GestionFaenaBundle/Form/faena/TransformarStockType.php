@@ -12,6 +12,7 @@ use GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena;
 use GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
 
 class TransformarStockType extends AbstractType
 {
@@ -24,12 +25,14 @@ class TransformarStockType extends AbstractType
         $builder->add('artProcFaena', 
                               EntityType::class, 
                               [
-                              'class' => ArticuloProcesoFaena::class
+                              'class' => ArticuloAtributoConcepto::class,
+                              'choices' => [$entrada->getArtProcFaena()]
                                 ])
                 ->add('procesoFnDay', 
                               EntityType::class, 
                               [
-                              'class' => ProcesoFaenaDiaria::class
+                              'class' => ProcesoFaenaDiaria::class, 
+                              'choices' => [$entrada->getProcesoFnDay()]
                                 ])
                 ->add('valores', CollectionType::class, [
                     'entry_type' => ValorAtributoType::class,
@@ -45,7 +48,7 @@ class TransformarStockType extends AbstractType
         $form = $event->getForm();
 
             $form->add('concepto', 
-                       EntityType::class, ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimiento', 'choices' => [$valor->getConcepto()]]);
+                       EntityType::class, ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 'choices' => [$valor->getConcepto()]]);
 
         
     }

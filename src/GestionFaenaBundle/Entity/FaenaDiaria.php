@@ -3,6 +3,7 @@
 namespace GestionFaenaBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -60,7 +61,11 @@ class FaenaDiaria
     private $finalizada;
 
     /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria", mappedBy="faenaDiaria", cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria", cascade={"persist"})
+     * @ORM\JoinTable(name="sp_proc_for_fan_day",
+     *      joinColumns={@ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id")}
+     *      )
      */
     private $procesos;
 
@@ -75,6 +80,27 @@ class FaenaDiaria
     * @ORM\JoinColumn(name="id_user_close", referencedColumnName="id", nullable=true)
     */      
     private $userClose;
+
+
+    /*Dado un ProcesoFaena devuelve el correspondiente ProcesoFaenaDiaria de la faena
+    public function getProcesoDiario(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+    {
+        foreach ($this->procesos as $proc) 
+        {
+            if ($proc->getProcesoFaena() == $proceso)
+                return $proc;
+        }
+        return null;
+    }*/
+
+    public function getProceso($id)
+    {
+        foreach ($this->procesos as $proc) {
+            if ( $proc->getProcesoFaena()->getId() == $id)
+                return $proc;
+        }
+        return null;
+    }
 
     /**
      * @ORM\PrePersist

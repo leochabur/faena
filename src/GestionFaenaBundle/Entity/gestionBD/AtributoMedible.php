@@ -14,13 +14,6 @@ use GestionFaenaBundle\Entity\faena\ValorNumerico;
 abstract class AtributoMedible extends Atributo
 {
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="factorAjuste", type="float", nullable=true, options={"default":0.0})
-     * @Assert\Type(type="float", message="Tipo de valor invalido.")
-     */
-    private $factorAjuste = 0;
 
     /**
     * @ORM\ManyToOne(targetEntity="UnidadMedida") 
@@ -30,35 +23,25 @@ abstract class AtributoMedible extends Atributo
     private $unidadMedida;
     
     /**
-     * @var boolean
+     * @var int
      *
-     * @ORM\Column(name="ajustable", type="boolean", options={"default":false})
+     * @ORM\Column(name="decimales", type="integer", options={"default":0})
      */
-    private $ajustable; 
+    private $decimales = 0;
 
     /**
-     * Set factorAjuste
+     * @var string
      *
-     * @param float $factorAjuste
-     *
-     * @return AtributoMedible
+     * @ORM\Column(name="acumula", type="boolean", options={"default":false})
      */
-    public function setFactorAjuste($factorAjuste)
-    {
-        $this->factorAjuste = $factorAjuste;
-
-        return $this;
-    }
+    private $acumula = false;
 
     /**
-     * Get factorAjuste
+     * @var string
      *
-     * @return float
+     * @ORM\Column(name="promedia", type="boolean", options={"default":false})
      */
-    public function getFactorAjuste()
-    {
-        return $this->factorAjuste;
-    }
+    private $promedia = false;
 
     /**
      * Set unidadMedida
@@ -84,29 +67,7 @@ abstract class AtributoMedible extends Atributo
         return $this->unidadMedida;
     }
 
-    /**
-     * Set ajustable
-     *
-     * @param boolean $ajustable
-     *
-     * @return AtributoMedible
-     */
-    public function setAjustable($ajustable)
-    {
-        $this->ajustable = $ajustable;
 
-        return $this;
-    }
-
-    /**
-     * Get ajustable
-     *
-     * @return boolean
-     */
-    public function getAjustable()
-    {
-        return $this->ajustable;
-    }
 
     public function getTipo()
     {
@@ -118,7 +79,7 @@ abstract class AtributoMedible extends Atributo
         return $this->factorAjuste;
     }
 
-    public function getEntityValorAtributo($atributo)
+    public function getEntityValorAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo)
     {
         $value = new ValorNumerico();
         $value->setUnidadMedida($this->unidadMedida);
@@ -129,5 +90,82 @@ abstract class AtributoMedible extends Atributo
     public function getType()
     {
         return 1;
+    }
+
+    public function manejaDecimales()
+    {
+        return true;
+    }
+
+    /**
+     * Set decimales
+     *
+     * @param integer $decimales
+     *
+     * @return AtributoMedible
+     */
+    public function setDecimales($decimales)
+    {
+        $this->decimales = $decimales;
+
+        return $this;
+    }
+
+    /**
+     * Get decimales
+     *
+     * @return integer
+     */
+    public function getDecimales()
+    {
+        return $this->decimales;
+    }
+
+    /**
+     * Set acumula
+     *
+     * @param boolean $acumula
+     *
+     * @return AtributoMedible
+     */
+    public function setAcumula($acumula)
+    {
+        $this->acumula = $acumula;
+
+        return $this;
+    }
+
+    /**
+     * Get acumula
+     *
+     * @return boolean
+     */
+    public function getAcumula()
+    {
+        return $this->acumula;
+    }
+
+    /**
+     * Set promedia
+     *
+     * @param boolean $promedia
+     *
+     * @return AtributoMedible
+     */
+    public function setPromedia($promedia)
+    {
+        $this->promedia = $promedia;
+
+        return $this;
+    }
+
+    /**
+     * Get promedia
+     *
+     * @return boolean
+     */
+    public function getPromedia()
+    {
+        return $this->promedia;
     }
 }

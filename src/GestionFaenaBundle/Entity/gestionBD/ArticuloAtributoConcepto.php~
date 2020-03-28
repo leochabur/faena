@@ -1,0 +1,212 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\gestionBD;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+/**
+ * ArticuloAtributoConcepto
+ *
+ * @ORM\Table(name="sp_st_art_atr_con")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\ArticuloAtributoConceptoRepository")
+ * @UniqueEntity(
+ *     fields={"articulo", "concepto"},
+ *     message="Articulo ya asignado al proceso!!"
+ * )
+ * @ORM\HasLifecycleCallbacks()
+ */
+class ArticuloAtributoConcepto
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="Articulo", inversedBy="artsAtrConc") 
+    * @ORM\JoinColumn(name="id_articulo", referencedColumnName="id")
+    */      
+    private $articulo;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso", inversedBy="articulos") 
+    * @ORM\JoinColumn(name="id_concepto", referencedColumnName="id")
+    */      
+    private $concepto;
+
+    /**
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo", mappedBy="articuloAtrConc", cascade={"persist", "remove"})
+     * @ORM\OrderBy({"posicion" = "ASC"}) 
+     */
+    private $atributos;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="asignado", type="boolean", options={"default":true})
+     */
+    private $activo = true;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atr_def_stock", referencedColumnName="id")
+    */      
+    private $defineStock;
+    
+    /**
+     * Get id
+     *
+     * @return int
+     */
+
+    public function getVistaEdicion(){
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set articulo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo = null)
+    {
+        $this->articulo = $articulo;
+
+        return $this;
+    }
+
+    /**
+     * Get articulo
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
+     */
+    public function getArticulo()
+    {
+        return $this->articulo;
+    }
+
+    /**
+     * Set concepto
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso $concepto
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setConcepto(\GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso $concepto = null)
+    {
+        $this->concepto = $concepto;
+
+        return $this;
+    }
+
+    /**
+     * Get concepto
+     *
+     * @return \GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso
+     */
+    public function getConcepto()
+    {
+        return $this->concepto;
+    }
+
+
+    public function __toString()
+    {
+        return $this->articulo."";
+    }
+
+    public function updatePropiedades()
+    {
+        foreach ($this->atributos as $atr) {
+            $atr->setArticuloAtrConc($this);
+        }
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function updateAtributos()
+    {
+        foreach ($this->atributos as $atr) {
+            $atr->setAsignado(true);
+        }
+    }
+
+    /**
+     * Set activo
+     *
+     * @param boolean $activo
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setActivo($activo)
+    {
+        $this->activo = $activo;
+
+        return $this;
+    }
+
+    /**
+     * Get activo
+     *
+     * @return boolean
+     */
+    public function getActivo()
+    {
+        return $this->activo;
+    }
+
+    /**
+     * Add atributo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Atributo $atributo
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function addAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo)
+    {
+        $this->atributos[] = $atributo;
+
+        return $this;
+    }
+
+    /**
+     * Remove atributo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Atributo $atributo
+     */
+    public function removeAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo)
+    {
+        $this->atributos->removeElement($atributo);
+    }
+
+    /**
+     * Get atributos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAtributos()
+    {
+        return $this->atributos;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->atributos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+}

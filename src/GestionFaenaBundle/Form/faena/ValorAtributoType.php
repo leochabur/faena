@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use GestionFaenaBundle\Entity\faena\ValorNumerico;
 use GestionFaenaBundle\Entity\faena\ValorTexto;
 use GestionFaenaBundle\Entity\faena\ValorExterno;
-use GestionFaenaBundle\Entity\gestionBD\AtributoProceso;
+use GestionFaenaBundle\Entity\gestionBD\Atributo;
 
 class ValorAtributoType extends AbstractType
 {
@@ -30,11 +30,25 @@ class ValorAtributoType extends AbstractType
     {
         $valor = $event->getData();
         $form = $event->getForm();
-        $form->add('atributo', EntityType::class, ['class' => AtributoProceso::class, 'choices' => [$valor->getAtributo()],'attr' => ['class' => 'col-2']]);
+        $form->add('atributo', 
+                    EntityType::class, 
+                    [
+                        'class' => Atributo::class, 
+                        'choices' => [$valor->getAtributo()],
+                        'attr' => ['class' => 'col-2'],
+                        'choice_label' => 'nombre'
+                    ]);
         if (ValorNumerico::class == get_class($valor))
         {
-            $form->add('unidadMedida', EntityType::class, ['attr' => ['class' => 'col-2'], 'class' => 'GestionFaenaBundle\Entity\gestionBD\UnidadMedida', 'choices' => [$valor->getAtributo()->getAtributo()->getUnidadMedida()]]);
-            $form->add('valor', TextType::class, ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getAtributo()->getManual()]]);
+            $form->add('unidadMedida', 
+                        EntityType::class, 
+                        ['attr' => ['class' => 'col-2'], 
+                         'class' => 'GestionFaenaBundle\Entity\gestionBD\UnidadMedida', 
+                         'choices' => [$valor->getAtributo()->getUnidadMedida()]]);
+            $form->add('valor', 
+                       TextType::class, 
+                       ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()],
+                        'required' => true]);
         }
         elseif(ValorTexto::class == get_class($valor))
         {
@@ -42,7 +56,7 @@ class ValorAtributoType extends AbstractType
         }
         elseif(ValorExterno::class == get_class($valor))
         {
-            $form->add('entidadExterna', EntityType::class, ['attr' => ['class' => 'col-4'], 'class' => $valor->getAtributo()->getAtributo()->getClaseExterna()]);
+            $form->add('entidadExterna', EntityType::class, ['attr' => ['class' => 'col-4'], 'class' => $valor->getAtributo()->getClaseExterna()]);
         }
         
     }

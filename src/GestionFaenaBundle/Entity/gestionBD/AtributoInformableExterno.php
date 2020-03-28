@@ -43,7 +43,7 @@ class AtributoInformableExterno extends AtributoInformable
         return $this->claseExterna;
     }
 
-    public function getEntityValorAtributo($atributo)
+    public function getEntityValorAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo)
     {
         $value = new ValorExterno();
         $value->setAtributo($atributo);

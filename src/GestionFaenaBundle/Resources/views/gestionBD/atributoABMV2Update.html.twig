@@ -1,0 +1,98 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<br>
+	<hr>
+<spam class="h5 mb-5">Modificar atributos de articulos</spam>
+<hr>
+
+	<div class="form-row">
+		<div class="col-6 h5">
+			{{  art.vistaEdicion }}
+		</div>
+	</div>
+
+	<table class="table table-bordered table-hover table-striped table-sm">
+		<thead>
+			<tr>
+				<th>Atributo</th>
+				<th>Calculo</th>
+				<th>Acumula</th>
+				<th>Promedia</th>
+				<th>Decimales</th>
+				<th>Posicion</th>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for atrib in art.atributos %}
+				{% if not atrib.eliminado %}
+					{% set atr = formsAtr[atrib.id] %}
+					{{ form_start(atr, {'attr' : {'novalidate' : 'novalidate', 'class' : 'editatr'}}) }}
+					<tr>
+						<td>{{ atrib }}</td>
+						<td>{{ atrib.calculo }}</td>
+						<td>{{ form_widget(atr.acumula, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td>{{ form_widget(atr.promedia, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td>{{ form_widget(atr.decimales, {'attr' : {'class' : 'form-control-sm col-4'}}) }}</td>
+						<td>{{ form_widget(atr.posicion, {'attr' : {'class' : 'form-control-sm col-4'}}) }}</td>
+						<td>{{ form_widget(atr.guardar, {'attr' : {'class' : 'btn-sm btn-warning'}}) }}</td>
+						<td>{{ form_widget(atr.delete, {'attr' : {'class' : 'btn-sm btn-danger btn-delete', 'data-id' : atrib.id}}) }}</td>
+					</tr>
+					{{ form_end(atr) }}
+				{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+	<button class="btn btn-success back"><< Volver</button>
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script type="text/javascript">
+		$(document).ready(function(){
+									$('.back').click(function(){window.history.back();});
+									var route = "{{ path('bd_delete_atributo', {atr : '_ID_ATR'}) }}";
+									$('.editatr').submit(function(event){
+																			event.preventDefault();
+																			var form = $(this);
+																			$.post(form.attr('action'),
+																				   form.serialize(),
+																				   function(data){
+																				   					alert(data.posicion);
+																				   });
+									});
+
+									$('.btn-delete').click(function(event){
+																			event.preventDefault();
+																			var btn = $(this);
+																			
+																			bootbox.confirm({
+																			    message: "Seguro eliminar el atributo?",
+																			    buttons: {
+																			        confirm: {
+																			            label: 'Si',
+																			            className: 'btn-success'
+																			        },
+																			        cancel: {
+																			            label: 'No',
+																			            className: 'btn-danger'
+																			        }
+																			    },
+																			    callback: function (result) {
+																			        if (result){
+																			        	$.post(route.replace('_ID_ATR', btn.data('id')),
+																			        		   function(data){
+																			        		   			location.reload();
+																			        		   });
+																			        }
+																			    }
+																			});
+									});
+		});
+	</script>
+
+{% endblock %}

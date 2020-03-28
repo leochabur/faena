@@ -14,9 +14,10 @@ class AtributoMedibleManualType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('atributoMedible', AtributoMedibleType::class, array(
-                                    'data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoMedibleManual',
-                                ))
+        $builder->add('atributoMedible', 
+                      AtributoMedibleType::class,
+                      ['data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoMedibleManual']
+                      )
                 ->add('guardar', SubmitType::class);
     }
     /**

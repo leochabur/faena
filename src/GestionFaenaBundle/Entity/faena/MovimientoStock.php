@@ -3,6 +3,7 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * MovimientoStock
@@ -11,7 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\MovimientoStockRepository")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
- * @ORM\DiscriminatorMap({1:"MovimientoStock",2: "EntradaStock", 3: "SalidaStock", 4: "TransformarStock"})
+ * @ORM\DiscriminatorMap({1:"MovimientoStock",2: "EntradaStock", 3: "SalidaStock", 5: "TransferirStock"})
+ * @ORM\HasLifecycleCallbacks()
  */
 abstract class MovimientoStock
 {
@@ -27,32 +29,94 @@ abstract class MovimientoStock
     /**
     * @ORM\ManyToOne(targetEntity="ProcesoFaenaDiaria", inversedBy="movimientos") 
     * @ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id")
+    * @Assert\NotNull
     */      
     private $procesoFnDay;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena") 
-    * @ORM\JoinColumn(name="id_art_proc_fan", referencedColumnName="id")
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\FaenaDiaria") 
+    * @ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")
+    * @Assert\NotNull
     */      
-    private $artProcFaena;
+    private $faenaDiaria; //utilizado porque al poder compartir movimientos de distintas faenas debo poder identificar a cual corresponde
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento") 
-    * @ORM\JoinColumn(name="id_concepto", referencedColumnName="id")
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto") 
+    * @ORM\JoinColumn(name="id_art_proc_fan", referencedColumnName="id")
+    * @Assert\NotNull(message="Debe seleccionar un articulo!!")
     */      
-    private $concepto;
+    private $artProcFaena;
 
     /**
      * @ORM\OneToMany(targetEntity="ValorAtributo", mappedBy="movimiento", cascade={"persist", "remove"})
      */
     private $valores;
 
+    /**
+     * @ORM\OneToOne(targetEntity="TransferirStock", mappedBy="movimientoDestino")
+     */
+    private $destino;
+
+    /**
+     * @ORM\OneToOne(targetEntity="TransferirStock", mappedBy="movimientoOrigen")
+     */
+    private $origen;
+
+    /**
+     * @ORM\Column(name="visible", type="boolean", options={"default":true})
+     */
+    private $visible;
+
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false}, nullable=true)
+     */
+    private $eliminado = false;
+
+    /**
+     * @Assert\IsFalse(
+     *     message = "El tipo de movimiento requiere que defina cual articulo se transformara!!"
+     * )
+     */
+    public function isTransformaProductos()
+    {
+        if ($this->artProcFaena)
+        {
+            if  ($this->artProcFaena->getConcepto()->getTipoMovimiento()->getTransformaProductos())
+            {
+                return $this->artProcFaena->getConcepto()->getArticuloOrigenTransformacion() == null;
+            }
+        }
+        return false;
+    }
+
+
+    public function getValorWhitAtribute($atributo)
+    {
+        foreach ($this->valores as $v) {
+            if ($v->getAtributo()->getAtributoAbstracto()->getId() == $atributo)
+                return $v;
+        }
+        return null;
+    }
 
     public function generateAtributes()
     {
-        foreach ($this->artProcFaena->getAtributos() as $atributo) {
-            if ($this->concepto->manejaAtributo($atributo))
-                $this->addValore($atributo->getAtributo()->getEntityValorAtributo($atributo));
+
+        $atributoConcepto = $this->artProcFaena->getAtributos()->toArray();
+
+        if (!$atributoConcepto)
+            throw new \Exception("Error Processing Request", 1);
+            
+        $atributos = $atributoConcepto; //$atributoConcepto->getAtributos()->toArray();
+        uasort($atributos, function ($a, $b) {
+                                                  if ($a->getNumeroOrden() == $b->getNumeroOrden()) {
+                                                      return 0;
+                                                  }
+                                                  return ($a->getNumeroOrden() < $b->getNumeroOrden()) ? -1 : 1;
+                                              });
+        foreach ($atributos as $atributo) {
+            if (!$atributo->getEliminado())
+                $this->addValore($atributo->getEntityValorAtributo($atributo));
         }        
     }
 
@@ -99,30 +163,6 @@ abstract class MovimientoStock
     }
 
     /**
-     * Set artProcFaena
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena $artProcFaena
-     *
-     * @return MovimientoStock
-     */
-    public function setArtProcFaena(\GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena $artProcFaena = null)
-    {
-        $this->artProcFaena = $artProcFaena;
-
-        return $this;
-    }
-
-    /**
-     * Get artProcFaena
-     *
-     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena
-     */
-    public function getArtProcFaena()
-    {
-        return $this->artProcFaena;
-    }
-
-    /**
      * Add valore
      *
      * @param \GestionFaenaBundle\Entity\faena\ValorAtributo $valore
@@ -156,34 +196,10 @@ abstract class MovimientoStock
         return $this->valores;
     }
 
-    /**
-     * Set concepto
-     *
-     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto
-     *
-     * @return MovimientoStock
-     */
-    public function setConcepto(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto = null)
-    {
-        $this->concepto = $concepto;
-
-        return $this;
-    }
-
-    /**
-     * Get concepto
-     *
-     * @return \GestionFaenaBundle\Entity\faena\ConceptoMovimiento
-     */
-    public function getConcepto()
-    {
-        return $this->concepto;
-    }
-
-    public function getValorConAtributo($atributo)
+    public function getValorConAtributo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
     {
         foreach ($this->valores as $value) {
-            if ($value->getAtributo()->getAtributo() == $atributo){
+            if ($value->getAtributo()->getAtributoAbstracto() == $atributo){
                 return $value;
             }
         }
@@ -200,7 +216,7 @@ abstract class MovimientoStock
         return null;
     }
 
-    public abstract function updateValues($promedio);
+    public abstract function updateValues($promedio, $entityManager);
 
     public abstract function getType();
 
@@ -210,7 +226,166 @@ abstract class MovimientoStock
 
     }
 
-    public function getConceptos($conceptos){
+    public function getConceptos($conceptos, $proceso = null){
         
+    }
+
+    public function getFactor()
+    {
+        return 1;
+    }
+
+    /**
+     * Set artProcFaena
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artProcFaena
+     *
+     * @return MovimientoStock
+     */
+    public function setArtProcFaena(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artProcFaena = null)
+    {
+        $this->artProcFaena = $artProcFaena;
+
+        return $this;
+    }
+
+    /**
+     * Get artProcFaena
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto
+     */
+    public function getArtProcFaena()
+    {
+        return $this->artProcFaena;
+    }
+
+    /**
+     * Set destino
+     *
+     * @param \GestionFaenaBundle\Entity\faena\TransferirStock $destino
+     *
+     * @return MovimientoStock
+     */
+    public function setDestino(\GestionFaenaBundle\Entity\faena\TransferirStock $destino = null)
+    {
+        $this->destino = $destino;
+
+        return $this;
+    }
+
+    /**
+     * Get destino
+     *
+     * @return \GestionFaenaBundle\Entity\faena\TransferirStock
+     */
+    public function getDestino()
+    {
+        return $this->destino;
+    }
+
+    /**
+     * Set origen
+     *
+     * @param \GestionFaenaBundle\Entity\faena\TransferirStock $origen
+     *
+     * @return MovimientoStock
+     */
+    public function setOrigen(\GestionFaenaBundle\Entity\faena\TransferirStock $origen = null)
+    {
+        $this->origen = $origen;
+
+        return $this;
+    }
+
+    /**
+     * Get origen
+     *
+     * @return \GestionFaenaBundle\Entity\faena\TransferirStock
+     */
+    public function getOrigen()
+    {
+        return $this->origen;
+    }
+
+    /**
+     * Set visible
+     *
+     * @param boolean $visible
+     *
+     * @return MovimientoStock
+     */
+    public function setVisible($visible)
+    {
+        $this->visible = $visible;
+
+        return $this;
+    }
+
+    /**
+     * Get visible
+     *
+     * @return boolean
+     */
+    public function getVisible()
+    {
+        return $this->visible;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setVisiblePrePersist()
+    {
+        $this->updateVisible();
+    }
+
+    protected abstract function updateVisible();
+
+    /**
+     * Set eliminado
+     *
+     * @param boolean $eliminado
+     *
+     * @return MovimientoStock
+     */
+    public function setEliminado($eliminado)
+    {
+        $this->eliminado = $eliminado;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminado
+     *
+     * @return boolean
+     */
+    public function getEliminado()
+    {
+        return $this->eliminado;
+    }
+
+    /**
+     * Set faenaDiaria
+     *
+     * @param \GestionFaenaBundle\Entity\FaenaDiaria $faenaDiaria
+     *
+     * @return MovimientoStock
+     */
+    public function setFaenaDiaria(\GestionFaenaBundle\Entity\FaenaDiaria $faenaDiaria = null)
+    {
+        $this->faenaDiaria = $faenaDiaria;
+
+        return $this;
+    }
+
+    /**
+     * Get faenaDiaria
+     *
+     * @return \GestionFaenaBundle\Entity\FaenaDiaria
+     */
+    public function getFaenaDiaria()
+    {
+        return $this->faenaDiaria;
     }
 }

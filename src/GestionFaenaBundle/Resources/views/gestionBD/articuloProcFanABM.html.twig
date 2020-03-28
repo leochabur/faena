@@ -2,12 +2,20 @@
         
 
 {% block fos_user_content %}
-		<br>
-<p class="h4 mb-5">Nueva definicion de articulos</p>
+<br>
+<hr>
+<span class="h5 card-title">Definir atributos para el articulo</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+    <div class="alert alert-success" role="alert">
+      {{ message }}
+    </div>
+{% endfor %}
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-	{{ form_widget(form.articulo) }}
+	{{ form_label(form.proceso) }}
 	{{ form_widget(form.proceso) }}
-
+    {{ form_label(form.articulo) }}
+    {{ form_widget(form.articulo) }}
 <ul class="tags" data-prototype="{{ form_widget(form.atributos.vars.prototype)|e('html_attr') }}">
 
 </ul>

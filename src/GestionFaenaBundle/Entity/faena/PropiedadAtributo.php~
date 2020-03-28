@@ -1,0 +1,285 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\faena;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * PropiedadAtributo
+ *
+ * @ORM\Table(name="sp_st_prop_atr")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\PropiedadAtributoRepository")
+ */
+class PropiedadAtributo
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="posicion", type="integer")
+     */
+    private $posicion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="mostrar", type="boolean")
+     */
+    private $mostrar;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="decimales", type="integer")
+     */
+    private $decimales;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="acumula", type="boolean")
+     */
+    private $acumula = false;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="promedia", type="boolean")
+     */
+    private $promedia;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="controlaStock", type="boolean")
+     */
+    private $controlaStock;    
+    
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo") 
+    * @ORM\JoinColumn(name="id_atributo", referencedColumnName="id")
+    */      
+    private $atributo;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto", inversedBy="propiedades") 
+    * @ORM\JoinColumn(name="id_artatrcon", referencedColumnName="id")
+    */      
+    private $articuloAtrConc;
+
+    public function __toString()
+    {
+        return $this->atributo."";
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set posicion
+     *
+     * @param integer $posicion
+     *
+     * @return PropiedadAtributo
+     */
+    public function setPosicion($posicion)
+    {
+        $this->posicion = $posicion;
+
+        return $this;
+    }
+
+    /**
+     * Get posicion
+     *
+     * @return int
+     */
+    public function getPosicion()
+    {
+        return $this->posicion;
+    }
+
+    /**
+     * Set mostrar
+     *
+     * @param string $mostrar
+     *
+     * @return PropiedadAtributo
+     */
+    public function setMostrar($mostrar)
+    {
+        $this->mostrar = $mostrar;
+
+        return $this;
+    }
+
+    /**
+     * Get mostrar
+     *
+     * @return string
+     */
+    public function getMostrar()
+    {
+        return $this->mostrar;
+    }
+
+    /**
+     * Set decimales
+     *
+     * @param integer $decimales
+     *
+     * @return PropiedadAtributo
+     */
+    public function setDecimales($decimales)
+    {
+        $this->decimales = $decimales;
+
+        return $this;
+    }
+
+    /**
+     * Get decimales
+     *
+     * @return int
+     */
+    public function getDecimales()
+    {
+        return $this->decimales;
+    }
+
+    /**
+     * Set atributo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Atributo $atributo
+     *
+     * @return PropiedadAtributo
+     */
+    public function setAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo = null)
+    {
+        $this->atributo = $atributo;
+
+        return $this;
+    }
+
+    /**
+     * Get atributo
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Atributo
+     */
+    public function getAtributo()
+    {
+        return $this->atributo;
+    }
+
+    /**
+     * Set articuloAtrConc
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articuloAtrConc
+     *
+     * @return PropiedadAtributo
+     */
+    public function setArticuloAtrConc(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articuloAtrConc = null)
+    {
+        $this->articuloAtrConc = $articuloAtrConc;
+
+        return $this;
+    }
+
+    /**
+     * Get articuloAtrConc
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto
+     */
+    public function getArticuloAtrConc()
+    {
+        return $this->articuloAtrConc;
+    }
+
+    /**
+     * Set controlaStock
+     *
+     * @param boolean $controlaStock
+     *
+     * @return PropiedadAtributo
+     */
+    public function setControlaStock($controlaStock)
+    {
+        $this->controlaStock = $controlaStock;
+
+        return $this;
+    }
+
+    /**
+     * Get controlaStock
+     *
+     * @return boolean
+     */
+    public function getControlaStock()
+    {
+        return $this->controlaStock;
+    }
+
+    /**
+     * Set acumula
+     *
+     * @param boolean $acumula
+     *
+     * @return PropiedadAtributo
+     */
+    public function setAcumula($acumula)
+    {
+        $this->acumula = $acumula;
+
+        return $this;
+    }
+
+    /**
+     * Get acumula
+     *
+     * @return boolean
+     */
+    public function getAcumula()
+    {
+        return $this->acumula;
+    }
+
+    /**
+     * Set promedia
+     *
+     * @param boolean $promedia
+     *
+     * @return PropiedadAtributo
+     */
+    public function setPromedia($promedia)
+    {
+        $this->promedia = $promedia;
+
+        return $this;
+    }
+
+    /**
+     * Get promedia
+     *
+     * @return boolean
+     */
+    public function getPromedia()
+    {
+        return $this->promedia;
+    }
+}

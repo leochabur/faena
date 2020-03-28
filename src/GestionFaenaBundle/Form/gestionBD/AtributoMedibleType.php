@@ -13,12 +13,13 @@ class AtributoMedibleType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('factorAjuste')->add('unidadMedida')
+        $builder->add('unidadMedida')
+                ->add('decimales')
+                ->add('acumula')
+                ->add('promedia')
                 ->add('atributo', AtributoType::class, array(
                                     'data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoMedible',
-                                ))
-                ->add('unidadMedida')
-                ->add('ajustable');  
+                                ));  
     }
     /**
      * {@inheritdoc}

@@ -1,0 +1,75 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Transportistas</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+
+    <br>
+    <span class="h5">Nuevo Transportista</span>
+    <hr>
+    	{{ form_start(trans, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="form-row">
+          <div class="col">
+              {{ form_label(trans.entidad.valor, 'TTE.') }}
+              {{ form_widget(trans.entidad.valor) }}
+          </div>
+          <div class="col">
+              {{ form_label(trans.cuit, 'CUIT') }}
+              {{ form_widget(trans.cuit) }}
+          </div>
+          <div class="col">
+              {{ form_label(trans.titular) }}
+              {{ form_widget(trans.titular) }}
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col">
+              {{ form_label(trans.chofer) }}
+              {{ form_widget(trans.chofer) }}
+          </div>
+          <div class="col">
+              {{ form_label(trans.chasis) }}
+              {{ form_widget(trans.chasis) }}
+          </div>
+          <div class="col">
+              {{ form_label(trans.acoplado) }}
+              {{ form_widget(trans.acoplado) }}
+          </div>
+        </div>
+    	{{ form_end(trans) }}
+    <br>
+    <span class="h5">Transportista Existentes</span>
+    <hr>
+    <table class="table table-striped table-bordered table-hover table-sm ">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>TTE</th>
+            <th>CUIT</th>
+            <th>Titular</th>
+            <th>Chofer</th>
+            <th>Chasis</th>
+            <th>Acoplado</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for f in transportistas %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ f }}</td>  
+              <td>{{ f.cuit }}</td>            
+              <td>{{ f.titular }}</td>
+              <td>{{ f.chofer }}</td>
+              <td>{{ f.chasis }}</td>
+              <td>{{ f.acoplado }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+{% endblock fos_user_content %}

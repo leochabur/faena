@@ -12,5 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class AtributoMedibleManual extends AtributoMedible
 {
-
+    public function getClass()
+    {
+        return get_class($this);
+    }
 }

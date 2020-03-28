@@ -1,0 +1,60 @@
+{% block fos_user_content %}
+
+		<br>
+<p class="h5 card-title">Listado de atributos generados</p>
+<hr>
+
+						<table class="table table-striped table-bordered table-hover table-sm ">
+						  <thead>
+						    <tr>
+						      <th scope="col">#</th>
+						      <th scope="col">Nombre</th>
+						      <th scope="col">Visible</th>
+						      <th scope="col">Controla Stock</th>
+						      <th scope="col">Orden</th>
+						      <th></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						  	{% for attr in atr.atributos %}
+						  		<tr>
+						  			<td>{{ loop.index }}</td>
+						  			<td>{{ attr }}</td>
+						  			<td>{{ attr.mostrar }}</td>
+						  			<td>{{ attr.controlaStock }}</td>
+						  			<td>{{ attr.orden }}</td>
+						  			<td><a href="{{ path('bd_delete_atr_proc_atr_conc', { atco: atr.id, atpr : attr.id}) }}" class="btn btn-sm btn-danger sender">Eliminar</a></td>
+						  		</tr>
+						  	{% endfor %}
+						  </tbody>
+						</table>
+						{{ form_start(form, { 'attr' : { 'novalidate' : 'novalidate' , 'class' : 'add'}}) }}
+						{{ form_widget(form) }}
+						{{ form_end(form) }}
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+<script type="text/javascript">
+	$('.sender').click(function(event){
+										event.preventDefault();
+										var a = $(this);
+										$.post(a.attr('href'),
+											   function(data){
+											   					if (data.status)
+											   						$('.atrCon').trigger('change');
+											   });
+										
+	});
+	$('.add').submit(function(event){
+										event.preventDefault();
+										var form = $(this);
+										$.post(form.attr('action'),
+											   form.serialize(),
+											   function(data){
+											   					if (data.status)
+											   						$('.atrCon').trigger('change');
+											   });
+										
+	});
+</script>
+{% endblock %}

@@ -16,8 +16,7 @@ class AtributoProcesoType extends AbstractType
     {
         $builder->add('orden')
                 ->add('mostrar')
-                ->add('atributo')
-                ->add('controlaStock');
+                ->add('atributo');
     }/**
      * {@inheritdoc}
      */

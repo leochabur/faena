@@ -8,11 +8,11 @@
 
 
 <div class="card-columns">
-{% for p in faena.procesos %}
+{% for p in procesos %}
   <div class="card mb-3">
     <div class="card-body">
       <h5 class="card-title">{{ p }}</h5>
-      <p class="card-text"><a href="{{ path('bd_adm_proc_fan_day', {proc : p.id}) }}" class="btn btn-primary">Ir a gestionar..</a></p>
+      <p class="card-text"><a href="{{ path('bd_adm_proc_fan_day', {proc : p.id, fd : faena.id}) }}" class="btn btn-primary">Ir a gestionar..</a></p>
       <p class="card-text"><small class="text-muted">Ultima Actualizacion: {{ p.ultimoMovimiento is empty ? "" : p.ultimoMovimiento|date('d/m/Y - H:i') }}</small></p>
     </div>
   </div>

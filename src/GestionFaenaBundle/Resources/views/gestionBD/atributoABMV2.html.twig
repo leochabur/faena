@@ -1,0 +1,63 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<br>
+	<hr>
+<spam class="h5 mb-5">Editar articulos generados</spam>
+<hr>
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	<div class="form-row">
+		<div class="col-6">
+			{{ form_label(form.articulos) }}
+			{{ form_widget(form.articulos, {'attr' : {'class' : 'articulos'}}) }}
+			
+		</div>
+	</div>
+	<div class="form-row">
+		<div class="col-2">
+			{{ form_widget(form.modificar, {'attr' : {'class' : 'btn btn-success btn-block'}}) }}
+		</div>
+		<div class="col-2">
+			{{ form_widget(form.agregar, {'attr' : {'class' : 'btn btn-warning btn-block'}}) }}
+		</div>
+		<div class="col-2">
+			<a href="{{ path('bd_delete_articulo', {art : '_ID_ART'}) }}" class="btn btn-danger btn-block btn-delete">Eliminar Articulo</a>
+		</div>
+	</div>
+	{{ form_end(form) }}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+
+	$('.btn-delete').click(function(event){
+											event.preventDefault();
+											var btn = $(this);
+											var route = btn.attr('href');
+											bootbox.confirm({
+											    message: "Seguro eliminar el articulo?",
+											    buttons: {
+											        confirm: {
+											            label: 'Si',
+											            className: 'btn-success'
+											        },
+											        cancel: {
+											            label: 'No',
+											            className: 'btn-danger'
+											        }
+											    },
+											    callback: function (result) {
+											        if (result){
+											        	$.post(route.replace('_ID_ART', $('.articulos').val()),
+											        		   function(data){
+											        		   			bootbox.alert(data.msge);
+											        		   });
+											        }
+											    }
+											});
+	});
+	</script>
+{% endblock %}

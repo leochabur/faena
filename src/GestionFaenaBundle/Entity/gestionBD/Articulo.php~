@@ -4,11 +4,13 @@ namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Articulo
  *
  * @ORM\Table(name="sp_gst_art")
+ * @UniqueEntity("nombre", message="Articulo existente en la base de datos")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\ArticuloRepository")
  */
 class Articulo
@@ -30,6 +32,10 @@ class Articulo
      */
     private $nombre;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ArticuloAtributoConcepto", mappedBy="articulo")
+     */
+    private $artsAtrConc;
 
     /**
      * Get id

@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ProcesoInicio extends ProcesoFaena
 {
-
+    public function getType()
+    {
+        return "Proceso Inicio";
+    }
 }
-

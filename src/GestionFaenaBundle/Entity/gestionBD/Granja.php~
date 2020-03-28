@@ -20,6 +20,20 @@ class Granja extends EntidadExterna
      */
     private $propia;
 
+
+    /**
+     * @var  string
+     *
+     * @ORM\Column(name="renspa", type="string")
+     */
+    private $renspa;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="Ciudad") 
+    * @ORM\JoinColumn(name="id_city", referencedColumnName="id")
+    */      
+    private $ciudad;
+
     /**
      * Set propia
      *
@@ -43,5 +57,28 @@ class Granja extends EntidadExterna
     {
         return $this->propia;
     }
-}
 
+    /**
+     * Set renspa
+     *
+     * @param string $renspa
+     *
+     * @return Granja
+     */
+    public function setRenspa($renspa)
+    {
+        $this->renspa = $renspa;
+
+        return $this;
+    }
+
+    /**
+     * Get renspa
+     *
+     * @return string
+     */
+    public function getRenspa()
+    {
+        return $this->renspa;
+    }
+}

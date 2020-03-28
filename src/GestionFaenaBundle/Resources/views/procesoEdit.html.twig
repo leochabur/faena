@@ -5,7 +5,7 @@
 	<br>
 	<p class="h4">Editar proceso</p>
 
-	<form class="border border-light p-5">
+	
 
 	    <p class="h4 mb-4 text-center">{{ proccess.nombre }}</p>
 		<div class="row">
@@ -40,9 +40,48 @@
 				</div>
 		  </div>
 		</div>
-	</div>
-	</form>
-
+		<br>
+		<div class="row">
+		  <div class="col-6">
+				<div class="card">
+				  <div class="card-header">
+				    Configurar manejo stock
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+								<thead>
+									<tr>
+										<th>Articulo</th>
+										<th>Atributo</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for proceso in proccess.manejosStock %}
+										<tr>
+											<td>{{ proceso.articulo }}</td>
+											<td>{{ proceso.atributo }}</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+						</table>
+				  	{{ form_start(stock) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(stock.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col">
+				  				{{ form_widget(stock.atributo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col">
+				  				{{ form_widget(stock.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	
+				  	{{ form_end(stock) }}
+				  </div>
+				</div>
+			</div>
+		</div>
 
 
 <div class="modal fade" id="modalSubscriptionForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"

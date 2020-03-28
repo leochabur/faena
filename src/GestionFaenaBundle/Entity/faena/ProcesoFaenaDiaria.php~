@@ -146,4 +146,38 @@ class ProcesoFaenaDiaria
     {
         $this->ultimoMovimiento = new \DateTime();
     }
+
+    /**
+     * Add movimiento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimiento
+     *
+     * @return ProcesoFaenaDiaria
+     */
+    public function addMovimiento(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimiento)
+    {
+        $this->movimientos[] = $movimiento;
+
+        return $this;
+    }
+
+    /**
+     * Remove movimiento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimiento
+     */
+    public function removeMovimiento(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimiento)
+    {
+        $this->movimientos->removeElement($movimiento);
+    }
+
+    /**
+     * Get movimientos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMovimientos()
+    {
+        return $this->movimientos;
+    }
 }

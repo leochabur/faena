@@ -17,8 +17,15 @@
 	</style>
 {% endblock %}
 {% block fos_user_content %}
-
-<p class="h3">Procesos definidos</p>
+<br>
+<hr>
+<span class="h5 card-title">Procesos existentes en el sistema</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
 <table id="dtBasicExample" class="table table-hover table-striped table-bordered table-sm table-responsive-md btn-table" cellspacing="0" width="100%">
   <thead>
     <tr>

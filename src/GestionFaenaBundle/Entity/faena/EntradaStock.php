@@ -15,7 +15,7 @@ class EntradaStock extends MovimientoStock
 
 	public function __toString()
 	{
-		return "Entrada Stock";
+		return "Ingreso";
 	}
 
 	public function getType()
@@ -23,23 +23,38 @@ class EntradaStock extends MovimientoStock
 		return 2;
 	}
 
-    public function updateValues($promedio)
+    public function updateValues($promedio, $entityManager)
     {
         $iterator = $this->getValores()->getIterator();
         $iterator->uasort(function ($first, $second) {
-            return (int) $first->getAtributo()->getAtributo()->getPosition() > (int) $second->getAtributo()->getAtributo()->getPosition() ? 1 : -1;
+            return (int) $first->getAtributo()->getPosition() > (int) $second->getAtributo()->getPosition() ? 1 : -1;
         });
         foreach ($this->getValores() as $valor) {
-            $valor->calcularValor($this);
+            $valor->calcularValor($this, $entityManager, 0);
         }
     }
 
-    public function getConceptos($conceptos){
+    public function getConceptos($conceptos, $proceso = null){
+        if ($proceso)
+            $conceptosProceso = $proceso->getProcesoFaena()->getConceptos();
+        else
+            $conceptosProceso = $this->getProcesoFnDay()->getProcesoFaena()->getConceptos();
         $collections = array();
         foreach ($conceptos as $con) {
-           if ($con->getEsa() == 1)
-            $collections[] = $con;
+         //  if (in_array($con->getEsa(), array(1,3,7,5)))
+          //      if ($conceptosProceso->contains($con))
+                    $collections[] = $con;
         }
         return $collections;
+    }
+
+    public static function getInstance()
+    {
+        return 2;
+    }
+
+    protected function updateVisible()
+    {
+        $this->setVisible(true);
     }
 }

@@ -1,0 +1,109 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Modificar articulos de proceso</span>
+<hr>
+    {% for flash_message in app.session.flashbag.get('errorForm') %}
+            <div class="alert alert-danger" role="alert">
+                {{ flash_message }}
+            </div>
+    {% endfor %}
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	{{ form_widget(form) }}
+	{{ form_end(form) }}
+
+    {% if proceso is defined %}
+        <table class="table table-striped table-bordered table-hover table-sm ">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Articulo</th>
+                    <th>Atributos</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in proceso.articulos %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ p }}</td>
+                        <td>
+                            {% for a in p.atributos %}
+                                {{ a }}/
+                            {% endfor %}
+                        </td>
+
+                        <td>
+                            {{ form_start(formsAdd[p.id], {'attr': {'novalidate': 'novalidate'}}) }}
+                            {{ form_widget(formsAdd[p.id].atributo, { 'attr' : { 'class' : 'form-control form-control-sm'}}) }}
+                            {{ form_widget(formsAdd[p.id].add, { 'attr' : { 'class' : 'btn btn-sm btn-success'}}) }}
+                            {{ form_end(formsAdd[p.id]) }}
+                        </td>
+                            
+                        <td>{{ p.activo ? 'Activado' : 'Desactivado' }}</td>
+                        <td>
+                            <a href="{{ path('bd_change_articulo_proceso', { art: p.id }) }}" class="btn btn-sm btn-warning actdes">{{ p.activo ? 'Desactivar' : 'Activar' }}</a>
+ <a href="{{ path('bd_delete_articulo_proceso', { art: p.id }) }}" class="btn btn-sm btn-danger actdes">Eliminar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock fos_user_content %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $('.actdes').click(function(event){
+                                    event.preventDefault();
+                                    var a = $(this);
+                                    $.post(a.attr('href'),
+                                           function(data){
+
+                                           });
+    });
+    $('.articulo').change(function(){
+                                    var articulo = $(this);
+                                    $('.atributo').empty();
+                                    $.ajax({
+                                        url: "{{ path('bd_get_atributes_for_articles') }}",
+                                        type: "GET",
+                                        dataType: "JSON",
+                                        data: {
+                                            artid: articulo.val()
+                                        },
+                                        success: function (data) {                                                        
+                                                            $.each(data, function (key, value) {
+                                                                    $('.atributo').append('<option value="' + value.key + '">' + value.value + '</option>');
+                                                            });
+                                        },
+                                        error: function (err) {
+                                                                $('.atributo').empty();
+                                        }
+                                    });
+    });
+    $('.atributo').change(function(){
+                                    var atributo = $(this);
+                                    $("#atributo").html('');
+                                    $.ajax({
+                                        url: "{{ path('bd_get_atribute') }}",
+                                        type: "GET",
+                                        data: {
+                                            atrid: atributo.val()
+                                        },
+                                        success: function (data) {                                                  
+                                                            $("#atributo").html(data);
+                                        },
+                                        error: function (err) {
+                                                            $("#atributo").html('');
+                                        }
+                                    });
+    });
+</script>
+{% endblock %}
+
+

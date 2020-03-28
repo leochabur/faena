@@ -16,12 +16,22 @@ class AtributoMedibleAutomaticoType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('factor1')
-                ->add('factor2')
-                ->add('operacion', ChoiceType::class, ['choices'  => ['Replicar' => null, '+' => '+', '-' => '-', '*' => '*', '/' => '/']])
+        $articulo = $options['articulo'];
+        $builder->add('factor1', 
+                      FactorCalculoType::class,
+                      ['required' => false,
+                       'articulo' => $articulo]
+                    )
+                ->add('factor2', 
+                      FactorCalculoType::class,
+                      ['required' => false,
+                    'articulo' => $articulo]
+                     )
+                ->add('operacion', ChoiceType::class, ['choices'  => ['Replicar' => 'R', '+' => '+', '-' => '-', '*' => '*', '/' => '/']])
                 ->add('atributoMedible', AtributoMedibleType::class, array(
                                     'data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoMedibleAutomatico',
                                 ))
+                ->add('factorAjuste')
                 ->add('guardar', SubmitType::class);
     }
 
@@ -31,8 +41,9 @@ class AtributoMedibleAutomaticoType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoMedibleAutomatico'
-        ));
+                                    'data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoMedibleAutomatico'
+                              ))
+                  ->setRequired('articulo'); //para cuando deba definir el calculo, solo muestre los atributos propios del articulo y no tdos
     }
 
     /**

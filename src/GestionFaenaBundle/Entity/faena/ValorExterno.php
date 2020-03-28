@@ -42,7 +42,7 @@ class ValorExterno extends ValorAtributo
         return $this->entidadExterna;
     }
     
-    public function calcularValor($movimiento, $promedio = 0)
+    public function calcularValor($movimiento, $entityManager, $promedio = 0)
     {
         
     }

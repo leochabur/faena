@@ -3,23 +3,31 @@
 {% block fos_user_content %}
 <br>
 <hr>
-<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ proceso.faenaDiaria }}</p>
+<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }}</p>
 <hr>
 {% if fatr is not defined %}
-	{{ form_start(form) }}
+	{% if errors is defined %}
+		<ul>
+			{% for error in errors %}
+			    <li class="list-group-item list-group-item-danger">{{ error.message }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	{{ form_start(form, {'attr' : {'novalidate' : 'novalidate'}}) }}
 	<div class="row container">
 		<div class="col">
-				{{ form_label(form.movimiento) }}
-				{{ form_widget(form.movimiento, {'attr' : {'class' : 'movimientos'}}) }}
+				{{ form_label(form.tipoMovimiento) }}
+				{{ form_widget(form.tipoMovimiento, {'attr' : {'class' : 'tipos'}}) }}
 		</div>
 		<div class="col">
-				{{ form_label(form.concepto) }}
-				{{ form_widget(form.concepto, {'attr' : {'class' : 'conceptos'}}) }}
+				{{ form_label(form.conMovProc, 'Concepto de Movimiento') }}
+				{{ form_widget(form.conMovProc, {'attr' : {'class' : 'conceptos'}}) }}
 		</div>
 		<div class="col">
-				{{ form_label(form.artProcFaena) }}
-				{{ form_widget(form.artProcFaena) }}
+				{{ form_label(form.artProcFaena, 'Articulo') }}
+				{{ form_widget(form.artProcFaena, {'attr' : {'class' : 'articulos'}}) }}
 		</div>
+		{{ form_widget(form.proceso, {'attr' : {'class' : 'proceso'}}) }}
 	</div>
 	<div class="row container">
 		<div class="col">
@@ -32,7 +40,7 @@
 {% if fatr is defined %}
 <div class="card">
   <div class="card-header">
-    Registrar movimiento
+    <p class="h5">Movimiento : {{ movimiento }}</p>
   </div>
   <div class="card-body">
 	{{ form_start(fatr, {'attr':{'class' : 'container', 'novalidate':'novalidate'}}) }}
@@ -43,26 +51,30 @@
 
 		<li>{{  form_widget(fatr.concepto, {'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
 	</ul>
-
+	<hr>
+	{% if fatr.destino is defined %}
+		{{ form_label(fatr.destino, 'Proceso destino') }}
+		{{ form_widget(fatr.destino, {'attr' : {'class' : 'col-md-6 col-sm-6'}}) }}
+	{% endif %}
 	{{ form_label(fatr.valores, 'Valores') }}
     {% for f in fatr.valores %}
     	<div class="form-row">
-    		{{  form_widget(f.atributo) }}
+    		{{  form_widget(f.atributo, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
     		{%  if f.unidadMedida is defined %}
-    			{{  form_widget(f.unidadMedida) }}
+    			{{  form_widget(f.unidadMedida, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
     		{% endif %}
     		{%  if f.entidadExterna is defined %}
-    			{{  form_widget(f.entidadExterna) }}
+    			{{  form_widget(f.entidadExterna, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
     		{% endif %}
     		{%  if f.valor is defined %}
-    			{{  form_widget(f.valor) }}
+    			{{  form_widget(f.valor, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
     		{% endif %}
     	</div>            	
     {% endfor %}
     <div class="row">
     	<div class="col">
     		{{ form_widget(fatr.guardar) }}
-    		<a href="{{ path('bd_adm_proc_fan_day',{'proc': proceso.id }) }}" class="btn btn-danger">Cancelar</a>
+    		<a href="{{ path('bd_adm_proc_fan_day',{proc: proceso.id, fd: faena.id }) }}" class="btn btn-danger">Cancelar</a>
     	</div>
     </div>
 	{{ form_end(fatr) }}
@@ -77,8 +89,11 @@
 			<thead>
 				<tr>
 					<th>#</th>
+					<th>Tipo</th>
+					<th>Producto</th>
+					<th>Concepto</th>
 				{% for mov in conceptos %}
-					<th>{{ mov.atributo }}</th>
+					<th>{{ mov }}</th>
 				{% endfor %}
 					<th></th>
 					<th></th>
@@ -86,15 +101,19 @@
 			</thead>
 			<tbody>
 		    {% for key, value in movs %}
-		    	<tr>
+		    	<tr>	
 			    		<td>{{ loop.index }}</td>
-					    {% for k, v in conceptos %}
-					    	
+			    		<td>{{ con[key] is defined?con[key].mov:'' }}</td>
+			    		<td>{{ con[key] is defined?con[key].art.articulo:'' }}</td>
+			    		<td>{{ con[key] is defined?con[key].con:'' }}</td>
+			    		{% set trx =  0 %}
+					    {% for k, v in conceptos %}					    	
 					    	{% if datos[key][k] is defined %}
 							    <td>{{ datos[key][k].data }}</td>
 								{% set proced =  datos[key][k].proc %}
 						    	{% set movim =  datos[key][k].mov %}
 						    	{% set artic =  datos[key][k].art %}
+						    	{% set trx =  datos[key][k].trx %}
 							{% else %}
 								<td></td>
 							{% endif %}
@@ -105,17 +124,20 @@
 					    </td>
 					    <td class="align-middle">
 					    						{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
-										    	{{ form_widget(formsDelete[value].delete, {'attr' : {'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
+										    	{{ form_widget(formsDelete[value].delete, {'attr' : {'data-mov' : value, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
 										    	{{ form_end(formsDelete[value]) }}
 					    </td>
 			</tr>
 		    {% endfor %}
-		    <tr class="table-warning h5">
+		    <tr class="table-warning h5"> <!--v.decimales-->
 		    	<td>TOTALES</td>
+		    	<td></td>
+		    	<td></td>
+		    	<td></td>
 		    {% for k, v in conceptos %}
 			    <td>
 			    	{% if totales[k] is defined %}
-			    		{{ (totales[k].total/totales[k].cant)|number_format(v.decimales, ',', '') }}
+			    		{{ (totales[k].total/totales[k].cant)|number_format(2, ',', '') }}
 			    	{% endif %}
 			    </td>
 			 {% endfor %}
@@ -124,7 +146,7 @@
 			</tr>
 			</tbody>
 		</table>
-		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : proceso.faenaDiaria.id}) }}" class="btn btn-warning"><< Volver</a>
+		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-warning"><< Volver</a>
 	{% endif %}
 
 {% endblock fos_user_content %}
@@ -132,50 +154,97 @@
 {% block javascripts %}
 
 <script type="text/javascript">
-	var $sport = $('.movimientos');
-	// When sport gets selected ...
-	$sport.change(function() {
-	  // ... Obtener el formulario.
-	  var $form = $(this).closest('form');
-	  // Datos del formulario, pero sólo incluir el valor del deporte seleccionado.
-	  var data = {};
-	  data[$sport.attr('name')] = $sport.val();
-	  // Enviar los datos con AJAX al directorio de acción del formulario.
+	var tipos = $('.tipos');
+	var conceptos = $('.conceptos');
+	var articulos = $('.articulos');
+	conceptos.html('');
+	articulos.html('');
+	tipos.change(function() {
+	  var form = $(this).closest('form');
 	  $.ajax({
-	    url : $form.attr('action'),
-	    type: $form.attr('method'),
-	    data : data,
-	    success: function(html) {
-	      // Reemplazar la posición actual ...
-	      $('.conceptos').replaceWith(
-	        // ... con la devuelta por la respuesta AJAX.
-	        $(html).find('.conceptos')
-	      );
-	      // Position field ya muestra las posiciones correctas.
-	    }
-	  });
+			    url : "{{ path('bd_change_tipo_movimiento') }}",
+			    type: "POST",
+			    data : {proceso: form.find('.proceso').val(), tipoMovimiento: $(this).val()},
+			    success: function(data) {
+						articulos.html('');
+		                conceptos.html('<option>Selecciona...</option>');
+		                for (var i = 0, total = data.length; i < total; i++) {
+		                    conceptos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
+			    		}
+			    },
+			    failed: function(data){
+			    	alert('error');
+			    }
+	  		});
 	});
+
+	conceptos.change(function() {
+	  $.ajax({
+			    url : "{{ path('bd_change_concepto_movimiento') }}",
+			    type: "POST",
+			    data : {concepto: $(this).val()},
+			    success: function(data) {
+						articulos.html('<option value="null">Selecciona...</option>');
+		                for (var i = 0, total = data.length; i < total; i++) {
+		                    articulos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
+			    		}
+			    }
+	  		});
+	});
+
+
 	$('.btnDelete').click(function(event){
 											event.preventDefault();
+											var route = "{{ path ('query_consulta_movimiento', {mov: '_MOV', trx : '_TRX'})}}";
 											var btn = $(this);
-											bootbox.confirm({
-										    message: "Seguro eliminar el item "+btn.data('index')+"?",
-										    buttons: {
-										        confirm: {
-										            label: 'Si',
-										            className: 'btn-success'
-										        },
-										        cancel: {
-										            label: 'No',
-										            className: 'btn-danger'
-										        }
-										    },
-										    callback: function (result) {
-										        if (result){
-										        	btn.parent().submit();
-										        }
-										    }
-										});
+											if (btn.data('trx'))
+											{
+												var ruta = route.replace('_MOV', btn.data('mov')).replace('_TRX', btn.data('trx'));
+												$.post(ruta,
+													  function(response){
+																		bootbox.confirm({
+																		    message: response.msge,
+																		    size: "large",
+																		    buttons: {
+																		        confirm: {
+																		            label: 'Si',
+																		            className: 'btn-success'
+																		        },
+																		        cancel: {
+																		            label: 'No',
+																		            className: 'btn-danger'
+																		        }
+																		    },
+																		    callback: function (result) {
+																		        if (result){
+																		        	btn.parent().submit();
+																		        }
+																		    }
+																		});
+													  }
+												);
+											}
+											else
+											{
+													bootbox.confirm({
+												    message: "Seguro eliminar el item "+btn.data('index')+"?",
+												    buttons: {
+												        confirm: {
+												            label: 'Si',
+												            className: 'btn-success'
+												        },
+												        cancel: {
+												            label: 'No',
+												            className: 'btn-danger'
+												        }
+												    },
+												    callback: function (result) {
+												        if (result){
+												        	btn.parent().submit();
+												        }
+												    }
+												});
+											}
 	});
 
 	$('.view-art').click(function(){

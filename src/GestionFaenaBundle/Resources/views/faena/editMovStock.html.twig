@@ -2,7 +2,9 @@
 
 {% block fos_user_content %}
 <br>
-<p class="h5 card-title">Fecha de Faena: {{ proceso.faenaDiaria }}</p>
+<hr>
+<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ proceso.faenaDiaria }}</p>
+<hr>
 
 
 
@@ -13,15 +15,13 @@
   </div>
   <div class="card-body">
 	{{ form_start(fatr, {'atr':{'class' : 'container', 'novalidate':'novalidate'}}) }}
-	<div class="form-row">
-		{{ form_label(fatr.procesoFnDay, 'Proceso') }}
-		{{  form_widget(fatr.procesoFnDay) }}
+	<ul>
+		<li>{{  form_widget(fatr.procesoFnDay,{'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
 		
-	</div>
-	<div class="form-row">
-		{{ form_label(fatr.artProcFaena, 'Articulo') }}
-		{{  form_widget(fatr.artProcFaena) }}
-	</div>
+		<li>{{  form_widget(fatr.artProcFaena,{'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
+
+		<li>{{  form_widget(fatr.concepto,{'attr' : {'class' : 'form-control-plaintext h5'}}) }}</li>
+	</ul>
 	{{ form_label(fatr.valores, 'Valores') }}
     {% for f in fatr.valores %}
     	<div class="form-row">
@@ -35,11 +35,14 @@
     		{%  if f.valor is defined %}
     			{{  form_widget(f.valor, {'atr':{'placeholder' : 'Ingrese el valor'}}) }}
     		{% endif %}
-    	</div>
-				
-
-            	
+    	</div>            	
     {% endfor %}
+    <div class="row">
+    	<div class="col">
+    		{{ form_widget(fatr.guardar) }}
+    		<a href="{{ path('bd_adm_proc_fan_day',{'proc': proceso.id }) }}" class="btn btn-danger">Cancelar</a>
+    	</div>
+    </div>
 	{{ form_end(fatr) }}
 </div>
 </div>

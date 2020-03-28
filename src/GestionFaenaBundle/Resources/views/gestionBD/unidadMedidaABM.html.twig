@@ -1,0 +1,20 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<div class="container">
+		<br>
+<p class="h5 card-title">Nueva Unidad de Medida</p>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+		{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+		{{ form_label(form.unidad) }}
+		{{ form_widget(form.unidad, { 'attr' : { 'class' : 'col-3' }}) }}
+		{{ form_widget(form.guardar) }}
+		{{ form_end(form) }}
+	</div>
+{% endblock fos_user_content %}

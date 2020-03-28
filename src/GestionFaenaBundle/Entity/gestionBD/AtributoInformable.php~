@@ -3,7 +3,7 @@
 namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use GestionFaenaBundle\Entity\faena\ValorTexto;
 /**
  * AtributoInformable
  *
@@ -16,5 +16,10 @@ abstract class AtributoInformable extends Atributo
     public function getTipo()
     {
     	return 'Informable';
+    }
+
+    public function getType()
+    {
+        return 2;
     }
 }

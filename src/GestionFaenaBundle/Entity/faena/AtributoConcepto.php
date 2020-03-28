@@ -3,12 +3,17 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * AtributoConcepto
  *
  * @ORM\Table(name="sp_gst_atr_prod_proc_con")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\AtributoConceptoRepository")
+ * @UniqueEntity(
+ *     fields={"concepto", "articulo"},
+ *     message="Ya existe una configuracion paras el articulo"
+ * )
  */
 class AtributoConcepto
 {

@@ -23,13 +23,7 @@ class ProcesoFaenaDiaria
     private $id;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\FaenaDiaria", inversedBy="procesos") 
-    * @ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")
-    */      
-    private $faenaDiaria;
-
-    /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena") 
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="procesosFaenaDiaria") 
     * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
     */      
     private $procesoFaena;
@@ -60,34 +54,9 @@ class ProcesoFaenaDiaria
         return $this->procesoFaena->getNombre();
     }
 
-    public function __construct($faena, $proceso)
+    public function __construct($proceso)
     {
-        $this->faenaDiaria = $faena;
         $this->procesoFaena = $proceso;
-    }
-
-    /**
-     * Set faenaDiaria
-     *
-     * @param \GestionFaenaBundle\Entity\FaenaDiaria $faenaDiaria
-     *
-     * @return ProcesoFaenaDiaria
-     */
-    public function setFaenaDiaria(\GestionFaenaBundle\Entity\FaenaDiaria $faenaDiaria = null)
-    {
-        $this->faenaDiaria = $faenaDiaria;
-
-        return $this;
-    }
-
-    /**
-     * Get faenaDiaria
-     *
-     * @return \GestionFaenaBundle\Entity\FaenaDiaria
-     */
-    public function getFaenaDiaria()
-    {
-        return $this->faenaDiaria;
     }
 
     /**

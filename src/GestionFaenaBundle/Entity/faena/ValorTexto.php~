@@ -43,4 +43,14 @@ class ValorTexto extends ValorAtributo
     {
         return $this->valor;
     }
+
+    public function calcularValor($movimiento, $promedio = 0)
+    {
+        
+    }
+
+    public function getData()
+    {
+        return $this->getValor();
+    }
 }

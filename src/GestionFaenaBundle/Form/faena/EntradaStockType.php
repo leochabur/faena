@@ -8,7 +8,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena;
+use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
 use GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -23,7 +23,7 @@ class EntradaStockType extends AbstractType
         $builder->add('artProcFaena', 
                               EntityType::class, 
                               [
-                              'class' => ArticuloProcesoFaena::class,
+                              'class' => ArticuloAtributoConcepto::class,
                               'choices' => [$entrada->getArtProcFaena()]
                                 ])
                 ->add('procesoFnDay', 
@@ -46,7 +46,11 @@ class EntradaStockType extends AbstractType
         $form = $event->getForm();
 
             $form->add('concepto', 
-                       EntityType::class, ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimiento', 'choices' => [$valor->getConcepto()]]);
+                       EntityType::class, 
+                       ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 
+                        'choices' => [$valor->getArtProcFaena()->getConcepto()],
+                        'mapped' => false
+                       ]);
 
         
     }
