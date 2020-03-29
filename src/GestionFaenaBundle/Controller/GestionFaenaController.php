@@ -413,7 +413,16 @@ class GestionFaenaController extends Controller
                       $articuloManejaStock = $procesoDestino->existeArticuloDefinidoManejoStock($articulo->getArticulo());
                       if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
                       {
-                         throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock");
+                        $this->addFlash(
+                                            'error',
+                                            "El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock"
+                                        );
+                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                            ['fatr' => $formAtr->createView(), 
+                                             'movimiento' => $movimiento, 
+                                             'proceso' => $proceso, 
+                                             'faena' => $faena]);
+                        // throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock");
                       }
                       //Busca en la FaenaDiaria correspondiente el ProcesoFaenaDiaria correspondiente al ProcesoFanea
                       $procFanDay = $faena->getProceso($procesoDestino->getId());
@@ -488,7 +497,16 @@ class GestionFaenaController extends Controller
                       }
                       elseif($stockArticulo['stock'] < $valorAtributo->getValor())
                       {
-                        throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
+                        //throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
+                        $this->addFlash(
+                                            'error',
+                                            "El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!"
+                                        );
+                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                            ['fatr' => $formAtr->createView(), 
+                                             'movimiento' => $movimiento, 
+                                             'proceso' => $proceso, 
+                                             'faena' => $faena]);
                       }
                       $salida = new SalidaStock();
                       $salida->setFaenaDiaria($faena);
@@ -718,30 +736,31 @@ class GestionFaenaController extends Controller
 
 
     /**
-     * @Route("/gstMovEdit/{mov}/{proc}/{art}", name="bd_adm_mov_st_edit")
+     * @Route("/gstMovEdit/{mov}/{proc}/{art}/{fanday}", name="bd_adm_mov_st_edit")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function editarMovimientoStockAction($mov, $proc, $art)
+    public function editarMovimientoStockAction($mov, $proc, $art, $fanday)
     {
         $em = $this->getDoctrine()->getManager();
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $movimiento = $em->find(MovimientoStock::class, $mov);
         $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
-        $formAtr = $this->getFormAddMovStock($movimiento, $proc, $art, 'bd_adm_edit_mov_stock_procesar', null);
-        return $this->render('@GestionFaena/faena/editMovStock.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));        
+        $faena = $em->find(FaenaDiaria::class, $fanday);
+        $formAtr = $this->getFormAddMovStock($movimiento, $proc, $art, 'bd_adm_edit_mov_stock_procesar', $fanday);
+        return $this->render('@GestionFaena/faena/editMovStock.html.twig', array('faena' => $faena, 'fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));        
     }
 
     /**
-     * @Route("/gstMovEditProc/{mov}/{proc}/{art}", name="bd_adm_edit_mov_stock_procesar", methods={"POST"})
+     * @Route("/gstMovEditProc/{mov}/{proc}/{art}/{fanday}", name="bd_adm_edit_mov_stock_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function procesarEditMovimientoStockAction(Request $request, $mov, $proc, $art)
+    public function procesarEditMovimientoStockAction(Request $request, $mov, $proc, $art, $fanday)
     {
         $em = $this->getDoctrine()->getManager();
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $movimiento = $em->find(MovimientoStock::class, $mov);
         $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
-        $formAtr = $this->getFormAddMovStock($movimiento, $proc, $art,'bd_adm_edit_mov_stock_procesar', null);
+        $formAtr = $this->getFormAddMovStock($movimiento, $proc, $art,'bd_adm_edit_mov_stock_procesar', $fanday);
         $formAtr->handleRequest($request);
         $repo = $em->getRepository(MovimientoStock::class);
       //  $stock = $repo->pesoPromedio($proceso, $articulo)['valor'];
@@ -751,7 +770,7 @@ class GestionFaenaController extends Controller
         {
             $proceso->setUltimoMovimiento(new \DateTime());
             $em->flush();
-            return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc]);
+            return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
         }
         return $this->render('@GestionFaena/faena/editMovStock.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso)); 
     }

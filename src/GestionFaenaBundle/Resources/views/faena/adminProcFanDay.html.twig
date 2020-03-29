@@ -38,6 +38,11 @@
 {% endif %}
 
 {% if fatr is defined %}
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">
+        {{ message }}
+    </div>
+{% endfor %}
 <div class="card">
   <div class="card-header">
     <p class="h5">Movimiento : {{ movimiento }}</p>
@@ -120,7 +125,7 @@
 					    	
 					    {% endfor %}
 					    <td class="align-middle">
-					    	<a href="{{ path('bd_adm_mov_st_edit',{'mov': movim, 'proc': proced, 'art' : artic }) }}" class="btn btn-sm btn-success">Editar</a>
+					    	<a href="{{ path('bd_adm_mov_st_edit',{mov : movim, proc : proced, art : artic , fanday : faena.id}) }}" class="btn btn-sm btn-success">Editar</a>
 					    </td>
 					    <td class="align-middle">
 					    						{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
