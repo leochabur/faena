@@ -105,6 +105,7 @@
 					<th>{{ mov }}</th>
 				{% endfor %}
 					<th></th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -128,27 +129,20 @@
 					    	
 					    {% endfor %}
 					    <td class="align-middle">
-
-<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false">
-<i class="fas fa-align-justify"></i>
-        </a>
-<div class="dropdown-menu">
-  <a class="dropdown-item {% if trx %} disabled {% endif %}"  href="{{ path('bd_adm_mov_st_edit',{mov : movim, proc : proced, art : artic , fanday : faena.id}) }}">
-  		<button class="btn btn-warning btn-sm {% if trx %} disabled {% endif %}">Editar</button>
-  </a>
-  <div class="dropdown-item">
-  	{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
+					    	<a href="{{ path('bd_adm_mov_st_edit',{mov : movim, proc : proced, art : artic , fanday : faena.id}) }}" class="btn btn-sm btn-success">Editar</a>
+					    </td>
+					    <td class="align-middle">
+					    						{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
 										    	{{ form_widget(formsDelete[value].delete, {'attr' : {'data-mov' : value, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
 										    	{{ form_end(formsDelete[value]) }}
-  </div>
-</div>
-
 					    </td>
 			</tr>
 		    {% endfor %}
 		    <tr class="table-warning h5"> <!--v.decimales-->
-		    	<td colspan="4">TOTALES</td>
+		    	<td>TOTALES</td>
+		    	<td></td>
+		    	<td></td>
+		    	<td></td>
 		    {% for k, v in conceptos %}
 			    <td class="text-right">
 			    	{% if totales[k] is defined %}
@@ -157,10 +151,11 @@
 			    </td>
 			 {% endfor %}
 			 <td></td>
+			 <td></td>
 			</tr>
 			</tbody>
 		</table>
-		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-success"><< Volver</a>
+		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-warning"><< Volver</a>
 	{% endif %}
 
 {% endblock fos_user_content %}
