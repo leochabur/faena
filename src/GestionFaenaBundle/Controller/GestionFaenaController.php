@@ -410,7 +410,7 @@ class GestionFaenaController extends Controller
               {
                   /////////////////////////////ENTRADA DE STOCK A PROCESO DESTINO///////////////////////////////////////
                       //El proceso destino existe, debe verificar que se encuentre definido el articulo de la transferencia como habilitado para manejar stock
-                      $articuloManejaStock = $procesoDestino->existeArticuloDefinidoManejoStock($articulo->getArticulo());
+                      $articuloManejaStock = $procesoDestino->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo->getArticulo());
                       if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
                       {
                         $this->addFlash(
@@ -425,7 +425,7 @@ class GestionFaenaController extends Controller
                         // throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock");
                       }
                       //Busca en la FaenaDiaria correspondiente el ProcesoFaenaDiaria correspondiente al ProcesoFanea
-                      $procFanDay = $faena->getProceso($procesoDestino->getId());
+                      $procFanDay = $faena->getProceso($procesoDestino->getProcesoFaena()->getId());
                       if (!$procFanDay) //no esta configurado el articulo para manejar el stock
                       {
                           throw new \Exception("El proceso de destino es inexistente!!!");
@@ -434,7 +434,7 @@ class GestionFaenaController extends Controller
                       $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
                                                                                           $articulo->getConcepto()->getConcepto(),
                                                                                           EntradaStock::getInstance(),
-                                                                                          $procesoDestino,
+                                                                                          $procesoDestino->getProcesoFaena(),
                                                                                           $em);
                       //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
                       $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo()->getId());
@@ -720,16 +720,18 @@ class GestionFaenaController extends Controller
                                  'method' => 'POST']);
         }
         elseif ($movimiento->getType() == 5){
+                  $faenaDiaria = $this->getDoctrine()->getManager()->find(FaenaDiaria::class, $fanday);
                   return $this->createForm(TransferirStockType::class, 
-                                 $movimiento, 
-                                 ['action' => $this->generateUrl($url, 
-                                                                ['type' => $movimiento->getType(), 
-                                                                 'proc' => $proc, 
-                                                                 'conc' => $movimiento->getArtProcFaena()->getConcepto()->getId(), 
-                                                                 'art' => $art, 
-                                                                 'mov' => $movimiento->getId(),
-                                                                 'fanday' => $fanday]),
-                                 'method' => 'POST']);
+                                           $movimiento, 
+                                           ['fanDay' => $faenaDiaria,
+                                            'action' => $this->generateUrl($url, 
+                                                                          ['type' => $movimiento->getType(), 
+                                                                           'proc' => $proc, 
+                                                                           'conc' => $movimiento->getArtProcFaena()->getConcepto()->getId(), 
+                                                                           'art' => $art, 
+                                                                           'mov' => $movimiento->getId(),
+                                                                           'fanday' => $fanday]),
+                                           'method' => 'POST']);
         }
     }
 

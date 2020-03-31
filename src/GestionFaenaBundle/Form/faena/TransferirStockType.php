@@ -14,11 +14,14 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 class TransferirStockType extends AbstractType
 {
+
+    private $faenaDiaria;
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $this->faenaDiaria = $options['fanDay'];
         $transferir = $builder->getData();
         $builder->add('artProcFaena', 
                               EntityType::class, 
@@ -53,7 +56,7 @@ class TransferirStockType extends AbstractType
               ->add('destino', 
                     EntityType::class, 
                     ['class' => 'GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria', 
-                    'choices' => $valor->getProcesoFnDay()->getProcesoFaena()->getProcesosDestino(),
+                    'choices' => $this->faenaDiaria->getProcesosDestinos($valor->getProcesoFnDay()->getProcesoFaena()),
                     'mapped' => false,
                     'required' => true
                     ]);
@@ -69,6 +72,7 @@ class TransferirStockType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'GestionFaenaBundle\Entity\faena\TransferirStock'
         ));
+        $resolver->setRequired('fanDay'); //para poder recuperar cuales son los ProcesosDiarios Instanciados
     }
 
     /**

@@ -64,11 +64,44 @@ class InformesController extends Controller
      * @Route("/informes/existencias", name="informes_ver_existencias")
 
      */
-    public function viewExistenciasAction()
+    public function viewExistenciasAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        return $this->render('@GestionFaena/Default/success.html.twig');
+        //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY')
+        $form = $this->getFormSelectProceso();
+        if ($request->isMethod('POST')){
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+              $data = $form->getData();
+              $em = $this->getDoctrine()->getManager();
+              $repository = $em->getRepository('GestionFaenaBundle\Entity\faena\MovimientoStock');
+              $stock = $repository->getStockArticulosPorProceso($data['proceso']);
+              return $this->render('@GestionFaena/informes/existencias.html.twig', ['form' => $form->createView(), 'stock' => $stock]);
+            }
+
+        }
+        return $this->render('@GestionFaena/informes/existencias.html.twig', ['form' => $form->createView()]);
     }
 
+    private function getFormSelectProceso()
+    {
+
+        $form = $this->createFormBuilder()
+                      ->add('proceso', 
+                            EntityType::class, 
+                            ['class' => ProcesoFaena::class, 
+                             'required' => true,
+                             'constraints' => [new NotNull(array('message' => "Debe seleccionar un proceso!!"))],
+                             'query_builder' => function (EntityRepository $er) {
+                                                                                        return $er->createQueryBuilder('p')
+                                                                                                  ->where('p.permanente = :permanente')
+                                                                                                  ->setParameter('permanente', true)
+                                                                                                  ->orderBy('p.nombre', 'ASC');
+                                                                                                }
+                            ])
+                        ->add('cargar', SubmitType::class, ['label' => 'Cargar'])
+                        ->getForm();
+        return $form;
+    }
 
 }

@@ -93,7 +93,7 @@ class FaenaDiaria
         return null;
     }*/
 
-    public function getProceso($id)
+    public function getProceso($id)//dado un id evuelve el ProcesoFaenaDiaria Coreespondiente al id del ProcesoFaena
     {
         foreach ($this->procesos as $proc) {
             if ( $proc->getProcesoFaena()->getId() == $id)
@@ -348,5 +348,16 @@ class FaenaDiaria
                 return false;
         }
         return true;
+    }
+
+    public function getProcesosDestinos(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)//dado un proceso recupera todos los procesos destinos del mismo que han sido instanciados en la faena
+    {
+        $destinos = array();
+        foreach ($proceso->getProcesosDestino() as $destino) {
+            $procFanDay = $this->getProceso($destino->getId());
+            if ($procFanDay)
+                $destinos[] = $procFanDay;
+        }
+        return $destinos;
     }
 }

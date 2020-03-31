@@ -65,7 +65,7 @@ abstract class MovimientoStock
     /**
      * @ORM\Column(name="visible", type="boolean", options={"default":true})
      */
-    private $visible;
+    private $visible; //flag utilizado para indicar si el movimiento debe ser tomado para calculos o para mostrar en los informes (Por ej, las TRX no se muestran, solo se muestran los movimientos de Egreso e Ingreso que se generarn automaticamente)
 
     /**
      * @ORM\Column(name="eliminado", type="boolean", options={"default":false}, nullable=true)

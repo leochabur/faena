@@ -1,0 +1,47 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Existencias actuales</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+		<div class="form-row col-6">
+			{{ form_label(form.proceso) }}
+			{{ form_widget(form.proceso) }}
+		</div>
+		<div class="form-row col-6">
+			{{ form_widget(form.cargar, {'attr' : {'class' : 'btn-success'}}) }}
+		</div>
+
+	{{ form_end(form) }}
+<hr>
+{% if stock is defined %}
+	<table class="table table-striped table-bordered table-hover table-sm ">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Articulo</th>
+					<th>Fecha Faena</th>
+					<th>Cantidad</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				
+				{% for f in stock %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ f.nombre }}</td>	
+						<td>{{ f.fecha|date("d/m/Y") }}</td>						
+						<td>{{ f.cantidad }}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+	{% endif %}
+{% endblock fos_user_content %}
