@@ -52,7 +52,7 @@ class ValorAtributoType extends AbstractType
             $form->add('valor', 
                        TextType::class, 
                        ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()],
-                       'data' => $this->proceso->getStockArticulo($this->faena, $this->articulo),
+                       'data' => ($this->proceso?$this->proceso->getStockArticulo($this->faena, $this->articulo):""),
                         'required' => true]);
         }
         elseif(ValorTexto::class == get_class($valor))
