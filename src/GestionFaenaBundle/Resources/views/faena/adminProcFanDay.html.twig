@@ -20,15 +20,15 @@
 			{% endif %}
 			{{ form_start(form, {'attr' : {'novalidate' : 'novalidate'}}) }}
 			<div class="row">
-				<div class="col">
+				<div class="col-md-4 col-sm-12">
 						{{ form_label(form.tipoMovimiento) }}
 						{{ form_widget(form.tipoMovimiento, {'attr' : {'class' : 'tipos'}}) }}
 				</div>
-				<div class="col">
+				<div class="col-md-4 col-sm-12">
 						{{ form_label(form.conMovProc, 'Concepto de Movimiento') }}
 						{{ form_widget(form.conMovProc, {'attr' : {'class' : 'conceptos'}}) }}
 				</div>
-				<div class="col">
+				<div class="col-md-4 col-sm-12">
 						{{ form_label(form.artProcFaena, 'Articulo') }}
 						{{ form_widget(form.artProcFaena, {'attr' : {'class' : 'articulos'}}) }}
 				</div>
