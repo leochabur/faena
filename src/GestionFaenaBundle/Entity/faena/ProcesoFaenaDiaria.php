@@ -149,4 +149,30 @@ class ProcesoFaenaDiaria
     {
         return $this->movimientos;
     }
+
+    public function getStockArticulo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
+    {
+        $stock = 0;
+        foreach ($this->movimientos as $mov) {
+            if ((!$mov->getEliminado()) && ($mov->getVisible()))
+            {
+                    if ($mov->getArtProcFaena()->getArticulo() == $articulo)
+                    {
+                        if($mov->getFaenaDiaria() == $faena)
+                        {
+                            $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);
+                            if ($manejo)
+                            {
+                                $valor = $mov->getValorWhitAtribute($manejo->getAtributo()->getId());
+                                if ($valor)
+                                    $stock+=  $valor->getValor();
+                            }
+                        }
+                    }
+                
+            }
+        }
+        return $stock;
+    }
 }

@@ -27,7 +27,7 @@
 					<th>#</th>
 					<th>Articulo</th>
 					<th>Fecha Faena</th>
-					<th>Cantidad</th>
+					<th>Stock</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -38,7 +38,15 @@
 						<td>{{ loop.index }}</td>
 						<td>{{ f.nombre }}</td>	
 						<td>{{ f.fecha|date("d/m/Y") }}</td>						
-						<td>{{ f.cantidad }}</td>
+						<td class="text-right">{{ f.cantidad|number_format(2) }}</td>
+						<td class="text-center">
+							<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
+								<div class="dropdown-menu">
+								    <a class="dropdown-item" href="#">Ver movimientos</a>
+								    <a class="dropdown-item" href="#">Iniciar seguimienton</a>
+								    <a class="dropdown-item" href="#">Dispocicion final</a>
+								</div>
+						</td>
 					</tr>
 				{% endfor %}
 				</tbody>

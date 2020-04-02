@@ -20,9 +20,13 @@ class ValorAtributoType extends AbstractType
     /**
      * {@inheritdoc}
      */
+    private $faena, $proceso, $articulo;
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $this->faena = $options['faena'];
+        $this->proceso = $options['proceso'];
+        $this->articulo = $options['articulo'];
         $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
     }
 
@@ -48,6 +52,7 @@ class ValorAtributoType extends AbstractType
             $form->add('valor', 
                        TextType::class, 
                        ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()],
+                       'data' => $this->proceso->getStockArticulo($this->faena, $this->articulo),
                         'required' => true]);
         }
         elseif(ValorTexto::class == get_class($valor))
@@ -70,5 +75,6 @@ class ValorAtributoType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'GestionFaenaBundle\Entity\faena\ValorAtributo'
         ));
+        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo');
     }
 }

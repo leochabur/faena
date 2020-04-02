@@ -93,7 +93,8 @@ abstract class MovimientoStock
     public function getValorWhitAtribute($atributo)
     {
         foreach ($this->valores as $v) {
-            if ($v->getAtributo()->getAtributoAbstracto()->getId() == $atributo)
+            $val = $v->getAtributo()?$v->getAtributo()->getAtributoAbstracto():$v->getAtributoAbstracto();
+            if ($val->getId() == $atributo)
                 return $v;
         }
         return null;

@@ -12,32 +12,35 @@ use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
 use GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+
 class TransferirStockType extends AbstractType
 {
 
-    private $faenaDiaria;
+    private $faena, $proceso, $articulo;  //FaenaDiaria - ProcesoFaenaDiaria - Articulo
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $this->faenaDiaria = $options['fanDay'];
+        $this->faena = $options['faena'];
+        $this->proceso = $options['proceso'];
+        $this->articulo = $options['articulo'];
         $transferir = $builder->getData();
         $builder->add('artProcFaena', 
                               EntityType::class, 
                               [
                               'class' => ArticuloAtributoConcepto::class,
                               'choices' => [$transferir->getArtProcFaena()]
-                                ])
+                              ])
                 ->add('procesoFnDay', 
                               EntityType::class, 
                               [
                               'class' => ProcesoFaenaDiaria::class, 
                               'choices' => [$transferir->getProcesoFnDay()]
-                                ])
+                              ])
                 ->add('valores', CollectionType::class, [
                     'entry_type' => ValorAtributoType::class,
-                    'entry_options' => ['label' => false],
+                    'entry_options' => ['label' => false, 'faena' => $this->faena, 'proceso' => $this->proceso, 'articulo' => $this->articulo],
                 ])
                 ->add('guardar', SubmitType::class);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
@@ -56,7 +59,7 @@ class TransferirStockType extends AbstractType
               ->add('destino', 
                     EntityType::class, 
                     ['class' => 'GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria', 
-                    'choices' => $this->faenaDiaria->getProcesosDestinos($valor->getProcesoFnDay()->getProcesoFaena()),
+                    'choices' => $this->faena->getProcesosDestinos($valor->getProcesoFnDay()->getProcesoFaena()),
                     'mapped' => false,
                     'required' => true
                     ]);
@@ -72,7 +75,7 @@ class TransferirStockType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'GestionFaenaBundle\Entity\faena\TransferirStock'
         ));
-        $resolver->setRequired('fanDay'); //para poder recuperar cuales son los ProcesosDiarios Instanciados
+        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo'); //para poder recuperar cuales son los ProcesosDiarios Instanciados
     }
 
     /**
