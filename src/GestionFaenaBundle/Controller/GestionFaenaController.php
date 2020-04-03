@@ -144,12 +144,22 @@ class GestionFaenaController extends Controller
         $faena = $repo->find($fan);
         $procesos = array();
         $user = $this->getUser();
-        foreach ($faena->getProcesos() as $proc) {
+        $procesosFd = array();
+        foreach ($faena->getProcesos() as $p) {
+            $procesosFd[] = $p;
+        }
+        uasort($procesosFd, function ($a, $b) {
+                                                  if ($a->getProcesoFaena()->getOrden() == $b->getProcesoFaena()->getOrden()) {
+                                                      return 0;
+                                                  }
+                                                  return ($a->getProcesoFaena()->getOrden() < $b->getProcesoFaena()->getOrden()) ? -1 : 1;
+                                            });
+        foreach ($procesosFd as $proc) 
+        {
             if ($user->getProcesos()->contains($proc->getProcesoFaena()))
             {
                 $procesos[] = $proc;
             }
-      //      $procesos[] = $proc;
         }
         return $this->render('@GestionFaena/faena/procesosFaenaDiaria.html.twig', array('procesos' => $procesos, 'faena' => $faena));
     }
