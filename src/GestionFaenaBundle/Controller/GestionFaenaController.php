@@ -149,9 +149,6 @@ class GestionFaenaController extends Controller
             $procesosFd[] = $p;
         }
         uasort($procesosFd, function ($a, $b) {
-                                                  if ($a->getProcesoFaena()->getOrden() == $b->getProcesoFaena()->getOrden()) {
-                                                      return 0;
-                                                  }
                                                   return ($a->getProcesoFaena()->getOrden() < $b->getProcesoFaena()->getOrden()) ? -1 : 1;
                                             });
         foreach ($procesosFd as $proc) 
