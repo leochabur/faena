@@ -2,28 +2,15 @@
         
 
 {% block fos_user_content %}
-	<br>
-	<p class="h4">Editar proceso</p>
+<br>
+<hr>
+<span class="h5 card-title">Editar proceso</span>
+<hr>
 
 	
 
 	    <p class="h4 mb-4 text-center">{{ proccess.nombre }}</p>
 		<div class="row">
-		  <div class="col">
-				<div class="card">
-				  <div class="card-header">
-				    Articulos asignados
-				  </div>
-				  <div class="card-body">
-					<div class="list-group">
-				  	{% for art in proccess.articulos %}
-					  <a href="#!" data-id="{{art.id}}" class="view-art list-group-item list-group-item-action">{{ art }}</a>
-					{% endfor %}
-					</div>
-				    <a href="#" class="btn btn-primary">Agregar nuevo</a>
-				  </div>
-				</div>
-			</div>
 		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
@@ -39,9 +26,6 @@
 				  </div>
 				</div>
 		  </div>
-		</div>
-		<br>
-		<div class="row">
 		  <div class="col-6">
 				<div class="card">
 				  <div class="card-header">

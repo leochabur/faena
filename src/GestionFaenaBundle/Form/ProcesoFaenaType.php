@@ -14,7 +14,8 @@ class ProcesoFaenaType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('nombre')
-                ->add('permanente');
+                ->add('permanente')
+                ->add('orden');
     }
 
     /**

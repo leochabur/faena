@@ -92,6 +92,11 @@ abstract class ProcesoFaena
      *      )
      */
     private $manejosStock;
+
+    /**
+     * @ORM\Column(name="orden", type="integer", options={"default":0})
+     */
+    private $orden = 0; 
     
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
@@ -437,5 +442,29 @@ abstract class ProcesoFaena
             $articulos[] = $fatcor->getArticulo();
         }
         return $articulos;
+    }
+
+    /**
+     * Set permanente
+     *
+     * @param boolean $permanente
+     *
+     * @return ProcesoFaena
+     */
+    public function setPermanente($permanente)
+    {
+        $this->permanente = $permanente;
+
+        return $this;
+    }
+
+    /**
+     * Get permanente
+     *
+     * @return boolean
+     */
+    public function getPermanente()
+    {
+        return $this->permanente;
     }
 }
