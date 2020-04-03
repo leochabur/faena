@@ -31,6 +31,7 @@
     <tr>
       <th class="th-sm">Nombre Proceso </th>
       <th class="th-sm">Tipo de Proceso</th>
+      <th class="th-sm" >Orden</th>
       <th class="th-sm"></th>
     </tr>
   </thead>
@@ -42,6 +43,9 @@
   				</td>
   				<td>
   					{{ p.type }}
+  				</td>
+  				<td>
+  					{{ p.orden }}
   				</td>
   				<td class="text-center">
 					<a href="{{ path('bd_edit_procesos', {proccess : p.id}) }}" class="btn btn-indigo btn-sm m-0">Administrar</a>
