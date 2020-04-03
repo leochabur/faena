@@ -37,6 +37,7 @@
 									<tr>
 										<th>Articulo</th>
 										<th>Atributo</th>
+										<th></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -44,6 +45,7 @@
 										<tr>
 											<td>{{ proceso.articulo }}</td>
 											<td>{{ proceso.atributo }}</td>
+											<td class="text-center"><a href="{{ path('bd_delete_manejo_stock_from_proccess', {proccess : proccess.id, manejo : proceso.id}) }}" class="btn btn-sm btn-danger">Quitar</a></td>
 										</tr>
 									{% endfor %}
 								</tbody>
@@ -123,7 +125,7 @@
 										 		function(data){
 										 						if (data.status)
 										 						{
-
+										 							location.reload();
 										 						}
 										 						else
 										 						{

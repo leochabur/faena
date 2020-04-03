@@ -929,6 +929,26 @@ class GestionBDController extends Controller
     }
 
     /**
+     * @Route("/delgstst/{proccess}/{manejo}", name="bd_delete_manejo_stock_from_proccess")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteManejoStockProccess($proccess, $manejo)
+    {
+            try
+            {
+                $entityManager = $this->getDoctrine()->getManager();
+                $proceso = $entityManager->find(ProcesoFaena::class, $proccess);
+                $stock = $entityManager->find(FactorCalculo::class, $manejo);
+                $proceso->removeManejosStock($stock);
+                $entityManager->flush();
+            }
+            catch (\Exception $e){
+
+            }
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proccess]);
+    }
+
+    /**
      * @Route("/viewArtProcFan/{articulo}", name="bd_view_art_proc_fan")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
