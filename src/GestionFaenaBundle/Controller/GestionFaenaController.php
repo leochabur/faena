@@ -499,7 +499,15 @@ class GestionFaenaController extends Controller
                       $stockArticulo = $repositoryMovimiento->getStockDeArticulo($proceso, $articuloManejaStock->getArticulo(), $articuloManejaStock->getAtributo());
                       if (!$stockArticulo)
                       {
-                          throw new \Exception("No se pudo calcular el stock del articulo ".$articuloManejaStock->getArticulo()."!!");
+                        $this->addFlash(
+                                            'error',
+                                            "No se pudo calcular el stock del articulo ".$articuloManejaStock->getArticulo().", en el proceso ".$proceso."!!"
+                                        );
+                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                            ['fatr' => $formAtr->createView(), 
+                                             'movimiento' => $movimiento, 
+                                             'proceso' => $proceso, 
+                                             'faena' => $faena]);
 
                       }
                       elseif($stockArticulo['stock'] < $valorAtributo->getValor())
