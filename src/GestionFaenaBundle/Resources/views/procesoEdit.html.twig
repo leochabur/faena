@@ -11,21 +11,35 @@
 
 	    <p class="h4 mb-4 text-center">{{ proccess.nombre }}</p>
 		<div class="row">
-		  <div class="col">
+		  <div class="col-6">
 				<div class="card">
 				  <div class="card-header">
 				     Reporta articulos a...
 				  </div>
 				  <div class="card-body">
-				  <div class="list-group">
+					<table class="table table-striped table-bordered table-hover table-sm ">
+								<thead>
+									<tr>
+										<th>Proceso Destino</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
 					  	{% for send in proccess.procesosDestino %}
-						  <a href="#!" class="list-group-item list-group-item-action">{{ send.nombre }}</a>
-						{% endfor %}					
+					  	  <tr>
+								<td>{{ send.nombre }}</td>
+						  		<td><a href="{{ path('delete_destination', {origen : proccess.id, destino : send.id}) }}" class="btn btn-sm btn-danger col">Quitar</a></td>
+					  	  </tr>
+						  
+						{% endfor %}	
+						</tbody>
+						</table>		
+						<button type="button" class="btn btn-primary col-6" data-toggle="modal" data-target="#modalSubscriptionForm">Agregar proceso</button>		
 				  </div>
-				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalSubscriptionForm">Agregar proceso</button>
+				  
 				  </div>
 				</div>
-		  </div>
+		
 		  <div class="col-6">
 				<div class="card">
 				  <div class="card-header">

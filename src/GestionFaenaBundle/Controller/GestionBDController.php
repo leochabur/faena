@@ -837,6 +837,20 @@ class GestionBDController extends Controller
                                   'stock' => $this->getFormConfigurarManejoStock($proceso)->createView()));
     }
 
+    /**
+     * @Route("/deletDest/{origen}/{destino}", name="delete_destination")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteDestination($origen, $destino)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $origen = $entityManager->find(ProcesoFaena::class, $origen);
+        $destino = $entityManager->find(ProcesoFaena::class, $destino);
+        $origen->removeProcesosDestino($destino);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $origen]);
+    }
+
 
     /**
      * @Route("/updmnjst/{proc}", name="bd_update_manejo_stock", methods={"POST"})
