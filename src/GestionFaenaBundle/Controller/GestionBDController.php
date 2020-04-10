@@ -122,7 +122,7 @@ class GestionBDController extends Controller
     {
         $atr = new AtributoAbstracto();
         $form = $this->getFormAltaAtrAbs($atr);
-        return $this->render('@GestionFaena/gestionBD/AtributoAbstractoAlta.html.twig', array('form' => $form->createView()));
+        return $this->render('@GestionFaena/gestionBD/atributoAbstractoAlta.html.twig', array('form' => $form->createView()));
     }
 
     private function getFormAltaAtrAbs($atrabs)
