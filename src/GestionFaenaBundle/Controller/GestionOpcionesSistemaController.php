@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use GestionFaenaBundle\Entity\gestionBD\Granja;
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
 use GestionFaenaBundle\Entity\gestionBD\Ciudad;
+use GestionFaenaBundle\Entity\gestionBD\Cargador;
 
 class GestionOpcionesSistemaController extends Controller
 {
@@ -67,6 +68,24 @@ class GestionOpcionesSistemaController extends Controller
                                    'action' => $this->generateUrl('save_entidad_externa', array('ee' => 3))]);
         return $this->render('@GestionFaena/gestionBD/abmCiudad.html.twig', 
                             ['form' => $form->createView(), 'ciudades' => $ciudades]);
+    }
+
+    /**
+     * @Route("/addcrg", name="bd_add_entity_cargador")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntityCargadorAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $cargadores = $em->getRepository(Cargador::class)->findAll();
+
+        $cargador = new Cargador();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\CargadorType::class, 
+                                  $cargador, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 4))]);
+        return $this->render('@GestionFaena/gestionBD/abmCargador.html.twig', 
+                            ['form' => $form->createView(), 'cargadores' => $cargadores]);
     }
 
     /**
@@ -138,6 +157,28 @@ class GestionOpcionesSistemaController extends Controller
             }  
             return $this->render('@GestionFaena/gestionBD/abmCiudad.html.twig', 
                                 ['ciudades' => $ciudades, 'form' => $form->createView()]);
+        }
+        elseif ($ee == 4)
+        {
+            $cargador = new \GestionFaenaBundle\Entity\gestionBD\Cargador();
+            $cargadores = $entityManager->getRepository(Cargador::class)->findAll();
+            $fCarg = $this->createForm(\GestionFaenaBundle\Form\gestionBD\CargadorType::class, 
+                                      $cargador, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 4))]);
+            $fCarg->handleRequest($request);
+            if ($fCarg->isValid())
+            {
+                $entityManager->persist($cargador);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Cargador almacenado exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_cargador');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmCargador.html.twig', 
+                                ['cargadores' => $cargadores, 'form' => $fCarg->createView()]);
         }        
     }
 

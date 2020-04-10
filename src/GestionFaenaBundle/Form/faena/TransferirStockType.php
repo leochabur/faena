@@ -40,7 +40,7 @@ class TransferirStockType extends AbstractType
                               ])
                 ->add('valores', CollectionType::class, [
                     'entry_type' => ValorAtributoType::class,
-                    'entry_options' => ['label' => false, 'faena' => $this->faena, 'proceso' => $this->proceso, 'articulo' => $this->articulo],
+                    'entry_options' => ['label' => false, 'type' => $transferir->getType(), 'faena' => $this->faena, 'proceso' => $this->proceso, 'articulo' => $this->articulo],
                 ])
                 ->add('guardar', SubmitType::class);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);

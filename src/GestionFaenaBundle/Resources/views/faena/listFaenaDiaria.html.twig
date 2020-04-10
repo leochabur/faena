@@ -39,16 +39,6 @@
 							<a href="{{ path('bd_view_procesos_faena_diaria', {fan:f.id}) }}" class="btn btn-success btn-sm " >Gestionar...</a>
 							<a href="{{ path('bd_fan_day_close', {id:f.id}) }}" data-action="cerrar" class="btn btn-warning btn-sm btn-close" data-index="{{ loop.index }}">Cerrar</a>
 							<a href="{{ path('bd_fan_day_delete', {id:f.id}) }}" data-action="eliminar" class="btn btn-danger btn-sm btn-close" data-index="{{ loop.index }}">Eliminar</a>
-							<button class="btn btn-primary dropdown-toggle mr-4 btn-sm" type="button" data-toggle="dropdown"
-  aria-haspopup="true" aria-expanded="false">Informes</button>
-
-<div class="dropdown-menu">
-  <a class="dropdown-item" target="_blanck" href="{{ path('planilla_control_antemorten', {fanday : f.id}) }}">Planilla Control Ante-Mortem</a>
-  <a class="dropdown-item" href="#">Informe I</a>
-  <a class="dropdown-item" href="#">Iforme II</a>
-  <div class="dropdown-divider"></div>
-  <a class="dropdown-item" href="#">Informe III</a>
-</div>
 						</td>
 					</tr>
 				{% endfor %}

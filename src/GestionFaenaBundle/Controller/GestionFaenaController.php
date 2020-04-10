@@ -802,6 +802,7 @@ class GestionFaenaController extends Controller
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $movimiento = $em->find(MovimientoStock::class, $mov);
         $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
+        $faena = $em->find(FaenaDiaria::class, $fanday);
         $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo,'bd_adm_edit_mov_stock_procesar', $faena);
         $formAtr->handleRequest($request);
         $repo = $em->getRepository(MovimientoStock::class);
@@ -948,12 +949,14 @@ class GestionFaenaController extends Controller
     }
 
     /**
-     * @Route("/informes/ctrlam/{fanday}", name="planilla_control_antemorten", methods={"GET", "POST"})
+     * @Route("/informes/ctrlam/{procFanDay}/{fanDay}", name="planilla_control_antemorten", methods={"GET", "POST"})
      */
-    public function emitirCuponesAction($fanday, Request $request)
+    public function emitirCuponesAction($procFanDay, $fanDay, Request $request)
     {
-        $faena = $this->getDoctrine()->getManager()->find(FaenaDiaria::class, $fanday);
-        $proceso = $faena->getProceso(1);
+        $proceso = $this->getDoctrine()->getManager()->find(ProcesoFaenaDiaria::class, $procFanDay);
+        $faena = $this->getDoctrine()->getManager()->find(FaenaDiaria::class, $fanDay);
+
+       // $proceso = $faena->getProceso(1);
         $logo = $this->get('kernel')->getRootDir() . '/../web/resources/img/senasa.jpg';
         $pdf = $this->get('app.fpdf');
         $pdf->AliasNbPages();

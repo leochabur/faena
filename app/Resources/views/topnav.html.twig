@@ -1,4 +1,5 @@
-<nav class="navbar navbar-expand-lg navbar-dark primary-color">
+<nav class="navbar navbar-expand-lg navbar-dark  primary-color">
+
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -6,7 +7,7 @@
     <ul class="navbar-nav mr-auto">
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Configuracion Sistema
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -42,6 +43,7 @@
               
               <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones del Sistema</a>
                 <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_cargador') }}">Nuevo Cargador</a></li>
                       <li><a class="dropdown-item" href="{{ path('bd_add_unidad_medida') }}">Nueva Unidad de Medida</a></li>
                       <li><a class="dropdown-item" href="{{ path('bd_add_entity_granja') }}">Nueva Granja</a></li>
                       <li><a class="dropdown-item" href="{{ path('bd_add_entity_transportista') }}">Nuevo Transportista</a></li>

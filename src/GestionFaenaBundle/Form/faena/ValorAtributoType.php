@@ -20,13 +20,14 @@ class ValorAtributoType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    private $faena, $proceso, $articulo;
+    private $faena, $proceso, $articulo, $type;
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $this->faena = $options['faena'];
         $this->proceso = $options['proceso'];
         $this->articulo = $options['articulo'];
+        $this->type = $options['type'];
         $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
     }
 
@@ -49,11 +50,15 @@ class ValorAtributoType extends AbstractType
                         ['attr' => ['class' => 'col-2'], 
                          'class' => 'GestionFaenaBundle\Entity\gestionBD\UnidadMedida', 
                          'choices' => [$valor->getAtributo()->getUnidadMedida()]]);
+
+            $options = ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()], 'required' => true];
+            if ($this->type)
+            {
+                $options['data'] = ($this->proceso?$this->proceso->getStockArticulo($this->faena, $this->articulo):"");
+            }
             $form->add('valor', 
                        TextType::class, 
-                       ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()],
-                       'data' => ($this->proceso?$this->proceso->getStockArticulo($this->faena, $this->articulo):""),
-                        'required' => true]);
+                        $options);
         }
         elseif(ValorTexto::class == get_class($valor))
         {
@@ -72,9 +77,11 @@ class ValorAtributoType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
+        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo')->setRequired('type');
         $resolver->setDefaults(array(
-            'data_class' => 'GestionFaenaBundle\Entity\faena\ValorAtributo'
+            'data_class' => 'GestionFaenaBundle\Entity\faena\ValorAtributo',
+            'type' => null
         ));
-        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo');
+        
     }
 }

@@ -12,7 +12,22 @@
   <div class="card mb-3">
     <div class="card-body">
       <h5 class="card-title">{{ p }}</h5>
-      <p class="card-text"><a href="{{ path('bd_adm_proc_fan_day', {proc : p.id, fd : faena.id}) }}" class="btn btn-primary">Ir a gestionar..</a></p>
+      <div class="row">
+      		<div class="col"><p class="card-text"><a href="{{ path('bd_adm_proc_fan_day', {proc : p.id, fd : faena.id}) }}" class="btn btn-primary">Ir a gestionar..</a></p></div>
+      		<div class="col">
+				<button class="btn btn-warning dropdown-toggle" type="button" data-toggle="dropdown"
+				  aria-haspopup="true" aria-expanded="false">Informes</button>
+
+				<div class="dropdown-menu">
+				  <a class="dropdown-item" target="_blanck" href="{{ path('planilla_control_antemorten', {fanDay : faena.id, procFanDay : p.id}) }}">Planilla Control Ante-Mortem</a>
+				  <a class="dropdown-item" href="#">Informe I</a>
+				  <a class="dropdown-item" href="#">Iforme II</a>
+				  <div class="dropdown-divider"></div>
+				  <a class="dropdown-item" href="#">Informe III</a>
+				</div>
+      		</div>
+      </div>
+      
       <p class="card-text"><small class="text-muted">Ultima Actualizacion: {{ p.ultimoMovimiento is empty ? "" : p.ultimoMovimiento|date('d/m/Y - H:i') }}</small></p>
     </div>
   </div>

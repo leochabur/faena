@@ -7,6 +7,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use GestionFaenaBundle\Entity\gestionBD\Granja; 
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
+use GestionFaenaBundle\Entity\gestionBD\Cargador;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 class AtributoInformableExternoType extends AbstractType
@@ -19,7 +20,7 @@ class AtributoInformableExternoType extends AbstractType
         $builder->add('atributoInformable', AtributoInformableType::class, array(
                                     'data_class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoInformableExterno',
                                 ))
-                ->add('claseExterna', ChoiceType::class, ['choices' => ['Granja'=> Granja::class , 'Transportista' => Transportista::class]])
+                ->add('claseExterna', ChoiceType::class, ['choices' => ['Granja'=> Granja::class , 'Transportista' => Transportista::class, 'Cargador' => Cargador::class]])
                 ->add('guardar', SubmitType::class);
     }
 
