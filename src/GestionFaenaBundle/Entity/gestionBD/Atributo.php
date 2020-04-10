@@ -88,7 +88,7 @@ abstract class Atributo
      *
      * @ORM\Column(name="eliminado", type="boolean", options={"default":false}, nullable=true)
      */
-    private $eliminado;
+    private $eliminado = false;
 
 
     public function getNumeroOrden()

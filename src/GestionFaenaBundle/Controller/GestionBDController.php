@@ -493,6 +493,7 @@ class GestionBDController extends Controller
                 $em = $this->getDoctrine()->getManager();
                 $atributo = $em->find(Atributo::class, $atr);
                 $atributo->setEliminado(true);
+                $atributo->setActivo(false);
                 $em->flush();
                 return new JsonResponse(array('ok' => true, 'message' => ''));
             }            
