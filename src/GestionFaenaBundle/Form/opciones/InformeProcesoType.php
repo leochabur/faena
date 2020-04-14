@@ -1,30 +1,29 @@
 <?php
 
-namespace GestionFaenaBundle\Form\gestionBD;
+namespace GestionFaenaBundle\Form\opciones;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
-class ArticuloType extends AbstractType
+class InformeProcesoType extends AbstractType
 {
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('nombre')
-                ->add('codigoSenasa')
-                ->add('nombreSenasa')
-                ->add('guardar', SubmitType::class);
+        $builder->add('conceptos')
+                ->add('proceso')
+                ->add('guardar', SubmitType::class);;
     }/**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'GestionFaenaBundle\Entity\gestionBD\Articulo'
+            'data_class' => 'GestionFaenaBundle\Entity\opciones\InformeProceso'
         ));
     }
 
@@ -33,7 +32,7 @@ class ArticuloType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'gestionfaenabundle_articulo';
+        return 'gestionfaenabundle_opciones_informeproceso';
     }
 
 

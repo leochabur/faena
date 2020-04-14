@@ -1,3 +1,8 @@
+gestion_sigcer:
+    resource: "@GestionSigcerBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
 gestion_faena:
     resource: "@GestionFaenaBundle/Controller/"
     type:     annotation

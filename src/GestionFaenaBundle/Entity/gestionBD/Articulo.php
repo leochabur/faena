@@ -33,6 +33,20 @@ class Articulo
     private $nombre;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="codigoSenasa", type="string", length=255, nullable=true)
+     */
+    private $codigoSenasa;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nombreSenasa", type="string", length=255, nullable=true)
+     */
+    private $nombreSenasa;
+
+    /**
      * @ORM\OneToMany(targetEntity="ArticuloAtributoConcepto", mappedBy="articulo")
      */
     private $artsAtrConc;
@@ -115,5 +129,53 @@ class Articulo
     public function getArtsAtrConc()
     {
         return $this->artsAtrConc;
+    }
+
+    /**
+     * Set codigoSenasa
+     *
+     * @param string $codigoSenasa
+     *
+     * @return Articulo
+     */
+    public function setCodigoSenasa($codigoSenasa)
+    {
+        $this->codigoSenasa = $codigoSenasa;
+
+        return $this;
+    }
+
+    /**
+     * Get codigoSenasa
+     *
+     * @return string
+     */
+    public function getCodigoSenasa()
+    {
+        return $this->codigoSenasa;
+    }
+
+    /**
+     * Set nombreSenasa
+     *
+     * @param string $nombreSenasa
+     *
+     * @return Articulo
+     */
+    public function setNombreSenasa($nombreSenasa)
+    {
+        $this->nombreSenasa = $nombreSenasa;
+
+        return $this;
+    }
+
+    /**
+     * Get nombreSenasa
+     *
+     * @return string
+     */
+    public function getNombreSenasa()
+    {
+        return $this->nombreSenasa;
     }
 }

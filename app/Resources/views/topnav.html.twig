@@ -7,7 +7,7 @@
     <ul class="navbar-nav mr-auto">
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle active btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Configuracion Sistema
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -50,13 +50,18 @@
                       <li><a class="dropdown-item" href="{{ path('bd_add_entity_ciudad') }}">Nueva Ciudad</a></li>
                 </ul>
               </li>
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
+                <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{{ path('bd_add_informe_proceso') }}">Nueva definicion de informe</a></li>
+                </ul>
+              </li>
             </ul>
           </li>
 
         </ul>
       </li>
-        <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Faena Diaria
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -75,8 +80,27 @@
           </li>
         </ul>
       </li>
-        <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Sistema SIGCER
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                  <li><a class="dropdown-item" href="{{ path('sigcer_add_grupos_solicitudes') }}">Nuevo grupo solicitud</a></li>
+                  <li><a class="dropdown-item" href="{{ path('bd_view_faena') }}">Ver Faenas</a></li>
+
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{ path('sigcer_add_pais_origen') }}">Alta Pais Origen</a></li>
+              <li><a class="dropdown-item" href="{{ path('sigcer_add_envase') }}">Alta Envase</a></li>
+              <li><a class="dropdown-item" href="{{ path('sigcer_add_cliente') }}">Alta Cliente</a></li>
+              <li><a class="dropdown-item" href="{{ path('sigcer_add_camion') }}">Alta Camion</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Informes
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">

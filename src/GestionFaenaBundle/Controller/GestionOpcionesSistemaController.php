@@ -11,9 +11,55 @@ use GestionFaenaBundle\Entity\gestionBD\Granja;
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
 use GestionFaenaBundle\Entity\gestionBD\Ciudad;
 use GestionFaenaBundle\Entity\gestionBD\Cargador;
+use GestionFaenaBundle\Entity\opciones\InformeProceso;
 
 class GestionOpcionesSistemaController extends Controller
 {
+
+    /**
+     * @Route("/addinfproc", name="bd_add_informe_proceso")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addInformeProceso()
+    {
+       // $em = $this->getDoctrine()->getManager();
+       // $granjas = $em->getRepository(Granja::class)->findAll();
+
+        $informe = new InformeProceso();
+        $formInf = $this->createForm(\GestionFaenaBundle\Form\opciones\InformeProcesoType::class, 
+                                      $informe, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('bd_add_informe_proceso_procesar')]);
+        return $this->render('@GestionFaena/options/abmInforme.html.twig', 
+                            ['form' => $formInf->createView()]);
+    }
+
+    /**
+     * @Route("/iprproc", name="bd_add_informe_proceso_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarFormArtAtrConcepto(Request $request)
+    {
+        $informe = new InformeProceso();
+        $form = $this->createForm(\GestionFaenaBundle\Form\opciones\InformeProcesoType::class, 
+                                      $informe, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('bd_add_informe_proceso_procesar')]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($informe);
+            $entityManager->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Configuracion almacenada exitosamente!'
+                            );
+            return $this->redirectToRoute('bd_add_informe_proceso');
+        }
+        return $this->render('@GestionFaena/options/abmInforme.html.twig', 
+                            ['form' => $form->createView()]);
+    }
 
 ///////////////////////MANEJO ENTIDADES EXTERNAS /////////////////////////////////////////////////////
     /**

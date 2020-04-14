@@ -20,6 +20,7 @@ class AppKernel extends Kernel
             new AppBundle\AppBundle(),
             new GestionFaenaBundle\GestionFaenaBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
+            new GestionSigcerBundle\GestionSigcerBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

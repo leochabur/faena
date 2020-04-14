@@ -20,7 +20,7 @@
 
 				<div class="dropdown-menu">
 				  <a class="dropdown-item" target="_blanck" href="{{ path('planilla_control_antemorten', {fanDay : faena.id, procFanDay : p.id}) }}">Planilla Control Ante-Mortem</a>
-				  <a class="dropdown-item" href="#">Informe I</a>
+				  <a class="dropdown-item" href="{{ path('informe_ingresos_egresos', {fd: faena.id, pfd: p.id}) }}">Informe I</a>
 				  <a class="dropdown-item" href="#">Iforme II</a>
 				  <div class="dropdown-divider"></div>
 				  <a class="dropdown-item" href="#">Informe III</a>

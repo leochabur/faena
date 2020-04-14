@@ -1,0 +1,192 @@
+<?php
+
+namespace GestionSigcerBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * GrupoSolicitud
+ *
+ * @ORM\Table(name="sig_grpo_solic")
+ * @ORM\Entity(repositoryClass="GestionSigcerBundle\Repository\GrupoSolicitudRepository")
+ */
+class GrupoSolicitud
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="version", type="string", length=255)
+     */
+    private $version;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="codigoEstablecimiento", type="string", length=255)
+     */
+    private $codigoEstablecimiento;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="roleEstablecimiento", type="string", length=255)
+     */
+    private $roleEstablecimiento;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fecha", type="datetime")
+     */
+    private $fecha;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\PaisDestino") 
+    * @ORM\JoinColumn(name="id_pais_ddestino", referencedColumnName="id")
+    */      
+    private $paisDestino;
+
+    /**
+     * @ORM\OneToMany(targetEntity="TropaSolicitud", mappedBy="grupoSolicitud")
+     */
+    private $tropas;
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set version
+     *
+     * @param string $version
+     *
+     * @return GrupoSolicitud
+     */
+    public function setVersion($version)
+    {
+        $this->version = $version;
+
+        return $this;
+    }
+
+    /**
+     * Get version
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+    /**
+     * Set codigoEstablecimiento
+     *
+     * @param string $codigoEstablecimiento
+     *
+     * @return GrupoSolicitud
+     */
+    public function setCodigoEstablecimiento($codigoEstablecimiento)
+    {
+        $this->codigoEstablecimiento = $codigoEstablecimiento;
+
+        return $this;
+    }
+
+    /**
+     * Get codigoEstablecimiento
+     *
+     * @return string
+     */
+    public function getCodigoEstablecimiento()
+    {
+        return $this->codigoEstablecimiento;
+    }
+
+    /**
+     * Set roleEstablecimiento
+     *
+     * @param string $roleEstablecimiento
+     *
+     * @return GrupoSolicitud
+     */
+    public function setRoleEstablecimiento($roleEstablecimiento)
+    {
+        $this->roleEstablecimiento = $roleEstablecimiento;
+
+        return $this;
+    }
+
+    /**
+     * Get roleEstablecimiento
+     *
+     * @return string
+     */
+    public function getRoleEstablecimiento()
+    {
+        return $this->roleEstablecimiento;
+    }
+
+    /**
+     * Set fecha
+     *
+     * @param \DateTime $fecha
+     *
+     * @return GrupoSolicitud
+     */
+    public function setFecha($fecha)
+    {
+        $this->fecha = $fecha;
+
+        return $this;
+    }
+
+    /**
+     * Get fecha
+     *
+     * @return \DateTime
+     */
+    public function getFecha()
+    {
+        return $this->fecha;
+    }
+
+    /**
+     * Set paisDestino
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\PaisDestino $paisDestino
+     *
+     * @return GrupoSolicitud
+     */
+    public function setPaisDestino(\GestionSigcerBundle\Entity\opciones\PaisDestino $paisDestino = null)
+    {
+        $this->paisDestino = $paisDestino;
+
+        return $this;
+    }
+
+    /**
+     * Get paisDestino
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\PaisDestino
+     */
+    public function getPaisDestino()
+    {
+        return $this->paisDestino;
+    }
+}

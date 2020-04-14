@@ -6,7 +6,8 @@
     "autoload": {
         "psr-4": {
             "AppBundle\\": "src/AppBundle",
-            "GestionFaenaBundle\\": "src/GestionFaenaBundle"
+            "GestionFaenaBundle\\": "src/GestionFaenaBundle",
+            "GestionSigcerBundle\\": "src/GestionSigcerBundle"
         },
         "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
     },

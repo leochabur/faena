@@ -197,6 +197,11 @@ abstract class MovimientoStock
         return $this->valores;
     }
 
+    public function setValores(\Doctrine\Common\Collections\ArrayCollection $valores)
+    {
+        $this->valores = $valores;
+    }
+
     public function getValorConAtributo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
     {
         foreach ($this->valores as $value) {

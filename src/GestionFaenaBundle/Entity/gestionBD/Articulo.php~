@@ -33,6 +33,20 @@ class Articulo
     private $nombre;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="codigoSenasa", type="string", length=255, nullable=true)
+     */
+    private $codigoSenasa;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nombreSenasa", type="string", length=255, nullable=true)
+     */
+    private $nombreSenasa;
+
+    /**
      * @ORM\OneToMany(targetEntity="ArticuloAtributoConcepto", mappedBy="articulo")
      */
     private $artsAtrConc;
@@ -74,5 +88,46 @@ class Articulo
     public function __toString()
     {
         return $this->nombre;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->artsAtrConc = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add artsAtrConc
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc
+     *
+     * @return Articulo
+     */
+    public function addArtsAtrConc(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc)
+    {
+        $this->artsAtrConc[] = $artsAtrConc;
+
+        return $this;
+    }
+
+    /**
+     * Remove artsAtrConc
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc
+     */
+    public function removeArtsAtrConc(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artsAtrConc)
+    {
+        $this->artsAtrConc->removeElement($artsAtrConc);
+    }
+
+    /**
+     * Get artsAtrConc
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getArtsAtrConc()
+    {
+        return $this->artsAtrConc;
     }
 }

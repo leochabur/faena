@@ -788,8 +788,17 @@ class GestionFaenaController extends Controller
         $movimiento = $em->find(MovimientoStock::class, $mov);
         $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
         $faena = $em->find(FaenaDiaria::class, $fanday);
+        $valores = $movimiento->getValores()->getIterator();
+        $valores->uasort( function ($a, $b) {
+                                                  if ($a->getAtributo()->getNumeroOrden() == $b->getAtributo()->getNumeroOrden()) {
+                                                      return 0;
+                                                  }
+                                                  return ($a->getAtributo()->getNumeroOrden() < $b->getAtributo()->getNumeroOrden()) ? -1 : 1;
+                                              });
+        $valores = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($valores));
+        $movimiento->setValores($valores);
         $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_edit_mov_stock_procesar', $faena);
-        return $this->render('@GestionFaena/faena/editMovStock.html.twig', array('faena' => $faena, 'fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));        
+        return $this->render('@GestionFaena/faena/editMovStock.html.twig', array('valores' => $valores, 'faena' => $faena, 'fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));        
     }
 
     /**

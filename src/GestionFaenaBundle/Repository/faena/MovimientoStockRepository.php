@@ -21,6 +21,28 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
             		->getResult();
     }
 
+    public function getAllEntradasStockProceso(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso,
+                                               \GestionFaenaBundle\Entity\FaenaDiaria $faena,
+                                               \GestionFaenaBundle\Entity\opciones\InformeProceso $informe)
+    {
+        return $this->getEntityManager()
+                ->createQuery('SELECT e
+                               FROM GestionFaenaBundle:faena\EntradaStock e
+                               JOIN e.artProcFaena apf
+                               JOIN apf.concepto cmp
+                               WHERE e.procesoFnDay = :proceso AND
+                                     e.faenaDiaria = :faenaDiaria AND
+                                     e.visible = :visible AND
+                                     e.eliminado = :eliminado AND
+                                     cmp.concepto in (:conceptos)')
+                ->setParameter('proceso', $proceso)
+                ->setParameter('faenaDiaria', $faena)
+                ->setParameter('conceptos', $informe->getConceptos())
+                ->setParameter('visible', true)
+                ->setParameter('eliminado', false)
+                ->getResult();
+    }
+
     public function pesoPromedio($proceso, $articulo)
     {
         return $this->getEntityManager()

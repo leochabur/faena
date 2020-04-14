@@ -1,0 +1,36 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<div class="text-center">
+	<span class="h5 card-title">Faena:  {{ faena.fechaFaena | date('d/m/Y') }}</span>
+</div>
+<hr>
+
+	<table class="table table-striped table-bordered table-hover table-sm ">
+			<thead>
+				<tr>
+					<th rowspan="2">Granja</th>
+					<th rowspan="2">Galpon</th>
+					<th rowspan="2">O/C</th>
+					<th rowspan="2">Transp.</th>
+					<th rowspan="2">Aves</th>
+					<th rowspan="2">DT-e</th>
+					<th colspan="4">Pesos</th>
+				</tr>
+				<tr>
+					<th>Bruto</th>
+					<th>Tara</th>
+					<th>Neto</th>
+					<th>Prom.</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for mov in movimientos %}
+					<tr>
+						<td></td>
+					</tr>
+				{% endfor %}
+			</tbody>
+	</table>
+{% endblock fos_user_content %}

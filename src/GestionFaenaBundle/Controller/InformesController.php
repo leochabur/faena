@@ -56,6 +56,10 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use GestionFaenaBundle\Entity\opciones\InformeProceso;
+use GestionFaenaBundle\Entity\FaenaDiaria;
+use GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria;
+use GestionFaenaBundle\Entity\faena\MovimientoStock;
 
 class InformesController extends Controller
 {
@@ -85,7 +89,6 @@ class InformesController extends Controller
 
     private function getFormSelectProceso()
     {
-
         $form = $this->createFormBuilder()
                       ->add('proceso', 
                             EntityType::class, 
@@ -102,6 +105,22 @@ class InformesController extends Controller
                         ->add('cargar', SubmitType::class, ['label' => 'Cargar'])
                         ->getForm();
         return $form;
+    }
+
+    /**
+     * @Route("/informes/informe1/{fd}/{pfd}", name="informe_ingresos_egresos")
+
+     */
+    public function informeMovimientosAction($fd, $pfd)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $faenaDiaria = $em->find(FaenaDiaria::class, $fd);
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $pfd);
+        $informe = $em->find(InformeProceso::class, 1);
+        $repository = $em->getRepository(MovimientoStock::class);
+        $movimientos = $repository->getAllEntradasStockProceso($proceso, $faenaDiaria, $informe);
+        
+        return $this->render('@GestionFaena/informes/informeUno.html.twig', ['faena'=> $faenaDiaria, 'proceso' => $proceso, 'movimientos' => $movimientos]);
     }
 
 }
