@@ -10,4 +10,15 @@ namespace GestionSigcerBundle\Repository;
  */
 class SolicitudRepository extends \Doctrine\ORM\EntityRepository
 {
+	public function findSolicitudes(\GestionSigcerBundle\Entity\GrupoSolicitud $grupo,
+									\GestionSigcerBundle\Entity\opciones\Zona $zona) 
+	{ 
+	    return $this->createQueryBuilder('s')
+	    			->where('s.zona = :zona AND s.grupo = :grupo')
+	    			->setParameter('zona', $zona)
+	    			->setParameter('grupo', $grupo)
+			        ->addOrderBy('s.zona')
+			        ->getQuery()
+			        ->getResult(); 
+	} 
 }

@@ -75,6 +75,11 @@ class TropaSolicitud
     */      
     private $grupoSolicitud;
 
+    public function __toString()
+    {
+        return "Faena: ".$this->fechaFaena->format('d/m/Y')." - Vto: ".$this->fechaVto->format('d/m/Y');
+    }
+
     /**
      * Get id
      *

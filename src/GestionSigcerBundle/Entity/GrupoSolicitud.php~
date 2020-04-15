@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * GrupoSolicitud
  *
@@ -46,6 +46,7 @@ class GrupoSolicitud
      * @var \DateTime
      *
      * @ORM\Column(name="fecha", type="datetime")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $fecha;
 
@@ -61,6 +62,11 @@ class GrupoSolicitud
     private $tropas;
 
     /**
+     * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo")
+     */
+    private $solicitudes;
+
+    /**
      * Get id
      *
      * @return int
@@ -68,6 +74,11 @@ class GrupoSolicitud
     public function getId()
     {
         return $this->id;
+    }
+
+    public function __toString()
+    {
+        return $this->fecha->format('d/m/Y');
     }
 
     /**
@@ -188,5 +199,39 @@ class GrupoSolicitud
     public function getPaisDestino()
     {
         return $this->paisDestino;
+    }
+
+    /**
+     * Add tropa
+     *
+     * @param \GestionSigcerBundle\Entity\TropaSolicitud $tropa
+     *
+     * @return GrupoSolicitud
+     */
+    public function addTropa(\GestionSigcerBundle\Entity\TropaSolicitud $tropa)
+    {
+        $this->tropas[] = $tropa;
+
+        return $this;
+    }
+
+    /**
+     * Remove tropa
+     *
+     * @param \GestionSigcerBundle\Entity\TropaSolicitud $tropa
+     */
+    public function removeTropa(\GestionSigcerBundle\Entity\TropaSolicitud $tropa)
+    {
+        $this->tropas->removeElement($tropa);
+    }
+
+    /**
+     * Get tropas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTropas()
+    {
+        return $this->tropas;
     }
 }

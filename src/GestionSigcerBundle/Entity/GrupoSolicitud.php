@@ -62,6 +62,11 @@ class GrupoSolicitud
     private $tropas;
 
     /**
+     * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo")
+     */
+    private $solicitudes;
+
+    /**
      * Get id
      *
      * @return int
@@ -195,13 +200,6 @@ class GrupoSolicitud
     {
         return $this->paisDestino;
     }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->tropas = new \Doctrine\Common\Collections\ArrayCollection();
-    }
 
     /**
      * Add tropa
@@ -235,5 +233,47 @@ class GrupoSolicitud
     public function getTropas()
     {
         return $this->tropas;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->tropas = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->solicitudes = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add solicitude
+     *
+     * @param \GestionSigcerBundle\Entity\Solicitud $solicitude
+     *
+     * @return GrupoSolicitud
+     */
+    public function addSolicitude(\GestionSigcerBundle\Entity\Solicitud $solicitude)
+    {
+        $this->solicitudes[] = $solicitude;
+
+        return $this;
+    }
+
+    /**
+     * Remove solicitude
+     *
+     * @param \GestionSigcerBundle\Entity\Solicitud $solicitude
+     */
+    public function removeSolicitude(\GestionSigcerBundle\Entity\Solicitud $solicitude)
+    {
+        $this->solicitudes->removeElement($solicitude);
+    }
+
+    /**
+     * Get solicitudes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSolicitudes()
+    {
+        return $this->solicitudes;
     }
 }

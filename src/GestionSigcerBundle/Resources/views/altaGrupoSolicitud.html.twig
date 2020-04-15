@@ -50,6 +50,7 @@
             <th>Fecha</th>
             <th>Establecimiento</th>
             <th>Role Establecimiento</th>
+            <th>Cant. Solic.</th>
             <th></th>
           </tr>
         </thead>
@@ -60,12 +61,13 @@
                 <td>{{ g.fecha|date('d/m/Y')}}</td>
                 <td>{{ g.codigoEstablecimiento }}</td>
                 <td>{{ g.roleEstablecimiento }}</td>
+                <td>{{ g.solicitudes|length }}</td>
                 <td>
               <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
                 <div class="dropdown-menu">
-                  <a class="dropdown-item"  href="{{ path('sigcer_add_tropa_grupo_solicitud', { gpo : g.id}) }}">
-                      Agregar Tropa
-                    </a>
+                  <a class="dropdown-item"  href="{{ path('sigcer_add_tropa_grupo_solicitud', { gpo : g.id}) }}">Agregar Tropa</a>
+                  <a class="dropdown-item"  href="{{ path('sigcer_add_solictud_a_grupo', { gpo : g.id}) }}">Gestionar solicitudes</a>
+                  <a class="dropdown-item"  href="{{ path('sigcer_modificacion_multiple', { gpo : g.id}) }}">Modificar Multiples Solicitudes</a>
                 </div>
                 </td>
             </tr>

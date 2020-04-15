@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * DetalleSolicitud
  *
@@ -24,48 +24,46 @@ class DetalleSolicitud
     /**
      * @var float
      *
-     * @ORM\Column(name="pesoNeto", type="float", nullable=true)
+     * @ORM\Column(name="pesoNeto", type="float")
      */
     private $pesoNeto;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="pesoBruto", type="float", nullable=true)
+     * @ORM\Column(name="pesoBruto", type="float")
      */
     private $pesoBruto;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="cantidad", type="float", nullable=true)
+     * @ORM\Column(name="cantidad", type="float")
      */
     private $cantidad;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="certificadoOrigen", type="string", length=255, nullable=true)
+     * @ORM\Column(name="certificadoOrigen", type="string", length=255)
      */
     private $certificadoOrigen;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo") 
     * @ORM\JoinColumn(name="id_art", referencedColumnName="id")
-    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $articulo;
 
     /**
     * @ORM\ManyToOne(targetEntity="TropaSolicitud") 
-    * @ORM\JoinColumn(name="id_tropa", referencedColumnName="id", nullable=true)
+    * @ORM\JoinColumn(name="id_tropa", referencedColumnName="id")
     */      
     private $tropa;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Envase") 
     * @ORM\JoinColumn(name="id_env_primario", referencedColumnName="id")
-    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $envasePrimario;
 

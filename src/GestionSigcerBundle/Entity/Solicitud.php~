@@ -109,7 +109,7 @@ class Solicitud
     private $camion;
 
     /**
-     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="solicitud", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="solicitud")
      */
     private $detalles;
 
@@ -464,29 +464,5 @@ class Solicitud
     public function getZona()
     {
         return $this->zona;
-    }
-
-    /**
-     * Set precintos
-     *
-     * @param integer $precintos
-     *
-     * @return Solicitud
-     */
-    public function setPrecintos($precintos)
-    {
-        $this->precintos = $precintos;
-
-        return $this;
-    }
-
-    /**
-     * Get precintos
-     *
-     * @return integer
-     */
-    public function getPrecintos()
-    {
-        return $this->precintos;
     }
 }

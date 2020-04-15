@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Camion
  *
- * @ORM\Table(name="opciones_camion")
+ * @ORM\Table(name="sig_cmion_rpto")
  * @ORM\Entity(repositoryClass="GestionSigcerBundle\Repository\opciones\CamionRepository")
  */
 class Camion
@@ -49,6 +49,10 @@ class Camion
      */
     private $senasa;
 
+    public function __toString()
+    {
+        return $this->patente;
+    }
 
     /**
      * Get id

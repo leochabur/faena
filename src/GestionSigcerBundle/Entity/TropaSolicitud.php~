@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * TropaSolicitud
  *
- * @ORM\Table(name="tropa_solicitud")
+ * @ORM\Table(name="sig_trp_sol")
  * @ORM\Entity(repositoryClass="GestionSigcerBundle\Repository\TropaSolicitudRepository")
  */
 class TropaSolicitud

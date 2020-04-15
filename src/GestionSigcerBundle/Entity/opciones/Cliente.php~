@@ -49,10 +49,6 @@ class Cliente
      */
     private $telefono;
 
-    public function __toString()
-    {
-        return $this->razonSocial;
-    }
 
     /**
      * Get id

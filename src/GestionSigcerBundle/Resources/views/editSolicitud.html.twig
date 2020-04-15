@@ -1,0 +1,93 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Modificar Solicitud</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+
+<div class="">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-row">
+      <div class="col-4">
+        {{ form_label(form.grupo, 'Solicitudes de fecha:') }}
+        {{ form_widget(form.grupo) }}
+      </div>
+    </div>
+    <br>
+    <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.zona) }}
+        {{ form_widget(form.zona) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.cliente) }}
+        {{ form_widget(form.cliente) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.camion) }}
+        {{ form_widget(form.camion) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.lugarDestino) }}
+        {{ form_widget(form.lugarDestino) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.precintos) }}
+        {{ form_widget(form.precintos) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.precintoSenasa) }}
+        {{ form_widget(form.precintoSenasa) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.precintoAduana) }}
+        {{ form_widget(form.precintoAduana) }}
+      </div>
+
+      <div class="col-3">
+        {{ form_label(form.remitoNumero) }}
+        {{ form_widget(form.remitoNumero) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.temperatura) }}
+        {{ form_widget(form.temperatura) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.termoTemperatura, 'Tº termo-proceso') }}
+        {{ form_widget(form.termoTemperatura) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.termoTiempo,' Tpo. termo-proceso') }}
+        {{ form_widget(form.termoTiempo) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-6">
+        {{ form_label(form.observaciones) }}
+        {{ form_widget(form.observaciones) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col">
+        {{ form_widget(form.guardar) }}
+      </div>
+    </div>
+	{{ form_end(form) }}
+    <br>
+</div>
+    <hr>
+    <div>
+        <a href="{{ path('sigcer_add_grupos_solicitudes') }}" class="btn btn-success"><< Volver</a>
+    </div>
+{% endblock fos_user_content %}
