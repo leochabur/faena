@@ -53,6 +53,7 @@ class GrupoSolicitud
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\PaisDestino") 
     * @ORM\JoinColumn(name="id_pais_ddestino", referencedColumnName="id")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $paisDestino;
 
