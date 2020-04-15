@@ -226,6 +226,70 @@ class GestionSolicitudesController extends Controller
 
   ////////////////Agregar Articulos a Solicitudes//////////////////////////////////
     /**
+     * @Route("/delart/{art}", name="sigcer_delete_detalle")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteDetalleArticulo($art)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $detalle = $em->find(DetalleSolicitud::class, $art);
+        $sol = $detalle->getSolicitud()->getId();
+        $em->remove($detalle);
+        $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Articulo eliminado exitosamente del detalle!'
+                            );
+        return $this->redirectToRoute('sigcer_add_articulos_a_solicitud', ['sol' => $sol]);
+    }
+
+    /**
+     * @Route("/editarsol/{art}", name="sigcer_add_articulos_editar")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarArticuloDetalle($art)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $detalle = $em->find(DetalleSolicitud::class, $art);
+
+        $formInf = $this->createForm(\GestionSigcerBundle\Form\DetalleSolicitudType::class, 
+                                      $detalle, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_add_articulos_editar_procesar', array('art' => $art))]);
+        return $this->render('@GestionSigcer/editarArticulo.html.twig', 
+                            ['form' => $formInf->createView(), 'sol' => $detalle->getSolicitud()]);
+    }
+
+    /**
+     * @Route("/editarsolproc/{art}", name="sigcer_add_articulos_editar_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarArticuloDetalleProcesar($art, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $detalle = $em->find(DetalleSolicitud::class, $art);
+
+        $form = $this->createForm(\GestionSigcerBundle\Form\DetalleSolicitudType::class, 
+                                      $detalle, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_add_articulos_editar_procesar', array('art' => $art))]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Producto modificado exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_articulos_a_solicitud', ['sol' => $detalle->getSolicitud()->getId()]);
+        }
+        return $this->render('@GestionSigcer/editarArticulo.html.twig', 
+                            ['form' => $form->createView(), 'sol' => $detalle->getSolicitud()]);
+    }
+
+
+
+    /**
      * @Route("/addart/{sol}", name="sigcer_add_articulos_a_solicitud")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */

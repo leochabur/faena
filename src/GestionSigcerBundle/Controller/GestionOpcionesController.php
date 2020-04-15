@@ -11,12 +11,61 @@ use GestionSigcerBundle\Entity\opciones\PaisDestino;
 use GestionSigcerBundle\Entity\opciones\Envase;
 use GestionSigcerBundle\Entity\opciones\Cliente;
 use GestionSigcerBundle\Entity\opciones\Camion;
+use GestionSigcerBundle\Entity\opciones\Producto;
 /**
  * @Route("/sigcer")
  */
 
 class GestionOpcionesController extends Controller
 {
+
+  ///////////////Producto//////////////////////////////////
+    /**
+     * @Route("/addprd", name="sigcer_add_producto")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addProducto()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $productos = $em->getRepository(Producto::class)->findAll();
+
+        $producto = new Producto();
+        $formInf = $this->createForm(\GestionSigcerBundle\Form\opciones\ProductoType::class, 
+                                      $producto, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_add_producto_procesar')]);
+        return $this->render('@GestionSigcer/opciones/abmProducto.html.twig', 
+                            ['form' => $formInf->createView(), 'productos' => $productos]);
+    }
+
+    /**
+     * @Route("/addprdprc", name="sigcer_add_producto_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarProducto(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $productos = $em->getRepository(Producto::class)->findAll();
+
+        $producto = new Producto();
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ProductoType::class, 
+                                      $producto, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_add_producto_procesar')]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->persist($producto);
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Producto almacenado exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_producto');
+        }
+        return $this->render('@GestionSigcer/opciones/abmProducto.html.twig', 
+                            ['form' => $form->createView(), 'productos' => $productos]);
+    }
 
 	////////////////Pais Origen//////////////////////////////////
     /**

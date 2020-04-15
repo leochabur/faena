@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Cliente
  *
@@ -25,6 +25,7 @@ class Cliente
      * @var string
      *
      * @ORM\Column(name="razonSocial", type="string", length=255)
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $razonSocial;
 

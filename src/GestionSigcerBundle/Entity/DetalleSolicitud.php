@@ -50,7 +50,7 @@ class DetalleSolicitud
     private $certificadoOrigen;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo") 
+    * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Producto") 
     * @ORM\JoinColumn(name="id_art", referencedColumnName="id")
     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
@@ -188,30 +188,6 @@ class DetalleSolicitud
     }
 
     /**
-     * Set articulo
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo
-     *
-     * @return DetalleSolicitud
-     */
-    public function setArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo = null)
-    {
-        $this->articulo = $articulo;
-
-        return $this;
-    }
-
-    /**
-     * Get articulo
-     *
-     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
-     */
-    public function getArticulo()
-    {
-        return $this->articulo;
-    }
-
-    /**
      * Set tropa
      *
      * @param \GestionSigcerBundle\Entity\TropaSolicitud $tropa
@@ -305,5 +281,29 @@ class DetalleSolicitud
     public function getSolicitud()
     {
         return $this->solicitud;
+    }
+
+    /**
+     * Set articulo
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Producto $articulo
+     *
+     * @return DetalleSolicitud
+     */
+    public function setArticulo(\GestionSigcerBundle\Entity\opciones\Producto $articulo = null)
+    {
+        $this->articulo = $articulo;
+
+        return $this;
+    }
+
+    /**
+     * Get articulo
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\Producto
+     */
+    public function getArticulo()
+    {
+        return $this->articulo;
     }
 }

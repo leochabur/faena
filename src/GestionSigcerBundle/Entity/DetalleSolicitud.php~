@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DetalleSolicitud
  *
@@ -24,46 +24,48 @@ class DetalleSolicitud
     /**
      * @var float
      *
-     * @ORM\Column(name="pesoNeto", type="float")
+     * @ORM\Column(name="pesoNeto", type="float", nullable=true)
      */
     private $pesoNeto;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="pesoBruto", type="float")
+     * @ORM\Column(name="pesoBruto", type="float", nullable=true)
      */
     private $pesoBruto;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="cantidad", type="float")
+     * @ORM\Column(name="cantidad", type="float", nullable=true)
      */
     private $cantidad;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="certificadoOrigen", type="string", length=255)
+     * @ORM\Column(name="certificadoOrigen", type="string", length=255, nullable=true)
      */
     private $certificadoOrigen;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo") 
+    * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Producto") 
     * @ORM\JoinColumn(name="id_art", referencedColumnName="id")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $articulo;
 
     /**
     * @ORM\ManyToOne(targetEntity="TropaSolicitud") 
-    * @ORM\JoinColumn(name="id_tropa", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_tropa", referencedColumnName="id", nullable=true)
     */      
     private $tropa;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Envase") 
     * @ORM\JoinColumn(name="id_env_primario", referencedColumnName="id")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $envasePrimario;
 
@@ -183,30 +185,6 @@ class DetalleSolicitud
     public function getCertificadoOrigen()
     {
         return $this->certificadoOrigen;
-    }
-
-    /**
-     * Set articulo
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo
-     *
-     * @return DetalleSolicitud
-     */
-    public function setArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo = null)
-    {
-        $this->articulo = $articulo;
-
-        return $this;
-    }
-
-    /**
-     * Get articulo
-     *
-     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
-     */
-    public function getArticulo()
-    {
-        return $this->articulo;
     }
 
     /**

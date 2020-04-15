@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * PaisDestino
  *
@@ -25,6 +25,7 @@ class PaisDestino
      * @var string
      *
      * @ORM\Column(name="pais", type="string", length=255, unique=true)
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $pais;
 
@@ -32,6 +33,7 @@ class PaisDestino
      * @var int
      *
      * @ORM\Column(name="codigo", type="integer", unique=true)
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $codigo;
 
