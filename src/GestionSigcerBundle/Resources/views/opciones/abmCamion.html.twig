@@ -13,12 +13,6 @@
 <div class="">
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <div class="form-row">
-      <div class="col-4">
-        {{ form_label(form.zona) }}
-        {{ form_widget(form.zona) }}
-      </div>
-    </div>
-    <div class="form-row">
       <div class="col-3">
         {{ form_label(form.tipo) }}
         {{ form_widget(form.tipo) }}
@@ -51,7 +45,6 @@
             <th>#</th>
             <th>Patente</th>
             <th>SENASA</th>
-            <th>Zona</th>
             <th>Precintos</th>
           </tr>
         </thead>
@@ -61,7 +54,6 @@
                 <td>{{ loop.index }}</td>
                 <td>{{ p.patente }}</td>
                 <td>{{ p.senasa }}</td>
-                <td>{{ p.zona }}</td>
                 <td>{{ p.cantPrecintos }}</td>
                 <td class="text-center"><a href="{{ path('sigcer_editar_camion', {cmo : p.id}) }}" class="btn btn-sm btn-success">Modificar</a></td>
             </tr>

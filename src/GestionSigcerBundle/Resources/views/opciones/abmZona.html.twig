@@ -27,6 +27,10 @@
         {{ form_label(form.zona, 'Localidad') }}
         {{ form_widget(form.zona) }}
       </div>
+      <div class="col-3">
+        {{ form_label(form.camion) }}
+        {{ form_widget(form.camion) }}
+      </div>
     </div>
     <div class="form-row">
       <div class="col">
@@ -44,7 +48,8 @@
             <th>Region</th>
             <th>Codigo</th>
             <th>Zona</th>
-            <td></td>
+            <td>Camion</td>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -55,6 +60,7 @@
                     <td>{{ p.region }}</td>
                     <td>{{ p.codigo }}</td>
                     <td>{{ p.zona|upper }}</td>
+                    <td>{{ p.camion }}</td>
                     <td class="text-center"><a href="{{ path('sigcer_editar_zona', {zna : p.id}) }}" class="btn btn-sm btn-success">Modificar</a></td>
                 </tr>
             </tr>

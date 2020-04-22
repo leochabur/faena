@@ -44,10 +44,16 @@ class Zona
     */      
     private $region;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Camion")
+     * @ORM\JoinColumn(name="id_camion", referencedColumnName="id")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $camion;
 
     public function __toString()
     {
-        return $this->zona;
+        return $this->codigo." - ".strtoupper($this->zona);
     }
     /**
      * Get id

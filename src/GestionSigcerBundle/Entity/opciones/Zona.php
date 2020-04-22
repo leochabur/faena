@@ -44,6 +44,12 @@ class Zona
     */      
     private $region;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Camion")
+     * @ORM\JoinColumn(name="id_camion", referencedColumnName="id")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $camion;
 
     public function __toString()
     {
@@ -153,5 +159,29 @@ class Zona
     public function getRegion()
     {
         return $this->region;
+    }
+
+    /**
+     * Set camion
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Camion $camion
+     *
+     * @return Zona
+     */
+    public function setCamion(\GestionSigcerBundle\Entity\opciones\Camion $camion = null)
+    {
+        $this->camion = $camion;
+
+        return $this;
+    }
+
+    /**
+     * Get camion
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\Camion
+     */
+    public function getCamion()
+    {
+        return $this->camion;
     }
 }

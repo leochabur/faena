@@ -51,13 +51,6 @@ class Camion
      */
     private $cantPrecintos;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Zona")
-     * @ORM\JoinColumn(name="id_zona", referencedColumnName="id")
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
-     */
-    private $zona;
-
 
 
     public function __toString()
@@ -145,30 +138,6 @@ class Camion
     public function getTipo()
     {
         return $this->tipo;
-    }
-
-    /**
-     * Set zona
-     *
-     * @param \GestionSigcerBundle\Entity\opciones\Zona $zona
-     *
-     * @return Camion
-     */
-    public function setZona(\GestionSigcerBundle\Entity\opciones\Zona $zona = null)
-    {
-        $this->zona = $zona;
-
-        return $this;
-    }
-
-    /**
-     * Get zona
-     *
-     * @return \GestionSigcerBundle\Entity\opciones\Zona
-     */
-    public function getZona()
-    {
-        return $this->zona;
     }
 
     /**

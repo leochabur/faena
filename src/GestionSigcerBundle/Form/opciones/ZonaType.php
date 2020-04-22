@@ -17,6 +17,7 @@ class ZonaType extends AbstractType
         $builder->add('codigo')
                 ->add('zona')
                 ->add('region')
+                ->add('camion')
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

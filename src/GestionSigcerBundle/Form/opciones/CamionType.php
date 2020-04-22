@@ -21,7 +21,7 @@ class CamionType extends AbstractType
                                                                         'MARITIMO' => 'MA',
                                                                         'AEREO' => 'AE',
                                                                     ],
-                                                                ])->add('zona');
+                                                                ]);
     }/**
      * {@inheritdoc}
      */
