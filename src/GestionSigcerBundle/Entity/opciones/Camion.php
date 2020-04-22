@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Camion
  *
@@ -24,13 +24,6 @@ class Camion
     /**
      * @var string
      *
-     * @ORM\Column(name="titular", type="string", length=255)
-     */
-    private $titular;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="tipo", type="string", length=255)
      */
     private $tipo;
@@ -39,6 +32,7 @@ class Camion
      * @var string
      *
      * @ORM\Column(name="patente", type="string", length=255)
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $patente;
 
@@ -46,12 +40,21 @@ class Camion
      * @var string
      *
      * @ORM\Column(name="senasa", type="string", length=255)
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $senasa;
 
     /**
-     * @ORM\OneToOne(targetEntity="Zona", inversedBy="camion")
+     *
+     * @ORM\Column(name="precintos", type="integer")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $cantPrecintos;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Zona")
      * @ORM\JoinColumn(name="id_zona", referencedColumnName="id")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $zona;
 
@@ -70,30 +73,6 @@ class Camion
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set titular
-     *
-     * @param string $titular
-     *
-     * @return Camion
-     */
-    public function setTitular($titular)
-    {
-        $this->titular = $titular;
-
-        return $this;
-    }
-
-    /**
-     * Get titular
-     *
-     * @return string
-     */
-    public function getTitular()
-    {
-        return $this->titular;
     }
 
     /**
@@ -190,5 +169,29 @@ class Camion
     public function getZona()
     {
         return $this->zona;
+    }
+
+    /**
+     * Set cantPrecintos
+     *
+     * @param integer $cantPrecintos
+     *
+     * @return Camion
+     */
+    public function setCantPrecintos($cantPrecintos)
+    {
+        $this->cantPrecintos = $cantPrecintos;
+
+        return $this;
+    }
+
+    /**
+     * Get cantPrecintos
+     *
+     * @return integer
+     */
+    public function getCantPrecintos()
+    {
+        return $this->cantPrecintos;
     }
 }

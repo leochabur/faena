@@ -30,13 +30,6 @@ class Zona
     private $codigo;
 
     /**
-     *
-     * @ORM\Column(name="precintos", type="integer")
-    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
-     */
-    private $cantPrecintos;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="zona", type="string", length=255)
@@ -51,16 +44,10 @@ class Zona
     */      
     private $region;
 
-    /**
-     * @ORM\OneToOne(targetEntity="Camion", mappedBy="zona")
-* @Assert\NotNull(message="El campo no puede permanecer en blanco!")
-     */
-    private $camion;
-
 
     public function __toString()
     {
-        return $this->zona;
+        return $this->codigo." - ".strtoupper($this->zona);
     }
     /**
      * Get id
@@ -166,29 +153,5 @@ class Zona
     public function getRegion()
     {
         return $this->region;
-    }
-
-    /**
-     * Set camion
-     *
-     * @param \GestionSigcerBundle\Entity\opciones\Camion $camion
-     *
-     * @return Zona
-     */
-    public function setCamion(\GestionSigcerBundle\Entity\opciones\Camion $camion = null)
-    {
-        $this->camion = $camion;
-
-        return $this;
-    }
-
-    /**
-     * Get camion
-     *
-     * @return \GestionSigcerBundle\Entity\opciones\Camion
-     */
-    public function getCamion()
-    {
-        return $this->camion;
     }
 }

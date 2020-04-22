@@ -15,11 +15,8 @@ class ZonaType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('codigo')
-                ->add('cantPrecintos')
                 ->add('zona')
                 ->add('region')
-                ->add('region')
-                ->add('camion')
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

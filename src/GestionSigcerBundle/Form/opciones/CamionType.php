@@ -15,7 +15,7 @@ class CamionType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('titular')->add('patente')->add('senasa')->add('guardar', SubmitType::class)->add('tipo', ChoiceType::class, [
+        $builder->add('cantPrecintos')->add('patente')->add('senasa')->add('guardar', SubmitType::class)->add('tipo', ChoiceType::class, [
                                                                     'choices'  => [
                                                                         'TERRESTRE' => 'TE',
                                                                         'MARITIMO' => 'MA',

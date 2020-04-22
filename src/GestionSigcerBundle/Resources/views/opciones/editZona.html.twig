@@ -1,0 +1,32 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Modificar Zona</span>
+<hr>
+<div class="">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.region) }}
+        {{ form_widget(form.region) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.codigo) }}
+        {{ form_widget(form.codigo) }}
+      </div>
+      <div class="col-3">
+        {{ form_label(form.zona, 'Localidad') }}
+        {{ form_widget(form.zona) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col">
+        {{ form_widget(form.guardar) }}
+      </div>
+    </div>
+	{{ form_end(form) }}
+</div>
+{% endblock fos_user_content %}

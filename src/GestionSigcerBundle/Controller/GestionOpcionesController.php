@@ -23,6 +23,50 @@ class GestionOpcionesController extends Controller
 
   ///////////////ZONA//////////////////////////////////
     /**
+     * @Route("/editzna/{zna}", name="sigcer_editar_zona")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editZona($zna)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $zona = $em->find(Zona::class, $zna);
+
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ZonaType::class, 
+                                      $zona, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_zona_procesar', ['zna' => $zona->getId()])]);
+        return $this->render('@GestionSigcer/opciones/editZona.html.twig', 
+                            ['form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/editznaproc/{zna}", name="sigcer_editar_zona_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarEditZona($zna, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $zona = $em->find(Zona::class, $zna);
+
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ZonaType::class, 
+                                      $zona, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_zona_procesar', ['zna' => $zona->getId()])]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Zona modificada exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_zona');
+        }
+        return $this->render('@GestionSigcer/opciones/editZona.html.twig', 
+                            ['form' => $form->createView()]);
+    }
+
+    /**
      * @Route("/addzna", name="sigcer_add_zona")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
@@ -265,6 +309,50 @@ class GestionOpcionesController extends Controller
     }
 
     ////////////////////////////Camion/////////////////////////////////////////////
+    /**
+     * @Route("/editcmo/{cmo}", name="sigcer_editar_camion")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarCamion($cmo)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $camion = $em->find(Camion::class, $cmo);
+
+        $formInf = $this->createForm(\GestionSigcerBundle\Form\opciones\CamionType::class, 
+                                      $camion, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_camion_editar', ['cmo' => $camion->getId()])]);
+        return $this->render('@GestionSigcer/opciones/editCamion.html.twig', 
+                            ['form' => $formInf->createView()]);
+    }
+
+    /**
+     * @Route("/editcmoproc/{cmo}", name="sigcer_editar_camion_editar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarEditarCamion($cmo, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $camion = $em->find(Camion::class, $cmo);
+
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\CamionType::class, 
+                                      $camion, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_camion_editar', ['cmo' => $camion->getId()])]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Camion modificado exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_camion');
+        }
+        return $this->render('@GestionSigcer/opciones/editCamion.html.twig', 
+                            ['form' => $form->createView()]);
+    }
+
     /**
      * @Route("/addcmo", name="sigcer_add_camion")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
