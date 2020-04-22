@@ -114,6 +114,50 @@ class GestionOpcionesController extends Controller
     }
   ///////////////Producto//////////////////////////////////
     /**
+     * @Route("/editprod/{prod}", name="sigcer_editar_producto")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarProducto($prod)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $producto = $em->find(Producto::class, $prod);
+
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ProductoType::class, 
+                                      $producto, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_producto_procesar', ['prod' => $producto->getId()])]);
+        return $this->render('@GestionSigcer/opciones/editProducto.html.twig', 
+                            ['form' => $form->createView()]);
+    }
+    /**
+     * @Route("/editprodproc/{prod}", name="sigcer_editar_producto_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarEditarProducto($prod, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $producto = $em->find(Producto::class, $prod);
+
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ProductoType::class, 
+                                      $producto, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_producto_procesar', ['prod' => $producto->getId()])]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Producto modificado exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_producto');
+        }
+        return $this->render('@GestionSigcer/opciones/editProducto.html.twig', 
+                            ['form' => $form->createView()]);
+    }
+
+
+    /**
      * @Route("/addprd", name="sigcer_add_producto")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */

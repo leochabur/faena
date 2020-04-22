@@ -59,6 +59,18 @@ class Producto
     */      
     private $envaseSecundario;
 
+    /**
+    * @ORM\Column(name="ajusteBruto", type="float")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $ajusteBruto;
+
+    /**
+    * @ORM\Column(name="ajusteNeto", type="float")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $ajusteNeto;
+    
 
     public function __toString()
     {

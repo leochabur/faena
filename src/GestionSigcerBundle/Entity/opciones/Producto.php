@@ -59,6 +59,18 @@ class Producto
     */      
     private $envaseSecundario;
 
+    /**
+    * @ORM\Column(name="ajusteBruto", type="float")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $ajusteBruto;
+
+    /**
+    * @ORM\Column(name="ajusteNeto", type="float")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $ajusteNeto;
+    
 
     public function __toString()
     {
@@ -193,5 +205,53 @@ class Producto
     public function getEnvaseSecundario()
     {
         return $this->envaseSecundario;
+    }
+
+    /**
+     * Set ajusteBruto
+     *
+     * @param float $ajusteBruto
+     *
+     * @return Producto
+     */
+    public function setAjusteBruto($ajusteBruto)
+    {
+        $this->ajusteBruto = $ajusteBruto;
+
+        return $this;
+    }
+
+    /**
+     * Get ajusteBruto
+     *
+     * @return float
+     */
+    public function getAjusteBruto()
+    {
+        return $this->ajusteBruto;
+    }
+
+    /**
+     * Set ajusteNeto
+     *
+     * @param float $ajusteNeto
+     *
+     * @return Producto
+     */
+    public function setAjusteNeto($ajusteNeto)
+    {
+        $this->ajusteNeto = $ajusteNeto;
+
+        return $this;
+    }
+
+    /**
+     * Get ajusteNeto
+     *
+     * @return float
+     */
+    public function getAjusteNeto()
+    {
+        return $this->ajusteNeto;
     }
 }

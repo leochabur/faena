@@ -2,14 +2,8 @@
 {% block fos_user_content %}
 <br>
 <hr>
-<span class="h5 card-title">Nuevo Producto</span>
+<span class="h5 card-title">Editar Producto</span>
 <hr>
-{% for message in app.flashes('sussecc') %}
-	<div class="alert alert-success" role="alert">
-	  {{ message }}
-	</div>
-{% endfor %}
-
 <div class="">
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <div class="form-row">
@@ -53,38 +47,5 @@
       </div>
     </div>
 	{{ form_end(form) }}
-    <br>
-    <span class="h5">Productos Existentes</span>
-    <hr>
-    <table class="table table-striped table-bordered table-hover table-sm ">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Marca</th>
-            <th>Codigo CAPA</th>
-            <th>Env. Prim.</th>
-            <th>Env. Sec.</th>
-            <th>Fact. P. Bruto</th>
-            <th>Fact. P. Neto</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in productos %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ p.nombre|upper }}</td>
-                <td>{{ p.marca|upper }}</td>
-                <td>{{ p.codigoCapa|upper }}</td>
-                <td>{{ p.envasePrimario }}</td>
-                <td>{{ p.envaseSecundario }}</td>
-                <td>{{ p.ajusteBruto }}</td>
-                <td>{{ p.ajusteNeto }}</td>
-                <td><a class="btn btn-sm btn-success" href="{{ path('sigcer_editar_producto', {prod : p.id}) }}">Modificar</a></td>
-            </tr>
-          {% endfor %}
-        </tbody>
-    </table>
 </div>
 {% endblock fos_user_content %}

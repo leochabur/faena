@@ -18,7 +18,9 @@ class ProductoType extends AbstractType
                 ->add('codigoCapa')
                 ->add('marca')
                 ->add('envasePrimario')
-                ->add('envaseSecundario')                
+                ->add('envaseSecundario')      
+                ->add('ajusteBruto')
+                ->add('ajusteNeto')            
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

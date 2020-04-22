@@ -39,7 +39,7 @@ class Envase
 
     public function __toString()
     {
-        return $this->nombre;
+        return strtoupper($this->nombre);
     }
 
     /**
