@@ -3,6 +3,7 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Zona
@@ -22,11 +23,39 @@ class Zona
     private $id;
 
     /**
+     *
+     * @ORM\Column(name="codigo", type="integer")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $codigo;
+
+    /**
+     *
+     * @ORM\Column(name="precintos", type="integer")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $cantPrecintos;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="zona", type="string", length=255)
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $zona;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="Region", inversedBy="zonas") 
+    * @ORM\JoinColumn(name="id_region", referencedColumnName="id")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+    */      
+    private $region;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Camion", mappedBy="zona")
+* @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $camion;
 
 
     public function __toString()
@@ -66,5 +95,100 @@ class Zona
     {
         return $this->zona;
     }
-}
 
+    /**
+     * Set codigo
+     *
+     * @param integer $codigo
+     *
+     * @return Zona
+     */
+    public function setCodigo($codigo)
+    {
+        $this->codigo = $codigo;
+
+        return $this;
+    }
+
+    /**
+     * Get codigo
+     *
+     * @return integer
+     */
+    public function getCodigo()
+    {
+        return $this->codigo;
+    }
+
+    /**
+     * Set cantPrecintos
+     *
+     * @param integer $cantPrecintos
+     *
+     * @return Zona
+     */
+    public function setCantPrecintos($cantPrecintos)
+    {
+        $this->cantPrecintos = $cantPrecintos;
+
+        return $this;
+    }
+
+    /**
+     * Get cantPrecintos
+     *
+     * @return integer
+     */
+    public function getCantPrecintos()
+    {
+        return $this->cantPrecintos;
+    }
+
+    /**
+     * Set region
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Region $region
+     *
+     * @return Zona
+     */
+    public function setRegion(\GestionSigcerBundle\Entity\opciones\Region $region = null)
+    {
+        $this->region = $region;
+
+        return $this;
+    }
+
+    /**
+     * Get region
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\Region
+     */
+    public function getRegion()
+    {
+        return $this->region;
+    }
+
+    /**
+     * Set camion
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Camion $camion
+     *
+     * @return Zona
+     */
+    public function setCamion(\GestionSigcerBundle\Entity\opciones\Camion $camion = null)
+    {
+        $this->camion = $camion;
+
+        return $this;
+    }
+
+    /**
+     * Get camion
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\Camion
+     */
+    public function getCamion()
+    {
+        return $this->camion;
+    }
+}

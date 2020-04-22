@@ -97,7 +97,6 @@ class Solicitud
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Cliente") 
     * @ORM\JoinColumn(name="id_cliente", referencedColumnName="id")
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $cliente;
 

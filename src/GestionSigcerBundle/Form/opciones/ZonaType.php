@@ -7,18 +7,19 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
-class ProductoType extends AbstractType
+class ZonaType extends AbstractType
 {
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('nombre')
-                ->add('codigoCapa')
-                ->add('marca')
-                ->add('envasePrimario')
-                ->add('envaseSecundario')                
+        $builder->add('codigo')
+                ->add('cantPrecintos')
+                ->add('zona')
+                ->add('region')
+                ->add('region')
+                ->add('camion')
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}
@@ -26,7 +27,7 @@ class ProductoType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'GestionSigcerBundle\Entity\opciones\Producto'
+            'data_class' => 'GestionSigcerBundle\Entity\opciones\Zona'
         ));
     }
 
@@ -35,8 +36,7 @@ class ProductoType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'gestionsigcerbundle_opciones_producto';
+        return 'gestionsigcerbundle_opciones_zona';
     }
-
 
 }

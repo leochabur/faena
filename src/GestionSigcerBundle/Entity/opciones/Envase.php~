@@ -3,7 +3,7 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Envase
  *
@@ -25,6 +25,7 @@ class Envase
      * @var string
      *
      * @ORM\Column(name="codigo", type="string", length=255)
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $codigo;
 
@@ -32,9 +33,14 @@ class Envase
      * @var string
      *
      * @ORM\Column(name="nombre", type="string", length=255, unique=true)
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $nombre;
 
+    public function __toString()
+    {
+        return $this->nombre;
+    }
 
     /**
      * Get id

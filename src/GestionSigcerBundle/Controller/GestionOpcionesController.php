@@ -12,6 +12,8 @@ use GestionSigcerBundle\Entity\opciones\Envase;
 use GestionSigcerBundle\Entity\opciones\Cliente;
 use GestionSigcerBundle\Entity\opciones\Camion;
 use GestionSigcerBundle\Entity\opciones\Producto;
+use GestionSigcerBundle\Entity\opciones\Zona;
+
 /**
  * @Route("/sigcer")
  */
@@ -19,6 +21,53 @@ use GestionSigcerBundle\Entity\opciones\Producto;
 class GestionOpcionesController extends Controller
 {
 
+  ///////////////ZONA//////////////////////////////////
+    /**
+     * @Route("/addzna", name="sigcer_add_zona")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addZona()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $zonas = $em->getRepository(Zona::class)->findAll();
+
+        $zona = new Zona();
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ZonaType::class, 
+                                      $zona, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_add_zona_procesar')]);
+        return $this->render('@GestionSigcer/opciones/abmZona.html.twig', 
+                            ['form' => $form->createView(), 'zonas' => $zonas]);
+    }
+
+    /**
+     * @Route("/addznaproc", name="sigcer_add_zona_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarZona(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $zonas = $em->getRepository(Zona::class)->findAll();
+
+        $zona = new Zona();
+        $form = $this->createForm(\GestionSigcerBundle\Form\opciones\ZonaType::class, 
+                                      $zona, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_add_zona_procesar')]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->persist($zona);
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Zona almacenada exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_zona');
+        }
+        return $this->render('@GestionSigcer/opciones/abmZona.html.twig', 
+                            ['form' => $form->createView(), 'zonas' => $zonas]);
+    }
   ///////////////Producto//////////////////////////////////
     /**
      * @Route("/addprd", name="sigcer_add_producto")

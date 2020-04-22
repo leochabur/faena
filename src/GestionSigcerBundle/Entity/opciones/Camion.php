@@ -49,9 +49,17 @@ class Camion
      */
     private $senasa;
 
+    /**
+     * @ORM\OneToOne(targetEntity="Zona", inversedBy="camion")
+     * @ORM\JoinColumn(name="id_zona", referencedColumnName="id")
+     */
+    private $zona;
+
+
+
     public function __toString()
     {
-        return $this->patente;
+        return strtoupper($this->patente);
     }
 
     /**
@@ -158,5 +166,29 @@ class Camion
     public function getTipo()
     {
         return $this->tipo;
+    }
+
+    /**
+     * Set zona
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Zona $zona
+     *
+     * @return Camion
+     */
+    public function setZona(\GestionSigcerBundle\Entity\opciones\Zona $zona = null)
+    {
+        $this->zona = $zona;
+
+        return $this;
+    }
+
+    /**
+     * Get zona
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\Zona
+     */
+    public function getZona()
+    {
+        return $this->zona;
     }
 }

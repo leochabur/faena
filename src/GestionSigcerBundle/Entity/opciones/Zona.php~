@@ -1,0 +1,93 @@
+<?php
+
+namespace GestionSigcerBundle\Entity\opciones;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Zona
+ *
+ * @ORM\Table(name="sig_zna_repto")
+ * @ORM\Entity(repositoryClass="GestionSigcerBundle\Repository\opciones\ZonaRepository")
+ */
+class Zona
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     *
+     * @ORM\Column(name="codigo", type="integer")
+     */
+    private $codigo;
+
+    /**
+     *
+     * @ORM\Column(name="precintos", type="integer")
+     */
+    private $cantPrecintos;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="zona", type="string", length=255)
+     */
+    private $zona;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="Region", inversedBy="zonas") 
+    * @ORM\JoinColumn(name="id_region", referencedColumnName="id")
+    */      
+    private $region;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Camion", mappedBy="zona")
+     */
+    private $camion;
+
+
+    public function __toString()
+    {
+        return $this->zona;
+    }
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set zona
+     *
+     * @param string $zona
+     *
+     * @return Zona
+     */
+    public function setZona($zona)
+    {
+        $this->zona = $zona;
+
+        return $this;
+    }
+
+    /**
+     * Get zona
+     *
+     * @return string
+     */
+    public function getZona()
+    {
+        return $this->zona;
+    }
+}
+
