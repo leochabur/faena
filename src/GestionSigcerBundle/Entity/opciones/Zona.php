@@ -3,6 +3,7 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -10,6 +11,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="sig_zna_repto")
  * @ORM\Entity(repositoryClass="GestionSigcerBundle\Repository\opciones\ZonaRepository")
+ * @UniqueEntity(
+ *     fields={"codigo", "zona", "region"},
+ *     errorPath="codigo",
+ *     message="Ya existe una zona con el codigo ingresado en la region!!"
+ * )
  */
 class Zona
 {

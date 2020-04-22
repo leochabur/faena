@@ -3,12 +3,17 @@
 namespace GestionSigcerBundle\Entity\opciones;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Camion
  *
  * @ORM\Table(name="sig_cmion_rpto")
  * @ORM\Entity(repositoryClass="GestionSigcerBundle\Repository\opciones\CamionRepository")
+ * @UniqueEntity(
+ *     fields={"patente"},
+ *     message="Ya existe un camion con el dominio ingresado!!"
+ * )
  */
 class Camion
 {
