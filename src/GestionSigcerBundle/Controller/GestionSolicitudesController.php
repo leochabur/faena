@@ -584,7 +584,6 @@ class GestionSolicitudesController extends Controller
                     $detalle = $dom->createElement('se:detalle');
                         $producto = $dom->createElement('se:producto');
                           $codigo = $dom->createElement('se:codigoProducto', $deta->getArticulo()->getCodigoCapa());
-                          $nombre = $dom->createElement('se:nombre', $deta->getArticulo()->getNombre());
                         $producto->appendChild($codigo);
                         $producto->appendChild($nombre);
                     $detalle->appendChild($producto);
@@ -632,7 +631,7 @@ class GestionSolicitudesController extends Controller
         if ($generateZip)
         {
             $archivo = new \ZipArchive();
-            $zipName = 'solicitudes_fecha_'.$grupo->getFecha()->format('d_m_Y').'.zip';
+            $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'.zip';
             $archivo->open($zipName,  \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
             foreach ($files as $k => $v) {
