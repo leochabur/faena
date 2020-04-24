@@ -472,6 +472,11 @@ class GestionSolicitudesController extends Controller
                                   'class' => TropaSolicitud::class,
                                   'choices' => $grupo->getTropas()
                                 ])
+                        ->add('region', 
+                               EntityType::class, 
+                               [
+                                  'class' => Region::class
+                                ])
                         ->add('precinto',TextType::class, ['data' => $grupo->getInicioPrecinto()])
                         ->add('generar', SubmitType::class, ['label' => 'Generar Solicitudes'])   
                         ->setMethod('POST')   
@@ -489,6 +494,8 @@ class GestionSolicitudesController extends Controller
             $lastPrecinto = 0;
             foreach ($allZonas as $zona) 
             {
+              if ($zona->getRegion() == $data['region'])
+              {
                 $solicitud = new Solicitud();
 
                 if (($lastZona) && ($lastZona->getCamion() == $zona->getCamion())) //la ultima zona procesada tiene el mismo camion que la actual, se debe copiar el ultimo numero de precinto
@@ -533,6 +540,7 @@ class GestionSolicitudesController extends Controller
                 $em->persist($solicitud);
                 $lastPrecinto = $precinto;
                 $lastZona = $zona;
+              }
             }
             $em->flush();
         }

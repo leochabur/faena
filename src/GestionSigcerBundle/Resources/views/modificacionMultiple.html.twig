@@ -29,6 +29,7 @@
             <thead>
               <tr>
                 <th>Zona</th>
+                <th>Localidad</th>
                 <th>Articulo</th>
                 <th>
                           <div  class="form-row">
@@ -51,6 +52,7 @@
                             {% set last = s.zona.codigo %}
                           {% endif %}
                       </td>
+                      <td>{{ s.zona.zona|upper }}</td>
                       <td>{{ d.articulo }}</td>
                       {{ form_start(formUpd[d.id], {'attr' : {'class' : 'upd', 'novalidate' : 'novalidate'}} ) }}
                       <td class="text-right">
