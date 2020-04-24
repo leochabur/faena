@@ -593,7 +593,6 @@ class GestionSolicitudesController extends Controller
                         $producto = $dom->createElement('se:producto');
                           $codigo = $dom->createElement('se:codigoProducto', $deta->getArticulo()->getCodigoCapa());
                         $producto->appendChild($codigo);
-                        $producto->appendChild($nombre);
                     $detalle->appendChild($producto);
                     $congelado = $tr->getFechaCongelado()->format('Y-m-d');
                     $tropa = $dom->createElement('se:tropa');
