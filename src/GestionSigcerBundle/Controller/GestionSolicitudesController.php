@@ -659,7 +659,7 @@ class GestionSolicitudesController extends Controller
         
         $archivo->close();
 
-        $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'solicitudes_fecha_'.$grupo->getFecha()->format('d_m_Y') . '.zip');
+        $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'solicitudesfecha'.$grupo->getFecha()->format('dmY') . '.zip');
         $response->headers->set('Content-Disposition', $d);
        
         
