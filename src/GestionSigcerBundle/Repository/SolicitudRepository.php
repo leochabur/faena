@@ -11,10 +11,12 @@ namespace GestionSigcerBundle\Repository;
 class SolicitudRepository extends \Doctrine\ORM\EntityRepository
 {
 	public function findSolicitudes(\GestionSigcerBundle\Entity\GrupoSolicitud $grupo,
-									\GestionSigcerBundle\Entity\opciones\Zona $zona) 
+									\GestionSigcerBundle\Entity\opciones\Region $zona) 
 	{ 
 	    return $this->createQueryBuilder('s')
-	    			->where('s.zona = :zona AND s.grupo = :grupo')
+	    			->join('s.zona', 'z')
+	    			->join('z.region', 'r')
+	    			->where('r = :zona AND s.grupo = :grupo')
 	    			->setParameter('zona', $zona)
 	    			->setParameter('grupo', $grupo)
 			        ->addOrderBy('s.zona')

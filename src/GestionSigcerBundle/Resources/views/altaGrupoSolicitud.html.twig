@@ -35,6 +35,12 @@
       </div>
     </div>
     <div class="form-row">
+      <div class="col-3">
+        {{ form_label(form.inicioPrecinto) }}
+        {{ form_widget(form.inicioPrecinto) }}
+      </div>
+    </div>
+    <div class="form-row">
       <div class="col">
         {{ form_widget(form.guardar) }}
       </div>
@@ -66,6 +72,8 @@
               <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
                 <div class="dropdown-menu">
                   <a class="dropdown-item"  href="{{ path('sigcer_add_tropa_grupo_solicitud', { gpo : g.id}) }}">Agregar Tropa</a>
+                  <a class="dropdown-item"  href="{{ path('sigcer_generate_multiples', { gpo : g.id}) }}">Generar solicitudes multiples</a>
+                  <a class="dropdown-item"  href="{{ path('sigcer_generar_archivos', { gpo : g.id}) }}" target="_blank" >Generar Archivos</a>
                   <a class="dropdown-item"  href="{{ path('sigcer_add_solictud_a_grupo', { gpo : g.id}) }}">Gestionar solicitudes</a>
                   <a class="dropdown-item"  href="{{ path('sigcer_modificacion_multiple', { gpo : g.id}) }}">Modificar Multiples Solicitudes</a>
                 </div>

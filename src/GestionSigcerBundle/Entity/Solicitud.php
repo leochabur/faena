@@ -78,7 +78,7 @@ class Solicitud
      * @ORM\Column(name="temperatura", type="float")
      * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
-    private $temperatura;
+    private $temperatura = 0;
 
     /**
      * @var float

@@ -7,7 +7,7 @@
   {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <div class="form-row">
       <div class="col-2">
-        {{ form_label(form.zona) }}
+        {{ form_label(form.zona, 'Region') }}
         {{ form_widget(form.zona) }}
       </div>
       <div class="col-3">
@@ -22,13 +22,13 @@
     </div>
   {{ form_end(form) }}
   <hr>
+  <h4>Solicitudes Region: {{ region }}</h4>
+  <hr>
     {% if solicitudes is defined %}
         <table class="table table-striped table-bordered table-hover table-sm ">
             <thead>
               <tr>
-                <th>Destino</th>
-                <th>Cliente</th>
-                <th>Camion</th>
+                <th>Zona</th>
                 <th>Articulo</th>
                 <th>
                           <div  class="form-row">
@@ -41,12 +41,16 @@
               </tr>
             </thead>
             <tbody>
+              {% set last = 0 %}
               {% for s in solicitudes %}
                 {% for d in s.detalles %}
                   <tr>
-                      <td>{{ s.lugarDestino }}</td>
-                      <td>{{ s.cliente }}</td>
-                      <td>{{ s.camion}}</td>
+                      <td>
+                          {% if last != s.zona.codigo %}
+                            {{ s.zona.codigo }}
+                            {% set last = s.zona.codigo %}
+                          {% endif %}
+                      </td>
                       <td>{{ d.articulo }}</td>
                       {{ form_start(formUpd[d.id], {'attr' : {'class' : 'upd', 'novalidate' : 'novalidate'}} ) }}
                       <td class="text-right">

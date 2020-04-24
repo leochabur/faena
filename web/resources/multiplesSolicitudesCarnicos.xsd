@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ 	xmlns:se="http://www.senasa.gov.ar/solicitud"
+	targetNamespace="http://www.senasa.gov.ar/solicitud" elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+	 <!-- Definicion de tipos Simples -->
+    <xs:simpleType name="numeroTropaType">
+        <xs:annotation>
+        	<xs:documentation>
+        		Valores que puede tomar el Numero de Tropa
+        	</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:int">
+    		<xs:maxInclusive value="99999"></xs:maxInclusive>
+    		<xs:minInclusive value="1"></xs:minInclusive>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="fechaSimpleType">
+    	<xs:annotation>
+    		<xs:documentation>Fecha simple en el formato yyyy-MM-dd</xs:documentation>
+    	</xs:annotation>
+    	<xs:restriction base="xs:date">
+    		<xs:pattern value="dddd-dd-dd"></xs:pattern>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="codigoProductoType">
+    	<xs:annotation>
+    		<xs:documentation> Formato que puede tener el codigo de producto</xs:documentation>
+    	</xs:annotation>
+    	<xs:restriction base="xs:string">
+    		<xs:maxLength value="25"></xs:maxLength>
+    		<xs:pattern value="\d{1,5}-\d{1,7}/\d{1,3}"></xs:pattern>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="numeroCertificadoType">
+    	<xs:annotation>
+    		<xs:documentation> Formato que puede tener el numero de certificado provisorio, PT o PTR</xs:documentation>
+    	</xs:annotation>
+    	<xs:restriction base="xs:string">
+    		<xs:maxLength value="25"></xs:maxLength>
+    		<xs:pattern value="\d\d\d\d-\w-\d+"></xs:pattern>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="stringRestringidoType">
+    	<xs:restriction base="xs:string">
+    		<xs:maxLength value="200"></xs:maxLength>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="pesoType">
+        <xs:annotation>
+        	<xs:documentation>
+        		Valores que puede tomar el peso de un producto, siempre
+        		expresado en kilos.
+        	</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:double">
+    		<xs:maxInclusive value="999999"></xs:maxInclusive>
+    		<xs:minInclusive value="0"></xs:minInclusive>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="tipoTransporteType">
+
+        <xs:annotation>
+        	<xs:documentation>Define si el tipo de transporte que translada la mercaderia es de tipo Aereo, Maritimo o Terrestre.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+    		<xs:enumeration value="TE"></xs:enumeration>
+    		<xs:enumeration value="MA"></xs:enumeration>
+    		<xs:enumeration value="AE"></xs:enumeration>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="rolEstablecimientoType">
+
+        <xs:annotation>
+        	<xs:documentation>Define los tipos de Rol que puede tener un establecimiento. FAENADOR, ELABORADOR, FAENADOR_ELABORADOR o DEPOSITO</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+    		<xs:enumeration value="FAENADOR"></xs:enumeration>
+    		<xs:enumeration value="ELABORADOR"></xs:enumeration>
+    		<xs:enumeration value="FAENADOR_ELABORADOR"></xs:enumeration>
+    		<xs:enumeration value="DEPOSITO"></xs:enumeration>
+    	</xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="territorioType">
+    	<xs:annotation>
+    		<xs:documentation>Define los tipos de territorio en que puede dividirse el pais</xs:documentation>
+    	</xs:annotation>
+    	<xs:restriction base="xs:string">
+    		<xs:pattern value="AR-[0-9]"></xs:pattern>
+    		<xs:maxLength value="10"></xs:maxLength>
+    	</xs:restriction>
+    </xs:simpleType>
+
+    <!-- Definicion de Tipos Complejos -->
+    <xs:complexType name="productoType">
+        <xs:annotation>
+        	<xs:documentation>
+        		Tipo Producto: Contiene los datos para describir al
+        		producto que se desea exportar.
+        	</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+    		<xs:element name="codigoProducto" type="se:codigoProductoType" minOccurs="1" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Codigo del Producto Registrado en CAPA
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="nombre" type="se:stringRestringidoType" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Nombre Comercial utilizado por la empresa
+    					(deberia ser el mismo que esta registrado en
+    					CAPA)
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="detallesType">
+        <xs:annotation>
+        	<xs:documentation>
+        		Lista con todos los detalles de la solicitud.
+        	</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+    		<xs:element name="detalle" type="se:detalleType" minOccurs="1" maxOccurs="50">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Un elemento de detalle de la solicitud.
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="transporteType">
+    	<xs:annotation>
+    		<xs:documentation>Camion que transporta la mercaderia, ya sea a su destino final o al puerto.</xs:documentation>
+    	</xs:annotation>
+    	<xs:sequence>
+    		<xs:element name="tipoDeTransporte" type="se:tipoTransporteType" minOccurs="0" maxOccurs="1" fixed="TE">
+    			<xs:annotation>
+    				<xs:documentation>Define el tipo de transporte utilizado</xs:documentation>
+    			</xs:annotation>	
+    		</xs:element>
+    		<xs:element name="patenteCamion" type="xs:string" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Patente del camion que transporta los productos</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="habilitacionTransporte" type="xs:string" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Numero de Habilitacion de SENASA del transporte</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="medioDeTransporteType">
+        <xs:annotation>
+        	<xs:documentation>
+        		Medio de transporte donde viajan los productos a destino final, si no es en camion
+        	</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+    		<xs:element name="tipoDeTransporte" type="se:tipoTransporteType" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Define el tipo de transporte utilizado</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="nombreBuque" type="xs:string" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Nombre del barco que transporta la mercaderia.</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="numeroDeVuelo" type="xs:string" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Numero de vuelo</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="aerolinea" type="xs:string" minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Aerolinea por la que vuela la mercaderia</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="diaDelVuelo" type="xs:dateTime"  minOccurs="0" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>Fecha y hora del vuelo</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="detalleType">
+    	<xs:sequence>
+    		<xs:element name="producto" type="se:productoType">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Producto que se solicita exportar.
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="tropa" type="se:tropaType" minOccurs="0"
+    			maxOccurs="4">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Valor opcional para asociar directamente las
+    					tropas con un detalle (un producto).
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="pesoNeto" type="se:pesoType" maxOccurs="1"
+    			minOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Peso neto del detalle, expresado en kilos.
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="pesoBruto" type="se:pesoType"
+    			maxOccurs="1" minOccurs="0">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Peso bruto del detalle, expresado en kilos.
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="cantidad" type="xs:integer" maxOccurs="1"
+    			minOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Cantidad del producto que sale en el detalle
+    					medida en bultos contables (cajas, medias reses,
+    					etc) como siempre han generado la solicitud.
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="envasePrimario"
+    			type="se:stringRestringidoType">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Descripcion del envase primario segun la empresa
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="envaseSecundario"
+    			type="se:stringRestringidoType">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Descripcion del envase secundario segun la
+    					empresa.
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="codEnvasePrimarioSENASA"
+    			type="xs:integer">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Codigo de envase de SENASA que mas se aproxima
+    					al utilizado por la empresa (el valor se debe
+    					sacar de la lista enviada por el SENASA).
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="codEnvaseSecundarioSENASA"
+    			type="xs:integer">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Codigo de envase de SENASA que mas se aproxima
+    					al utilizado por la empresa (el valor se debe
+    					sacar de la lista enviada por el SENASA).
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="marca" type="se:stringRestringidoType"
+    			minOccurs="1" maxOccurs="1">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Marca del Producto
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    		<xs:element name="certificadoDeOrigen" type="se:numeroCertificadoType" minOccurs="0"></xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="tropasType">
+    	<xs:annotation>
+    		<xs:documentation>
+    			Listado de las tropas o lotes que se utilizaron para
+    			producir los productos la solicitud.
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:sequence>
+    		<xs:element name="tropa" type="se:tropaType" minOccurs="1" maxOccurs="unbounded">
+    			<xs:annotation>
+    				<xs:documentation>
+    					Cada una de las tropas que forrma parte de las
+    					listas de tropas
+    				</xs:documentation>
+    			</xs:annotation>
+    		</xs:element>
+    	</xs:sequence>
+
+    </xs:complexType>
+    <xs:complexType name="solicitudType">
+        <xs:annotation>
+        	<xs:documentation>
+        		Esta es una representacion de la solicitud realizada por
+        		la empresa para importar los datos al sistema de
+        		certificaciones.
+        	</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+        	<xs:element name="version" type="xs:string" fixed="1.0.1"></xs:element>
+        	<xs:element name="tropasPorProducto" type="xs:boolean"
+        		default="false">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Flag para aclarar si las tropas se declaran por
+        				solicitud o por producto. Si es false, las
+        				tropas se declaran por solicitud, caso contrario
+        				se declarar por producto o detalle. Valor por
+        				defecto false.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="detalles" type="se:detallesType"
+        		minOccurs="1" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Lista de los productos amparados
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="tropas" type="se:tropasType" maxOccurs="1"
+        		minOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Lista de tropas de los productos que componen la
+        				soliciutd
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="exportador" maxOccurs="1" minOccurs="0"
+        		type="xs:integer">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Numero de registro del exportador en SENASA
+        				segun R. 492
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="precintoAduana" maxOccurs="1"
+        		minOccurs="0" type="xs:string">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Precinto de Aduana, si hay mas de uno ponerlos
+        				todos juntos.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="precintoSENASA" maxOccurs="1"
+        		minOccurs="0" type="xs:string">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Precinto de SENASA, si hay mas de uno ponerlos
+        				todos juntos.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="destinatarioNombre" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Nombre del destinatario comercial que tiene que
+        				recibir los productos amparados
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="destinatarioDireccion" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Direccion del destinatario comercial que tiene
+        				que recibir los productos amparados
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="destinatarioCP" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				CP del destinatario comercial que tiene que
+        				recibir los productos amparados
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="destinatarioTelefono" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Telefono del destinatario comercial que tiene
+        				que recibir los productos amparados
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="contramarca" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Contramarca comercial para los productos
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="observaciones" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Observaciones sobre la solicitud
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="establecimientoDestino" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Numero oficial del establecimiento de destino de
+        				la mercaderia si es que va a otro
+        				establecimiento
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+			<xs:element name="establecimiento" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Numero oficial del establecimiento que emite la solicitud
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+			<xs:element name="paisDestino" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Id del país la que va destinada la mercadería
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="atributoDeCalidad" type="xs:string" minOccurs="0"
+        		maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Código del atributo de calidad de la mercadería
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="lugarDestino" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Lugar de destino del producto, no es el pais
+        				sino la ciudad o partido donde se dirige en el
+        				caso de los PT y PTR
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="numeroContenedor" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Numero de contenedor en que salen los productos.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="camion" type="se:transporteType"
+        		minOccurs="1" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Camion en que viaja la mercaderia.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="medioDeTransporte"
+        		type="se:medioDeTransporteType" minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Medio de transporte que lleva la mercaderia
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="listaPaisTransito" type="xs:string">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Lista de los paises en transito por los cuales
+        				pasa la mercaderia, excluyendo Argentina.Se pone
+        				el codigo ISO 3166-1-alpha-2 correspondiente al
+        				pais
+        			</xs:documentation>
+        		</xs:annotation>
+
+        	</xs:element>
+			<xs:element name="listaPaisAdicional" type="xs:string">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Lista de los paises adicionales, 
+						excluyendo Argentina.Se pone
+        				el codigo ISO 3166-1-alpha-2 correspondiente al
+        				pais
+        			</xs:documentation>
+        		</xs:annotation>
+
+        	</xs:element>
+        	<xs:element name="remitoNumero" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Numero de remito que corresponde con la garga
+        				(re-opcional)
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="temperatura" type="xs:double"
+        		minOccurs="1" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				temperatura en grados centigrados en que se
+        				conserva el producto.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="termoprocesoTemperatura" type="xs:double"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Para Productos Termoprocesados: Temperatura que
+        				alcanza en el termoproceso.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="termoprocesoTiempo" type="xs:string"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Para Productos Termoprocesados: Tiempo que se
+        				somete al termoporceso el producto.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="territorio" type="se:territorioType"
+        		minOccurs="0" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>
+        				Territorio de donde proviene la mercaderia , si
+        				es que hiciera falta aclararlo.
+        			</xs:documentation>
+        		</xs:annotation>
+        	</xs:element>
+        	<xs:element name="rolDelEstablecimiento" type="se:rolEstablecimientoType" minOccurs="1" maxOccurs="1">
+        		<xs:annotation>
+        			<xs:documentation>Este campo se utiliza para definir si el establecimiento es FAENADOR, ELABORADOR, FAENADOR_ELABORADOR o DEPOSITO</xs:documentation>
+        		</xs:annotation></xs:element>
+        </xs:sequence>
+    </xs:complexType>
+	
+	
+ 	<xs:element name="solicitud" type="se:solicitudType" nillable="false"></xs:element>
+ 	
+    
+
+ 	<xs:complexType name="tropaType">
+        <xs:annotation>
+        	<xs:documentation>Datos asociados a una tropa</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="numeroTropa" type="se:numeroTropaType"></xs:attribute>
+		<xs:attribute name="lote" type="xs:string"></xs:attribute>
+ 		<xs:attribute name="fechaDeFaena" type="se:fechaSimpleType">
+ 			<xs:annotation>
+ 				<xs:documentation>
+ 					Fecha de Faena de la Tropa
+ 				</xs:documentation>
+ 			</xs:annotation>
+ 		</xs:attribute>
+ 		<xs:attribute name="fechaDeElaboracion"
+ 			type="se:fechaSimpleType">
+ 			<xs:annotation>
+ 				<xs:documentation>
+ 					fecha de Elaboracion de la Tropa-producto
+ 				</xs:documentation>
+ 			</xs:annotation>
+ 		</xs:attribute>
+ 		<xs:attribute name="fechaDeCongelado"
+ 			type="se:fechaSimpleType">
+            <xs:annotation>
+            	<xs:documentation>Fecha en que se congela la produccion de la Tropa</xs:documentation>
+            </xs:annotation>
+ 		</xs:attribute>
+ 		<xs:attribute name="fechaDeVencimiento" type="se:fechaSimpleType">
+ 			<xs:annotation>
+ 				<xs:documentation>Fecha de Vencimiento de la produccion de la tropa - producto</xs:documentation>
+ 			</xs:annotation></xs:attribute>
+ 	</xs:complexType>
+</xs:schema>

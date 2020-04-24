@@ -53,6 +53,7 @@ class GrupoSolicitud
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\PaisDestino") 
     * @ORM\JoinColumn(name="id_pais_ddestino", referencedColumnName="id")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $paisDestino;
 
@@ -65,6 +66,12 @@ class GrupoSolicitud
      * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo")
      */
     private $solicitudes;
+
+    /**
+     * @ORM\Column(name="inicioPrecinto", type="integer")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $inicioPrecinto;
 
     /**
      * Get id
@@ -233,5 +240,47 @@ class GrupoSolicitud
     public function getTropas()
     {
         return $this->tropas;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->tropas = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->solicitudes = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add solicitude
+     *
+     * @param \GestionSigcerBundle\Entity\Solicitud $solicitude
+     *
+     * @return GrupoSolicitud
+     */
+    public function addSolicitude(\GestionSigcerBundle\Entity\Solicitud $solicitude)
+    {
+        $this->solicitudes[] = $solicitude;
+
+        return $this;
+    }
+
+    /**
+     * Remove solicitude
+     *
+     * @param \GestionSigcerBundle\Entity\Solicitud $solicitude
+     */
+    public function removeSolicitude(\GestionSigcerBundle\Entity\Solicitud $solicitude)
+    {
+        $this->solicitudes->removeElement($solicitude);
+    }
+
+    /**
+     * Get solicitudes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSolicitudes()
+    {
+        return $this->solicitudes;
     }
 }

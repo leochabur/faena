@@ -68,6 +68,19 @@ class GrupoSolicitud
     private $solicitudes;
 
     /**
+     * @ORM\Column(name="inicioPrecinto", type="integer")
+     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $inicioPrecinto;
+
+    public function getTropa()
+    {
+        foreach ($this->tropas as $t) {
+            return $t;
+        }
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -276,5 +289,29 @@ class GrupoSolicitud
     public function getSolicitudes()
     {
         return $this->solicitudes;
+    }
+
+    /**
+     * Set inicioPrecinto
+     *
+     * @param integer $inicioPrecinto
+     *
+     * @return GrupoSolicitud
+     */
+    public function setInicioPrecinto($inicioPrecinto)
+    {
+        $this->inicioPrecinto = $inicioPrecinto;
+
+        return $this;
+    }
+
+    /**
+     * Get inicioPrecinto
+     *
+     * @return integer
+     */
+    public function getInicioPrecinto()
+    {
+        return $this->inicioPrecinto;
     }
 }
