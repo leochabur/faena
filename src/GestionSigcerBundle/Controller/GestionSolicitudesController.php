@@ -691,7 +691,8 @@ class GestionSolicitudesController extends Controller
                     $ok = true;
                 }
             }
-            if ($ok){
+            if ($ok)
+            {
                 $generateZip = true;
                 $solicitud->appendChild($detalles);
                 $solicitud->appendChild($dom->createElement('se:precintoSENASA', $sol->getPrecintoSenasa()));
@@ -712,11 +713,11 @@ class GestionSolicitudesController extends Controller
             }
         }
 
-
+        
         ///gyuardar
         $archivo = new \ZipArchive();
         $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'Region'.$region->getRegion().'.zip';
-        $archivo->open($zipName,  \ZipArchive::CREATE);
+        $archivo->open($zipName,  \ZipArchive::CREATE|\ZipArchive::OVERWRITE);
 
         foreach ($files as $k => $v) 
         {
