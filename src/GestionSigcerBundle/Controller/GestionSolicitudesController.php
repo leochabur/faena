@@ -723,9 +723,9 @@ class GestionSolicitudesController extends Controller
         {
             $archivo->addFile($v,  $k); 
         }
-       
-        $response = new Response(file_get_contents($archivo->filename));
         $archivo->close();
+        $response = new Response(file_get_contents($zip.$zipName));
+        
         $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $zipName);
         $response->headers->set('Content-Disposition', $d);
         return $response;
