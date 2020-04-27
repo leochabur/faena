@@ -10,4 +10,12 @@ namespace GestionSigcerBundle\Repository\opciones;
  */
 class ZonaRepository extends \Doctrine\ORM\EntityRepository
 {
+	public function findZonasOfGrupo(\GestionSigcerBundle\Entity\opciones\Region $region) { 
+	    return $this->createQueryBuilder('z')
+	    			->where('z.region = :region')
+	    			->setParameter('region', $region)
+			        ->addOrderBy('z.codigo')
+			        ->getQuery()
+			        ->getResult(); 
+	} 
 }

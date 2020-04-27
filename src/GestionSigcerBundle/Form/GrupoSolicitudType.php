@@ -37,7 +37,6 @@ class GrupoSolicitudType extends AbstractType
                                                                 ])
                 ->add('fecha', DateType::class, ['widget' => 'single_text'])
                 ->add('paisDestino')
-                ->add('inicioPrecinto')
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

@@ -68,10 +68,20 @@ class GrupoSolicitud
     private $solicitudes;
 
     /**
-     * @ORM\Column(name="inicioPrecinto", type="integer")
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     * @ORM\ManyToMany(targetEntity="GestionSigcerBundle\Entity\opciones\Region")
+     * @ORM\JoinTable(name="sig_reg_gen_gpo",
+     *      joinColumns={@ORM\JoinColumn(name="id_gpo", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_reg", referencedColumnName="id")}
+     *      )
      */
-    private $inicioPrecinto;
+    private $regionesGeneradas;
+
+    public function getTropa()
+    {
+        foreach ($this->tropas as $t) {
+            return $t;
+        }
+    }
 
     /**
      * Get id
@@ -248,6 +258,7 @@ class GrupoSolicitud
     {
         $this->tropas = new \Doctrine\Common\Collections\ArrayCollection();
         $this->solicitudes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->regionesGenerada = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -282,5 +293,63 @@ class GrupoSolicitud
     public function getSolicitudes()
     {
         return $this->solicitudes;
+    }
+
+    /**
+     * Set inicioPrecinto
+     *
+     * @param integer $inicioPrecinto
+     *
+     * @return GrupoSolicitud
+     */
+    public function setInicioPrecinto($inicioPrecinto)
+    {
+        $this->inicioPrecinto = $inicioPrecinto;
+
+        return $this;
+    }
+
+    /**
+     * Get inicioPrecinto
+     *
+     * @return integer
+     */
+    public function getInicioPrecinto()
+    {
+        return $this->inicioPrecinto;
+    }
+
+    /**
+     * Add regionesGenerada
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Region $regionesGenerada
+     *
+     * @return GrupoSolicitud
+     */
+    public function addRegionesGenerada(\GestionSigcerBundle\Entity\opciones\Region $regionesGenerada)
+    {
+        $this->regionesGeneradas[] = $regionesGenerada;
+
+        return $this;
+    }
+
+    /**
+     * Remove regionesGenerada
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Region $regionesGenerada
+     */
+    public function removeRegionesGenerada(\GestionSigcerBundle\Entity\opciones\Region $regionesGenerada)
+    {
+        $this->regionesGeneradas->removeElement($regionesGenerada);
+    }
+
+    /**
+     * Get regionesGeneradas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRegionesGeneradas()
+    {
+        return $this->regionesGeneradas;
     }
 }

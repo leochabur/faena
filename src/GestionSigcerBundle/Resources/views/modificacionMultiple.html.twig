@@ -22,9 +22,11 @@
     </div>
   {{ form_end(form) }}
   <hr>
+  {% if solicitudes is defined %}
   <h4>Solicitudes Region: {{ region }}</h4>
+  <a href="{{ path('sigcer_generar_archivos', {gpo: grupo, rgn: region.id}) }}" class="btn btn-danger" target="_blank">Exportar solicitudes</a>
   <hr>
-    {% if solicitudes is defined %}
+    
         <table class="table table-striped table-bordered table-hover table-sm ">
             <thead>
               <tr>

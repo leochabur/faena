@@ -13,7 +13,6 @@ use GestionSigcerBundle\Entity\Solicitud;
 use GestionSigcerBundle\Entity\opciones\Envase;
 use GestionSigcerBundle\Entity\opciones\Zona;
 use GestionSigcerBundle\Entity\opciones\Producto;
-use GestionSigcerBundle\Entity\opciones\Camion;
 use GestionSigcerBundle\Entity\opciones\Region;
 use GestionSigcerBundle\Entity\DetalleSolicitud;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -22,8 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Validator\Constraints\NotNull;
-use Doctrine\ORM\EntityRepository;
+
 
 /**
  * @Route("/sigcer/solic")
@@ -412,7 +410,7 @@ class GestionSolicitudesController extends Controller
               }
             }
 
-            return $this->render('@GestionSigcer/modificacionMultiple.html.twig', ['grupo' => $gpo, 'region' => $data['zona'], 'form' => $form->createView(), 'solicitudes' => $solicitudes, 'formUpd' => $forms]);
+            return $this->render('@GestionSigcer/modificacionMultiple.html.twig', ['region' => $data['zona'], 'form' => $form->createView(), 'solicitudes' => $solicitudes, 'formUpd' => $forms]);
         }
 
         return $this->render('@GestionSigcer/modificacionMultiple.html.twig', ['region' => '', 'form' => $form->createView()]);
@@ -479,154 +477,81 @@ class GestionSolicitudesController extends Controller
                                [
                                   'class' => Region::class
                                 ])
-                        ->add('precinto',TextType::class, [
-                                                              'constraints' => [
-                                                                  new NotNull(['message' => 'Valor invalido']),
-                                                              ],
-                                                          ])
-                        ->add('generar', SubmitType::class, ['label' => 'Generar/Cargar Solicitudes'])   
+                        ->add('precinto',TextType::class, ['data' => $grupo->getInicioPrecinto()])
+                        ->add('generar', SubmitType::class, ['label' => 'Generar Solicitudes'])   
                         ->setMethod('POST')   
                         ->getForm();
 
         if ($request->isMethod('POST'))
         {
             $form->handleRequest($request);
-
-            if ($form->isValid())
+            $data = $form->getData();
+            $allZonas = $em->getRepository(Zona::class)->findAll();
+            $allProductos = $em->getRepository(Producto::class)->findAll();
+            $lastZona = null;
+            $inicioPrecinto = $data['precinto'];
+            $tropa = $data['tropa'];
+            $lastPrecinto = 0;
+            foreach ($allZonas as $zona) 
             {
-                $data = $form->getData();
-                if (!$grupo->generoSolicitudes($data['region']))
+              if ($zona->getRegion() == $data['region'])
+              {
+                $solicitud = new Solicitud();
+
+                if (($lastZona) && ($lastZona->getCamion() == $zona->getCamion())) //la ultima zona procesada tiene el mismo camion que la actual, se debe copiar el ultimo numero de precinto
                 {
-                      $allZonas = $em->getRepository(Zona::class)->findZonasOfGrupo($data['region']);
-                      $allProductos = $em->getRepository(Producto::class)->findAll();
-                      $lastZona = null;
-                      $inicioPrecinto = $data['precinto'];
-                      $tropa = $data['tropa'];
-                      $lastPrecinto = 0;
-                      foreach ($allZonas as $zona) 
+                  $precinto = $lastPrecinto;              
+                }
+                else //o es la primer solicitud o el ultimo camion es ditinto al actual, se debe generar la numeracion
+                {
+                    $precinto = "";
+                    for ($i = 0; $i < $zona->getCamion()->getCantPrecintos(); $i++)
+                    {
+                      if (!$precinto)
                       {
-                        if ($zona->getRegion() == $data['region'])
-                        {
-                          $solicitud = new Solicitud();
-
-                          if (($lastZona) && ($lastZona->getCamion() == $zona->getCamion())) //la ultima zona procesada tiene el mismo camion que la actual, se debe copiar el ultimo numero de precinto
-                          {
-                            $precinto = $lastPrecinto;              
-                          }
-                          else //o es la primer solicitud o el ultimo camion es ditinto al actual, se debe generar la numeracion
-                          {
-                              $precinto = "";
-                              for ($i = 0; $i < $zona->getCamion()->getCantPrecintos(); $i++)
-                              {
-                                if (!$precinto)
-                                {
-                                  $precinto = strval($inicioPrecinto);
-                                }
-                                else
-                                {
-                                    $aux = strval($inicioPrecinto);
-                                    $precinto.="/".substr($aux, -4);
-                                }
-                                $inicioPrecinto++;
-                              }
-                          }
-                          $solicitud->setPrecintoSenasa($precinto);
-                          $solicitud->setZona($zona);
-                          $solicitud->setLugarDestino($zona->getZona());
-                          $solicitud->setPrecintos($zona->getCamion()->getCantPrecintos());
-                          $solicitud->setCamion($zona->getCamion());
-
-                          foreach ($allProductos as $prod) 
-                          {
-                              $detalle = new DetalleSolicitud();
-                              $detalle->setArticulo($prod);
-                              $detalle->setTropa($tropa);
-                              $detalle->setEnvasePrimario($prod->getEnvasePrimario());
-                              $detalle->setEnvaseSecundario($prod->getEnvaseSecundario());
-                              $detalle->setSolicitud($solicitud);
-                              $solicitud->addDetalle($detalle);
-                          }
-                          $solicitud->setGrupo($grupo);
-                          $grupo->addSolicitude($solicitud);
-                          $em->persist($solicitud);
-                          $lastPrecinto = $precinto;
-                          $lastZona = $zona;
-                        }
+                        $precinto = strval($inicioPrecinto);
                       }
-                      $grupo->addRegionesGenerada($data['region']);
-                      $em->flush();
-                      $this->addFlash(
-                                    'sussecc',
-                                    'Solicitudes generadas exitosamente!'
-                                    );
+                      else
+                      {
+                          $aux = strval($inicioPrecinto);
+                          $precinto.="/".substr($aux, -4);
+                      }
+                      $inicioPrecinto++;
+                    }
                 }
-                else
+                $solicitud->setPrecintoSenasa($precinto);
+                $solicitud->setZona($zona);
+                $solicitud->setLugarDestino($zona->getZona());
+                $solicitud->setPrecintos($zona->getCamion()->getCantPrecintos());
+                $solicitud->setCamion($zona->getCamion());
+
+                foreach ($allProductos as $prod) 
                 {
-                      $this->addFlash(
-                                    'warning',
-                                    'Ya se han generado las solicitudes para la region '.$data['region'].'!'
-                                    );
+                    $detalle = new DetalleSolicitud();
+                    $detalle->setArticulo($prod);
+                    $detalle->setTropa($tropa);
+                    $detalle->setEnvasePrimario($prod->getEnvasePrimario());
+                    $detalle->setEnvaseSecundario($prod->getEnvaseSecundario());
+                    $detalle->setSolicitud($solicitud);
+                    $solicitud->addDetalle($detalle);
                 }
-                $solicitudes = $em->getRepository(Solicitud::class)->findSolicitudes($grupo, $data['region']);
-                $forms = array();
-                foreach ($solicitudes as $sol) {
-                    $forms[$sol->getId()] = $this->getFormUpdateSolicitud($sol)->createView();
-                }
-                return $this->render('@GestionSigcer/generarMultiples.html.twig', 
-                                    ['form' => $form->createView(), 'region' => $data['region'], 'grupo' => $grupo, 'solicitudes' => $solicitudes, 'forms' => $forms]);
+                $solicitud->setGrupo($grupo);
+                $grupo->addSolicitude($solicitud);
+                $em->persist($solicitud);
+                $lastPrecinto = $precinto;
+                $lastZona = $zona;
+              }
             }
+            $em->flush();
         }
         return $this->render('@GestionSigcer/generarMultiples.html.twig', ['form' => $form->createView(), 'grupo' => $grupo]);
     }
 
-    private function getFormUpdateSolicitud($solicitud)
-    {
-        $form =    $this->createFormBuilder()
-                        ->add('temp',TextType::class, [
-                                                        'data' => $solicitud->getTemperatura(),
-                                                      ])
-                        ->add('precinto',TextType::class, ['data' => $solicitud->getPrecintoSenasa()])
-                        ->add('camion',EntityType::class, ['class' => Camion::class,
-                                                           'query_builder' => function (EntityRepository $er) {
-                                                                                                                      return $er->createQueryBuilder('c');
-                                                                                                              },
-                                                            'data' => $solicitud->getCamion()])
-                        ->add('load', SubmitType::class, ['label' => 'Modificar'])   
-                        ->setAction($this->generateUrl('sigcer_update_solicitud_multiple', array('sol' => $solicitud->getId())))
-                        ->setMethod('POST')   
-                        ->getForm();
-        return $form;
-    }
-
     /**
-     * @Route("/upslml/{sol}", name="sigcer_update_solicitud_multiple")
+     * @Route("/genxml/{gpo}", name="sigcer_generar_archivos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function updateSolicitudMultiple($sol, Request $request)
-    {
-      try
-      {
-          $em = $this->getDoctrine()->getManager();
-          $solicitud = $em->find(Solicitud::class, $sol);
-          $form = $this->getFormUpdateSolicitud($solicitud);
-          $form->handleRequest($request);
-          $data = $form->getData();
-          $solicitud->setPrecintoSenasa($data['precinto']);
-          $solicitud->setTemperatura($data['temp']);
-          $solicitud->setCamion($data['camion']);
-          $em->flush();
-          return new JsonResponse(array('status' => true));
-      }
-      catch (\Exception $e){
-                            return new JsonResponse(array('status' => false, 'message' => 'No se ha podido realizar la actualizacion'));
-      }
-    }
-
-    /**
-     * @Route("/genxml/{gpo}/{rgn}", name="sigcer_generar_archivos")
-     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
-     */
-    public function generateXML($gpo, $rgn)
+    public function generateXML($gpo)
     {
         $xsd = $this->get('kernel')->getRootDir() . '/../web/resources/multiplesSolicitudesCarnicos.xsd';
 
@@ -635,12 +560,11 @@ class GestionSolicitudesController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $grupo = $em->find(GrupoSolicitud::class, $gpo);
-        $region = $em->find(Region::class, $rgn);
-        $solicitudes = $em->getRepository(Solicitud::class)->findSolicitudes($grupo, $region);
+
         $tr = $grupo->getTropa();
         $files = array();
         $generateZip = false;
-        foreach ($solicitudes as $sol) 
+        foreach ($grupo->getSolicitudes() as $sol) 
         {
             $dom = new \DOMDocument('1.0', 'utf-8');
             $dom->xmlStandalone = true;
@@ -711,21 +635,39 @@ class GestionSolicitudesController extends Controller
                 $files["sol_".$sol->getId().".xml"] = $name;
             }
         }
-
-        $archivo = new \ZipArchive();
-        $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'Region'.$region->getRegion().'.zip';
-        $archivo->open($zipName,  \ZipArchive::CREATE);
-
-        foreach ($files as $k => $v) 
+        if ($generateZip)
         {
-            $archivo->addFile($v,  $k); 
-        }
+            $archivo = new \ZipArchive();
+            $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'.zip';
+            $archivo->open($zipName,  \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+            foreach ($files as $k => $v) {
+                $archivo->addFile($v,  $k); 
+            }
+           
+           // 
+           /* $response = new Response();
+            $response->setContent(readfile($zipName));
+            $response->headers->set('Content-Type', 'application/zip');
+            $response->header('Content-disposition: attachment; filename='.$grupo->getFecha()->format('d_m_Y').'.zip');
+            $response->header('Content-Length: ' . filesize($zipName));
+            $response->readfile($zipName);
+            return $response;*/
+
        
         $response = new Response(file_get_contents($archivo->filename));
+        
         $archivo->close();
-        $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $zipName);
+
+        $d = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'solicitudesfecha'.$grupo->getFecha()->format('dmY') . '.zip');
         $response->headers->set('Content-Disposition', $d);
+       
+        
+       
         return $response;
+
+
+        }
 
     }
     private function getDOM()
