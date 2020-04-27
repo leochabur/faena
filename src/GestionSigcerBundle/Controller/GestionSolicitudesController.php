@@ -712,6 +712,8 @@ class GestionSolicitudesController extends Controller
             }
         }
 
+
+        ///gyuardar
         $archivo = new \ZipArchive();
         $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'Region'.$region->getRegion().'.zip';
         $archivo->open($zipName,  \ZipArchive::CREATE);
