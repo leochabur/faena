@@ -706,9 +706,9 @@ class GestionSolicitudesController extends Controller
                 $dom->appendChild($solicitud);
               //  $dom->schemaValidate($xsd);
 
-                $name = $zip."sol_".$sol->getId().".xml";
+                $name = $zip."sol_".$sol->getId()."_zona_".$sol->getZona().".xml";
                 $dom->save($name);
-                $files["sol_".$sol->getId().".xml"] = $name;
+                $files["sol_".$sol->getId()."_zona_".$sol->getZona().".xml"] = $name;
             }
         }
 
