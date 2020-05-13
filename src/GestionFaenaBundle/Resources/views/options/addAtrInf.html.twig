@@ -16,6 +16,11 @@
           <th>#</th>
           <th>Atributo</th>
           <th>Posicion</th>
+          <th>Visible</th>
+          <th>Sumariza</th>
+          <th>Promedia</th>
+          <th>Agrupa</th>
+          <th>Nº Orden</th>
           <th></th>
         </tr>
       </thead>
@@ -25,7 +30,12 @@
           <tr>
             <td>{{ loop.index }}</td>
             <td>{{ f.atributo }}</td>  
-            <td>{{ f.posicion }}</td>           
+            <td>{{ f.posicion }}</td>      
+            <td>{{ f.visible }}</td>  
+            <td>{{ f.sumariza }}</td>    
+            <td>{{ f.promedia }}</td>  
+            <td>{{ f.agrupa }}</td>      
+            <td>{{ f.numeroOrden }}</td>      
             <td class="text-center">
               <a href="#" class="btn btn-sm btn-success">Modificar</a>
           </td>
@@ -37,20 +47,39 @@
 
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <div class="form-row">
-      <div class="col-sm-5">
+      <div class="col-sm-3">
         {{ form_label(form.informe) }}
         {{ form_widget(form.informe) }}
       </div>
-      <div class="col-sm-4">
+      <div class="col-sm-3">
         {{ form_label(form.atributo) }}
         {{ form_widget(form.atributo) }}
       </div>
-      <div class="col-sm-2">
+      <div class="col-sm-3">
         {{ form_label(form.posicion) }}
         {{ form_widget(form.posicion) }}
       </div>
-      <div class="col-sm-1 mt-5">
-       <span class="mt-2">{{ form_widget(form.visible) }}</span> 
+      <div class="col-sm-3">
+        {{ form_label(form.numeroOrden) }}
+        {{ form_widget(form.numeroOrden) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-sm-3">
+        {{ form_label(form.agrupa) }}
+        {{ form_widget(form.agrupa) }}
+      </div>
+      <div class="col-sm-3">
+        {{ form_label(form.sumariza) }}
+        {{ form_widget(form.sumariza) }}
+      </div>
+      <div class="col-sm-3">
+        {{ form_label(form.promedia) }}
+        {{ form_widget(form.promedia) }}
+      </div>
+      <div class="col-sm-3">
+        {{ form_label(form.visible) }}
+        {{ form_widget(form.visible) }}
       </div>
     </div>
     <div class="form-row">

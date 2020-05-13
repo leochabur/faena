@@ -20,6 +20,10 @@ class AtributoInformeType extends AbstractType
         $builder->add('posicion')
                 ->add('atributo')
                 ->add('visible')
+                ->add('agrupa')
+                ->add('sumariza')
+                ->add('promedia')
+                ->add('numeroOrden')
                 ->add('guardar', SubmitType::class)
                 ->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
     }
