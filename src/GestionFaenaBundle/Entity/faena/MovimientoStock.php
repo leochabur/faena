@@ -90,14 +90,33 @@ abstract class MovimientoStock
     }
 
 
-    public function getValorWhitAtribute($atributo)
+    public function getValorWhitAtribute($atributo, $espejo = false)
     {
-        foreach ($this->valores as $v) {
-            $val = $v->getAtributo()?$v->getAtributo()->getAtributoAbstracto():$v->getAtributoAbstracto();
+        $value = null;
+        foreach ($this->valores as $v) 
+        {
+            //$val = $v->getAtributo()?$v->getAtributo()->getAtributoAbstracto():$v->getAtributoAbstracto();
+             $val = $v->getAtributo()?$v->getAtributo()->getAtributoBase():$v->getAtributoAbstracto();
             if ($val->getId() == $atributo)
-                return $v;
+            {
+                if ($v->getAtributo())  //tiene el Atributo Asignado, puede verificar si debe devolver el valor espejo o no
+                {
+                    if ($v->getAtributo()->getEspejo() == $espejo)
+                    {
+                        return $v;
+                    }
+                    else
+                    {
+                        $value = $v;
+                    }
+                }
+                else
+                {
+                    return $v;
+                }
+            }
         }
-        return null;
+        return $value;
     }
 
     public function generateAtributes()
@@ -210,6 +229,18 @@ abstract class MovimientoStock
             }
         }
         return null;
+    }
+
+    public function setValorConAtributo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo, $valor)
+    {
+        foreach ($this->valores as $value) 
+        {
+            if ($value->getAtributo()->getAtributoAbstracto() == $atributo)
+            {
+                $value->setValor($valor);
+               // throw new \Exception($value." ERROR ".$valor, 1);                
+            }
+        }
     }
 
     public function getValorAtributoConNombre($nombre)

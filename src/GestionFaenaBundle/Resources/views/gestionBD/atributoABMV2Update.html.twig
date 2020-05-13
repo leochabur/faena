@@ -17,9 +17,12 @@
 		<thead>
 			<tr>
 				<th>Atributo</th>
-				<th>Calculo</th>
 				<th>Acumula</th>
 				<th>Promedia</th>
+				<th>Espejo</th>
+				<th>Carga Dato</th>
+				<th>Atr. Base</th>
+				<th>Mostrar</th>
 				<th>Decimales</th>
 				<th>Posicion</th>
 				<th></th>
@@ -31,11 +34,14 @@
 				{% if not atrib.eliminado %}
 					{% set atr = formsAtr[atrib.id] %}
 					{{ form_start(atr, {'attr' : {'novalidate' : 'novalidate', 'class' : 'editatr'}}) }}
-					<tr>
-						<td>{{ atrib }}</td>
-						<td>{{ atrib.calculo }}</td>
+					<tr class="h6 small">
+						<td title="{{ atrib.calculo }}">{{ atrib }}</td>
 						<td>{{ form_widget(atr.acumula, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td>{{ form_widget(atr.promedia, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td>{{ form_widget(atr.espejo, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td>{{ form_widget(atr.mostrarAlCargar, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td>{{ form_widget(atr.atributoBase, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td>{{ form_widget(atr.mostrar, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td>{{ form_widget(atr.decimales, {'attr' : {'class' : 'form-control-sm col-4'}}) }}</td>
 						<td>{{ form_widget(atr.posicion, {'attr' : {'class' : 'form-control-sm col-4'}}) }}</td>
 						<td>{{ form_widget(atr.guardar, {'attr' : {'class' : 'btn-sm btn-warning'}}) }}</td>

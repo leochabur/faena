@@ -24,7 +24,7 @@
 	</ul>
 	{{ form_label(fatr.valores, 'Valores') }}
     {% for f in fatr.valores %}
-    	<div class="form-row">
+    	<div class="form-row {% if f.hidden is defined %}invisible{% endif %}">
     		{{  form_widget(f.atributo) }}
     		{%  if f.unidadMedida is defined %}
     			{{  form_widget(f.unidadMedida) }}
@@ -34,6 +34,9 @@
     		{% endif %}
     		{%  if f.valor is defined %}
     			{{  form_widget(f.valor, {'atr':{'placeholder' : 'Ingrese el valor'}}) }}
+    		{% endif %}
+    		{% if f.hidden is defined %}
+    			{{ form_widget(f.hidden) }}
     		{% endif %}
     	</div>            	
     {% endfor %}

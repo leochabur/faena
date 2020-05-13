@@ -194,7 +194,7 @@ class ValorNumerico extends ValorAtributo
     {
         $valor = $this->valor;//getMovimiento()->updateValueAtribute($this->getValor());
         if ($redonedo)
-            return number_format($valor,($this->getAtributo()?$this->getAtributo()->getDecimales():$this->getDecimales()),',','');
+            return number_format($valor,($this->getAtributo()?$this->getAtributo()->getDecimales():$this->getDecimales()),'.','');
         else
             return $valor;
     }

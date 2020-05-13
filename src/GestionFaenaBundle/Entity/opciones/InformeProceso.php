@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * InformeProceso
  *
- * @ORM\Table(name="opciones_informe_proceso")
+ * @ORM\Table(name="sp_opc_def_inf")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\opciones\InformeProcesoRepository")
  */
 class InformeProceso
@@ -23,7 +23,7 @@ class InformeProceso
     private $id;
 
     /**
-     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento")
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento", cascade={"all"})
      * @ORM\JoinTable(name="sp_proc_con_mov_por_proceso",
      *      joinColumns={@ORM\JoinColumn(name="id_inf_proc", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="id_con_mov", referencedColumnName="id", unique=true)}
@@ -36,12 +36,31 @@ class InformeProceso
      */
     private $conceptos;
 
+
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena") 
+     * @ORM\OneToMany(targetEntity="AtributoInforme", mappedBy="informe")
+     * @ORM\OrderBy({"posicion" = "ASC"})
+     */
+    private $atributos;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", cascade={"all"}) 
     * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $proceso;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo") 
+    * @ORM\JoinColumn(name="id_atr_ajuste", referencedColumnName="id")
+    */      
+    private $atributoAjuste;
+    
+
+    public function __toString()
+    {
+        return $this->proceso."";
+    }
 
     /**
      * Get id
@@ -51,13 +70,6 @@ class InformeProceso
     public function getId()
     {
         return $this->id;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->conceptos = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -116,5 +128,106 @@ class InformeProceso
     public function getProceso()
     {
         return $this->proceso;
+    }
+
+    /**
+     * Add atributo
+     *
+     * @param \GestionFaenaBundle\Entity\opciones\AtributoInforme $atributo
+     *
+     * @return InformeProceso
+     */
+    public function addAtributo(\GestionFaenaBundle\Entity\opciones\AtributoInforme $atributo)
+    {
+        $this->atributos[] = $atributo;
+
+        return $this;
+    }
+
+    /**
+     * Remove atributo
+     *
+     * @param \GestionFaenaBundle\Entity\opciones\AtributoInforme $atributo
+     */
+    public function removeAtributo(\GestionFaenaBundle\Entity\opciones\AtributoInforme $atributo)
+    {
+        $this->atributos->removeElement($atributo);
+    }
+
+    /**
+     * Get atributos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAtributos()
+    {
+        return $this->atributos;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->conceptos = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->atributos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    public function getAtrWhitSort($orden)
+    {
+        foreach ($this->atributos as $atr) {
+            if ($atr->getNumeroOrden() == $orden)
+                return $atr;
+        }
+        return null;
+    }
+
+    public function getAtributoAgrupa() //devuelve cual es el atributo por el cual se deben agrupar los datos
+    {
+        foreach ($this->atributos as $atr) {
+            if ($atr->getAgrupa())
+                return $atr;
+        }
+        return null;
+    }
+
+    public function getAtributosAcumulables() //devuelve un areglo con los atributos que se deben acumular
+    {
+        $atributos = array();
+        foreach ($this->atributos as $atr) 
+        {
+            if ($atr->getSumariza())
+            {
+                $atributos[$atr->getAtributo()->getId()] = 's';
+            }
+            elseif ($atr->getPromedia()) {
+                $atributos[$atr->getAtributo()->getId()] = 'p';
+            }
+        }
+        return $atributos;
+    }
+
+
+    /**
+     * Set atributoAjuste
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Atributo $atributoAjuste
+     *
+     * @return InformeProceso
+     */
+    public function setAtributoAjuste(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributoAjuste = null)
+    {
+        $this->atributoAjuste = $atributoAjuste;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoAjuste
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Atributo
+     */
+    public function getAtributoAjuste()
+    {
+        return $this->atributoAjuste;
     }
 }

@@ -90,6 +90,27 @@ abstract class Atributo
      */
     private $eliminado = false;
 
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atr_base", referencedColumnName="id")
+    */      
+    private $atributoBase;  //para el caso que se deba modificar la informacion del mismo atributo (Ej al ajustar el informe de Faena)
+
+    /**
+     * @ORM\Column(name="espejo", type="boolean", options={"default":false}, nullable=true)
+     */
+    private $espejo = false;  //para el caso que se dese modficar el valor de un atributo no se altere el original -idem anterior-
+
+    /**
+     * @ORM\Column(name="mostrarAlCargar", type="boolean", options={"default":true}, nullable=true)
+     */
+    private $mostrarAlCargar = true;  //para el caso que se manejen datos paralelos no se muetren a realizar la carga
+
+    /**
+     * @ORM\Column(name="defecto", type="float", nullable=true)
+     */
+    private $defecto;  //valor por defecto asignado
+
 
     public function getNumeroOrden()
     {
@@ -419,5 +440,101 @@ abstract class Atributo
     public function getEliminado()
     {
         return $this->eliminado;
+    }
+
+    /**
+     * Set espejo
+     *
+     * @param boolean $espejo
+     *
+     * @return Atributo
+     */
+    public function setEspejo($espejo)
+    {
+        $this->espejo = $espejo;
+
+        return $this;
+    }
+
+    /**
+     * Get espejo
+     *
+     * @return boolean
+     */
+    public function getEspejo()
+    {
+        return $this->espejo;
+    }
+
+    /**
+     * Set atributoBase
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoBase
+     *
+     * @return Atributo
+     */
+    public function setAtributoBase(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoBase = null)
+    {
+        $this->atributoBase = $atributoBase;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoBase
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto
+     */
+    public function getAtributoBase()
+    {
+        return $this->atributoBase;
+    }
+
+    /**
+     * Set mostrarAlCargar
+     *
+     * @param boolean $mostrarAlCargar
+     *
+     * @return Atributo
+     */
+    public function setMostrarAlCargar($mostrarAlCargar)
+    {
+        $this->mostrarAlCargar = $mostrarAlCargar;
+
+        return $this;
+    }
+
+    /**
+     * Get mostrarAlCargar
+     *
+     * @return boolean
+     */
+    public function getMostrarAlCargar()
+    {
+        return $this->mostrarAlCargar;
+    }
+
+    /**
+     * Set defecto
+     *
+     * @param float $defecto
+     *
+     * @return Atributo
+     */
+    public function setDefecto($defecto)
+    {
+        $this->defecto = $defecto;
+
+        return $this;
+    }
+
+    /**
+     * Get defecto
+     *
+     * @return float
+     */
+    public function getDefecto()
+    {
+        return $this->defecto;
     }
 }

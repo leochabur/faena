@@ -3,13 +3,30 @@
 <br>
 <hr>
 <div class="text-left">
-	<span class="h5 card-title">INFORME I</span>
+	<span class="h5 card-title">INFORME III</span>
 </div>
 <div class="text-center">
 	<span class="h5 card-title">Faena:  {{ faena.fechaFaena | date('d/m/Y') }}</span>
 </div>
 <hr>
-
+{{ form_start(form) }}
+<div class="form-row">
+	<div class="col-2">
+		{{ form_label(form.factor) }}
+		{{ form_widget(form.factor) }}
+	</div>
+</div>
+<div class="form-row">
+	<div class="col-3">
+		{{ form_widget(form.load, {'attr' : {'class' : 'btn btn-warning'}}) }}
+	</div>
+	<div class="col-3">
+		{{ form_widget(form.aplicar, {'attr' : {'class' : 'btn btn-danger'}}) }}
+	</div>
+</div>
+{{ form_end(form) }}
+<hr>
+{% if movimientos is defined %}
 	<table class="table table-striped table-bordered table-hover table-sm ">
 			<thead>
 				<tr>
@@ -44,5 +61,6 @@
 				{% endfor %}
 			</tbody>
 	</table>
-	<a class="btn btn-success" href="{{ path('export_informe_uno', { proc: proceso.id, fd : faena.id}) }}" target="_blanck">Imprimir</a>
+	<a class="btn btn-success" href="{{ path('export_informe_uno', { proc: proceso.id, fd : faena.id, ajs: 1}) }}" target="_blanck">Imprimir</a>
+{% endif %}
 {% endblock fos_user_content %}

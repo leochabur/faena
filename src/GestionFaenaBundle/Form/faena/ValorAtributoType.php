@@ -13,6 +13,7 @@ use GestionFaenaBundle\Entity\faena\ValorNumerico;
 use GestionFaenaBundle\Entity\faena\ValorTexto;
 use GestionFaenaBundle\Entity\faena\ValorExterno;
 use GestionFaenaBundle\Entity\gestionBD\Atributo;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class ValorAtributoType extends AbstractType
 {
@@ -43,6 +44,13 @@ class ValorAtributoType extends AbstractType
                         'attr' => ['class' => 'col-2'],
                         'choice_label' => 'nombre'
                     ]);
+        if (!$valor->getAtributo()->getMostrarAlCargar()) //para los casos que el ususrio comun no vea los calculos que se haceb
+        {
+            $form->add('hidden', 
+                       HiddenType::class, 
+                       ['mapped' => false]);
+        }
+
         if (ValorNumerico::class == get_class($valor))
         {
             $form->add('unidadMedida', 
@@ -52,9 +60,17 @@ class ValorAtributoType extends AbstractType
                          'choices' => [$valor->getAtributo()->getUnidadMedida()]]);
 
             $options = ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()], 'required' => true];
+
             if ($this->type)
             {
                 $options['data'] = ($this->proceso?$this->proceso->getStockArticulo($this->faena, $this->articulo):"");
+            }
+            elseif (!$valor->getAtributo()->getMostrarAlCargar())
+            {
+                if ($valor->getValor())
+                    $options['data'] = $valor->getValor();
+                else
+                    $options['data'] = ($valor->getAtributo()->getDefecto()?$valor->getAtributo()->getDefecto():'');
             }
             $form->add('valor', 
                        TextType::class, 

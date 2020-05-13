@@ -71,7 +71,7 @@
 	{% endif %}
 	{{ form_label(fatr.valores, 'Valores') }}
     {% for f in fatr.valores %}
-    	<div class="form-row">
+    	<div class="form-row {% if f.hidden is defined %}invisible{% endif %}">
     		{{  form_widget(f.atributo, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
     		{%  if f.unidadMedida is defined %}
     			{{  form_widget(f.unidadMedida, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
@@ -81,6 +81,9 @@
     		{% endif %}
     		{%  if f.valor is defined %}
     			{{  form_widget(f.valor, {'attr' : {'class' : 'col-md-2 col-sm-2'}}) }}
+    		{% endif %}
+     		{% if f.hidden is defined %}
+    			{{ form_widget(f.hidden) }}
     		{% endif %}
     	</div>            	
     {% endfor %}

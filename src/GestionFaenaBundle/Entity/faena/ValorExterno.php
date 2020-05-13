@@ -51,4 +51,9 @@ class ValorExterno extends ValorAtributo
     {
         return $this->entidadExterna.'';
     }
+
+    public function __toString()
+    {
+        return $this->entidadExterna."";
+    }
 }

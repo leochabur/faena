@@ -53,4 +53,9 @@ class ValorTexto extends ValorAtributo
     {
         return $this->getValor();
     }
+
+    public function __toString()
+    {
+        return $this->valor;
+    }
 }

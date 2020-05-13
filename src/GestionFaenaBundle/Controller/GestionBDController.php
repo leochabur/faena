@@ -472,11 +472,15 @@ class GestionBDController extends Controller
     {        
         $form =    $this->createFormBuilder(['message' => 'Type your message here'])
                         ->add('posicion', IntegerType::class, ['data' => $atr->getPosicion()])
+                        ->add('mostrar', CheckboxType::class, ['data' => $atr->getMostrar()])
+                        ->add('atributoBase', EntityType::class, ['class' => AtributoAbstracto::class, 'data' => $atr->getAtributoBase()])
+                        ->add('espejo', CheckboxType::class, ['data' => $atr->getEspejo()])
+                        ->add('mostrarAlCargar', CheckboxType::class, ['data' => $atr->getMostrarAlCargar()])
                         ->add('decimales', IntegerType::class, ['data' => $atr->getDecimales(), 'disabled' => (!$atr->manejaDecimales())])
                         ->add('acumula', CheckboxType::class, ['label' => null, 'data' => $atr->getAcumula(), 'disabled' => (!$atr->manejaDecimales())])   
                         ->add('promedia', CheckboxType::class, ['data' => $atr->getPromedia(), 'disabled' => (!$atr->manejaDecimales())])   
-                        ->add('guardar', SubmitType::class, array('label' => 'Guardar'))          
-                        ->add('delete', ButtonType::class, array('label' => 'Eliminar'))    
+                        ->add('guardar', SubmitType::class, array('label' => '+'))          
+                        ->add('delete', ButtonType::class, array('label' => '-'))    
                         ->setAction($this->generateUrl('bd_update_atributo', array('atr' => $atr->getId())))            
                         ->getForm();
         return $form;
@@ -514,6 +518,10 @@ class GestionBDController extends Controller
         $form->handleRequest($request);
         $data = $form->getData();
         $atributo->setPosicion($data['posicion']);
+        $atributo->setMostrar($data['mostrar']);
+        $atributo->setMostrarAlCargar($data['mostrarAlCargar']);
+        $atributo->setAtributoBase($data['atributoBase']);
+        $atributo->setEspejo($data['espejo']);
         if ($atributo->manejaDecimales())
         {            
             $atributo->setDecimales($data['decimales']);
