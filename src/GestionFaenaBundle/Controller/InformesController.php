@@ -165,7 +165,7 @@ class InformesController extends Controller
         $em = $this->getDoctrine()->getManager();
         $faenaDiaria = $em->find(FaenaDiaria::class, $fd);
         $proceso = $em->find(ProcesoFaenaDiaria::class, $pfd);
-        $informe = $em->find(InformeProceso::class, 2);
+        $informe = $em->find(InformeProceso::class, 1);
         $repository = $em->getRepository(MovimientoStock::class);
         $movimientos = $repository->getAllEntradasStockProceso($proceso, $faenaDiaria, $informe);
         
@@ -388,7 +388,7 @@ class InformesController extends Controller
         $em = $this->getDoctrine()->getManager();
         $faena = $em->find(FaenaDiaria::class, $fd);
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
-        $informe = $em->find(InformeProceso::class, 2);
+        $informe = $em->find(InformeProceso::class, 1);
         $repository = $em->getRepository(MovimientoStock::class);
         $movimientos = $repository->getAllEntradasStockProceso($proceso, $faena, $informe);
         $result = $this->getDetalleMovimientos($informe, $movimientos, true, null, false);
@@ -422,7 +422,7 @@ class InformesController extends Controller
             }
             
             $data = $form->getData();
-            $informe = $em->find(InformeProceso::class, 2);
+            $informe = $em->find(InformeProceso::class, 1);
             $repository = $em->getRepository(MovimientoStock::class);
             $movimientos = $repository->getAllEntradasStockProceso($proceso, $faena, $informe);
             $result = $this->getDetalleMovimientos($informe, $movimientos, true, $data['factor'], $aplicar);
@@ -439,7 +439,7 @@ class InformesController extends Controller
         $em = $this->getDoctrine()->getManager();
         $faenaDiaria = $em->find(FaenaDiaria::class, $fd);
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
-        $informe = $em->find(InformeProceso::class, 2);
+        $informe = $em->find(InformeProceso::class, 1);
         $repository = $em->getRepository(MovimientoStock::class);
         $movimientos = $repository->getAllEntradasStockProceso($proceso, $faenaDiaria, $informe);
 
