@@ -81,8 +81,7 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                     ->setParameter('proceso', $proceso)
                     ->setParameter('articulo', $articulo)
                     ->setParameter('atributo', $atributo)
-                    ->getSql();
-                   // ->getOneOrNullResult();
+                    ->getOneOrNullResult();
     }
 
     public function getStockDeArticulosPorProceso(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso)
