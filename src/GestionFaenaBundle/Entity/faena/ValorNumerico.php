@@ -137,7 +137,8 @@ class ValorNumerico extends ValorAtributo
                                                                             $f1->getArticulo(),
                                                                             $f1->getAtributo(),
                                                                             $accion);
-                                    $factor1 = $due['stock'];
+                                   // $factor1 = $due['stock'];
+                                  //  throw new \Exception($due." ".$movimiento->getProcesoFnDay()->getId()."   ".$f1->getArticulo()->getId()." ".$f1->getAtributo()->getId(), 1);
                                 }                  
                             }
 
@@ -167,20 +168,27 @@ class ValorNumerico extends ValorAtributo
                                 }     
                                 else{ //significa que debe recuperar el valor del acumulado del atributo
                                     $accion = ($f2->getTipoCalculo()=='S'?'s':'p');
+                                   // try{
                                     $due = $repository->getPromedioAtributo($movimiento->getProcesoFnDay(),
                                                                             $f2->getArticulo(),
                                                                             $f2->getAtributo(),
                                                                             $accion);
+                                   // if ($due === null)
+                                   //   throw new \Exception("Error nulllllll Request ".print_r($due)."  ".$f2->getArticulo()."  ".$f2->getAtributo(), 1);
+                                  //  }
+                                  //  catch(\Exception $e){ throw new \Exception("Error Processing Request ".$e->getMessage(), 1); }
+                                    
+                                    
                                     $factor2 = $due['stock'];
                                 }                  
                             }
 
                             switch($factores['operacion']) {
-                                                case '/': $this->valor = $factor1 / ($factor2?$factor2:$factores['factor']); break;
-                                                case '*': $this->valor = $factor1 * ($factor2?$factor2:$factores['factor']); break;
-                                                case '+': $this->valor = $factor1 + ($factor2?$factor2:$factores['factor']); break;
-                                                case '-': $this->valor = $factor1 - ($factor2?$factor2:$factores['factor']); break;
-                                                case 'R': $this->valor = $factor1 * ($factor2?$factor2:$factores['factor']); break;
+                                                case '/': $this->valor = $factor1 / ($factor2?$factor2:$factores['factorAjuste']); break;
+                                                case '*': $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); break;
+                                                case '+': $this->valor = $factor1 + ($factor2?$factor2:$factores['factorAjuste']); break;
+                                                case '-': $this->valor = $factor1 - ($factor2?$factor2:$factores['factorAjuste']); break;
+                                                case 'R': $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); break;
                             }
                             
                     }

@@ -68,20 +68,21 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
         $accion = ($action == 's'?"SUM":"AVG");
         return $this->getEntityManager()
                     ->createQuery("SELECT articulo.nombre as art, $accion(valor.valor) as stock
-                                   FROM GestionFaenaBundle:faena\ValorNumerico valor   
-                                   JOIN valor.atributo atributo
-                                   JOIN atributo.atributoAbstracto atributoAbstracto
-                                   JOIN atributo.articuloAtrConc articuloAtributoConcepto
-                                   JOIN articuloAtributoConcepto.articulo articulo
-                                   JOIN articuloAtributoConcepto.concepto conceptoMovimientoProceso
-                                   JOIN conceptoMovimientoProceso.procesoFaena procesoFaena 
-                                   JOIN procesoFaena.procesosFaenaDiaria procesoDiario                                         
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   INNER JOIN valor.atributo atributo
+                                   INNER JOIN atributo.atributoAbstracto atributoAbstracto
+                                   INNER JOIN atributo.articuloAtrConc articuloAtributoConcepto
+                                   INNER JOIN articuloAtributoConcepto.articulo articulo
+                                   INNER JOIN articuloAtributoConcepto.concepto conceptoMovimientoProceso
+                                   INNER JOIN conceptoMovimientoProceso.procesoFaena procesoFaena 
+                                   INNER JOIN procesoFaena.procesosFaenaDiaria procesoDiario                                         
                                    WHERE procesoDiario = :proceso AND  articulo = :articulo  AND atributoAbstracto = :atributo
                                    GROUP BY articulo")
                     ->setParameter('proceso', $proceso)
                     ->setParameter('articulo', $articulo)
                     ->setParameter('atributo', $atributo)
-                    ->getOneOrNullResult();
+                    ->getSql();
+                   // ->getOneOrNullResult();
     }
 
     public function getStockDeArticulosPorProceso(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso)

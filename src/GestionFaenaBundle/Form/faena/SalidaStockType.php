@@ -36,7 +36,7 @@ class SalidaStockType extends AbstractType
                                 ])
                 ->add('valores', CollectionType::class, [
                     'entry_type' => ValorAtributoType::class,
-                    'entry_options' => ['label' => false],
+                    'entry_options' => ['label' => false, 'faena' => null, 'proceso' => null, 'articulo' => null],
                 ])
                 ->add('guardar', SubmitType::class);
                 $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
@@ -48,7 +48,11 @@ class SalidaStockType extends AbstractType
         $form = $event->getForm();
 
             $form->add('concepto', 
-                       EntityType::class, ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 'choices' => [$valor->getConcepto()]]);
+                       EntityType::class, 
+                       ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 
+                        'choices' => [$valor->getArtProcFaena()->getConcepto()],
+                        'mapped' => false
+                      ]);
 
         
     }

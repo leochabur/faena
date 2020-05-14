@@ -737,7 +737,7 @@ class GestionFaenaController extends Controller
                                  ['action' => $this->generateUrl($url, 
                                                                 ['type' => $movimiento->getType(), 
                                                                  'proc' => $proc->getId(), 
-                                                                 'conc' => $movimiento->getConcepto()->getId(), 
+                                                                 'conc' => $movimiento->getArtProcFaena()->getConcepto()->getId(), 
                                                                  'art' => $art->getId(), 
                                                                  'mov' => $movimiento->getId(),
                                                                  'fanday' => $fanday->getId()]),
