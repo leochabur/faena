@@ -90,13 +90,13 @@
               $('.fel').focusout(function(){                                                
                                             $('.ffn').val($(this).val());  
                                             var ffn = new Date($(this).val());  
-                                            ffn.setDate(ffn.getDate() + 15);
+                                            ffn.setDate(ffn.getDate() + 16);
                                             var result = ffn.getFullYear() + "-";
                                             var mont = ffn.getMonth()+1;
                                             if (mont < 10)
                                               mont = '0'+mont;
                                             result = result+mont+'-';
-                                            var day = ffn.getDate()+1;
+                                            var day = ffn.getDate();
                                             if (day < 10)
                                               day = '0'+day;
                                             result = result + day;
