@@ -22,4 +22,23 @@ class SolicitudRepository extends \Doctrine\ORM\EntityRepository
 			        ->getQuery()
 			        ->getResult(); 
 	} 
+
+	public function findSolicitudesWihtPrecinto($precinto) 
+	{ 
+	    $query =  $this->createQueryBuilder('s')
+		    			->andWhere('s.precintoSenasa LIKE :numero')
+		    			->setParameter('numero', '%'.$precinto.'%')
+				        ->getQuery()
+				        ->getResult();
+		return $query;
+
+		$query = $this->getEntityManager()->createQuery("SELECT s FROM GestionSigcerBundle:Solicitud s WHERE s.precintoSenasa LIKE :foo");
+		$query->setParameter('foo', '%'.$precinto.'%');
+		$users = $query->getResult();		
+		return $users;
+		return array(
+        'sql'        => $query->getSQL(),
+        'parameters' => $query->getParameters(),
+        );
+	} 
 }

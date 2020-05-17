@@ -12,6 +12,8 @@ class GrupoSolicitudRepository extends \Doctrine\ORM\EntityRepository
 {
 	public function findAllGrupos() { 
 	    return $this->createQueryBuilder('f')
+	    			->where('f.eliminada = :eliminada')
+	    			->setParameter('eliminada', false)
 			        ->addOrderBy('f.fecha', 'DESC')
 			        ->getQuery()
 			        ->getResult(); 

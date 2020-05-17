@@ -18,13 +18,10 @@ class TropaSolicitudType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('fechaCongelado', DateType::class, ['widget' => 'single_text'])
-                ->add('fechaElaboracion', DateType::class, ['widget' => 'single_text'])
+        $builder->add('fechaElaboracion', DateType::class, ['widget' => 'single_text'])
                 ->add('fechaFaena', DateType::class, ['widget' => 'single_text'])
                 ->add('fechaVto', DateType::class, ['widget' => 'single_text'])
-                ->add('numeroTropa')
-                ->add('lote')
-                ->add('guardar', SubmitType::class);
+                ->add('lote');
         $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
     }
 
@@ -36,7 +33,14 @@ class TropaSolicitudType extends AbstractType
                     EntityType::class, 
                     ['class' => 'GestionSigcerBundle\Entity\GrupoSolicitud', 
                      'choices' => [$valor->getGrupoSolicitud()]
-                    ]);        
+                    ]);   
+        if ($valor->getId())
+            $label = 'Modificar Tropa';
+        else
+            $label = 'Agregar Tropa';
+
+
+        $form->add('guardar', SubmitType::class, ['label' => $label]);     
     }
 
     /**

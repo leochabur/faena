@@ -24,7 +24,10 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Doctrine\ORM\EntityRepository;
-
+use GestionSigcerBundle\Form\TropaSolicitudType;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Type;
 /**
  * @Route("/sigcer/solic")
  */
@@ -83,6 +86,24 @@ class GestionSolicitudesController extends Controller
                             ['form' => $form->createView(), 'grupos' => $grupos]);
     }
 
+    /**
+     * @Route("/delgs/{gpo}", name="sigcer_delete_grupos_solicitudes")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteGrupoSolicitudes($gpo)
+    {
+      try
+      {
+          $em = $this->getDoctrine()->getManager();
+          $repository = $em->getRepository(GrupoSolicitud::class);
+          $grupo = $repository->find($gpo);
+          $grupo->setEliminada(true);
+          $em->flush();
+          return new JsonResponse(['ok' => true]);
+      }
+      catch (\Exception $e) { return new JsonResponse(['ok' => false, 'message' => $e->getMessage()]); }
+    }
+
   ////////////////Agregar Tropas a Grupo de Solicitud//////////////////////////////////
     /**
      * @Route("/addtrgs/{gpo}", name="sigcer_add_tropa_grupo_solicitud")
@@ -135,6 +156,49 @@ class GestionSolicitudesController extends Controller
                             ['form' => $form->createView()]);
     }
 
+    /**
+     * @Route("/edittrp/{tpa}", name="sigcer_editar_tropa")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarTropa($tpa)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $tropa = $em->find(TropaSolicitud::class, $tpa);
+
+        $form = $this->createForm(TropaSolicitudType::class, 
+                                      $tropa, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_tropa_procesar', array('tpa' => $tpa))]);
+        return $this->render('@GestionSigcer/addTropaAGrupo.html.twig', 
+                            ['form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/edittrproc/{tpa}", name="sigcer_editar_tropa_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarTropaProcesar($tpa, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $tropa = $em->find(TropaSolicitud::class, $tpa);
+
+        $form = $this->createForm(TropaSolicitudType::class, 
+                                      $tropa, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('sigcer_editar_tropa_procesar', array('tpa' => $tpa))]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $em->flush();
+            $this->addFlash(
+                                'sussecc',
+                                'Tropa modificada exitosamente!'
+                            );
+            return $this->redirectToRoute('sigcer_add_tropa_grupo_solicitud', ['gpo' => $tropa->getGrupoSolicitud()->getId()]);
+        }
+        return $this->render('@GestionSigcer/addTropaAGrupo.html.twig', 
+                            ['form' => $form->createView()]);
+    }
   ////////////////Agregar Solicitud a Grupo de Solicitudes//////////////////////////////////
     /**
      * @Route("/addsol/{gpo}", name="sigcer_add_solictud_a_grupo")
@@ -436,6 +500,44 @@ class GestionSolicitudesController extends Controller
     }
 
     /**
+     * @Route("/findsol", name="sigcer_find_solicitud", methods={"POST", "GET"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function findSolicitud(Request $request)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('precinto',TextType::class, [
+                                                      'label' => 'Nº de precinto',
+                                                      'constraints' => [
+                                                                      new Length(['min' => 2, 
+                                                                                  'max' => 4, 
+                                                                                  'minMessage' => 'Debe contener al menos dos numero',
+                                                                                  'maxMessage' => 'Como maximo se admiten cuatro numeros',]),
+                                                                      new NotBlank(['message' => 'Debe completar el campo']),
+                                                                      new Type(['type' => 'numeric', 'message' => 'Solo se aceptan numeros'])
+                                                                  ],
+                                                      ])
+                        ->add('find', SubmitType::class, ['label' => 'Buscar'])   
+                        ->setMethod('POST')   
+                        ->getForm();
+        if ($request->isMethod('POST'))
+        {
+          $form->handleRequest($request);
+          if ($form->isValid())
+          {
+              $data = $form->getData();
+
+              
+              $repo = $this->getDoctrine()->getRepository(Solicitud::class);
+              $solicitudes = $repo->findSolicitudesWihtPrecinto($data['precinto']);
+            //  throw new \Exception(" ".print_r($solicitudes) , 1);
+              return $this->render('@GestionSigcer/opciones/findSolicitud.html.twig', ['solicitudes' => $solicitudes, 'form' => $form->createView()]);
+          }
+        }
+        return $this->render('@GestionSigcer/opciones/findSolicitud.html.twig', ['form' => $form->createView()]);
+    }
+
+    /**
      * @Route("/updeta/{deta}", name="sigcer_update_detalle")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
@@ -671,12 +773,13 @@ class GestionSolicitudesController extends Controller
                         $producto->appendChild($codigo);
                     $detalle->appendChild($producto);
                     $congelado = $tr->getFechaCongelado()->format('Y-m-d');
-                    $tropa = $dom->createElement('se:tropa');
-                    $tropa->setAttribute( "fechaDeCongelado", "" .$congelado );
+                    //$tropa = $dom->createElement('se:tropa');
+                    //tropa->setAttribute( "fechaDeCongelado", "" .$congelado );
                     $tropa->setAttribute( "fechaDeElaboracion", "".$tr->getFechaElaboracion()->format('Y-m-d'));
                     $tropa->setAttribute( "fechaDeFaena", "".$tr->getFechaFaena()->format('Y-m-d') );
                     $tropa->setAttribute( "fechaDeVencimiento", ''.$tr->getFechaVto()->format('Y-m-d'));
-                    $tropa->setAttribute( "numeroTropa", ''.$tr->getNumeroTropa() );
+                    //$tropa->setAttribute( "numeroTropa", ''.$tr->getNumeroTropa() );
+                    $tropa->setAttribute( "numeroTropa", ''.$tr->getLote() );
                     $tropa->setAttribute( "lote", ''.$tr->getLote());
                     $detalle->appendChild($tropa);
                     $detalle->appendChild($dom->createElement('se:pesoNeto', $deta->getPesoNeto()));

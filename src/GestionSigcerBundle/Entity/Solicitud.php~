@@ -78,7 +78,7 @@ class Solicitud
      * @ORM\Column(name="temperatura", type="float")
      * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
-    private $temperatura;
+    private $temperatura = 0;
 
     /**
      * @var float
@@ -97,7 +97,6 @@ class Solicitud
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Cliente") 
     * @ORM\JoinColumn(name="id_cliente", referencedColumnName="id")
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
     */      
     private $cliente;
 
@@ -109,7 +108,7 @@ class Solicitud
     private $camion;
 
     /**
-     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="solicitud")
+     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="solicitud", cascade={"ALL"})
      */
     private $detalles;
 
@@ -464,5 +463,29 @@ class Solicitud
     public function getZona()
     {
         return $this->zona;
+    }
+
+    /**
+     * Set precintos
+     *
+     * @param integer $precintos
+     *
+     * @return Solicitud
+     */
+    public function setPrecintos($precintos)
+    {
+        $this->precintos = $precintos;
+
+        return $this;
+    }
+
+    /**
+     * Get precintos
+     *
+     * @return integer
+     */
+    public function getPrecintos()
+    {
+        return $this->precintos;
     }
 }

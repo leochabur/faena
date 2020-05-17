@@ -63,18 +63,25 @@ class GrupoSolicitud
     private $tropas;
 
     /**
-     * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo")
+     * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo", cascade={"ALL"})
      */
     private $solicitudes;
 
     /**
-     * @ORM\ManyToMany(targetEntity="GestionSigcerBundle\Entity\opciones\Region")
+     * @ORM\ManyToMany(targetEntity="GestionSigcerBundle\Entity\opciones\Region", cascade={"ALL"})
      * @ORM\JoinTable(name="sig_reg_gen_gpo",
      *      joinColumns={@ORM\JoinColumn(name="id_gpo", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="id_reg", referencedColumnName="id")}
      *      )
      */
     private $regionesGeneradas;
+
+    /**
+     *
+     * @ORM\Column(name="eliminada", type="boolean", options={"default"=false})
+     */
+    private $eliminada = false;
+
 
     public function getTropa()
     {
@@ -334,4 +341,28 @@ class GrupoSolicitud
         return $this->regionesGeneradas->contains($region);
     }
 
+
+    /**
+     * Set eliminada
+     *
+     * @param boolean $eliminada
+     *
+     * @return GrupoSolicitud
+     */
+    public function setEliminada($eliminada)
+    {
+        $this->eliminada = $eliminada;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminada
+     *
+     * @return boolean
+     */
+    public function getEliminada()
+    {
+        return $this->eliminada;
+    }
 }

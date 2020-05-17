@@ -63,18 +63,25 @@ class GrupoSolicitud
     private $tropas;
 
     /**
-     * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo")
+     * @ORM\OneToMany(targetEntity="Solicitud", mappedBy="grupo", cascade={"ALL"})
      */
     private $solicitudes;
 
     /**
-     * @ORM\ManyToMany(targetEntity="GestionSigcerBundle\Entity\opciones\Region")
+     * @ORM\ManyToMany(targetEntity="GestionSigcerBundle\Entity\opciones\Region", cascade={"ALL"})
      * @ORM\JoinTable(name="sig_reg_gen_gpo",
      *      joinColumns={@ORM\JoinColumn(name="id_gpo", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="id_reg", referencedColumnName="id")}
      *      )
      */
     private $regionesGeneradas;
+
+    /**
+     *
+     * @ORM\Column(name="eliminada", type="boolean", options={"default"=false})
+     */
+    private $eliminada = false;
+
 
     public function getTropa()
     {
@@ -296,30 +303,6 @@ class GrupoSolicitud
     }
 
     /**
-     * Set inicioPrecinto
-     *
-     * @param integer $inicioPrecinto
-     *
-     * @return GrupoSolicitud
-     */
-    public function setInicioPrecinto($inicioPrecinto)
-    {
-        $this->inicioPrecinto = $inicioPrecinto;
-
-        return $this;
-    }
-
-    /**
-     * Get inicioPrecinto
-     *
-     * @return integer
-     */
-    public function getInicioPrecinto()
-    {
-        return $this->inicioPrecinto;
-    }
-
-    /**
      * Add regionesGenerada
      *
      * @param \GestionSigcerBundle\Entity\opciones\Region $regionesGenerada
@@ -352,4 +335,10 @@ class GrupoSolicitud
     {
         return $this->regionesGeneradas;
     }
+
+    public function generoSolicitudes(\GestionSigcerBundle\Entity\opciones\Region $region)
+    {
+        return $this->regionesGeneradas->contains($region);
+    }
+
 }

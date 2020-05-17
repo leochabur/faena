@@ -69,6 +69,7 @@
                   <a class="dropdown-item"  href="{{ path('sigcer_generate_multiples', { gpo : g.id}) }}">Generar solicitudes multiples</a>
                   <a class="dropdown-item"  href="{{ path('sigcer_add_solictud_a_grupo', { gpo : g.id}) }}">Gestionar solicitudes</a>
                   <a class="dropdown-item"  href="{{ path('sigcer_modificacion_multiple', { gpo : g.id}) }}">Modificar Multiples Solicitudes</a>
+                  <a class="dropdown-item delete"  href="{{ path('sigcer_delete_grupos_solicitudes', { gpo : g.id}) }}">Eliminar</a>
                 </div>
                 </td>
             </tr>
@@ -77,3 +78,44 @@
     </table>
 </div>
 {% endblock fos_user_content %}
+{% block javascripts %}
+
+    {{ parent() }}
+    <script type="text/javascript">
+
+              $('.delete').click(function(event){
+                                                event.preventDefault();
+                                                var a = $(this);
+                                                bootbox.confirm({
+                                                                message: 'Se eliminaran todas las solicitudes generadas al momento. Seguro eliminar?',
+                                                                size: "large",
+                                                                buttons: {
+                                                                    confirm: {
+                                                                        label: 'Si, eliminar',
+                                                                        className: 'btn-success'
+                                                                    },
+                                                                    cancel: {
+                                                                        label: 'No, cancelar',
+                                                                        className: 'btn-danger'
+                                                                    }
+                                                                },
+                                                                callback: function (result) {
+                                                                    if (result)
+                                                                    {
+                                                                        $.post(a.attr('href'),
+                                                                               function(data){
+                                                                                              if (data.ok)
+                                                                                                  location.reload();
+                                                                                              else
+                                                                                                  alert(data.message);
+                                                                               });
+                                                                    }
+                                                                }
+                                                            });
+
+                                                
+                                                
+              });
+    </script>
+
+{% endblock  %}

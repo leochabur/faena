@@ -108,7 +108,7 @@ class Solicitud
     private $camion;
 
     /**
-     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="solicitud", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="solicitud", cascade={"ALL"})
      */
     private $detalles;
 

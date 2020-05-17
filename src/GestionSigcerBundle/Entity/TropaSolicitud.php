@@ -56,8 +56,7 @@ class TropaSolicitud
     /**
      * @var string
      *
-     * @ORM\Column(name="numeroTropa", type="string", length=255)
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     * @ORM\Column(name="numeroTropa", type="string", length=255, nullable=true)
      */
     private $numeroTropa;
 
