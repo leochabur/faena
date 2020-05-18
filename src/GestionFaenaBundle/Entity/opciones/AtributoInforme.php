@@ -79,6 +79,11 @@ class AtributoInforme
     private $informe;
 
     /**
+     * @ORM\Column(name="redondea", type="boolean", options={"default"=false})
+     */
+    private $redondea = false; // si debe redondear el numero
+
+    /**
      * Get id
      *
      * @return int
@@ -278,5 +283,29 @@ class AtributoInforme
     public function getPromedia()
     {
         return $this->promedia;
+    }
+
+    /**
+     * Set redondea
+     *
+     * @param boolean $redondea
+     *
+     * @return AtributoInforme
+     */
+    public function setRedondea($redondea)
+    {
+        $this->redondea = $redondea;
+
+        return $this;
+    }
+
+    /**
+     * Get redondea
+     *
+     * @return boolean
+     */
+    public function getRedondea()
+    {
+        return $this->redondea;
     }
 }

@@ -472,13 +472,14 @@ class GestionBDController extends Controller
     {        
         $form =    $this->createFormBuilder(['message' => 'Type your message here'])
                         ->add('posicion', IntegerType::class, ['data' => $atr->getPosicion()])
-                        ->add('mostrar', CheckboxType::class, ['data' => $atr->getMostrar()])
+                        ->add('mostrar', CheckboxType::class, ['label' => false, 'data' => $atr->getMostrar()])
+                        ->add('redondea', CheckboxType::class, ['label' => false, 'data' => $atr->getRedondea()])
                         ->add('atributoBase', EntityType::class, ['class' => AtributoAbstracto::class, 'data' => $atr->getAtributoBase()])
-                        ->add('espejo', CheckboxType::class, ['data' => $atr->getEspejo()])
-                        ->add('mostrarAlCargar', CheckboxType::class, ['data' => $atr->getMostrarAlCargar()])
+                        ->add('espejo', CheckboxType::class, ['label' => false, 'data' => $atr->getEspejo()])
+                        ->add('mostrarAlCargar', CheckboxType::class, ['label' => false, 'data' => $atr->getMostrarAlCargar()])
                         ->add('decimales', IntegerType::class, ['data' => $atr->getDecimales(), 'disabled' => (!$atr->manejaDecimales())])
-                        ->add('acumula', CheckboxType::class, ['label' => null, 'data' => $atr->getAcumula(), 'disabled' => (!$atr->manejaDecimales())])   
-                        ->add('promedia', CheckboxType::class, ['data' => $atr->getPromedia(), 'disabled' => (!$atr->manejaDecimales())])   
+                        ->add('acumula', CheckboxType::class, ['label' => false, 'data' => $atr->getAcumula(), 'disabled' => (!$atr->manejaDecimales())])   
+                        ->add('promedia', CheckboxType::class, ['label' => false, 'data' => $atr->getPromedia(), 'disabled' => (!$atr->manejaDecimales())])   
                         ->add('guardar', SubmitType::class, array('label' => '+'))          
                         ->add('delete', ButtonType::class, array('label' => '-'))    
                         ->setAction($this->generateUrl('bd_update_atributo', array('atr' => $atr->getId())))            
@@ -522,6 +523,7 @@ class GestionBDController extends Controller
         $atributo->setMostrarAlCargar($data['mostrarAlCargar']);
         $atributo->setAtributoBase($data['atributoBase']);
         $atributo->setEspejo($data['espejo']);
+        $atributo->setRedondea($data['redondea']);
         if ($atributo->manejaDecimales())
         {            
             $atributo->setDecimales($data['decimales']);

@@ -111,7 +111,11 @@ abstract class Atributo
      */
     private $defecto;  //valor por defecto asignado
 
-
+    /**
+     * @ORM\Column(name="redondea", type="boolean", options={"default"=false})
+     */
+    private $redondea = false; // si debe redondear el numero
+    
     public function getNumeroOrden()
     {
         return ($this->posicion?$this->posicion:$this->id);
@@ -536,5 +540,29 @@ abstract class Atributo
     public function getDefecto()
     {
         return $this->defecto;
+    }
+
+    /**
+     * Set redondea
+     *
+     * @param boolean $redondea
+     *
+     * @return Atributo
+     */
+    public function setRedondea($redondea)
+    {
+        $this->redondea = $redondea;
+
+        return $this;
+    }
+
+    /**
+     * Get redondea
+     *
+     * @return boolean
+     */
+    public function getRedondea()
+    {
+        return $this->redondea;
     }
 }

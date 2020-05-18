@@ -183,12 +183,21 @@ class ValorNumerico extends ValorAtributo
                                 }                  
                             }
 
-                            switch($factores['operacion']) {
+                            switch($factores['operacion']) 
+                            {
                                                 case '/': $this->valor = $factor1 / ($factor2?$factor2:$factores['factorAjuste']); break;
                                                 case '*': $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); break;
                                                 case '+': $this->valor = $factor1 + ($factor2?$factor2:$factores['factorAjuste']); break;
                                                 case '-': $this->valor = $factor1 - ($factor2?$factor2:$factores['factorAjuste']); break;
                                                 case 'R': $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); break;
+                            }
+
+                            if ($this->getAtributo()) //tiene un Atributo asociado
+                            {
+                                if ($this->getAtributo()->getRedondea())
+                                {
+                                    $this->valor = round($this->valor, -1);
+                                }
                             }
                             
                     }

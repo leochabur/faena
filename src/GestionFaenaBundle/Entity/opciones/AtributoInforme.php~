@@ -79,6 +79,11 @@ class AtributoInforme
     private $informe;
 
     /**
+     * @ORM\Column(name="redondea", type="boolean", options={"default"=false})
+     */
+    private $redondea = false; // si debe redondear el numero
+
+    /**
      * Get id
      *
      * @return int
@@ -230,5 +235,53 @@ class AtributoInforme
     public function getAgrupa()
     {
         return $this->agrupa;
+    }
+
+    /**
+     * Set sumariza
+     *
+     * @param boolean $sumariza
+     *
+     * @return AtributoInforme
+     */
+    public function setSumariza($sumariza)
+    {
+        $this->sumariza = $sumariza;
+
+        return $this;
+    }
+
+    /**
+     * Get sumariza
+     *
+     * @return boolean
+     */
+    public function getSumariza()
+    {
+        return $this->sumariza;
+    }
+
+    /**
+     * Set promedia
+     *
+     * @param boolean $promedia
+     *
+     * @return AtributoInforme
+     */
+    public function setPromedia($promedia)
+    {
+        $this->promedia = $promedia;
+
+        return $this;
+    }
+
+    /**
+     * Get promedia
+     *
+     * @return boolean
+     */
+    public function getPromedia()
+    {
+        return $this->promedia;
     }
 }
