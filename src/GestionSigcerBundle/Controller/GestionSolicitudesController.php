@@ -774,7 +774,7 @@ class GestionSolicitudesController extends Controller
                         $producto->appendChild($codigo);
                     $detalle->appendChild($producto);
                    // $congelado = $tr->getFechaCongelado()->format('Y-m-d');
-                    //$tropa = $dom->createElement('se:tropa');
+                    $tropa = $dom->createElement('se:tropa');
                     $tropa->setAttribute( "fechaDeCongelado", "" .$tr->getFechaElaboracion()->format('Y-m-d'));
                     $tropa->setAttribute( "fechaDeElaboracion", "".$tr->getFechaElaboracion()->format('Y-m-d'));
                     $tropa->setAttribute( "fechaDeFaena", "".$tr->getFechaFaena()->format('Y-m-d') );
