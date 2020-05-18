@@ -24,8 +24,7 @@ class TropaSolicitud
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="fechaCongelado", type="datetime")
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     * @ORM\Column(name="fechaCongelado", type="datetime", nullable=true)
      */
     private $fechaCongelado;
 

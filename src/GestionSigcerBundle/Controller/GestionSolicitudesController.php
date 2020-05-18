@@ -139,6 +139,7 @@ class GestionSolicitudesController extends Controller
                                       $tropa, 
                                       ['method' => 'POST',
                                        'action' => $this->generateUrl('sigcer_add_tropa_grupo_solicitud_procesar', array('gpo' => $gpo))]);
+        
         $form->handleRequest($request);
         if ($form->isValid())
         {
