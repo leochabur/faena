@@ -32,6 +32,4 @@ class TransformarStock extends MovimientoStock
     protected function updateVisible()
     {}
 
- // @ORM\Table(name="sp_st_trn_st")
- // @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\TransformarStockRepository")
 }

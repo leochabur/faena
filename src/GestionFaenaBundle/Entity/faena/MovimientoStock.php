@@ -140,6 +140,21 @@ abstract class MovimientoStock
         }        
     }
 
+    public function verificarValores()
+    {
+        $ok = true;
+        $messages = array();
+        foreach ($this->valores as $v) 
+        {
+            $valid = $v->isValid();
+            $ok = $ok && $valid['ok'];
+            if (!$valid['ok'])
+                $messages[] = $valid['message'];
+        }
+        return ['ok' => $ok, 'messages' => $messages];
+    }
+
+
     /**
      * Constructor
      */

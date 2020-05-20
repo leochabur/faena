@@ -3,7 +3,7 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ValorTexto
  *
@@ -57,5 +57,14 @@ class ValorTexto extends ValorAtributo
     public function __toString()
     {
         return $this->valor;
+    }
+
+    public function isValid()
+    {
+        if (!$this->valor)
+        {
+            return ['ok' => false, 'message' => 'El campo '.$this->getAtributo().' no puede permanecer en blanco!'];
+        }
+        return ['ok' => true];
     }
 }

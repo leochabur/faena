@@ -3,7 +3,7 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ValorExterno
  *
@@ -15,6 +15,7 @@ class ValorExterno extends ValorAtributo
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\EntidadExterna") 
     * @ORM\JoinColumn(name="id_etntity_extern", referencedColumnName="id")
+    * @Assert\NotNull(message="El valor no puede permanecer en Blanco!!")
     */      
     private $entidadExterna;
 
@@ -55,5 +56,14 @@ class ValorExterno extends ValorAtributo
     public function __toString()
     {
         return $this->entidadExterna."";
+    }
+
+    public function isValid()
+    {
+        if (!$this->entidadExterna)
+        {
+            return ['ok' => false, 'message' => 'El campo '.$this->getAtributo().' no puede permanecer en blanco!'];
+        }
+        return ['ok' => true];
     }
 }

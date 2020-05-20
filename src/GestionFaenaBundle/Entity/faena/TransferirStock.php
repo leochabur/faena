@@ -137,4 +137,5 @@ class TransferirStock extends MovimientoStock
     {
         $this->setVisible(false);
     }
+
 }

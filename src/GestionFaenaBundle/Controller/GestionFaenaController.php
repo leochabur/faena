@@ -578,6 +578,15 @@ class GestionFaenaController extends Controller
                 $movimiento->generateAtributes();
                 $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
                 $formAtr->handleRequest($request);
+                $valid = $movimiento->verificarValores();
+                if (!$valid['ok'])
+                {
+                    $this->addFlash(
+                                        'errorLoad',
+                                        $valid['messages']
+                                    );
+                    return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));                    
+                }
                 $movimiento->updateValues($stock, $em);
                 if ($formAtr->isValid())
                 {

@@ -58,6 +58,8 @@ abstract class ValorAtributo
     {
         return ($this->atributo?$this->atributo->getNombre():'SN');
     }
+*/
+    public abstract function isValid();
 
     /**
      * Get id

@@ -57,4 +57,6 @@ class EntradaStock extends MovimientoStock
     {
         $this->setVisible(true);
     }
+
+
 }

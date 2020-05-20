@@ -17,10 +17,10 @@ class ValorNumerico extends ValorAtributo
      * @var float
      *
      * @ORM\Column(name="valor", type="float")
-     * @Assert\NotNull
+     * @Assert\NotNull(message="El valor no puede permanecer en Blanco!!")
      */
 
-    private $valor;
+    private $valor = null;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\UnidadMedida") 
@@ -98,6 +98,25 @@ class ValorNumerico extends ValorAtributo
     {
         return $this->getAtributo()->getNombre()." (".$this->unidadMedida.")";
     }
+
+    
+    public function isValid()
+    {
+        $factores = $this->getAtributo()->getFactoresCalculo(); 
+        if (!$factores)
+        {
+            if (!$this->valor)
+            {
+                return ['ok' => false, 'message' => 'El campo '.$this->getAtributo().' no puede permanecer en blanco!'];
+            }
+            return ['ok' => true];
+        }
+        else
+        {
+            return ['ok' => true];; //esto hay que ver...no deberia hacer nada ya que este valor se debe calcular  en base a valores individuales los cuales ya se hayn verificado antes
+        }
+    }
+
 
     public function calcularValor($movimiento, $entityManager, $promedio = 0)
     {
@@ -185,11 +204,26 @@ class ValorNumerico extends ValorAtributo
 
                             switch($factores['operacion']) 
                             {
-                                                case '/': $this->valor = $factor1 / ($factor2?$factor2:$factores['factorAjuste']); break;
-                                                case '*': $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); break;
-                                                case '+': $this->valor = $factor1 + ($factor2?$factor2:$factores['factorAjuste']); break;
-                                                case '-': $this->valor = $factor1 - ($factor2?$factor2:$factores['factorAjuste']); break;
-                                                case 'R': $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); break;
+                                                case '/':   
+                                                            $factor2 = ($factor2?$factor2:$factores['factorAjuste']);
+                                                            if ($factor2 == 0)
+                                                                $value = 0;
+                                                            else
+                                                                $value = $factor1 / $factor2;
+                                                            $this->valor = $value; 
+                                                            break;
+                                                case '*': 
+                                                            $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                                                case '+': 
+                                                            $this->valor = $factor1 + ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                                                case '-': 
+                                                            $this->valor = $factor1 - ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                                                case 'R': 
+                                                            $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
                             }
 
                             if ($this->getAtributo()) //tiene un Atributo asociado
