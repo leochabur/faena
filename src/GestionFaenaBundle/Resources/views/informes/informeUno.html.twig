@@ -45,4 +45,5 @@
 			</tbody>
 	</table>
 	<a class="btn btn-success" href="{{ path('export_informe_uno', { proc: proceso.id, fd : faena.id}) }}" target="_blanck">Imprimir</a>
+	<a class="btn btn-default" href="{{ path('exportar_a_excel', { proc: proceso.id, fd : faena.id}) }}" target="_blanck">Exportar</a>
 {% endblock fos_user_content %}

@@ -486,18 +486,21 @@ class GestionSolicitudesController extends Controller
     private function getFormUpdateDetalle($detalle)
     {
         $form =    $this->createFormBuilder()
-                        ->add('cant',TextType::class, [
-                                                        'data' => $detalle->getCantidad(),
+                        ->add('cantSan',TextType::class, [
+                                                        'data' => $detalle->getCantidadSanitario(),
                                                         'attr' => ['data-fpb' => strval($detalle->getArticulo()->getAjusteBruto()),
-                                                                   'data-fpn' => strval($detalle->getArticulo()->getAjusteNeto())],
+                                                                   'data-fpn' => strval($detalle->getArticulo()->getAjusteNeto()),
+                                                                   'data-fcan' => strval($detalle->getArticulo()->getAjusteCantidad())],
                                                       ])
+                        ->add('cant',TextType::class, [ 'data' => $detalle->getCantidad()])
                         ->add('pbruto',TextType::class, ['data' => $detalle->getPesoBruto()])
                         ->add('pneto',TextType::class, ['data' => $detalle->getPesoNeto()])
-                        ->add('load', SubmitType::class, ['label' => 'Modificar'])   
+                        ->add('load', SubmitType::class, ['label' => 'Modificar']) 
                         ->setAction($this->generateUrl('sigcer_update_detalle', array('deta' => $detalle->getId())))
                         ->setMethod('POST')   
                         ->getForm();
         return $form;
+        //  
     }
 
     /**
@@ -554,6 +557,7 @@ class GestionSolicitudesController extends Controller
           $detalle->setCantidad($data['cant']);
           $detalle->setPesoBruto($data['pbruto']);
           $detalle->setPesoNeto($data['pneto']);
+          $detalle->setCantidadSanitario($data['cantSan']);
           $em->flush();
           return new JsonResponse(array('status' => true));
       }

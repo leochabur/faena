@@ -43,6 +43,13 @@ class DetalleSolicitud
     private $cantidad;
 
     /**
+     * @var float
+     *
+     * @ORM\Column(name="cantidadSanitario", type="float", nullable=true)
+     */
+    private $cantidadSanitario;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="certificadoOrigen", type="string", length=255, nullable=true)
@@ -305,5 +312,29 @@ class DetalleSolicitud
     public function getArticulo()
     {
         return $this->articulo;
+    }
+
+    /**
+     * Set cantidadSanitario
+     *
+     * @param float $cantidadSanitario
+     *
+     * @return DetalleSolicitud
+     */
+    public function setCantidadSanitario($cantidadSanitario)
+    {
+        $this->cantidadSanitario = $cantidadSanitario;
+
+        return $this;
+    }
+
+    /**
+     * Get cantidadSanitario
+     *
+     * @return float
+     */
+    public function getCantidadSanitario()
+    {
+        return $this->cantidadSanitario;
     }
 }

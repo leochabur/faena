@@ -20,7 +20,8 @@ class ProductoType extends AbstractType
                 ->add('envasePrimario')
                 ->add('envaseSecundario')      
                 ->add('ajusteBruto')
-                ->add('ajusteNeto')            
+                ->add('ajusteNeto')        
+                 ->add('ajusteCantidad')         
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

@@ -70,6 +70,12 @@ class Producto
     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
     private $ajusteNeto;
+
+    /**
+    * @ORM\Column(name="ajusteCantidad", type="float")
+    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     */
+    private $ajusteCantidad;
     
 
     public function __toString()
@@ -253,5 +259,29 @@ class Producto
     public function getAjusteNeto()
     {
         return $this->ajusteNeto;
+    }
+
+    /**
+     * Set ajusteCantidad
+     *
+     * @param float $ajusteCantidad
+     *
+     * @return Producto
+     */
+    public function setAjusteCantidad($ajusteCantidad)
+    {
+        $this->ajusteCantidad = $ajusteCantidad;
+
+        return $this;
+    }
+
+    /**
+     * Get ajusteCantidad
+     *
+     * @return float
+     */
+    public function getAjusteCantidad()
+    {
+        return $this->ajusteCantidad;
     }
 }

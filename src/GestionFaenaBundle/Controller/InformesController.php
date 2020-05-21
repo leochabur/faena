@@ -3,6 +3,7 @@
 namespace GestionFaenaBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,6 +67,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class InformesController extends Controller
 {
+
+    private $styleArray = array(
+                          'borders' => array(
+                            'allborders' => array(
+                              'style' => 'thin'
+                            )
+                          )
+                        );
 
     /**
      * @Route("/informes/existencias", name="informes_ver_existencias")
@@ -447,7 +456,7 @@ class InformesController extends Controller
         $faena = $this->getDoctrine()->getManager()->find(FaenaDiaria::class, $fd);
 
        // $proceso = $faena->getProceso(1);
-        $logo = $this->get('kernel')->getRootDir() . '/../web/resources/img/senasa.jpg';
+       // $logo = $this->get('kernel')->getRootDir() . '/../web/resources/img/senasa.jpg';
         $pdf = $this->get('app.fpdf');
         $pdf->AliasNbPages();
 
@@ -458,6 +467,146 @@ class InformesController extends Controller
         $pdf = $this->getHeader($pdf, $faena);
         $pdf = $this->getBody($pdf, $detalle, $informe);
         return new Response($pdf->Output(), 200, array('Content-Type' => 'application/pdf'));  
+    }
+
+    /**
+     * @Route("/informes/toexcel/{proc}/{fd}/{ajs}", name="exportar_a_excel")
+     */
+    public function exportarInformeExcel($proc, $fd, $ajs = 0)
+    {
+        
+        $em = $this->getDoctrine()->getManager();
+        $faenaDiaria = $em->find(FaenaDiaria::class, $fd);
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $informe = $em->find(InformeProceso::class, 1);
+        $repository = $em->getRepository(MovimientoStock::class);
+        $movimientos = $repository->getAllEntradasStockProceso($proceso, $faenaDiaria, $informe);
+
+
+        $excel = $this->get('phpexcel')->createPHPExcelObject();
+        $detalle = $this->getDetalleMovimientos($informe, $movimientos, $ajs, null, false);
+        
+
+
+       $excel->getProperties()->setCreator("liuggio")
+           ->setLastModifiedBy("Giulio De Donato")
+           ->setTitle("Office 2005 XLSX Test Document")
+           ->setSubject("Office 2005 XLSX Test Document")
+           ->setDescription("Test document for Office 2005 XLSX, generado usando clases de PHP")
+           ->setKeywords("office 2005 openxml php")
+           ->setCategory("Archivo de ejemplo");
+       
+        
+       $excel = $this->getHeaderExcel($excel, $faenaDiaria);
+       $excel = $this->getBodyExcel($excel, $detalle, $informe);
+
+       $excel->getActiveSheet()->setTitle('Faena');
+       // Define el indice de página al número 1, para abrir esa página al abrir el archivo
+       $excel->setActiveSheetIndex(0);
+
+        // Crea el writer
+        $writer = $this->get('phpexcel')->createWriter($excel, 'Excel2007');
+        // Envia la respuesta del controlador
+        $response = $this->get('phpexcel')->createStreamedResponse($writer);
+        // Agrega los headers requeridos
+        $dispositionHeader = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'Faena_'.$faenaDiaria->getFechaFaena()->format('d_m_Y').'.xlsx'
+        );
+
+        $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
+        $response->headers->set('Pragma', 'public');
+        $response->headers->set('Cache-Control', 'maxage=1');
+        $response->headers->set('Content-Disposition', $dispositionHeader);
+
+        return $response; 
+    }
+
+    private function getHeaderExcel($excel, $faena)
+    {
+      
+      $excel->setActiveSheetIndex(0)
+            ->mergeCells('A1:J1')
+            ->mergeCells('A3:A4')
+            ->mergeCells('B3:B4')
+            ->mergeCells('C3:C4')
+            ->mergeCells('D3:D4')
+            ->mergeCells('E3:E4')
+            ->mergeCells('F3:F4')
+            ->mergeCells('G3:J3')
+            ->setCellValue('A1', $faena->getFechaFaena()->format('d/m/Y'))
+            ->setCellValue('A3', 'Granja')
+           ->setCellValue('B3', 'Galpon')
+           ->setCellValue('C3', 'O/C')
+           ->setCellValue('D3', 'Transp.')
+           ->setCellValue('E3', 'Aves')
+           ->setCellValue('F3', 'DT-e')
+           ->setCellValue('G3', 'Pesos')
+           ->setCellValue('G4', 'Bruto')
+           ->setCellValue('H4', 'Tara')
+           ->setCellValue('I4', 'Neto')
+           ->setCellValue('J4', 'Prom.');
+      return $excel;
+    }
+
+    private function getBodyExcel($excel, $detalle, $informe)
+    {
+        $columnDef = [
+                        0 => ['s'=> 30, 'a' => 'C'],
+                        1 => ['s'=> 12, 'a' => 'C'],
+                        2 => ['s'=> 12, 'a' => 'C'],
+                        3 => ['s'=> 20, 'a' => 'C'],
+                        4 => ['s'=> 20, 'a' => 'R'],
+                        5 => ['s'=> 20, 'a' => 'C'],
+                        6 => ['s'=> 19, 'a' => 'R'],
+                        7 => ['s'=> 19, 'a' => 'R'],
+                        8 => ['s'=> 19, 'a' => 'R'],
+                        9 => ['s'=> 19, 'a' => 'R'],
+                        10 => ['s'=> 19, 'a' => 'R'],
+                      ];
+        $column = [
+                    1 => 'A',
+                    2 => 'B',
+                    3 => 'C',
+                    4 => 'D',
+                    5 => 'E',
+                    6 => 'F',
+                    7 => 'G',
+                    8 => 'H',
+                    9 => 'I',
+                    10 => 'J',
+                  ];
+        $fila = 5; 
+
+        foreach ($detalle as $det) 
+        {
+          $col = 1;
+          foreach ($informe->getAtributos() as $atr)
+          {
+            $key = $atr->getAtributo()->getId();
+
+            if (array_key_exists($key, $det))
+            {   
+                $data = $det[$key];
+            }
+            else
+            {  
+                $data = "";
+            }
+            if ($atr->getVisible())
+              $excel->getActiveSheet()->setCellValue($column[$col].$fila, $data);
+
+            $col++;
+          }
+          $fila++;
+        }
+        $excel->getActiveSheet()->getStyle('A3:J'.$fila)->applyFromArray($this->styleArray);
+
+              $excel->getActiveSheet()->getStyle('A3:j4')
+    ->getFill()
+    ->setFillType('solid')
+    ->getStartColor()->setARGB('b5b5b5');
+        return $excel;
     }
 
 

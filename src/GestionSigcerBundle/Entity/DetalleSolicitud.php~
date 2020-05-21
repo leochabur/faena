@@ -43,6 +43,13 @@ class DetalleSolicitud
     private $cantidad;
 
     /**
+     * @var float
+     *
+     * @ORM\Column(name="cantidadSanitario", type="float", nullable=true)
+     */
+    private $cantidadSanitario;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="certificadoOrigen", type="string", length=255, nullable=true)
@@ -281,5 +288,29 @@ class DetalleSolicitud
     public function getSolicitud()
     {
         return $this->solicitud;
+    }
+
+    /**
+     * Set articulo
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\Producto $articulo
+     *
+     * @return DetalleSolicitud
+     */
+    public function setArticulo(\GestionSigcerBundle\Entity\opciones\Producto $articulo = null)
+    {
+        $this->articulo = $articulo;
+
+        return $this;
+    }
+
+    /**
+     * Get articulo
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\Producto
+     */
+    public function getArticulo()
+    {
+        return $this->articulo;
     }
 }

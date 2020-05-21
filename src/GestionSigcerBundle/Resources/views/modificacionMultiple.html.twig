@@ -35,10 +35,12 @@
                 <th>Articulo</th>
                 <th>
                           <div  class="form-row">
+                            <div class="col-2">Cant.Sanit.</div>
                             <div class="col-2">Cant.</div>
                             <div class="col-2">P. Neto</div>
                             <div class="col-2">P. Bruto</div>                            
                             <div class="col-2"></div> 
+                            <div class="col-1"></div> 
                           </div>
                 </th>
               </tr>
@@ -56,16 +58,24 @@
                       </td>
                       <td>{{ s.zona.zona|upper }}</td>
                       <td>{{ d.articulo }}</td>
-                      {{ form_start(formUpd[d.id], {'attr' : {'class' : 'upd', 'novalidate' : 'novalidate'}} ) }}
+                      
                       <td class="text-right">
+                        {{ form_start(formUpd[d.id], {'attr' : {'class' : 'upd', 'novalidate' : 'novalidate'}} ) }}
                           <div  class="form-row text-right">
-                            <div class="col-2">{{ form_widget(formUpd[d.id].cant, {'attr' : {'class' : 'form-control form-control-sm'}}) }}</div>
-                            <div class="col-2">{{ form_widget(formUpd[d.id].pneto, {'attr' : {'class' : 'form-control form-control-sm'}}) }}</div>
-                            <div class="col-2">{{ form_widget(formUpd[d.id].pbruto, {'attr' : {'class' : 'form-control form-control-sm'}}) }}</div>                        
-                            <div class="col-2">{{ form_widget(formUpd[d.id].load, {'attr' : { 'class' : 'btn btn-warning btn-sm'}}) }}</div> 
+                            <div class="col-2">{{ form_widget(formUpd[d.id].cantSan, {'attr' : {'class' : 'cansan form-control form-control-sm'}}) }}</div>
+                            <div class="col-2">{{ form_widget(formUpd[d.id].cant, {'attr' : {'class' : 'cansol form-control form-control-sm'}}) }}</div>
+                            <div class="col-2">{{ form_widget(formUpd[d.id].pneto, {'attr' : {'class' : 'pneto form-control form-control-sm'}}) }}</div>
+                            <div class="col-2">
+                                                {{ form_widget(formUpd[d.id].pbruto, {'attr' : {'class' : 'pbruto form-control form-control-sm'}}) }}
+                            </div>                        
+                            <div class="col-2 mt-0">
+                                    {{ form_widget(formUpd[d.id].load, {'attr' : { 'class' : 'btn btn-warning btn-sm'}}) }}
+                            </div> 
+                            <div class="col-1 result">
+                            </div>
                           </div>
+                        {{ form_end(formUpd[d.id]) }}
                       </td>
-                      {{ form_end(formUpd[d.id]) }}
                   </tr>
                 {% endfor %}
               {% endfor %}
@@ -81,17 +91,44 @@
  {{ parent() }}
 <script type="text/javascript">
 
+          $(".cansan").focusout(function(){
+                                            var cantSan = $(this);
+                                            var cant = '';
+                                            var neto = '';
+                                            var bruto = '';
+
+                                            if (cantSan)
+                                            {
+                                              var cant = (cantSan.val()/cantSan.data('fcan'));
+                                              var neto = Math.round(cant*cantSan.data('fpn'));
+                                              var bruto = Math.round(cant*cantSan.data('fpb'));
+                                              var cant = Math.round(cant);
+                                            }
+
+                                            var form = cantSan.closest('form');
+                                            form.find('.cansol').val(cant);
+                                            form.find('.pneto').val(neto);
+                                            form.find('.pbruto').val(bruto);
+                                            form.find('button').focus();
+
+          });
+
           $('.upd').submit(function(event){
                                             event.preventDefault();
                                             var form = $(this);
                                             var route = form.attr('action');
+                                            var btn = form.find('button');
                                             $.post(route,
                                                    form.serialize(),
                                                    function(data){
                                                                   if (data.status)
-                                                                      alert('Actualizacion realizada exitosamente!!')
+                                                                  {
+                                                           
+                                                                      form.find('.result').append('<i class="far fa-thumbs-up fa-2x"></i>');
+                                                                     
+                                                                  }
                                                                   else
-                                                                      alert(data.message);
+                                                                      form.find('.result').append('<i class="far fa-thumbs-down fa-2x"></i>');
                                                    });
                                             
           });

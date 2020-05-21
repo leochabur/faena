@@ -1,0 +1,6 @@
+{
+    "require": {
+        "liuggio/excelbundle": "^2.1",
+        "phpoffice/phpexcel": "^1.8"
+    }
+}
