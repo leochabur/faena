@@ -7,6 +7,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class FactorCalculoType extends AbstractType
 {
@@ -23,6 +24,7 @@ class FactorCalculoType extends AbstractType
                          EntityType::class,
                          [ 'class' => 'GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto',
                            'required' => false,])
+                ->add('soloIngreso', CheckboxType::class, ['label' => false])
                 ->add('tipoCalculo', 
                       ChoiceType::class, [
                         'choices'  => [

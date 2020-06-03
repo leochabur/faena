@@ -14,8 +14,7 @@ class ProcesoFaenaRepository extends \Doctrine\ORM\EntityRepository
     public function findAllProcesos()
     {
         return $this->getEntityManager()
-            		->createQuery('SELECT p FROM GestionFaenaBundle:ProcesoFaena p WHERE p.activo = :actvo ORDER BY p.orden')
-            		->setParameter('actvo', true)
+            		->createQuery('SELECT p FROM GestionFaenaBundle:ProcesoFaena p ORDER BY p.orden')
             		->getResult();
     }
 

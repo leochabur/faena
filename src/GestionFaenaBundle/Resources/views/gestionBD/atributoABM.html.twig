@@ -183,8 +183,12 @@
 										{{ form_widget(formAMA.factor1.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
 										</div>
 										<div class="col">
-										{{ form_label(formAMA.factor1.tipoCalculo) }}
+										{{ form_label(formAMA.factor1.tipoCalculo, 'Tipo') }}
 										{{ form_widget(formAMA.factor1.tipoCalculo, {'attr' : {'class' : 'form-control-sm'}}) }}
+										</div>
+										<div class="col-2">
+										Ing.
+										{{ form_widget(formAMA.factor1.soloIngreso, {'attr' : {'class' : 'form-control-sm'}}) }}
 										</div>
 									</div>
 						</fieldset>
@@ -202,6 +206,10 @@
 									<div class="col">
 									{{ form_label(formAMA.factor2.tipoCalculo) }}
 									{{ form_widget(formAMA.factor2.tipoCalculo, {'attr' : {'class' : 'form-control-sm'}}) }}
+									</div>
+									<div class="col-2">
+									Ing.
+									{{ form_widget(formAMA.factor2.soloIngreso, {'attr' : {'class' : 'form-control-sm'}}) }}
 									</div>
 								</div>
 						</fieldset>

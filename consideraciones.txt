@@ -1,0 +1,1 @@
+Al crear un nuevo atributo recordar setear en la configuracion de articulos cual es el atributo Base correspondiente, generalmente el mismo que le da origen

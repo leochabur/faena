@@ -31,9 +31,9 @@ class AtributoMedibleAutomatico extends AtributoMedible
 
     /**
      *
-     * @ORM\Column(name="factorAjuste", type="float")
+     * @ORM\Column(name="factorAjuste", type="float", nullable=true)
      */
-    private $factorAjuste = 0;
+    private $factorAjuste = null;
     
 
     /**
@@ -221,5 +221,10 @@ class AtributoMedibleAutomatico extends AtributoMedible
     public function getFactorAjuste()
     {
         return $this->factorAjuste;
+    }
+
+    public function getTipo()
+    {
+        return 'Medible Aut.';
     }
 }

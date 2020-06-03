@@ -38,6 +38,13 @@ class FactorCalculo
     */
     private $tipoCalculo;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="soloIngreso", type="boolean", nullable=false)
+     */
+    private $soloIngreso = false;  //define si solo se debe realizar el calculo sobre los ingresos unicamente o sobre todos los movimientos, para el caso que se deba calcular las transformaciones X ej de Aves a Corazon, tome solo el ingreso
+
 
     /**
      * Get id
@@ -124,5 +131,29 @@ class FactorCalculo
     public function getTipoCalculo()
     {
         return $this->tipoCalculo;
+    }
+
+    /**
+     * Set soloIngreso
+     *
+     * @param boolean $soloIngreso
+     *
+     * @return FactorCalculo
+     */
+    public function setSoloIngreso($soloIngreso)
+    {
+        $this->soloIngreso = $soloIngreso;
+
+        return $this;
+    }
+
+    /**
+     * Get soloIngreso
+     *
+     * @return boolean
+     */
+    public function getSoloIngreso()
+    {
+        return $this->soloIngreso;
     }
 }

@@ -26,6 +26,7 @@ use GestionFaenaBundle\Entity\faena\SalidaStock;
 use GestionFaenaBundle\Entity\faena\TransformarStock;
 use GestionFaenaBundle\Entity\faena\TransferirStock;
 use GestionFaenaBundle\Entity\faena\MovimientoStock;
+use GestionFaenaBundle\Entity\faena\MovimientoCompuesto;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimiento;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso;
 use GestionFaenaBundle\Entity\faena\ValorNumerico;
@@ -316,7 +317,8 @@ class GestionFaenaController extends Controller
             //$movimiento->setConcepto($data['conMovProc']);
             $validator = $this->get('validator');
             $errors = $validator->validate($movimiento);
-            if (count($errors) == 0) {
+            if (count($errors) == 0) 
+            {
                 $errorsString = (string) $errors;
                 $movimiento->generateAtributes();
                 $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $data['artProcFaena'], 'bd_adm_proc_mov_st', $faena);
@@ -381,23 +383,95 @@ class GestionFaenaController extends Controller
               $stock = 0;
               $movimiento = new SalidaStock(); 
         }
-        elseif($type == 4){
-           //   $repo = $em->getRepository(TransformarStock::class);
-              $stock = 0;//$repo->pesoPromedio($proceso, $articulo)['valor'];
+        elseif($type == 4)
+        {
+              $stock = 0;
               $movimiento = new TransformarStock(); 
-                $movimiento->setArtProcFaena($articulo);
-                $movimiento->setConcepto($concepto);
-                $movimiento->setProcesoFnDay($proceso);
-                $movimiento->generateAtributes();
-                $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
-                $formAtr->handleRequest($request);
-                $movimiento->updateValues($stock, $em);
-                if ($formAtr->isValid())
-                {
-                    $em->persist($movimiento);
-                    $em->flush();
-                    return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
-                }
+
+              $movimiento->setArtProcFaena($articulo);
+              $movimiento->setProcesoFnDay($proceso);
+              $movimiento->setFaenaDiaria($faena);
+              $movimiento->generateAtributes();
+              $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
+              $formAtr->handleRequest($request);
+              $movimiento->updateValues($stock, $em);
+
+
+              ///////////Debe quitar del stock el articulo base   (Ejemplo: Aves -> Corazon)
+              ///Verifica si el Articulo base del proceso se encuentra configurado para manejar el stock
+              $articuloBase = $concepto->getArticuloOrigenTransformacion();
+              $articuloBaseManejaStock = $proceso->getProcesoFaena()->existeArticuloDefinidoManejoStock($articuloBase); //articulo base 
+
+              $articuloDestino = $articulo->getArticulo();
+              $articuloDestinoManejaStock = $proceso->getProcesoFaena()->existeArticuloDefinidoManejoStock($articuloDestino); //articulo destino 
+
+              if (!$articuloBaseManejaStock) //no esta configurado el articulo base para manejar el stock en el proceso
+              {
+                $this->addFlash('error', "El articulo ".$articuloBase." no se encuentra definido para manejar stock");
+                return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', ['fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena]);
+              }
+
+              if (!$articuloDestinoManejaStock) //no esta configurado el articulo destino para manejar el stock en el proceso
+              {
+                $this->addFlash('error', "El articulo ".$articuloDestino." no se encuentra definido para manejar stock");
+                return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', ['fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena]);
+              }
+
+              //1º: Recupera del proceso, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
+              $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articuloBase,
+                                                                                  $articulo->getConcepto()->getConcepto(),
+                                                                                  SalidaStock::getInstance(),
+                                                                                  $proceso->getProcesoFaena(),
+                                                                                  $em);
+
+              //Recupera la cantidad del Articulo (No del articulo base....para el ejemplo Recupera la cantidad de Corazon que sera la que debera descontar de las Aves, este valor es el mismo tanto para la entrada como para la salida, 
+              //RECORDAR CONFIGURAR L ARTICULO BASE!!
+              $valorAtributo = $movimiento->getValorWhitAtribute($articuloDestinoManejaStock->getAtributo());
+
+
+              ///Ya puede generar la salida del stcok del articulo base
+              $valorAtr = new ValorNumerico();
+              $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
+              $valorAtr->setValor($valorAtributo->getValor());
+              $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
+              $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
+              $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
+              $valorAtr->setAcumula(true);
+
+              $salida = new SalidaStock();
+              $salida->setFaenaDiaria($faena);
+              $salida->addValore($valorAtr);
+              $salida->setProcesoFnDay($proceso);
+              $salida->setArtProcFaena($artAtrConSalida);
+              $em->persist($salida);
+
+              ///Una vez realizada la salida delstock del articulo base, debe proceder a realizar la entrada del articulo destino (Corazon)
+              //1º: Recupera del proceso, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
+              $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimiento($articuloDestino,
+                                                                                  $articulo->getConcepto()->getConcepto(),
+                                                                                  EntradaStock::getInstance(),
+                                                                                  $proceso->getProcesoFaena(),
+                                                                                  $em);
+              $valorAtr = new ValorNumerico();
+              $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
+              $valorAtr->setValor($valorAtributo->getValor());
+              $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
+              $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
+              $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
+              $valorAtr->setAcumula(true);
+
+              $entrada = new EntradaStock();
+              $entrada->setFaenaDiaria($faena);
+              $entrada->addValore($valorAtr);
+              $entrada->setProcesoFnDay($proceso);
+              $entrada->setArtProcFaena($artAtrConEntrada);
+              $em->persist($entrada);
+              
+              $movimiento->setMovimientoDestino($entrada);
+              $movimiento->setMovimientoOrigen($salida);
+              $em->persist($movimiento);
+              $em->flush();
+
         }
         elseif($type == 5)  //comienza proceso Transferencia de stockk
         {
@@ -444,7 +518,8 @@ class GestionFaenaController extends Controller
                                                                                           $procesoDestino->getProcesoFaena(),
                                                                                           $em);
                       //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
-                      $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo()->getId());
+                      $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                     // throw new \Exception($articuloManejaStock->getAtributo()."  -  ".$movimiento->getValores()->first()->getAtributo()->getAtributoAbstracto());
                       if (!$valorAtributo)
                       {
                         throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
@@ -481,7 +556,7 @@ class GestionFaenaController extends Controller
                                                                                           $procesoOrigen,
                                                                                           $em);
                       //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
-                      $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo()->getId());
+                      $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
                       if (!$valorAtributo)
                       {
                         throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
@@ -653,14 +728,14 @@ class GestionFaenaController extends Controller
       try{
           $entityManager = $this->getDoctrine()->getManager();
           $movimiento = $entityManager->find(MovimientoStock::class, $mov);
-          $transferencia = $entityManager->find(TransferirStock::class, $trx);
+          $transferencia = $entityManager->find(MovimientoCompuesto::class, $trx);
           if ($transferencia->getFaenaDiaria()->getFinalizada())
           {
               return new JsonResponse(array('status' => false, 'msge' => 'La faena ya se encuentra finalizada!!'));
           }
 
           $movAsoc = ($transferencia->getMovimientoOrigen()->getId() == $movimiento->getId()?$transferencia->getMovimientoDestino():$transferencia->getMovimientoOrigen());
-          $msge = "El movimiento ".strtoupper($transferencia->getMovimientoOrigen())." correspondiente al proceso ".strtoupper($movimiento->getProcesoFnDay())." tiene asociado el movimiento ".strtoupper($movAsoc)." del proceso ".strtoupper($movAsoc->getProcesoFnDay()).", los dos movimientos seran eliminados. Continuar?";
+          $msge = "El movimiento ".strtoupper($transferencia->getMovimientoOrigen())." correspondiente al proceso ".strtoupper($transferencia->getMovimientoOrigen()->getProcesoFnDay())." tiene asociado el movimiento ".strtoupper($transferencia->getMovimientoDestino())." del proceso ".strtoupper($transferencia->getMovimientoDestino()->getProcesoFnDay()).", los dos movimientos seran eliminados. Continuar?";
 
           return new JsonResponse(array('msge' => $msge));
         }
@@ -755,10 +830,13 @@ class GestionFaenaController extends Controller
         elseif ($movimiento->getType() == 4){
                   return $this->createForm(TransformarStockType::class, 
                                  $movimiento, 
-                                 ['action' => $this->generateUrl($url, 
+                                 ['faena' => $fanday,
+                                  'proceso' => $proc,
+                                  'articulo' => $art->getConcepto()->getArticuloOrigenTransformacion(),
+                                  'action' => $this->generateUrl($url, 
                                                                 ['type' => $movimiento->getType(), 
                                                                  'proc' => $proc->getId(), 
-                                                                 'conc' => $movimiento->getConcepto()->getId(), 
+                                                                 'conc' => $movimiento->getArtProcFaena()->getConcepto()->getId(), 
                                                                  'art' => $art->getId(), 
                                                                  'mov' => $movimiento->getId(),
                                                                  'fanday' => $fanday->getId()]),
@@ -857,7 +935,7 @@ class GestionFaenaController extends Controller
         $id = $movimiento->getProcesoFnDay()->getId();
         if ($trx)
         {
-            $transferencia = $em->find(TransferirStock::class, $trx);
+            $transferencia = $em->find(MovimientoCompuesto::class, $trx);
             $transferencia->getMovimientoOrigen()->setEliminado(true);
             $transferencia->getMovimientoDestino()->setEliminado(true);
         }

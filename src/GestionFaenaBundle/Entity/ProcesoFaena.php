@@ -98,7 +98,7 @@ abstract class ProcesoFaena
      */
     private $orden = 0; 
     
-    //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock
+    //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
     {
         foreach ($this->manejosStock as $stock) {

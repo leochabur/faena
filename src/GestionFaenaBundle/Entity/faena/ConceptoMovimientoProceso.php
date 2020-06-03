@@ -57,7 +57,7 @@ class ConceptoMovimientoProceso
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo")
     * @ORM\JoinColumn(name="id_art_orig_trans", referencedColumnName="id", nullable=true)
      */
-    private $articuloOrigenTransformacion;
+    private $articuloOrigenTransformacion; //para el caso de el movimiento Transformar Stock, define cual es el articulo de origen que se va a transformar
 
     /**
      *

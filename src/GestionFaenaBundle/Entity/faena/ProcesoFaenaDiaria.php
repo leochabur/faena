@@ -3,7 +3,7 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use GestionFaenaBundle\Entity\faena\EntradaStock;
 /**
  * ProcesoFaenaDiaria
  *
@@ -154,25 +154,66 @@ class ProcesoFaenaDiaria
     //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
     {
         $stock = 0;
-        foreach ($this->movimientos as $mov) {
+        foreach ($this->movimientos as $mov) 
+        {
             if ((!$mov->getEliminado()) && ($mov->getVisible()))
             {
                     if ($mov->getArtProcFaena()->getArticulo() == $articulo)
-                    {
-                        if($mov->getFaenaDiaria() == $faena)
+                    {      
+                        if(true)//$mov->getFaenaDiaria() == $faena)
                         {
-                            $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);
+                            $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);                            
                             if ($manejo)
-                            {
-                                $valor = $mov->getValorWhitAtribute($manejo->getAtributo()->getId());
+                            {                                
+                                $valor = $mov->getValorWhitAtribute($manejo->getAtributo());
                                 if ($valor)
-                                    $stock+=  $valor->getValor();
+                                {
+                                    $stock+=  $valor->getData();
+                                }
                             }
                         }
                     }
-                
             }
         }
+        return $stock;
+    }
+
+    public function getStockArticuloConAtributo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo, 
+                                                \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
+                                                $soloIngreso,
+                                                $accion)
+    //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
+    {
+        $stock = 0;
+        $count = 0;
+        foreach ($this->movimientos as $mov) 
+        {
+            if ((!$mov->getEliminado()) && ($mov->getVisible()))
+            {
+                if ($mov->getArtProcFaena()->getArticulo() == $articulo)
+                {      
+                    $valor = $mov->getValorWhitAtribute($atributo);
+                    if ($valor)
+                    {
+                        if($soloIngreso)//solo debe levantar los movimientos de Ingreso de Stock
+                        {
+                            if (get_class($mov) === EntradaStock::class)
+                            {
+                                    $stock+=  $valor->getData();     
+                                    $count++;                           
+                            }
+                        }
+                        else
+                        {
+                            $stock+=  $valor->getData();   
+                            $count++;  
+                        }
+                    }
+                }
+            }
+        }
+        if ($accion == 'P')
+            $stock = ($stock/$count);
         return $stock;
     }
 }

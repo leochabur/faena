@@ -58,6 +58,8 @@ abstract class ValorAtributo
     {
         return ($this->atributo?$this->atributo->getNombre():'SN');
     }
+*/
+    public abstract function isValid();
 
     /**
      * Get id
@@ -143,5 +145,53 @@ abstract class ValorAtributo
     public function getAtributoAbstracto()
     {
         return $this->atributoAbstracto;
+    }
+
+    /**
+     * Set posicion
+     *
+     * @param integer $posicion
+     *
+     * @return ValorAtributo
+     */
+    public function setPosicion($posicion)
+    {
+        $this->posicion = $posicion;
+
+        return $this;
+    }
+
+    /**
+     * Get posicion
+     *
+     * @return integer
+     */
+    public function getPosicion()
+    {
+        return $this->posicion;
+    }
+
+    /**
+     * Set mostrar
+     *
+     * @param boolean $mostrar
+     *
+     * @return ValorAtributo
+     */
+    public function setMostrar($mostrar)
+    {
+        $this->mostrar = $mostrar;
+
+        return $this;
+    }
+
+    /**
+     * Get mostrar
+     *
+     * @return boolean
+     */
+    public function getMostrar()
+    {
+        return $this->mostrar;
     }
 }

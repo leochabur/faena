@@ -640,7 +640,7 @@ class GestionBDController extends Controller
                 $entityManager->flush();
                 return $this->redirectToRoute('bd_add_atributo', array('art' => $articulo->getId()));
             }
-            $this->addFlash('errors','El atributo '.$atributo->getAtributoAbstracto().' ya se encuentra asociado al articulo!');
+            $this->addFlash('errors','El atributo '.$atributo->getAtributoAbstracto().'('.$atributo->getId().') ya se encuentra asociado al articulo!');
         }
         $formAMM = $this->getFormABMAtributoMedibleManual(new AtributoMedibleManual(), $articulo);
         $formAMA = $this->getFormABMAtributoMedibleAutomatico(new AtributoMedibleAutomatico(), $articulo);
@@ -681,7 +681,7 @@ class GestionBDController extends Controller
                         return  new Response($e->getMessage());
                 }
             }
-            $this->addFlash('errors','El atributo '.$atributo->getAtributoAbstracto().' ya se encuentra asociado al articulo!');
+            $this->addFlash('errors','El atributo '.$atributo->getAtributoAbstracto().'('.$atributo->getId().') ya se encuentra asociado al articulo!');
         }
         else
         {
@@ -717,7 +717,7 @@ class GestionBDController extends Controller
                 $entityManager->flush();
                 return $this->redirectToRoute('bd_add_atributo', array('art' => $articulo->getId()));
             }
-            $this->addFlash('errors','El atributo '.$atributo->getAtributoAbstracto().' ya se encuentra asociado al articulo!');
+            $this->addFlash('errors','El atributo '.$atributo->getAtributoAbstracto().'('.$atributo->getId().') ya se encuentra asociado al articulo!');
         }
         $formAIE = $this->getFormABMAtributoInformableExterno(new AtributoInformableExterno(), $articulo);
         $formAIM = $this->getFormABMAtributoInformableManual(new AtributoInformableArbitrario(), $articulo);

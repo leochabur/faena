@@ -7,8 +7,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * TransformarStock
  *
+ * @ORM\Table(name="sp_st_transformar_st")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\TransformarStockRepository")
  */
-class TransformarStock extends MovimientoStock
+class TransformarStock extends MovimientoCompuesto
 {
     public function __toString()
     {
@@ -22,14 +24,19 @@ class TransformarStock extends MovimientoStock
 
     public function updateValues($promedio, $entityManager)
     {
-
-
-
-
-
+        $iterator = $this->getValores()->getIterator();
+        $iterator->uasort(function ($first, $second) {
+            return (int) $first->getAtributo()->getPosition() > (int) $second->getAtributo()->getPosition() ? 1 : -1;
+        });
+        foreach ($this->getValores() as $valor) {
+            $valor->calcularValor($this, $entityManager, 0);
+        }
     }
 
     protected function updateVisible()
-    {}
+    {
+
+        $this->setVisible(false);
+    }
 
 }

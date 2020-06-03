@@ -16,11 +16,17 @@ use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
 
 class TransformarStockType extends AbstractType
 {
+
+    private $faena, $proceso, $articulo;  //FaenaDiaria - ProcesoFaenaDiaria - Articulo
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $this->faena = $options['faena'];
+        $this->proceso = $options['proceso'];
+        $this->articulo = $options['articulo'];
+
         $entrada = $builder->getData();
         $builder->add('artProcFaena', 
                               EntityType::class, 
@@ -36,7 +42,7 @@ class TransformarStockType extends AbstractType
                                 ])
                 ->add('valores', CollectionType::class, [
                     'entry_type' => ValorAtributoType::class,
-                    'entry_options' => ['label' => false],
+                    'entry_options' => ['label' => false, 'type' => $entrada->getType(), 'faena' => $this->faena, 'proceso' => $this->proceso, 'articulo' => $this->articulo],
                 ])
                 ->add('guardar', SubmitType::class);
                 $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
@@ -48,7 +54,11 @@ class TransformarStockType extends AbstractType
         $form = $event->getForm();
 
             $form->add('concepto', 
-                       EntityType::class, ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 'choices' => [$valor->getConcepto()]]);
+                       EntityType::class, 
+                       ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 
+                       'choices' => [$valor->getArtProcFaena()->getConcepto()],
+                        'mapped' => false
+                      ]);
 
         
     }
@@ -64,6 +74,7 @@ class TransformarStockType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'GestionFaenaBundle\Entity\faena\TransformarStock'
         ));
+        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo'); 
     }
 
     /**

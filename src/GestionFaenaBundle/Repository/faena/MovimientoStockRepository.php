@@ -68,7 +68,8 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
         $accion = ($action == 's'?"SUM":"AVG");
         return $this->getEntityManager()
                     ->createQuery("SELECT articulo.nombre as art, $accion(valor.valor) as stock
-                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   JOIN valor.movimiento mov
                                    INNER JOIN valor.atributo atributo
                                    INNER JOIN atributo.atributoAbstracto atributoAbstracto
                                    INNER JOIN atributo.articuloAtrConc articuloAtributoConcepto
@@ -76,13 +77,43 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                                    INNER JOIN articuloAtributoConcepto.concepto conceptoMovimientoProceso
                                    INNER JOIN conceptoMovimientoProceso.procesoFaena procesoFaena 
                                    INNER JOIN procesoFaena.procesosFaenaDiaria procesoDiario                                         
-                                   WHERE procesoDiario = :proceso AND  articulo = :articulo  AND atributoAbstracto = :atributo
+                                   WHERE mov.procesoFnDay = :proceso AND mov.eliminado = :eliminado AND procesoDiario = :proceso AND  articulo = :articulo  AND atributoAbstracto = :atributo
+                                   GROUP BY atributo")
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('articulo', $articulo)
+                    ->setParameter('atributo', $atributo)
+                    ->setParameter('eliminado', false)
+                    ->getOneOrNullResult();
+    }
+
+    public function getPromedioAtributoV2___(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso, 
+                                             \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo, 
+                                             \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
+                                             $action)
+    {
+        $accion = ($action == 's'?"SUM":"AVG");
+        return $this->getEntityManager()
+                    ->createQuery("SELECT articulo.nombre as art, $accion(valor.valor) as stock
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   JOIN valor.movimiento mov
+                                   JOIN mov.artProcFaena artAtrCon
+                                   JOIN artAtrCon.articulo articulo
+                                   LEFT JOIN valor.atributoAbstracto atributo
+                                   LEFT JOIN valor.atributo atr
+                                   WHERE mov.procesoFnDay = :proceso AND  
+                                         articulo = :articulo  AND 
+                                         (atributo = :atributo OR atr.atributoAbstracto = :atributo) AND 
+                                         mov.eliminado = :eliminado
                                    GROUP BY articulo")
                     ->setParameter('proceso', $proceso)
                     ->setParameter('articulo', $articulo)
                     ->setParameter('atributo', $atributo)
+                    ->setParameter('eliminado', false)
                     ->getOneOrNullResult();
     }
+
+
+
 
     public function getStockDeArticulosPorProceso(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso)
     {

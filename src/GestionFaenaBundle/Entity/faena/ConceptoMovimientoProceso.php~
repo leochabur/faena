@@ -11,7 +11,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="sp_st_con_mov_proc")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\ConceptoMovimientoProcesoRepository")
  * @UniqueEntity(
- *     fields={"procesoFaena", "concepto"},
+ *     fields={"procesoFaena", "concepto", "tipoMovimiento"},
  *     message="Concepto ya asignado al proceso!!"
  * )
  */
@@ -57,13 +57,19 @@ class ConceptoMovimientoProceso
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo")
     * @ORM\JoinColumn(name="id_art_orig_trans", referencedColumnName="id", nullable=true)
      */
-    private $articuloOrigenTransformacion;
+    private $articuloOrigenTransformacion; //para el caso de el movimiento Transformar Stock, define cual es el articulo de origen que se va a transformar
 
     /**
      *
      * @ORM\Column(name="automatico", type="boolean", options={"default":false})
      */
-    private $automatico = false; //cuano genera una transferencia, debe existir la entrada y salida asociadoa al concepto
+    private $automatico = false; //cuano genera una transferencia, debe existir la entrada y salida asociadoa al concepto estos son marcadas como automaticos
+
+
+    public function getVistaEdicion()
+    {
+        return $this->procesoFaena."  -  ".$this->concepto;
+    }
 
     /**
      * Get id
@@ -127,7 +133,7 @@ class ConceptoMovimientoProceso
     {
         try
         {
-return $this->concepto." - ".$this->procesoFaena;
+            return $this->concepto."";//." ".$this->procesoFaena;
 
         }
         catch (\Exception $e) { return "";}
@@ -251,5 +257,29 @@ return $this->concepto." - ".$this->procesoFaena;
     public function getArticuloOrigenTransformacion()
     {
         return $this->articuloOrigenTransformacion;
+    }
+
+    /**
+     * Set automatico
+     *
+     * @param boolean $automatico
+     *
+     * @return ConceptoMovimientoProceso
+     */
+    public function setAutomatico($automatico)
+    {
+        $this->automatico = $automatico;
+
+        return $this;
+    }
+
+    /**
+     * Get automatico
+     *
+     * @return boolean
+     */
+    public function getAutomatico()
+    {
+        return $this->automatico;
     }
 }

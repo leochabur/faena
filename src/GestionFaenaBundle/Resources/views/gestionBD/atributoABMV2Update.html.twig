@@ -17,6 +17,7 @@
 		<thead>
 			<tr>
 				<th>Atributo</th>
+				<th>Tipo</th>
 				<th>Acumula</th>
 				<th>Promedia</th>
 				<th>Redondea</th>
@@ -37,6 +38,7 @@
 					{{ form_start(atr, {'attr' : {'novalidate' : 'novalidate', 'class' : 'editatr'}}) }}
 					<tr class="h6 small">
 						<td title="{{ atrib.calculo }}">{{ atrib }}</td>
+						<td title="{{ atrib.calculo }}">{{ atrib.tipo }}</td>
 						<td class="text-center">{{ form_widget(atr.acumula, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td class="text-center">{{ form_widget(atr.promedia, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td class="text-center">{{ form_widget(atr.redondea, {'attr' : {'class' : 'form-control-sm'}}) }}</td>

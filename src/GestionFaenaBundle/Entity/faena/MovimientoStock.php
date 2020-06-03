@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\MovimientoStockRepository")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
- * @ORM\DiscriminatorMap({1:"MovimientoStock",2: "EntradaStock", 3: "SalidaStock", 5: "TransferirStock"})
+ * @ORM\DiscriminatorMap({1:"MovimientoStock",2: "EntradaStock", 3: "SalidaStock", 4: "TransformarStock", 5: "TransferirStock", 6:"MovimientoCompuesto"})
  * @ORM\HasLifecycleCallbacks()
  */
 abstract class MovimientoStock
@@ -53,16 +53,6 @@ abstract class MovimientoStock
     private $valores;
 
     /**
-     * @ORM\OneToOne(targetEntity="TransferirStock", mappedBy="movimientoDestino")
-     */
-    private $destino;
-
-    /**
-     * @ORM\OneToOne(targetEntity="TransferirStock", mappedBy="movimientoOrigen")
-     */
-    private $origen;
-
-    /**
      * @ORM\Column(name="visible", type="boolean", options={"default":true})
      */
     private $visible; //flag utilizado para indicar si el movimiento debe ser tomado para calculos o para mostrar en los informes (Por ej, las TRX no se muestran, solo se muestran los movimientos de Egreso e Ingreso que se generarn automaticamente)
@@ -71,6 +61,16 @@ abstract class MovimientoStock
      * @ORM\Column(name="eliminado", type="boolean", options={"default":false}, nullable=true)
      */
     private $eliminado = false;
+
+    /**
+     * @ORM\OneToOne(targetEntity="MovimientoCompuesto", mappedBy="movimientoDestino")
+     */
+    private $destino;
+
+    /**
+     * @ORM\OneToOne(targetEntity="MovimientoCompuesto", mappedBy="movimientoOrigen")
+     */
+    private $origen;
 
     /**
      * @Assert\IsFalse(
@@ -90,14 +90,35 @@ abstract class MovimientoStock
     }
 
 
-    public function getValorWhitAtribute($atributo, $espejo = false)
+    public function getValorWhitAtribute(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo, $espejo = false)
     {
         $value = null;
         foreach ($this->valores as $v) 
         {
             //$val = $v->getAtributo()?$v->getAtributo()->getAtributoAbstracto():$v->getAtributoAbstracto();
-             $val = $v->getAtributo()?$v->getAtributo()->getAtributoBase():$v->getAtributoAbstracto();
-            if ($val->getId() == $atributo)
+            if ($v->getAtributo())
+            {
+                if ($v->getAtributo()->getAtributoBase())
+                {
+                    $val = $v->getAtributo()->getAtributoBase();
+                }
+                else
+                {
+                    $val = $v->getAtributo()->getAtributoAbstracto();
+                }
+            }
+            else
+            {
+                $val = $v->getAtributoAbstracto();
+            }
+
+            if (!$val)
+            {
+                throw new \Exception("No existe!!", 1);
+                
+            }
+
+            if ($val && ($val == $atributo))
             {
                 if ($v->getAtributo())  //tiene el Atributo Asignado, puede verificar si debe devolver el valor espejo o no
                 {
@@ -311,53 +332,6 @@ abstract class MovimientoStock
         return $this->artProcFaena;
     }
 
-    /**
-     * Set destino
-     *
-     * @param \GestionFaenaBundle\Entity\faena\TransferirStock $destino
-     *
-     * @return MovimientoStock
-     */
-    public function setDestino(\GestionFaenaBundle\Entity\faena\TransferirStock $destino = null)
-    {
-        $this->destino = $destino;
-
-        return $this;
-    }
-
-    /**
-     * Get destino
-     *
-     * @return \GestionFaenaBundle\Entity\faena\TransferirStock
-     */
-    public function getDestino()
-    {
-        return $this->destino;
-    }
-
-    /**
-     * Set origen
-     *
-     * @param \GestionFaenaBundle\Entity\faena\TransferirStock $origen
-     *
-     * @return MovimientoStock
-     */
-    public function setOrigen(\GestionFaenaBundle\Entity\faena\TransferirStock $origen = null)
-    {
-        $this->origen = $origen;
-
-        return $this;
-    }
-
-    /**
-     * Get origen
-     *
-     * @return \GestionFaenaBundle\Entity\faena\TransferirStock
-     */
-    public function getOrigen()
-    {
-        return $this->origen;
-    }
 
     /**
      * Set visible
@@ -439,5 +413,53 @@ abstract class MovimientoStock
     public function getFaenaDiaria()
     {
         return $this->faenaDiaria;
+    }
+
+    /**
+     * Set destino
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoCompuesto $destino
+     *
+     * @return MovimientoStock
+     */
+    public function setDestino(\GestionFaenaBundle\Entity\faena\MovimientoCompuesto $destino = null)
+    {
+        $this->destino = $destino;
+
+        return $this;
+    }
+
+    /**
+     * Get destino
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoCompuesto
+     */
+    public function getDestino()
+    {
+        return $this->destino;
+    }
+
+    /**
+     * Set origen
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoCompuesto $origen
+     *
+     * @return MovimientoStock
+     */
+    public function setOrigen(\GestionFaenaBundle\Entity\faena\MovimientoCompuesto $origen = null)
+    {
+        $this->origen = $origen;
+
+        return $this;
+    }
+
+    /**
+     * Get origen
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoCompuesto
+     */
+    public function getOrigen()
+    {
+        return $this->origen;
     }
 }

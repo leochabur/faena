@@ -53,17 +53,26 @@ class ValorAtributoType extends AbstractType
 
         if (ValorNumerico::class == get_class($valor))
         {
-            $form->add('unidadMedida', 
+            /*$form->add('unidadMedida', 
                         EntityType::class, 
                         ['attr' => ['class' => 'col-2'], 
                          'class' => 'GestionFaenaBundle\Entity\gestionBD\UnidadMedida', 
-                         'choices' => [$valor->getAtributo()->getUnidadMedida()]]);
+                         'choices' => [$valor->getAtributo()->getUnidadMedida()]]);*/
+            $class = 'col-2';
 
-            $options = ['attr' => ['class' => 'col-2', 'disabled' => $valor->getAtributo()->getManual()], 'required' => true];
+            if (strtoupper($valor->getAtributo()->getNombre()) == 'DT-E') // para aplicar el formato de entrada delatributo
+                $class.=', dt-e';
+            $options = ['attr' => ['class' => $class, 'disabled' => $valor->getAtributo()->getManual()], 'required' => true];
 
             if ($this->type)
             {
-                $options['data'] = ($this->proceso?$this->proceso->getStockArticulo($this->faena, $this->articulo):"");
+                $data = '';
+                if ($this->proceso)
+                {
+                    $data = round($this->proceso->getStockArticulo($this->faena, $this->articulo));
+                }
+                
+                $options['data'] = $data;
             }
             elseif (!$valor->getAtributo()->getMostrarAlCargar())
             {
@@ -78,7 +87,15 @@ class ValorAtributoType extends AbstractType
         }
         elseif(ValorTexto::class == get_class($valor))
         {
+
+            if (strtoupper($valor->getAtributo()->getNombre()) == 'DT-E') // para aplicar el formato de entrada delatributo
+            {
+                $form->add('class', 
+                           HiddenType::class, 
+                           ['mapped' => false, 'data'=> 'dte']);
+            }
             $form->add('valor', TextType::class, ['attr' => ['class' => 'col-2']]);
+
         }
         elseif(ValorExterno::class == get_class($valor))
         {

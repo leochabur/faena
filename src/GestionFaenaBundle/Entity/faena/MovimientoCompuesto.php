@@ -5,37 +5,30 @@ namespace GestionFaenaBundle\Entity\faena;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * TransferirStock
+ * MovimientoCompuesto
  *
- * @ORM\Table(name="sp_st_trans_st")
- * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\TransferirStockRepository")
+ * @ORM\Table(name="sp_st_mov_comp")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\MovimientoCompuestoRepository")
  */
-class TransferirStock extends MovimientoStock
+abstract class MovimientoCompuesto extends MovimientoStock
 {
+    /**
+    * @ORM\ManyToOne(targetEntity="ProcesoFaenaDiaria") 
+    * @ORM\JoinColumn(name="id_proc_fan_day_dest", referencedColumnName="id")
+    */      
+    private $procesoFnDayDestino;
 
+    /**
+     * @ORM\OneToOne(targetEntity="MovimientoStock", inversedBy="destino")
+     * @ORM\JoinColumn(name="id_entrada", referencedColumnName="id")
+     */
+    private $movimientoDestino; //es el movimiento final de la transferencia/transformacion (Es el proceso al cual se le envia la mercaderia, debe generar una EntradaStock)
 
-    public function __toString()
-    {
-        return "Transferir";
-    }
-
-    public function getType()
-    {
-        return 5;
-    }
-
-    public function updateValues($promedio, $entityManager)
-    {
-     /*   $iterator = $this->getValores()->getIterator();
-        $iterator->uasort(function ($first, $second) {
-            return (int) $first->getAtributo()->getAtributo()->getPosition() > (int) $second->getAtributo()->getAtributo()->getPosition() ? 1 : -1;
-        });
-        foreach ($this->getValores() as $valor) {
-            $valor->calcularValor($this);
-        }*/
-    }
-
-
+    /**
+     * @ORM\OneToOne(targetEntity="MovimientoStock", inversedBy="origen")
+     * @ORM\JoinColumn(name="id_salida", referencedColumnName="id")
+     */
+    private $movimientoOrigen; //cual es el movimiento origen de la transferencia/transformacion (Es el proceso del cual se retira la mercaderia, debe generar una SalidaStock)
 
 
     /**
@@ -43,7 +36,7 @@ class TransferirStock extends MovimientoStock
      *
      * @param \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesoFnDayDestino
      *
-     * @return TransferirStock
+     * @return MovimientoCompuesto
      */
     public function setProcesoFnDayDestino(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesoFnDayDestino = null)
     {
@@ -67,7 +60,7 @@ class TransferirStock extends MovimientoStock
      *
      * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoDestino
      *
-     * @return TransferirStock
+     * @return MovimientoCompuesto
      */
     public function setMovimientoDestino(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoDestino = null)
     {
@@ -91,7 +84,7 @@ class TransferirStock extends MovimientoStock
      *
      * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoOrigen
      *
-     * @return TransferirStock
+     * @return MovimientoCompuesto
      */
     public function setMovimientoOrigen(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoOrigen = null)
     {
@@ -109,15 +102,4 @@ class TransferirStock extends MovimientoStock
     {
         return $this->movimientoOrigen;
     }
-
-    public static function getInstance()
-    {
-        return 5;
-    }
-
-    protected function updateVisible()
-    {
-        $this->setVisible(false);
-    }
-
 }

@@ -1,14 +1,15 @@
 <?php
 
 namespace GestionFaenaBundle\Entity\faena;
-use GestionFaenaBundle\Entity\gestionBD\AtributoMedibleAutomatico;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * ValorNumerico
  *
  * @ORM\Table(name="sp_st_mov_val_nro")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\ValorNumericoRepository")
+ * @ORM\HasLifecycleCallbacks()
  */
 class ValorNumerico extends ValorAtributo
 {
@@ -16,10 +17,10 @@ class ValorNumerico extends ValorAtributo
      * @var float
      *
      * @ORM\Column(name="valor", type="float")
-     * @Assert\NotNull
+     * @Assert\NotNull(message="El valor no puede permanecer en Blanco!!")
      */
 
-    private $valor;
+    private $valor = null;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\UnidadMedida") 
@@ -98,8 +99,28 @@ class ValorNumerico extends ValorAtributo
         return $this->getAtributo()->getNombre()." (".$this->unidadMedida.")";
     }
 
+    
+    public function isValid()
+    {
+        $factores = $this->getAtributo()->getFactoresCalculo(); 
+        if (!$factores)
+        {
+            if (!$this->valor)
+            {
+                return ['ok' => false, 'message' => 'El campo '.$this->getAtributo().' no puede permanecer en blanco!'];
+            }
+            return ['ok' => true];
+        }
+        else
+        {
+            return ['ok' => true];; //esto hay que ver...no deberia hacer nada ya que este valor se debe calcular  en base a valores individuales los cuales ya se hayn verificado antes
+        }
+    }
+
+
     public function calcularValor($movimiento, $entityManager, $promedio = 0)
     {
+       // throw new \Exception("Alguno de los atributos del articulo  ".$movimiento->getValores()->first()->getData());
         if (false){//$movimiento->getType() == 3){  ///////////////////REVEEERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
            /* if (get_class($this->getAtributo()->getAtributo()) == AtributoMedibleAutomatico::class)
                 $this->valor = $movimiento->getFactor()*$movimiento->getValorAtributoConNombre('Aves') * $promedio;*/
@@ -132,10 +153,12 @@ class ValorNumerico extends ValorAtributo
                                 }     
                                 else{ //significa que debe recuperar el valor del acumulado del atributo
                                     $accion = ($f1->getTipoCalculo()=='S'?'s':'p');
-                                    $due = $repository->getPromedioAtributo($movimiento->getProcesoFnDay(),
+                                    $due = $repository->getPromedioAtributoV2___($movimiento->getProcesoFnDay(),
                                                                             $f1->getArticulo(),
                                                                             $f1->getAtributo(),
                                                                             $accion);
+                                    
+                                 //  throw new \Exception($due." ".$movimiento->getProcesoFnDay()->getId()."  ".$f1->getArticulo()->getId()." ".$f1->getAtributo()->getId());
                                     $factor1 = $due['stock'];
                                 }                  
                             }
@@ -166,21 +189,53 @@ class ValorNumerico extends ValorAtributo
                                 }     
                                 else{ //significa que debe recuperar el valor del acumulado del atributo
                                     $accion = ($f2->getTipoCalculo()=='S'?'s':'p');
+                                   // try{
                                     $due = $repository->getPromedioAtributo($movimiento->getProcesoFnDay(),
                                                                             $f2->getArticulo(),
                                                                             $f2->getAtributo(),
                                                                             $accion);
+                                   // if ($due === null)
+                                   //   throw new \Exception("Error nulllllll Request ".print_r($due)."  ".$f2->getArticulo()."  ".$f2->getAtributo(), 1);
+                                  //  }
+                                  //  catch(\Exception $e){ throw new \Exception("Error Processing Request ".$e->getMessage(), 1); }
+                                    
+                                    
                                     $factor2 = $due['stock'];
                                 }                  
                             }
 
-                            switch($factores['operacion']) {
-                                                case '/': $this->valor = $factor1 / ($factor2?$factor2:$factores['factor']); break;
-                                                case '*': $this->valor = $factor1 * ($factor2?$factor2:$factores['factor']); break;
-                                                case '+': $this->valor = $factor1 + ($factor2?$factor2:$factores['factor']); break;
-                                                case '-': $this->valor = $factor1 - ($factor2?$factor2:$factores['factor']); break;
-                                                case 'R': $this->valor = $factor1 * ($factor2?$factor2:$factores['factor']); break;
-                                            }
+                            switch($factores['operacion']) 
+                            {
+                                                case '/':   
+                                                            $factor2 = ($factor2?$factor2:$factores['factorAjuste']);
+                                                            if ($factor2 == 0)
+                                                                $value = 0;
+                                                            else
+                                                                $value = $factor1 / $factor2;
+                                                            $this->valor = $value; 
+                                                            break;
+                                                case '*': 
+                                                            $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                                                case '+': 
+                                                            $this->valor = $factor1 + ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                                                case '-': 
+                                                            $this->valor = $factor1 - ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                                                case 'R': 
+                                                            $this->valor = $factor1 * ($factor2?$factor2:$factores['factorAjuste']); 
+                                                            break;
+                            }
+
+                            if ($this->getAtributo()) //tiene un Atributo asociado
+                            {
+                                if ($this->getAtributo()->getRedondea())
+                                {
+                                    $this->valor = round($this->valor, -1);
+                                }
+                            }
+                            
                     }
                     catch (\Exception $e) {throw $e;
                      }
@@ -190,9 +245,9 @@ class ValorNumerico extends ValorAtributo
 
     public function getData($redonedo = true)
     {
-        $valor = $this->getMovimiento()->updateValueAtribute($this->getValor());
+        $valor = $this->valor;//getMovimiento()->updateValueAtribute($this->getValor());
         if ($redonedo)
-            return number_format($valor,($this->getAtributo()?$this->getAtributo()->getDecimales():$this->getDecimales()),',','');
+            return number_format($valor,($this->getAtributo()?$this->getAtributo()->getDecimales():$this->getDecimales()),'.','');
         else
             return $valor;
     }
@@ -267,5 +322,14 @@ class ValorNumerico extends ValorAtributo
     public function getPromedia()
     {
         return $this->promedia;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setPrePersist()
+    {
+        //para el caso de la salida de stock, transforma el valor en negativo
+        $this->valor = $this->getMovimiento()->updateValueAtribute($this->valor);
     }
 }
