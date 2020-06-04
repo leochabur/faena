@@ -199,6 +199,8 @@ class ValorNumerico extends ValorAtributo
                                                                             $f2->getArticulo(),
                                                                             $f2->getAtributo(),
                                                                             $accion);*/
+                                    if ($f2->getArticulo())
+                                    {
                                     $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f2->getArticulo(),
                                                                                                        $f2->getAtributo(),
                                                                                                        $f2->getSoloIngreso(),
@@ -211,6 +213,10 @@ class ValorNumerico extends ValorAtributo
                                     
                                     
                                     $factor2 = $due;
+                                }
+                                else{
+                                    $factor2 = 1;
+                                }
                                 }                  
                             }
 
