@@ -185,7 +185,7 @@ class InformesController extends Controller
             $linea = array();
             foreach ($informe->getAtributos() as $atr) 
             {
-                $data = $mov->getValorWhitAtribute($atr->getAtributo()->getId());
+                $data = $mov->getValorWhitAtribute($atr->getAtributo());
                 $linea[$atr->getAtributo()->getId()] = ($data?$data->getData():'');
             }
             $detalle[] = $linea;
