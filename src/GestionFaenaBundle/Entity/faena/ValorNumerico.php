@@ -215,7 +215,7 @@ class ValorNumerico extends ValorAtributo
                                     $factor2 = $due;
                                 }
                                 else{
-                                    $factor2 = 1;
+                                    $factor2 = null;
                                 }
                                 }                  
                             }
