@@ -73,7 +73,7 @@ class GestionBDController extends Controller
 
     ////////////////////////ALTA ARTICULO ATRIBUTO CONCEPTO
     /**
-     * @Route("/addartatcon", name="bd_add_articulo_atributo_concepto")
+     * @Route("/config/addartatcon", name="bd_add_articulo_atributo_concepto")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addArticuloAtributoConcepto()
@@ -89,7 +89,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addartatconproc", name="bd_add_articulo_atributo_concepto_procesar", methods={"POST"})
+     * @Route("/config/addartatconproc", name="bd_add_articulo_atributo_concepto_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormArtAtrConcepto(Request $request)
@@ -115,7 +115,7 @@ class GestionBDController extends Controller
 
     /////////////////Alta Atributo Abstracto
     /**
-     * @Route("/addatrabs", name="bd_add_atributo_abstracto")
+     * @Route("/config/addatrabs", name="bd_add_atributo_abstracto")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addAtributoAbstracto()
@@ -131,7 +131,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addatrabsproc", name="bd_add_atributo_abstracto_procesar", methods={"POST"})
+     * @Route("/config/addatrabsproc", name="bd_add_atributo_abstracto_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioAtributoAbstracto(Request $request)
@@ -156,7 +156,7 @@ class GestionBDController extends Controller
 
     /////////////////ABM Concepto movimiento proceso
     /**
-     * @Route("/addcnmvpr", name="bd_add_concepto_movimiento_proceso")
+     * @Route("/config/addcnmvpr", name="bd_add_concepto_movimiento_proceso")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addConceptoMovimientoProceso()
@@ -172,7 +172,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addcnmvprproc", name="bd_add_concepto_movimiento_proceso_procesar", methods={"POST"})
+     * @Route("/config/addcnmvprproc", name="bd_add_concepto_movimiento_proceso_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioConceptoMovimientoProceso(Request $request)
@@ -195,7 +195,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/viewcnmvpr", name="bd_view_concepto_movimiento_proceso", methods={"GET", "POST"})
+     * @Route("/config/viewcnmvpr", name="bd_view_concepto_movimiento_proceso", methods={"GET", "POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function viewConceptoMovimientoProceso(Request $request)
@@ -223,7 +223,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/editcnmvpr/{id}", name="bd_edit_concepto_movimiento_proceso")
+     * @Route("/config/editcnmvpr/{id}", name="bd_edit_concepto_movimiento_proceso")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editConceptoMovimientoProceso($id)
@@ -234,7 +234,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/editcnmvproc/{id}", name="bd_edit_concepto_movimiento_proceso_procesar", methods={"POST"})
+     * @Route("/config/editcnmvproc/{id}", name="bd_edit_concepto_movimiento_proceso_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editConceptoMovimientoProcesoProcesar($id, Request $request)
@@ -255,7 +255,7 @@ class GestionBDController extends Controller
 
     ///////////////UNIDAD MEDIDA
     /**
-     * @Route("/addUM", name="bd_add_unidad_medida")
+     * @Route("/bd/addUM", name="bd_add_unidad_medida")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addUnidadMedidaAction()
@@ -266,7 +266,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addUMProc", name="bd_add_um_procesar", methods={"POST"})
+     * @Route("/bd/addUMProc", name="bd_add_um_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioUnidadMedida(Request $request)
@@ -297,7 +297,7 @@ class GestionBDController extends Controller
 
     
     /**
-     * @Route("/addArt", name="bd_add_articulo")
+     * @Route("/config/addArt", name="bd_add_articulo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addArticuloAction()
@@ -308,7 +308,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addArtProc", name="bd_add_articulo_procesar", methods={"POST"})
+     * @Route("/config/addArtProc", name="bd_add_articulo_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioArticulo(Request $request)
@@ -336,7 +336,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addArtProcFan", name="bd_add_articulo_proceso_faena")
+     * @Route("/config/addArtProcFan", name="bd_add_articulo_proceso_faena")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addArticuloProcesoFaenaAction()
@@ -352,7 +352,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addArtProcFanProc", name="bd_add_articulo_proceso_faena_procesar", methods={"POST"})
+     * @Route("/config/addArtProcFanProc", name="bd_add_articulo_proceso_faena_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioArticuloProcesoFaena(Request $request)
@@ -371,7 +371,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/vieAllAtributes", name="bd_atributos_view_all")
+     * @Route("/config/vieAllAtributes", name="bd_atributos_view_all")
      */
     public function viewAllAtributes()
     {
@@ -382,7 +382,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/vieAtribute/{atr}", name="bd_atributos_show", methods={"POST", "GET"})
+     * @Route("/config/vieAtribute/{atr}", name="bd_atributos_show", methods={"POST", "GET"})
      */
     public function showAtribute($atr, Request $request)
     {
@@ -403,7 +403,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/deleteArt/{art}", name="bd_delete_articulo", methods={"POST"})
+     * @Route("/config/deleteArt/{art}", name="bd_delete_articulo", methods={"POST"})
      */
     public function deleteArticulo($art)
     {
@@ -420,7 +420,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/editart", name="bd_editar_articulo")
+     * @Route("/config/editart", name="bd_editar_articulo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarArticuloAction(Request $request)
@@ -489,7 +489,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/delatr/{atr}", name="bd_delete_atributo")
+     * @Route("/config/delatr/{atr}", name="bd_delete_atributo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function deleteAtributo($atr)
@@ -506,7 +506,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/updatr/{atr}", name="bd_update_atributo")
+     * @Route("/config/updatr/{atr}", name="bd_update_atributo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function updateAtributo($atr, Request $request)
@@ -553,7 +553,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/assartor/{conc}", name="bd_asignar_articulo_origen_transformacion")
+     * @Route("/config/assartor/{conc}", name="bd_asignar_articulo_origen_transformacion")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function asignarArticuloOrigenTransformacion($conc, Request $request)
@@ -571,7 +571,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addatr/{art}", name="bd_add_atributo")
+     * @Route("/config/addatr/{art}", name="bd_add_atributo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addAtributoMedibleManualAction($art)
@@ -618,7 +618,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addAIMProc/{art}", name="bd_add_tributo_informable_manual_procesar", methods={"POST"})
+     * @Route("/config/addAIMProc/{art}", name="bd_add_tributo_informable_manual_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioAtributoInformableManual($art, Request $request)
@@ -652,7 +652,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/addAMMProc/{art}", name="bd_add_tributo_medible_manual_procesar", methods={"POST"})
+     * @Route("/config/addAMMProc/{art}", name="bd_add_tributo_medible_manual_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioAtributoMedibleManual($art, Request $request)
@@ -694,7 +694,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addAMAProc/{art}", name="bd_add_tributo_medible_automatico_procesar", methods={"POST"})
+     * @Route("/config/addAMAProc/{art}", name="bd_add_tributo_medible_automatico_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioAtributoMedibleAutomatico($art, Request $request)
@@ -727,7 +727,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addAIProc/{art}", name="bd_add_tributo_informable_procesar", methods={"POST"})
+     * @Route("/config/addAIProc/{art}", name="bd_add_tributo_informable_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioAtributoInformable($art, Request $request)
@@ -762,7 +762,7 @@ class GestionBDController extends Controller
 
     //////////ADMINISTA LOS PROCESOS///////////////////////////
     /**
-     * @Route("/addPrc/{type}", name="bd_add_proceso")
+     * @Route("/config/addPrc/{type}", name="bd_add_proceso")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addProcesoAction($type)
@@ -792,7 +792,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addProcProc/{type}", name="bd_add_proceso_procesar", methods={"POST"})
+     * @Route("/config/addProcProc/{type}", name="bd_add_proceso_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioProceso($type, Request $request)
@@ -825,7 +825,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/viewProc", name="bd_view_procesos")
+     * @Route("/config/viewProc", name="bd_view_procesos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function viewProcesosAction()
@@ -835,7 +835,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/editProc/{proccess}", name="bd_edit_procesos")
+     * @Route("/config/editProc/{proccess}", name="bd_edit_procesos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editProcesosAction($proccess)
@@ -849,7 +849,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/deletDest/{origen}/{destino}", name="delete_destination")
+     * @Route("/config/deletDest/{origen}/{destino}", name="delete_destination")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function deleteDestination($origen, $destino)
@@ -864,7 +864,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/updmnjst/{proc}", name="bd_update_manejo_stock", methods={"POST"})
+     * @Route("/config/updmnjst/{proc}", name="bd_update_manejo_stock", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function updateManejoStockProceso($proc, Request $request)
@@ -928,7 +928,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addSender/{proccess}", name="bd_edit_procesos_add_sender")
+     * @Route("/config/addSender/{proccess}", name="bd_edit_procesos_add_sender")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editProcesosProcesarAction($proccess, Request $request)
@@ -954,7 +954,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/delgstst/{proccess}/{manejo}", name="bd_delete_manejo_stock_from_proccess")
+     * @Route("/config/delgstst/{proccess}/{manejo}", name="bd_delete_manejo_stock_from_proccess")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function deleteManejoStockProccess($proccess, $manejo)
@@ -974,7 +974,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/viewArtProcFan/{articulo}", name="bd_view_art_proc_fan")
+     * @Route("/config/viewArtProcFan/{articulo}", name="bd_view_art_proc_fan")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function viewArticuloProcesoFaena($articulo)
@@ -985,7 +985,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addAtrArtProcFan/{articulo}", name="bd_add_art_proc_fan", methods={"POST"})
+     * @Route("/config/addAtrArtProcFan/{articulo}", name="bd_add_art_proc_fan", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addAtrArtProcFanAction($articulo, Request $request)
@@ -1024,7 +1024,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/cnfAtrPrc", name="bd_config_atr_proceso")
+     * @Route("/config/cnfAtrPrc", name="bd_config_atr_proceso")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editAtributoConceptoAction()
@@ -1035,7 +1035,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/cnfAtrPrcProcesar", name="bd_config_atr_proceso_procesar", methods={"POST"})
+     * @Route("/config/cnfAtrPrcProcesar", name="bd_config_atr_proceso_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editAtributoConceptoProcesar(Request $request)
@@ -1054,7 +1054,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/edConAtr", name="bd_editar_atr_concepto", methods={"POST", "GET"})
+     * @Route("/config/edConAtr", name="bd_editar_atr_concepto", methods={"POST", "GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarAtributoConceptoProceso(Request $request){
@@ -1088,7 +1088,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/getConcProc/{proc}", name="bd_get_conceptos_proceso", methods={"POST"})
+     * @Route("/config/getConcProc/{proc}", name="bd_get_conceptos_proceso", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function getConceptosProceso($proc, Request $request){
@@ -1103,7 +1103,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/getAtribCon/{con}", name="bd_get_atributos_concepto", methods={"POST"})
+     * @Route("/config/getAtribCon/{con}", name="bd_get_atributos_concepto", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function getAtributosConceptosProceso($con, Request $request){
@@ -1118,7 +1118,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/delAtPrAtCn/{atco}/{atpr}", name="bd_delete_atr_proc_atr_conc", methods={"POST"})
+     * @Route("/config/delAtPrAtCn/{atco}/{atpr}", name="bd_delete_atr_proc_atr_conc", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function deleteAtributoProcesoOfAtributoConcepto($atco, $atpr, Request $request){
@@ -1136,7 +1136,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/getAtribAtribCon/{ac}", name="bd_get_atributos_atributo_concepto", methods={"POST"})
+     * @Route("/config/getAtribAtribCon/{ac}", name="bd_get_atributos_atributo_concepto", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function getAtributosAtributoConcepto($ac, Request $request){
@@ -1147,7 +1147,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addAtrPrAtrCn/{atrcon}", name="bd_add_atributo_proceso_a_atributo_concepto", methods={"POST"})
+     * @Route("/config/addAtrPrAtrCn/{atrcon}", name="bd_add_atributo_proceso_a_atributo_concepto", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addAtrProcAtAtrConc($atrcon, Request $request){
@@ -1187,7 +1187,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/editAtrArtProc", name="bd_editar_atributo_articulo", methods={"POST", "GET"})
+     * @Route("/config/editAtrArtProc", name="bd_editar_atributo_articulo", methods={"POST", "GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarAtributoProceso(Request $request){
@@ -1196,7 +1196,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/artProcChnage/{art}", name="bd_change_articulo_proceso", methods={"POST", "GET"})
+     * @Route("/config/artProcChnage/{art}", name="bd_change_articulo_proceso", methods={"POST", "GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function changeStateArticuloProceso($art, Request $request){
@@ -1209,7 +1209,7 @@ class GestionBDController extends Controller
 
 
     /**
-     * @Route("/editArtProc", name="bd_editar_articulo_proceso", methods={"POST", "GET"})
+     * @Route("/config/editArtProc", name="bd_editar_articulo_proceso", methods={"POST", "GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarArticuloProceso(Request $request){
@@ -1232,7 +1232,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/addAtrProcP/{artic}", name="bd_add_atr_art_procesar", methods={"POST"})
+     * @Route("/config/addAtrProcP/{artic}", name="bd_add_atr_art_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function adAtrArtProcesar($artic, Request $request){
@@ -1262,7 +1262,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/editAtrConc", name="bd_editar_atributo_concepto", methods={"POST", "GET"})
+     * @Route("/config/editAtrConc", name="bd_editar_atributo_concepto", methods={"POST", "GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarAtributoConcepto(Request $request){
@@ -1305,7 +1305,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/getArtProc", name="bd_get_articles_for_proccess", methods={"GET"})
+     * @Route("/config/getArtProc", name="bd_get_articles_for_proccess", methods={"GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function getArticulosProceso(Request $request){
@@ -1321,7 +1321,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/getAtrArt", name="bd_get_atributes_for_articles", methods={"GET"})
+     * @Route("/config/getAtrArt", name="bd_get_atributes_for_articles", methods={"GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function getAtributosArticulos(Request $request){
@@ -1337,7 +1337,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/getAtr", name="bd_get_atribute", methods={"GET"})
+     * @Route("/config/getAtr", name="bd_get_atribute", methods={"GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function getAtributo(Request $request){
@@ -1355,7 +1355,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/editAtr/{atr}", name="bd_editar_atributo", methods={"POST"})
+     * @Route("/config/editAtr/{atr}", name="bd_editar_atributo", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarAtributo($atr, Request $request){

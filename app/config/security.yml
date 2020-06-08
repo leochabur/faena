@@ -32,3 +32,4 @@ security:
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin/, role: ROLE_ADMIN }
         - { path: ^/informes/gerencia/, role: ROLE_SUPER_ADMIN }
+        - { path: ^/config/, role: ROLE_ADMIN }

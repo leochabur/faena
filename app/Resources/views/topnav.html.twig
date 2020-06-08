@@ -11,19 +11,21 @@
           Configuracion Sistema
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Admin. Procesos</a>
-            <ul class="dropdown-menu">
-              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir Proceso</a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':1})}}">Proceso Inicio</a></li>
-                  <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':2})}}">Proceso Medio</a></li>
-                  <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':3})}}">Proceso Fin</a></li>
-                </ul>
-              </li>
-              <li><a class="dropdown-item" href="{{ path('bd_view_procesos') }}">Ver Procesos</a></li>
-                       
-            </ul>
-          </li>
+          {% if is_granted('ROLE_ADMIN') %}
+            <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Admin. Procesos</a>
+              <ul class="dropdown-menu">
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir Proceso</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':1})}}">Proceso Inicio</a></li>
+                    <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':2})}}">Proceso Medio</a></li>
+                    <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':3})}}">Proceso Fin</a></li>
+                  </ul>
+                </li>
+                <li><a class="dropdown-item" href="{{ path('bd_view_procesos') }}">Ver Procesos</a></li>
+                         
+              </ul>
+            </li>
+
           <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Gestionar Articulos</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{{path('bd_add_articulo')}}">Nuevo Articulo</a></li>
@@ -31,16 +33,15 @@
               <li><a class="dropdown-item" href="{{ path('bd_editar_articulo') }}">Configurar Articulos</a></li>
             </ul>
           </li>
+          {% endif %}
           <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones BD</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{{path('bd_add_atributo_abstracto')}}">Nuevo Atributo Abstracto</a></li>
-              <li><a class="dropdown-item" href="{{ path('bd_add_concepto_movimiento') }}">Nuevo Concepto Movimiento</a></li>
-               <!--li><a class="dropdown-item" href="{{path('bd_editar_atributo_articulo')}}">Configurar Atributos por proceso</a></li-->
-              <li><a class="dropdown-item" href="{{path('bd_add_concepto_movimiento_proceso')}}">Asignar Concepto a proceso</a></li>
-              <li><a class="dropdown-item" href="{{path('bd_view_concepto_movimiento_proceso')}}">Ver Definicion de Conceptos</a></li>
-              <!--li><a class="dropdown-item" href=" path('bd_editar_atr_concepto') ">Configurar atributos por concepto</a></li-->
-              <!--li><a class="dropdown-item" href="{{ path('bd_editar_articulo_proceso') }}">Definicion de articulos por proceso</a></li-->
-              
+              {% if is_granted('ROLE_ADMIN') %}
+                <li><a class="dropdown-item" href="{{path('bd_add_atributo_abstracto')}}">Nuevo Atributo Abstracto</a></li>
+                <li><a class="dropdown-item" href="{{ path('bd_add_concepto_movimiento') }}">Nuevo Concepto Movimiento</a></li>
+                <li><a class="dropdown-item" href="{{path('bd_add_concepto_movimiento_proceso')}}">Asignar Concepto a proceso</a></li>
+                <li><a class="dropdown-item" href="{{path('bd_view_concepto_movimiento_proceso')}}">Ver Definicion de Conceptos</a></li>
+              {% endif %}
               <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones del Sistema</a>
                 <ul class="dropdown-menu">
                       <li><a class="dropdown-item" href="{{ path('bd_add_entity_cargador') }}">Nuevo Cargador</a></li>
@@ -50,23 +51,27 @@
                       <li><a class="dropdown-item" href="{{ path('bd_add_entity_ciudad') }}">Nueva Ciudad</a></li>
                 </ul>
               </li>
+              {% if is_granted('ROLE_ADMIN') %}
               <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
                 <ul class="dropdown-menu">
                       <li><a class="dropdown-item" href="{{ path('bd_add_informe_proceso') }}">Nueva definicion de informe</a></li>
                 </ul>
               </li>
+            {% endif %}
             </ul>
           </li>
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
-            <ul class="dropdown-menu">
-              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Informe I</a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{{path('bd_add_informe_proceso')}}">Definir informe</a></li>
-                  <li><a class="dropdown-item" href="{{path('informe_list_informes')}}">Configurar Informe</a></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
+          {% if is_granted('ROLE_ADMIN') %}
+            <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
+              <ul class="dropdown-menu">
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Informe I</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{path('bd_add_informe_proceso')}}">Definir informe</a></li>
+                    <li><a class="dropdown-item" href="{{path('informe_list_informes')}}">Configurar Informe</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          {% endif %}
         </ul>
       </li>
       <li class="nav-item dropdown">

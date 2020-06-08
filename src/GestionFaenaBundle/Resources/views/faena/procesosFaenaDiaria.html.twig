@@ -20,10 +20,15 @@
 
 				<div class="dropdown-menu">
 				  <a class="dropdown-item" target="_blanck" href="{{ path('planilla_control_antemorten', {fanDay : faena.id, procFanDay : p.id}) }}">Planilla Control Ante-Mortem</a>
-				  <a class="dropdown-item" href="{{ path('informe_ingresos_egresos', {fd: faena.id, pfd: p.id}) }}">Informe I</a>
-				  <a class="dropdown-item" href="{{ path('informe_informe_dos', {fd: faena.id, proc: p.id}) }}">Iforme II</a>
-				  <div class="dropdown-divider"></div>
-				  <a class="dropdown-item" href="{{ path('informe_informe_tres', {fd: faena.id, proc: p.id}) }}">Informe III</a>
+				  
+					  <a class="dropdown-item" target='_blanck' href="{{ path('informe_ingresos_egresos', {fd: faena.id, pfd: p.id}) }}">Informe I</a>
+					{% if is_granted('ROLE_ADMIN') %}
+					  <a class="dropdown-item" target='_blanck'  href="{{ path('informe_informe_dos', {fd: faena.id, proc: p.id}) }}">Iforme II</a>
+					{% endif %}
+					{% if is_granted('ROLE_SUPER_ADMIN') %}
+					  <div class="dropdown-divider"></div>
+					  <a class="dropdown-item" target='_blanck'  href="{{ path('informe_informe_tres', {fd: faena.id, proc: p.id}) }}">Informe III</a>
+					{% endif %}
 				</div>
       		</div>
       </div>

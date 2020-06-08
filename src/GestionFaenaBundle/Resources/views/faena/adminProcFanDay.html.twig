@@ -157,11 +157,13 @@
  		 							<a class="dropdown-item {% if trx %} disabled {% endif %}"  href="{{ path('bd_adm_mov_st_edit',{mov : movim, proc : proced, art : artic , fanday : faena.id}) }}">
   											<button class="btn btn-warning btn-sm {% if trx %} disabled {% endif %}">Editar</button>
   									</a>
-  									<div class="dropdown-item">
-  												{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
-										    	{{ form_widget(formsDelete[value].delete, {'attr' : {'data-mov' : value, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
-										    	{{ form_end(formsDelete[value]) }}
-  									</div>
+  									{% if is_granted('ROLE_ADMIN') %}
+	  									<div class="dropdown-item">
+	  												{{ form_start(formsDelete[value], {'attr' : {'class' : 'sendDelete'}}) }}
+											    	{{ form_widget(formsDelete[value].delete, {'attr' : {'data-mov' : value, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
+											    	{{ form_end(formsDelete[value]) }}
+	  									</div>
+	  								{% endif %}
 								</div>
 
 					    </td>

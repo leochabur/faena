@@ -35,6 +35,7 @@ use GestionFaenaBundle\Entity\gestionBD\Articulo;
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
 use GestionFaenaBundle\Entity\gestionBD\ArticuloProcesoFaena;
 use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
+use GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto;
 use GestionFaenaBundle\Repository\gestionBD\ArticuloProcesoFaenaRepository; 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormEvent;
@@ -1135,29 +1136,37 @@ class GestionFaenaController extends Controller
         $pdf->setY($pdf->getY()+44);
         $i = 0;
         $h=6;
+
+        $em = $this->getDoctrine()->getManager();
+        $atr6 = $em->find(AtributoAbstracto::class, 6);
+        $atr10 = $em->find(AtributoAbstracto::class, 10);
+        $atr5 = $em->find(AtributoAbstracto::class, 5);
+        $atr9 = $em->find(AtributoAbstracto::class, 9);
+        $atr11 = $em->find(AtributoAbstracto::class, 11);
+
         foreach ($proceso->getMovimientos() as $mov) {
             if ($mov->getVisible() && (!$mov->getEliminado()) && (get_class($mov) == EntradaStock::class))
             {             
                           $i++;
-                          $v = $mov->getValorWhitAtribute(6);
+                          $v = $mov->getValorWhitAtribute($atr6);
                           $data = "";
                           if ($v)
                               $data = $v->getData();
                           $pdf->Cell(20,$h,$data."",1,0,'C');
             
-                          $v = $mov->getValorWhitAtribute(10);
+                          $v = $mov->getValorWhitAtribute($atr10);
                           $data = "";
                           if ($v)
                               $data = $v->getData();
                           $pdf->Cell(34,$h,$data."",1,0,'C');
             
-                          $v = $mov->getValorWhitAtribute(5);
+                          $v = $mov->getValorWhitAtribute($atr5);
                           $data = "";
                           if ($v)
                               $data = $v->getData();
                           $pdf->Cell(50,$h,$data."",1,0,'C');
             
-                          $v = $mov->getValorWhitAtribute(5);
+                          $v = $mov->getValorWhitAtribute($atr5);
                           $data = "RENSPA";
                           if ($v)
                               $data = $v->getEntidadExterna()->getRenspa();
@@ -1165,13 +1174,13 @@ class GestionFaenaController extends Controller
             
                           $pdf->Cell(17,$h,$mov->getArtProcFaena()->getArticulo()."",1,0,'C');
             
-                          $v = $mov->getValorWhitAtribute(9);
+                          $v = $mov->getValorWhitAtribute($atr9);
                           $data = "";
                           if ($v)
                               $data = $v->getData();
                           $pdf->Cell(20,$h,$data."",1,0,'C');
             
-                          $v = $mov->getValorWhitAtribute(11);
+                          $v = $mov->getValorWhitAtribute($atr11);
                           $data = "";
                           if ($v)
                               $data = $v->getData();
