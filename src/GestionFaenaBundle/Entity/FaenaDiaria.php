@@ -93,7 +93,7 @@ class FaenaDiaria
         return null;
     }*/
 
-    public function getProceso($id)//dado un id evuelve el ProcesoFaenaDiaria Coreespondiente al id del ProcesoFaena
+    public function getProceso($id)//dado un id devuelve el ProcesoFaenaDiaria Coreespondiente al id del ProcesoFaena
     {
         foreach ($this->procesos as $proc) {
             if ( $proc->getProcesoFaena()->getId() == $id)

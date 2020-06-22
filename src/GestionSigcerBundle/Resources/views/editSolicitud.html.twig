@@ -11,7 +11,7 @@
 {% endfor %}
 
 <div class="">
-	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+  {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <div class="form-row">
       <div class="col-4">
         {{ form_label(form.grupo, 'Solicitudes de fecha:') }}
@@ -19,71 +19,123 @@
       </div>
     </div>
     <br>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.zona) }}
-        {{ form_widget(form.zona) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.cliente) }}
-        {{ form_widget(form.cliente) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.camion) }}
-        {{ form_widget(form.camion) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.lugarDestino) }}
-        {{ form_widget(form.lugarDestino) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.precintos) }}
-        {{ form_widget(form.precintos) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.precintoSenasa) }}
-        {{ form_widget(form.precintoSenasa) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.precintoAduana) }}
-        {{ form_widget(form.precintoAduana) }}
-      </div>
+    {% if not grupo.exportacion %}
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.zona) }}
+                  {{ form_widget(form.zona) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.cliente) }}
+                  {{ form_widget(form.cliente) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.camion) }}
+                  {{ form_widget(form.camion) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.lugarDestino) }}
+                  {{ form_widget(form.lugarDestino) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.precintos) }}
+                  {{ form_widget(form.precintos) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.precintoSenasa) }}
+                  {{ form_widget(form.precintoSenasa) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.precintoAduana) }}
+                  {{ form_widget(form.precintoAduana) }}
+                </div>
 
-      <div class="col-3">
-        {{ form_label(form.remitoNumero) }}
-        {{ form_widget(form.remitoNumero) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.temperatura) }}
-        {{ form_widget(form.temperatura) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.termoTemperatura, 'Tº termo-proceso') }}
-        {{ form_widget(form.termoTemperatura) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.termoTiempo,' Tpo. termo-proceso') }}
-        {{ form_widget(form.termoTiempo) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-6">
-        {{ form_label(form.observaciones) }}
-        {{ form_widget(form.observaciones) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col">
-        {{ form_widget(form.guardar) }}
-      </div>
-    </div>
-	{{ form_end(form) }}
+                <div class="col-3">
+                  {{ form_label(form.remitoNumero) }}
+                  {{ form_widget(form.remitoNumero) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.temperatura) }}
+                  {{ form_widget(form.temperatura) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.termoTemperatura, 'Tº termo-proceso') }}
+                  {{ form_widget(form.termoTemperatura) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.termoTiempo,' Tpo. termo-proceso') }}
+                  {{ form_widget(form.termoTiempo) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-6">
+                  {{ form_label(form.observaciones) }}
+                  {{ form_widget(form.observaciones) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col">
+                  {{ form_widget(form.guardar) }}
+                </div>
+              </div>
+      {% else %}
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.patenteCamion) }}
+                  {{ form_widget(form.patenteCamion) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.patenteAcoplado) }}
+                  {{ form_widget(form.patenteAcoplado) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.destinatarioExportacion) }}
+                  {{ form_widget(form.destinatarioExportacion) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.precintoSenasa) }}
+                  {{ form_widget(form.precintoSenasa) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.remitoNumero) }}
+                  {{ form_widget(form.remitoNumero) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.temperatura) }}
+                  {{ form_widget(form.temperatura) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.tipoTransporte) }}
+                  {{ form_widget(form.tipoTransporte) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.nombreBuque) }}
+                  {{ form_widget(form.nombreBuque) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.numeroContenedor) }}
+                  {{ form_widget(form.numeroContenedor) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col">
+                  {{ form_widget(form.guardar) }}
+                </div>
+              </div>
+
+              {{ form_errors(form) }}
+      {% endif %}
+  {{ form_end(form) }}
     <br>
 </div>
     <hr>

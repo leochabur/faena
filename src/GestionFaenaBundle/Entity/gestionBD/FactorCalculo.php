@@ -46,6 +46,24 @@ class FactorCalculo
     private $soloIngreso = false;  //define si solo se debe realizar el calculo sobre los ingresos unicamente o sobre todos los movimientos, para el caso que se deba calcular las transformaciones X ej de Aves a Corazon, tome solo el ingreso
 
 
+    public function getAction()
+    {
+        $action = '';
+        switch ($this->tipoCalculo) 
+        {
+            case 'S':
+                    $action = 'ACUMULADO';
+                break;
+            case 'P':
+                    $action = 'PROMEDIO';
+                break;
+            case 'U':
+                    $action = 'UNITARIO';
+                break;
+        }
+        return $action .' ('.$this->atributo.' DE '.$this->articulo.')';
+    }
+
     /**
      * Get id
      *

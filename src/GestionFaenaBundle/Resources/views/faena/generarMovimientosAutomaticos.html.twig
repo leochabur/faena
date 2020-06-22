@@ -1,0 +1,82 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<br>
+<hr>
+<p class="h5 card-title">Proceso: {{ proceso }} - Fecha Faena: {{ faena }}</p>
+<p class="h5 card-title">Generacion automatica de movimientos</p>
+<hr>
+{% for messages in app.flashes('errorLoad') %}
+	{% for message in messages %}
+		<div class="alert alert-danger" role="alert">
+		  {{ message }}
+		</div>
+	{% endfor %}
+{% endfor %}
+
+	<div class="card">
+		<div class="card-header">
+	    <p class="h5">Movimientos a realizar</p>
+	  </div>
+  		<div class="card-body">
+		<table class="table table-striped table-bordered table-hover table-sm ">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Tipo de Movimiento</th>
+					<th>Origen>>Destino</th>
+					<th>Formula calculo</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for auto in proceso.procesoFaena.automaticos %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ auto.concepto.tipoMovimiento }}</td>
+						<td>{{ auto.concepto.articuloOrigenTransformacion }} >> {{ auto.articulo }}</td>
+						<td>{{ auto.formaCalculoAutomatico }}</td>
+					</tr>
+				{% endfor %}
+
+			</tbody>
+		</table>
+		{{ form_start(form) }}
+		{{ form_widget(form.generar, {'attr' : {'class' : 'btn btn-warning btn-generate'}}) }}
+		{{ form_end(form) }}
+		</div>
+	</div>
+	<a href="{{ path('bd_adm_proc_fan_day',{proc: proceso.id, fd: faena.id }) }}" class="btn btn-success"><< Volver</a>
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+
+
+	$('.btn-generate').click(function(event){
+												event.preventDefault();
+												var form = $(this).closest('form');
+												bootbox.confirm({
+												    message: 'Seguro generar los movimientos de manera automatica?',
+												    size: "large",
+												    buttons: {
+												        confirm: {
+												            label: 'Si, generar',
+												            className: 'btn-success'
+												        },
+												        cancel: {
+												            label: 'No, cancelar',
+												            className: 'btn-danger'
+												        }
+												    },
+												    callback: function (result) {
+												        if (result){
+												        	form.submit();
+												        }
+												    }
+												});
+											});
+</script>
+
+{% endblock %}

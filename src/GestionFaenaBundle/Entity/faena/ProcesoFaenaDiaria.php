@@ -150,9 +150,13 @@ class ProcesoFaenaDiaria
         return $this->movimientos;
     }
 
-    public function getStockArticulo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    public function getStockArticulo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, 
+                                     \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+                                     \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
     //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
     {
+       // throw new \Exception("Error Processing Request ".$atributo." ".$articulo, 1);
+        
         $stock = 0;
         foreach ($this->movimientos as $mov) 
         {
@@ -160,18 +164,17 @@ class ProcesoFaenaDiaria
             {
                     if ($mov->getArtProcFaena()->getArticulo() == $articulo)
                     {      
-                        if(true)//$mov->getFaenaDiaria() == $faena)
-                        {
-                            $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);                            
-                            if ($manejo)
-                            {                                
-                                $valor = $mov->getValorWhitAtribute($manejo->getAtributo());
-                                if ($valor)
-                                {
-                                    $stock+=  $valor->getData();
-                                }
+                     //   $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);                            
+                      //  if ($manejo)
+                      //  {                                
+                            //$valor = $mov->getValorWhitAtribute($manejo->getAtributo());
+                            $valor = $mov->getValorWhitAtribute($atributo);//$manejo->getAtributo());
+                            if ($valor)
+                            {
+                                $stock+=  $valor->getData(false);
                             }
-                        }
+                      //  }
+                    
                     }
             }
         }
@@ -193,6 +196,8 @@ class ProcesoFaenaDiaria
                 if ($mov->getArtProcFaena()->getArticulo() == $articulo)
                 {      
                     $valor = $mov->getValorWhitAtribute($atributo);
+                    if ($accion == 'U')
+                        return $valor->getData();
                     if ($valor)
                     {
                         if($soloIngreso)//solo debe levantar los movimientos de Ingreso de Stock

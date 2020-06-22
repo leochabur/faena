@@ -66,4 +66,9 @@ class ValorExterno extends ValorAtributo
         }
         return ['ok' => true];
     }
+
+    public function isNumeric()
+    {
+        return false;
+    }
 }

@@ -4,16 +4,11 @@ namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * ArticuloAtributoConcepto
  *
  * @ORM\Table(name="sp_st_art_atr_con")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\ArticuloAtributoConceptoRepository")
- * @UniqueEntity(
- *     fields={"articulo", "concepto"},
- *     message="Articulo ya asignado al proceso!!"
- * )
  * @ORM\HasLifecycleCallbacks()
  */
 class ArticuloAtributoConcepto
@@ -53,10 +48,33 @@ class ArticuloAtributoConcepto
     private $activo = true;
     
     /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="automaticos") 
+    * @ORM\JoinColumn(name="id_proceso_faena", referencedColumnName="id")
+    */      
+    private $procesoFaena;
+
+    /**
      * Get id
      *
      * @return int
      */
+
+
+    public function getFormaCalculoAutomatico()
+    {
+        $stock = $this->concepto->getProcesoFaena()->existeArticuloDefinidoManejoStock($this->articulo);
+        if ($stock)
+        {
+            foreach ($this->atributos as $atr) {
+                if (($atr->getAtributoAbstracto() == $stock->getAtributo()) && ($atr->getActivo()))
+                {
+                    return $atr->getCalculo();
+                }
+            }
+
+        }
+        return null;
+    }
 
     public function existeAtributoActivo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo) //verifica si se encuentra definido el atributo
     {
@@ -213,5 +231,29 @@ class ArticuloAtributoConcepto
     public function __construct()
     {
         $this->atributos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Set procesoFaena
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setProcesoFaena(\GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena = null)
+    {
+        $this->procesoFaena = $procesoFaena;
+
+        return $this;
+    }
+
+    /**
+     * Get procesoFaena
+     *
+     * @return \GestionFaenaBundle\Entity\ProcesoFaena
+     */
+    public function getProcesoFaena()
+    {
+        return $this->procesoFaena;
     }
 }

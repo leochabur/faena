@@ -65,6 +65,11 @@ class ConceptoMovimientoProceso
      */
     private $automatico = false; //cuano genera una transferencia, debe existir la entrada y salida asociadoa al concepto estos son marcadas como automaticos
 
+    /**
+     *
+     * @ORM\Column(name="activo", type="boolean", options={"default":true})
+     */
+    private $activo = true; 
 
     public function getVistaEdicion()
     {

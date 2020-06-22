@@ -3,6 +3,8 @@
 <br>
 <hr>
 <span class="h5 card-title">Nueva Solicitud</span>
+<br>
+<span class="h5 card-title">Tipo Solicitud: {% if not grupo.exportacion %}Consumo Interno {% else %} Exportacion {% endif %}</span>
 <hr>
 {% for message in app.flashes('sussecc') %}
 	<div class="alert alert-success" role="alert">
@@ -23,70 +25,122 @@
       </div>
     </div>
     <br>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.zona) }}
-        {{ form_widget(form.zona) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.cliente) }}
-        {{ form_widget(form.cliente) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.camion) }}
-        {{ form_widget(form.camion) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.lugarDestino) }}
-        {{ form_widget(form.lugarDestino) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.precintos) }}
-        {{ form_widget(form.precintos) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.precintoSenasa) }}
-        {{ form_widget(form.precintoSenasa) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.precintoAduana) }}
-        {{ form_widget(form.precintoAduana) }}
-      </div>
+    {% if not grupo.exportacion %}
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.zona) }}
+                  {{ form_widget(form.zona) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.cliente) }}
+                  {{ form_widget(form.cliente) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.camion) }}
+                  {{ form_widget(form.camion) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.lugarDestino) }}
+                  {{ form_widget(form.lugarDestino) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.precintos) }}
+                  {{ form_widget(form.precintos) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.precintoSenasa) }}
+                  {{ form_widget(form.precintoSenasa) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.precintoAduana) }}
+                  {{ form_widget(form.precintoAduana) }}
+                </div>
 
-      <div class="col-3">
-        {{ form_label(form.remitoNumero) }}
-        {{ form_widget(form.remitoNumero) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.temperatura) }}
-        {{ form_widget(form.temperatura) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.termoTemperatura, 'Tº termo-proceso') }}
-        {{ form_widget(form.termoTemperatura) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.termoTiempo,' Tpo. termo-proceso') }}
-        {{ form_widget(form.termoTiempo) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-6">
-        {{ form_label(form.observaciones) }}
-        {{ form_widget(form.observaciones) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col">
-        {{ form_widget(form.guardar) }}
-      </div>
-    </div>
+                <div class="col-3">
+                  {{ form_label(form.remitoNumero) }}
+                  {{ form_widget(form.remitoNumero) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.temperatura) }}
+                  {{ form_widget(form.temperatura) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.termoTemperatura, 'Tº termo-proceso') }}
+                  {{ form_widget(form.termoTemperatura) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.termoTiempo,' Tpo. termo-proceso') }}
+                  {{ form_widget(form.termoTiempo) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-6">
+                  {{ form_label(form.observaciones) }}
+                  {{ form_widget(form.observaciones) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col">
+                  {{ form_widget(form.guardar) }}
+                </div>
+              </div>
+      {% else %}
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.patenteCamion) }}
+                  {{ form_widget(form.patenteCamion) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.patenteAcoplado) }}
+                  {{ form_widget(form.patenteAcoplado) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.destinatarioExportacion) }}
+                  {{ form_widget(form.destinatarioExportacion) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.precintoSenasa) }}
+                  {{ form_widget(form.precintoSenasa) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.remitoNumero) }}
+                  {{ form_widget(form.remitoNumero) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.temperatura) }}
+                  {{ form_widget(form.temperatura) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-3">
+                  {{ form_label(form.tipoTransporte) }}
+                  {{ form_widget(form.tipoTransporte) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.nombreBuque) }}
+                  {{ form_widget(form.nombreBuque) }}
+                </div>
+                <div class="col-3">
+                  {{ form_label(form.numeroContenedor) }}
+                  {{ form_widget(form.numeroContenedor) }}
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col">
+                  {{ form_widget(form.guardar) }}
+                </div>
+              </div>
+
+              {{ form_errors(form) }}
+      {% endif %}
 	{{ form_end(form) }}
     <br>
 </div>
@@ -94,38 +148,73 @@
     <span class="h5">Solicitudes generadas para el {{ grupo.fecha | date('d/m/Y')}}</span>
     <hr>
     <table class="table table-striped table-bordered table-hover table-sm ">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Zona</th>
-            <th>Cliente</th>
-            <th>Camion</th>
-            <th>Lugar Destino</th>
-            <th>Cant. Articulos</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in grupo.solicitudes %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ p.zona }}</td>
-                <td>{{ p.cliente}}</td>
-                <td>{{ p.camion }}</td>
-                <td>{{ p.lugarDestino }}</td>
-                <td>{{ p.detalles|length }}</td>
-                <td>
-              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
-                <div class="dropdown-menu">
-                  <a class="dropdown-item"  href="{{ path('sigcer_add_articulos_a_solicitud', { sol : p.id}) }}">Agregar Productos</a>
-                  <a class="dropdown-item"  href="{{ path('sigcer_editar_solicitud', { sol : p.id}) }}">Modificar Solicitud</a>
-                  <a class="dropdown-item"  href="{{ path('sigcer_delete_solicitud', { sol : p.id}) }}">Eliminar Solicitud</a>
-                </div>
-                </td>
-                </td>
-            </tr>
-          {% endfor %}
-        </tbody>
+        {% if not grupo.exportacion %}
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Zona</th>
+                <th>Cliente</th>
+                <th>Camion</th>
+                <th>Lugar Destino</th>
+                <th>Cant. Articulos</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in grupo.solicitudes %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ p.zona }}</td>
+                    <td>{{ p.cliente}}</td>
+                    <td>{{ p.camion }}</td>
+                    <td>{{ p.lugarDestino }}</td>
+                    <td>{{ p.detalles|length }}</td>
+                    <td>
+                  <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item"  href="{{ path('sigcer_add_articulos_a_solicitud', { sol : p.id}) }}">Agregar Productos</a>
+                      <a class="dropdown-item"  href="{{ path('sigcer_editar_solicitud', { sol : p.id}) }}">Modificar Solicitud</a>
+                      <a class="dropdown-item"  href="{{ path('sigcer_delete_solicitud', { sol : p.id}) }}">Eliminar Solicitud</a>
+                    </div>
+                    </td>
+                    </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          {% else %}
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Destinatario</th>
+                <th>Remito</th>
+                <th>Contenedor</th>
+                <th>Camion/Acoplado</th>
+                <th>Cant. Articulos</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in grupo.solicitudes %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ p.destinatarioExportacion }}</td>
+                    <td>{{ p.remitoNumero }}</td>
+                    <td>{{ p.numeroContenedor }}</td>
+                    <td>{{ p.patenteCamion }}/{{ p.patenteAcoplado }}</td>
+                    <td>{{ p.detalles|length }}</td>
+                    <td>
+                  <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item"  href="{{ path('sigcer_add_articulos_a_solicitud', { sol : p.id}) }}">Agregar Productos</a>
+                      <a class="dropdown-item"  href="{{ path('sigcer_editar_solicitud', { sol : p.id}) }}">Modificar Solicitud</a>
+                      <a class="dropdown-item"  href="{{ path('sigcer_delete_solicitud', { sol : p.id}) }}">Eliminar Solicitud</a>
+                    </div>
+                    </td>
+                    </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          {% endif %}
     </table>
     <div>
         <a href="{{ path('sigcer_add_grupos_solicitudes') }}" class="btn btn-success"><< Volver</a>

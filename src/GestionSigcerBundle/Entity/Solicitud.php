@@ -23,23 +23,20 @@ class Solicitud
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Zona") 
-    * @ORM\JoinColumn(name="id_zona", referencedColumnName="id")
-    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+    * @ORM\JoinColumn(name="id_zona", referencedColumnName="id", nullable=true)
     */      
     private $zona;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="lugarDestino", type="string", length=255)
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     * @ORM\Column(name="lugarDestino", type="string", length=255, nullable=true)
      */
     private $lugarDestino;
 
     /**
      *
-     * @ORM\Column(name="precintos", type="integer")
-     * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+     * @ORM\Column(name="precintos", type="integer", nullable=true)
      */
     private $precintos;
 
@@ -102,8 +99,7 @@ class Solicitud
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\Camion") 
-    * @ORM\JoinColumn(name="id_camion", referencedColumnName="id")
-    * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
+    * @ORM\JoinColumn(name="id_camion", referencedColumnName="id", nullable=true)
     */      
     private $camion;
 
@@ -117,11 +113,44 @@ class Solicitud
     * @ORM\JoinColumn(name="id_gr_sol", referencedColumnName="id")
     */      
     private $grupo;
+
+    /**
+     * @ORM\Column(name="patenteCamion", type="string", length=255, nullable=true)
+     */
+    private $patenteCamion;
+
+    /**
+     * @ORM\Column(name="patenteAcoplado", type="string", length=255, nullable=true)
+     */
+    private $patenteAcoplado;
     
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\DestinatarioExportacion") 
+    * @ORM\JoinColumn(name="id_dest_exportacion", referencedColumnName="id", nullable=true)
+    */      
+    private $destinatarioExportacion;
+
+    /**
+     * @ORM\Column(name="tipoTransporte", type="string", length=3, nullable=true)
+     */
+    private $tipoTransporte;
+
+    /**
+     * @ORM\Column(name="numeroContenedor", type="string", length=255, nullable=true)
+     */
+    private $numeroContenedor;
+
+    /**
+     * @ORM\Column(name="nombreBuque", type="string", length=255, nullable=true)
+     */
+    private $nombreBuque;
+
     public function __toString()
     {
         try{
-        return "Zona: ".$this->zona ." - Cliente: ".$this->cliente. " - Camion: ".$this->camion;
+            if ($this->zona)
+                return "Zona: ".$this->zona ." - Cliente: ".$this->cliente. " - Camion: ".$this->camion;
+            return "Destinatario: ".$this->destinatarioExportacion ." - Contenedro: ".$this->numeroContenedor;
         }
         catch (\Exception $e){ return $this->zona;}
     }
@@ -487,5 +516,149 @@ class Solicitud
     public function getPrecintos()
     {
         return $this->precintos;
+    }
+
+    /**
+     * Set patenteCamion
+     *
+     * @param string $patenteCamion
+     *
+     * @return Solicitud
+     */
+    public function setPatenteCamion($patenteCamion)
+    {
+        $this->patenteCamion = $patenteCamion;
+
+        return $this;
+    }
+
+    /**
+     * Get patenteCamion
+     *
+     * @return string
+     */
+    public function getPatenteCamion()
+    {
+        return $this->patenteCamion;
+    }
+
+    /**
+     * Set patenteAcoplado
+     *
+     * @param string $patenteAcoplado
+     *
+     * @return Solicitud
+     */
+    public function setPatenteAcoplado($patenteAcoplado)
+    {
+        $this->patenteAcoplado = $patenteAcoplado;
+
+        return $this;
+    }
+
+    /**
+     * Get patenteAcoplado
+     *
+     * @return string
+     */
+    public function getPatenteAcoplado()
+    {
+        return $this->patenteAcoplado;
+    }
+
+    /**
+     * Set destinatarioExportacion
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\DestinatarioExportacion $destinatarioExportacion
+     *
+     * @return Solicitud
+     */
+    public function setDestinatarioExportacion(\GestionSigcerBundle\Entity\opciones\DestinatarioExportacion $destinatarioExportacion = null)
+    {
+        $this->destinatarioExportacion = $destinatarioExportacion;
+
+        return $this;
+    }
+
+    /**
+     * Get destinatarioExportacion
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\DestinatarioExportacion
+     */
+    public function getDestinatarioExportacion()
+    {
+        return $this->destinatarioExportacion;
+    }
+
+    /**
+     * Set tipoTransporte
+     *
+     * @param string $tipoTransporte
+     *
+     * @return Solicitud
+     */
+    public function setTipoTransporte($tipoTransporte)
+    {
+        $this->tipoTransporte = $tipoTransporte;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoTransporte
+     *
+     * @return string
+     */
+    public function getTipoTransporte()
+    {
+        return $this->tipoTransporte;
+    }
+
+    /**
+     * Set numeroContenedor
+     *
+     * @param string $numeroContenedor
+     *
+     * @return Solicitud
+     */
+    public function setNumeroContenedor($numeroContenedor)
+    {
+        $this->numeroContenedor = $numeroContenedor;
+
+        return $this;
+    }
+
+    /**
+     * Get numeroContenedor
+     *
+     * @return string
+     */
+    public function getNumeroContenedor()
+    {
+        return $this->numeroContenedor;
+    }
+
+    /**
+     * Set nombreBuque
+     *
+     * @param string $nombreBuque
+     *
+     * @return Solicitud
+     */
+    public function setNombreBuque($nombreBuque)
+    {
+        $this->nombreBuque = $nombreBuque;
+
+        return $this;
+    }
+
+    /**
+     * Get nombreBuque
+     *
+     * @return string
+     */
+    public function getNombreBuque()
+    {
+        return $this->nombreBuque;
     }
 }

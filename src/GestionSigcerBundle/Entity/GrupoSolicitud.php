@@ -82,6 +82,17 @@ class GrupoSolicitud
      */
     private $eliminada = false;
 
+    /**
+     *
+     * @ORM\Column(name="exportacion", type="boolean", options={"default"=false})
+     */
+    private $exportacion = false;
+
+    /**
+     *
+     * @ORM\Column(name="registroExportador", type="integer", options={"default"=8122})
+     */
+    private $registroExportador = 8122;
 
     public function getTropa()
     {
@@ -364,5 +375,53 @@ class GrupoSolicitud
     public function getEliminada()
     {
         return $this->eliminada;
+    }
+
+    /**
+     * Set exportacion
+     *
+     * @param boolean $exportacion
+     *
+     * @return GrupoSolicitud
+     */
+    public function setExportacion($exportacion)
+    {
+        $this->exportacion = $exportacion;
+
+        return $this;
+    }
+
+    /**
+     * Get exportacion
+     *
+     * @return boolean
+     */
+    public function getExportacion()
+    {
+        return $this->exportacion;
+    }
+
+    /**
+     * Set registroExportador
+     *
+     * @param integer $registroExportador
+     *
+     * @return GrupoSolicitud
+     */
+    public function setRegistroExportador($registroExportador)
+    {
+        $this->registroExportador = $registroExportador;
+
+        return $this;
+    }
+
+    /**
+     * Get registroExportador
+     *
+     * @return integer
+     */
+    public function getRegistroExportador()
+    {
+        return $this->registroExportador;
     }
 }

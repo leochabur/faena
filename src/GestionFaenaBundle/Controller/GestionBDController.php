@@ -41,6 +41,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Validator\Constraints as Assert;
 use GestionFaenaBundle\Form\gestionBD\AtrProcType;
 use GestionFaenaBundle\Form\gestionBD\EntidadExternaType;
+use GestionFaenaBundle\Form\gestionBD\EditArtAtrConType;
 use GestionFaenaBundle\Form\gestionBD\UnidadMedidaType;
 use GestionFaenaBundle\Entity\gestionBD\AtributoProceso;
 use GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto;
@@ -50,12 +51,15 @@ use Symfony\Component\Form\FormEvents;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso;
 use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
 use GestionFaenaBundle\Form\gestionBD\ArticuloAtributoConceptoType;
+use GestionFaenaBundle\Form\AjusteMovimientoType;
 use Symfony\Component\Validator\Constraints\NotNull;
 use GestionFaenaBundle\Repository\gestionBD\ArticuloAtributoConceptoRepository;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use GestionFaenaBundle\Entity\AjusteMovimiento;
 
 class GestionBDController extends Controller
 {
@@ -410,8 +414,9 @@ class GestionBDController extends Controller
         $entityManager = $this->getDoctrine()->getManager();
         $atributo = $entityManager->find('GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto', $art);
         try{
-            $entityManager->remove($atributo->getConcepto());
-            $entityManager->remove($atributo);
+          //  $entityManager->remove($atributo->getConcepto());
+           // $entityManager->remove($atributo);
+            $atributo->setActivo(false);
             $entityManager->flush();
             return new JsonResponse(array('ok'=>true, 'msge' => ''));
         }
@@ -424,7 +429,15 @@ class GestionBDController extends Controller
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarArticuloAction(Request $request)
-    {        
+    {      
+
+      /*  $form =  $this->createFormBuilder()->add('proceso', 
+                                                  EntityType::class,
+                                                  [
+                                                    'class' => 'GestionFaenaBundle\Entity\ProcesoFaena'
+                                                  ])
+                                            ->getForm();*/
+    
         $form =    $this->createFormBuilder()
                         ->add('articulos', 
                               EntityType::class, [
@@ -466,6 +479,9 @@ class GestionBDController extends Controller
             }
         }
         return $this->render('@GestionFaena/gestionBD/atributoABMV2.html.twig', array('form' => $form->createView()));
+        
+       // $form = $this->createForm(EditArtAtrConType::class, null);
+       // return $this->render('@GestionFaena/gestionBD/atributoABMV3.html.twig', array('form' => $form->createView()));
     }
 
     private function getFormUpdateAtributo($atr)
@@ -842,10 +858,13 @@ class GestionBDController extends Controller
     {
         $entityManager = $this->getDoctrine()->getManager();
         $proceso = $entityManager->find(ProcesoFaena::class, $proccess);
+        $ajuste = new AjusteMovimiento();
         return $this->render('@GestionFaena/procesoEdit.html.twig', 
                             array('proccess' => $proceso, 
                                   'form' => $this->getFormAddDestinoProceso($proccess)->createView(),
-                                  'stock' => $this->getFormConfigurarManejoStock($proceso)->createView()));
+                                  'stock' => $this->getFormConfigurarManejoStock($proceso)->createView(),
+                                  'ajuste' => $this->getFormSetAjusteProceso($ajuste, $proceso)->createView(),
+                                  'auto' => $this->getFormSetAutomaticMov($proceso)->createView()));
     }
 
     /**
@@ -861,7 +880,6 @@ class GestionBDController extends Controller
         $entityManager->flush();
         return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $origen]);
     }
-
 
     /**
      * @Route("/config/updmnjst/{proc}", name="bd_update_manejo_stock", methods={"POST"})
@@ -883,7 +901,79 @@ class GestionBDController extends Controller
             $entityManager->flush();
             return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
         }
+    }
 
+    /**
+     * @Route("/config/updajmv/{proc}", name="bd_set_ajuste_proceso", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function updateAjusteMovimientoProceso($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $ajuste = new AjusteMovimiento();
+        $form = $this->getFormSetAjusteProceso($ajuste, $proceso);
+        $form->handleRequest($request);
+        if ($form->isValid()){
+            $entityManager->persist($ajuste);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        }
+    }
+
+    private function getFormSetAjusteProceso($ajuste, $proceso)
+    {
+
+        return $this->createForm(AjusteMovimientoType::class, 
+                                $ajuste, 
+                                ['action' => $this->generateUrl('bd_set_ajuste_proceso', ['proc' => $proceso->getId()]),
+                                 'method' => 'POST',
+                                 'proceso' => $proceso]);
+    }
+
+    /**
+     * @Route("/config/setauto/{proc}", name="bd_set_automatic_mov", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function setAutomaticMovProcesar($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $form = $this->getFormSetAutomaticMov($proceso);
+        $form->handleRequest($request);
+        if ($form->isValid()){
+            $data = $form->getData();
+            $atr = $data['artAtrCon'];
+            $atr->setProcesoFaena($proceso);
+            $proceso->addAutomatico($atr);
+
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        }
+    }
+
+    private function getFormSetAutomaticMov($proceso)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('artAtrCon', EntityType::class, [
+                              'class' => 'GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto',         
+                              'choice_label' => 'vistaEdicion',                    
+                              'query_builder' => function (EntityRepository $er) use ($proceso){
+                                                                                                return $er->createQueryBuilder('a')
+                                                                                                          ->join('a.concepto', 'c')
+                                                                                                          ->join('c.procesoFaena', 'p')
+                                                                                                          ->where('p = :proceso')
+                                                                                                          ->andWhere('a.procesoFaena IS NULL')
+                                                                                                          ->andWhere('a.activo = :activo')
+                                                                                                          ->setParameter('activo', true)
+                                                                                                          ->setParameter('proceso', $proceso);
+                                                                                                }
+                        ])
+                        ->add('asignar', SubmitType::class, ['label' => '+'])    
+                        ->setAction($this->generateUrl('bd_set_automatic_mov', array('proc' => $proceso->getId())))  
+                        ->setMethod('POST')               
+                        ->getForm();
+        return $form;
     }
 
     private function getFormConfigurarManejoStock($proceso)

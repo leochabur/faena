@@ -10,4 +10,13 @@ namespace GestionSigcerBundle\Repository;
  */
 class DetalleSolicitudRepository extends \Doctrine\ORM\EntityRepository
 {
+
+	public function getDetalleConTropa(\GestionSigcerBundle\Entity\TropaSolicitud $tropa) 
+	{ 
+	    return $this->createQueryBuilder('d')
+	    			->where('d.tropa = :tropa')
+	    			->setParameter('tropa', $tropa)
+			        ->getQuery()
+			        ->getOneOrNullResult(); 
+	} 
 }

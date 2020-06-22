@@ -9,96 +9,181 @@
 	  {{ message }}
 	</div>
 {% endfor %}
-
-<div class="">
-	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-    <div class="form-row">
-      <div class="col-6">
-        {{ form_label(form.solicitud) }}
-        {{ form_widget(form.solicitud) }}
+  {% if not sol.grupo.exportacion %}
+      <div class="">
+      	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+          <div class="form-row">
+            <div class="col-6">
+              {{ form_label(form.solicitud) }}
+              {{ form_widget(form.solicitud) }}
+            </div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="col-3">
+              {{ form_label(form.articulo) }}
+              {{ form_widget(form.articulo) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.envasePrimario) }}
+              {{ form_widget(form.envasePrimario) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.envaseSecundario) }}
+              {{ form_widget(form.envaseSecundario) }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-3">
+              {{ form_label(form.cantidad) }}
+              {{ form_widget(form.cantidad) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.pesoNeto) }}
+              {{ form_widget(form.pesoNeto) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.pesoBruto) }}
+              {{ form_widget(form.pesoBruto) }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-6">
+              {{ form_label(form.tropa) }}
+              {{ form_widget(form.tropa) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.certificadoOrigen) }}
+              {{ form_widget(form.certificadoOrigen) }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col">
+              {{ form_widget(form.guardar) }}
+            </div>
+          </div>
+      	{{ form_end(form) }}
+          <br>
       </div>
-    </div>
-    <br>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.articulo) }}
-        {{ form_widget(form.articulo) }}
+    {% else %}
+      <div class="">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+          <div class="form-row">
+            <div class="col-6">
+              {{ form_label(form.solicitud) }}
+              {{ form_widget(form.solicitud) }}
+            </div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="col-6">
+              {{ form_label(form.producto) }}
+              {{ form_widget(form.producto) }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-3">
+              {{ form_label(form.fecha, 'Fecha Faena') }}
+              {{ form_widget(form.fecha) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.cant, 'Cantidad') }}
+              {{ form_widget(form.cant) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.pbruto, 'Peso Bruto') }}
+              {{ form_widget(form.pbruto) }}
+            </div>
+            <div class="col-3">
+              {{ form_label(form.pneto, 'Peso Neto') }}
+              {{ form_widget(form.pneto) }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col">
+              {{ form_widget(form.guardar) }}
+            </div>
+          </div>
+        {{ form_end(form) }}
+          <br>
       </div>
-      <div class="col-3">
-        {{ form_label(form.envasePrimario) }}
-        {{ form_widget(form.envasePrimario) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.envaseSecundario) }}
-        {{ form_widget(form.envaseSecundario) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-3">
-        {{ form_label(form.cantidad) }}
-        {{ form_widget(form.cantidad) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.pesoNeto) }}
-        {{ form_widget(form.pesoNeto) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.pesoBruto) }}
-        {{ form_widget(form.pesoBruto) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col-6">
-        {{ form_label(form.tropa) }}
-        {{ form_widget(form.tropa) }}
-      </div>
-      <div class="col-3">
-        {{ form_label(form.certificadoOrigen) }}
-        {{ form_widget(form.certificadoOrigen) }}
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="col">
-        {{ form_widget(form.guardar) }}
-      </div>
-    </div>
-	{{ form_end(form) }}
-    <br>
-</div>
+    {% endif %}
     <hr>
     <span class="h5">Articulos asignados a la solicitud => {{ sol }}</span>
     <hr>
-    <table class="table table-striped table-bordered table-hover table-sm ">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Articulo</th>
-            <th>Cantidad</th>
-            <th>P. Neto</th>
-            <th>P. Bruto</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in sol.detalles %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ p.articulo }}</td>
-                <td>{{ p.cantidad}}</td>
-                <td>{{ p.pesoNeto }}</td>
-                <td>{{ p.pesoBruto }}</td>
-                <td>
-              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
-                <div class="dropdown-menu">
-                  <a class="dropdown-item"  href="{{ path('sigcer_add_articulos_editar', { art : p.id}) }}">Editar Producto</a>
-                  <a class="dropdown-item"  href="{{ path('sigcer_delete_detalle', { art : p.id}) }}">Eliminar Producto</a>
-                </div>
-                </td>
-                </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-    </table>
+    {%  if not sol.grupo.exportacion %}
+        <table class="table table-striped table-bordered table-hover table-sm ">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Articulo</th>
+                <th>Cantidad</th>
+                <th>P. Neto</th>
+                <th>P. Bruto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in sol.detalles %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ p.articulo }}</td>
+                    <td>{{ p.cantidad}}</td>
+                    <td>{{ p.pesoNeto }}</td>
+                    <td>{{ p.pesoBruto }}</td>
+                    <td>
+                  <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item"  href="{{ path('sigcer_add_articulos_editar', { art : p.id}) }}">Editar Producto</a>
+                      <a class="dropdown-item"  href="{{ path('sigcer_delete_detalle', { art : p.id}) }}">Eliminar Producto</a>
+                    </div>
+                    </td>
+                    </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <table class="table table-striped table-bordered table-hover table-sm ">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Articulo</th>
+                <th>Lote</th>
+                <th>F. Faena</th>
+                <th>F. Elab.</th>
+                <th>F. Vto</th>
+                <th>Cantidad</th>
+                <th>P. Neto</th>
+                <th>P. Bruto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in sol.detalles %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ p.articulo }}</td>
+                    <td>{{ p.tropa.lote }}</td>
+                    <td>{{ p.tropa.fechaElaboracion | date('d/m/Y') }}</td>
+                    <td>{{ p.tropa.fechaFaena | date('d/m/Y') }}</td>
+                    <td>{{ p.tropa.fechaVto | date('d/m/Y') }}</td>
+                    <td>{{ p.cantidad}}</td>
+                    <td>{{ p.pesoNeto }}</td>
+                    <td>{{ p.pesoBruto }}</td>
+                    <td>
+                  <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item"  href="{{ path('sigcer_add_articulos_editar', { art : p.id}) }}">Editar Producto</a>
+                      <a class="dropdown-item"  href="{{ path('sigcer_delete_detalle', { art : p.id}) }}">Eliminar Producto</a>
+                    </div>
+                    </td>
+                    </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
     <div>
         <a href="{{ path('sigcer_add_solictud_a_grupo', {gpo : sol.grupo.id}) }}" class="btn btn-success"><< Volver</a>
     </div>

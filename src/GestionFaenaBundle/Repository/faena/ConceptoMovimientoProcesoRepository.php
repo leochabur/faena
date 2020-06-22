@@ -34,10 +34,13 @@ class ConceptoMovimientoProcesoRepository extends \Doctrine\ORM\EntityRepository
                     ->createQuery('SELECT c.id, ca.concepto as show
                                    FROM GestionFaenaBundle:faena\ConceptoMovimientoProceso c
                                    JOIN c.concepto ca
-                                   WHERE c.procesoFaena = :proceso AND c.tipoMovimiento = :tipo AND c.automatico = :automatico')
+                                   JOIN GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto aac WITH aac.concepto = c
+                                   WHERE aac.activo = :activo AND c.procesoFaena = :proceso AND c.tipoMovimiento = :tipo AND c.automatico = :automatico
+                                   GROUP BY c')
                     ->setParameter('proceso', $proceso)
                     ->setParameter('tipo', $tipoMovimiento)
                     ->setParameter('automatico', $automatico)
+                    ->setParameter('activo', true)
                     ->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
     }
 

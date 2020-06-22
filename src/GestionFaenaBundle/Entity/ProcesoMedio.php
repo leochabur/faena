@@ -16,4 +16,9 @@ class ProcesoMedio extends ProcesoFaena
     {
         return "Proceso Manufactura";
     }
+
+    public function getInstance()
+    {
+    	return 3;
+    }
 }

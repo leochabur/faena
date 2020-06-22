@@ -10,4 +10,14 @@ namespace GestionSigcerBundle\Repository;
  */
 class TropaSolicitudRepository extends \Doctrine\ORM\EntityRepository
 {
+
+	public function findTropaWithLote(\GestionSigcerBundle\Entity\GrupoSolicitud $grupo, $lote) 
+	{ 
+	    return $this->createQueryBuilder('t')
+	    			->where('t.grupoSolicitud = :grupo AND t.lote = :lote')
+	    			->setParameter('grupo', $grupo)
+	    			->setParameter('lote', $lote)
+			        ->getQuery()
+			        ->getOneOrNullResult(); 
+	} 
 }

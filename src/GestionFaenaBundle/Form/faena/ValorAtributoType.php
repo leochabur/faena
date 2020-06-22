@@ -69,7 +69,10 @@ class ValorAtributoType extends AbstractType
                 $data = '';
                 if ($this->proceso)
                 {
-                    $data = round($this->proceso->getStockArticulo($this->faena, $this->articulo));
+                    $val = null;
+                    if (!$valor->getAtributo()->getManual())
+                        $val = $this->proceso->getStockArticulo($this->faena, $this->articulo, $valor->getAtributo()->getAtributoAbstracto());
+                    $data = $val; //, $valor->getAtributo()->getDecimales());
                 }
                 
                 $options['data'] = $data;

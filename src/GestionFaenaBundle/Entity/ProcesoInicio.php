@@ -16,4 +16,9 @@ class ProcesoInicio extends ProcesoFaena
     {
         return "Proceso Inicio";
     }
+
+    public function getInstance()
+    {
+    	return 2;
+    }
 }

@@ -64,7 +64,7 @@ class DetalleSolicitud
     private $articulo;
 
     /**
-    * @ORM\ManyToOne(targetEntity="TropaSolicitud") 
+    * @ORM\ManyToOne(targetEntity="TropaSolicitud", cascade={"persist", "remove"}) 
     * @ORM\JoinColumn(name="id_tropa", referencedColumnName="id", nullable=true)
     */      
     private $tropa;
@@ -312,5 +312,29 @@ class DetalleSolicitud
     public function getArticulo()
     {
         return $this->articulo;
+    }
+
+    /**
+     * Set cantidadSanitario
+     *
+     * @param float $cantidadSanitario
+     *
+     * @return DetalleSolicitud
+     */
+    public function setCantidadSanitario($cantidadSanitario)
+    {
+        $this->cantidadSanitario = $cantidadSanitario;
+
+        return $this;
+    }
+
+    /**
+     * Get cantidadSanitario
+     *
+     * @return float
+     */
+    public function getCantidadSanitario()
+    {
+        return $this->cantidadSanitario;
     }
 }

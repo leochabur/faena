@@ -85,7 +85,8 @@ class GestionFaenaController extends Controller
             $faena->setUserCreate($this->getUser());
             $procesos = $em->getRepository(ProcesoFaena::class)->findAllProcesos();
             $repository = $em->getRepository(ProcesoFaenaDiaria::class);
-            foreach ($procesos as $proceso) {
+            foreach ($procesos as $proceso) 
+            {
                 if ($proceso->getPermanente()) //el proceso se instancia una unica vez, se debe verificar si existe, sino se crea
                 {
                     $procesoFaena = $repository->getProcesoFaenaDiariaWhitProcess($proceso);
@@ -181,7 +182,7 @@ class GestionFaenaController extends Controller
     }
 
 
-    private function getFormBeginMovStockAction($proceso, $movimiento = null)
+    private function getFormBeginMovStockAction(ProcesoFaenaDiaria $proceso, $fd)
     {
 
         $form = $this->createFormBuilder()
@@ -202,9 +203,14 @@ class GestionFaenaController extends Controller
                         ->add('proceso', HiddenType::class, [
                                                               'data' => $proceso->getId()
                                                           ])
-                        ->add('guardar', SubmitType::class, ['label' => 'Siguiente >>'])
-                        ->getForm();
-        return $form;
+                        ->add('guardar', SubmitType::class, ['label' => 'Siguiente >>']);
+                        if (count($proceso->getProcesoFaena()->getAutomaticos()))
+                        {
+                          $form->add('automatic', SubmitType::class, ['label' => 'Generar Movimientos Automaticos >>']);
+                        }
+                        $form->setAction($this->generateUrl('bd_adm_proc_fan_day_procesar', ['proc' => $proceso->getId(), 'fd' => $fd]));
+                        
+        return $form->getForm();
         //'constraints' => [new NotNull(array('message' => "Debe seleccionar un concepto!!"))]
         //'constraints' => [new NotNull(array('message' => "Debe seleccionar un articulo!!"))]
     }
@@ -247,17 +253,46 @@ class GestionFaenaController extends Controller
     }
 
     /**
-     * @Route("/gstProcFanDay/{proc}/{fd}", name="bd_adm_proc_fan_day", methods={"POST", "GET"})
+     * @Route("/genauto/{proc}/{fan}", name="bd_generate_movimientos_automaticos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function administrarProcesoFaenaDiaria(Request $request, $proc, $fd)
+    public function generateMovimientosAutmaticos($proc, $fan)
     {
+      $em = $this->getDoctrine()->getManager();
+      $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+      $faena = $em->find(FaenaDiaria::class, $fan);
+      $procFaena = $proceso->getProcesoFaena();
+      foreach ($procFaena->getAutomaticos() as $auto) 
+      {
+          $instance = $auto->getConcepto()->getTipoMovimiento()->getInstancia();
+          if ($instance == 4)
+          {
+            $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
+          }
+          elseif (in_array($instance, [2,3])) 
+          {
+            $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
+          }
+      }
+      $em->flush();
+      return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+    }
+
+    /**
+     * @Route("/gstProcFanDay/{proc}/{fd}", name="bd_adm_proc_fan_day")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function administrarProcesoFaenaDiaria($proc, $fd)
+    {   
         $em = $this->getDoctrine()->getManager();
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $faena = $em->find(FaenaDiaria::class, $fd);
+        if ($proceso->getProcesoFaena()->getInstance() == 3)
+        {
+           return $this->getFormProccessMedium($proceso, $faena);
+        }
         $repository = $em->getRepository('GestionFaenaBundle:faena\MovimientoStock');
         $movimientos = $repository->findAllMovimientos($proceso);
-
         $conceptos = array();
         $movStock = array();
         $datos = array();
@@ -276,125 +311,320 @@ class GestionFaenaController extends Controller
               
               if (($valor->getAtributo()?$valor->getAtributo()->getMostrar():$valor->getMostrar()))
               {        
-                              if (!in_array(($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto
-                                ()), $conceptos)){
-                                $conceptos[] = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
-                              }
-                              $keyConcepto = array_search($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto(), $conceptos);
-                              $datos[$keyMov][$keyConcepto] = array('data' => $valor->getData(), 'mov' => $mov->getId(), 'art' => $mov->getArtProcFaena()->getId(), 'proc' => $mov->getProcesoFnDay()->getId(), 'trx' => $idTrx);
-                              if (($valor->getAtributo()?$valor->getAtributo()->getAcumula():$valor->getAcumula()))
-                              {
-                                if (!isset($totales[$keyConcepto]))
-                                {
-                                    $totales[$keyConcepto] = array('cant' => 0, 'total' => 0);
-                                }
-                                if (($valor->getAtributo()?$valor->getAtributo()->getPromedia():$valor->getPromedia()))
-                                  $totales[$keyConcepto]['cant']++;
-                                else
-                                  $totales[$keyConcepto]['cant'] = 1;
-                                $totales[$keyConcepto]['total']+= $valor->getData(false);
-                              }
+                  if (!in_array(($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto
+                    ()), $conceptos)){
+                    $conceptos[] = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
+                  }
+                  $keyConcepto = array_search($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto(), $conceptos);
+                  $datos[$keyMov][$keyConcepto] = array('data' => $valor->getData(), 'mov' => $mov->getId(), 'art' => $mov->getArtProcFaena()->getId(), 'proc' => $mov->getProcesoFnDay()->getId(), 'trx' => $idTrx);
+                  if (($valor->getAtributo()?$valor->getAtributo()->getAcumula():$valor->getAcumula()))
+                  {
+                    if (!isset($totales[$keyConcepto]))
+                    {
+                        $totales[$keyConcepto] = array('cant' => 0, 'total' => 0);
+                    }
+                    if (($valor->getAtributo()?$valor->getAtributo()->getPromedia():$valor->getPromedia()))
+                      $totales[$keyConcepto]['cant']++;
+                    else
+                      $totales[$keyConcepto]['cant'] = 1;
+                    $totales[$keyConcepto]['total']+= $valor->getData(false);
+                  }
               }
             }
         }
-
-        if ($request->isMethod('post'))
-        { 
-
-          $form = $this->getFormBeginMovStockAction($proceso);
-          $form->handleRequest($request);
-          $data = $form->getData();
-          $errors = array();
-          if ($form->isValid())
-          {
-            $data = $form->getData();
-
-            $tipoMovimiento = $data['tipoMovimiento'];
-
-            $movimiento = $tipoMovimiento->getInstanciaMovimiento();
-            $movimiento->setProcesoFnDay($proceso);
-            $movimiento->setFaenaDiaria($faena);
-            $movimiento->setArtProcFaena($data['artProcFaena']);
-            //$movimiento->setConcepto($data['conMovProc']);
-            $validator = $this->get('validator');
-            $errors = $validator->validate($movimiento);
-            if (count($errors) == 0) 
-            {
-                $errorsString = (string) $errors;
-                $movimiento->generateAtributes();
-                $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $data['artProcFaena'], 'bd_adm_proc_mov_st', $faena);
-                return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('movs' => $movStock, 'fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
-            }
-          }
-
-          return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('errors' => $errors, 'con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
-        }
-
-        $form = $this->getFormBeginMovStockAction($proceso);
+        $form = $this->getFormBeginMovStockAction($proceso, $fd);
         return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
     }
 
-
-
-    private function getFormTransformacionProductor($proceso)
+    /**
+     * @Route("/gstProcFanDayProc/{proc}/{fd}", name="bd_adm_proc_fan_day_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function administrarProcesoFaenaDiariaProcesar(Request $request, $proc, $fd)
     {
-        $form = $this->createFormBuilder()
-                      ->add('articulos', 
-                            EntityType::class, 
-                            [
-                              'class' => Articulo::class,
-                              'query_builder' => function (EntityRepository $er) use ($proceso){
-                                                                                        return $er->createQueryBuilder('a')
-                                                                                                  ->join('a.artsAtrConc', 'aac')
-                                                                                                  ->join('aac.concepto', 'cmp')
-                                                                                                  ->join('cmp.procesoFaena', 'pf')
-                                                                                                  ->join('pf.procesosFaenaDiaria', 'pfd')
-                                                                                                  ->join('aac.atributos', 'atr')
-                                                                                                  ->join('atr.valoresAtributos', 'valatr')
-                                                                                                  ->where('pfd = :proceso')
-                                                                                                  ->setParameter('proceso', $proceso)
-                                                                                                  ->groupBy('a, atr')
-                                                                                                  ->orderBy('a.nombre', 'ASC');
-                                                                                                }
-                            ])
-                        ->add('load', SubmitType::class, ['label' => 'Registrar ingreso'])      
-                        ->getForm();
-        return $form;
+          $em = $this->getDoctrine()->getManager();
+          $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+          $faena = $em->find(FaenaDiaria::class, $fd);
+          $form = $this->getFormBeginMovStockAction($proceso, $fd);
+          $form->handleRequest($request);
+          $data = $form->getData();
+          $errors = array();
+          if (!$form->get('guardar')->isClicked())
+          {
+            $form = $this->createFormBuilder()
+                         ->add('generar', SubmitType::class, ['label' => 'Generar movimientos'])
+                         ->setAction($this->generateUrl('bd_generate_movimientos_automaticos', 
+                                                        ['proc' => $proceso->getId(), 'fan' => $faena->getId()]))
+                         ->getForm();     
+            return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
+                                ['form' => $form->createView(), 'faena' => $faena, 'proceso' => $proceso]);
+          }
+          else
+          {
+            if ($form->isValid())
+            {
+              $data = $form->getData();
+
+              $tipoMovimiento = $data['tipoMovimiento'];
+
+              $movimiento = $tipoMovimiento->getInstanciaMovimiento();
+              $movimiento->setProcesoFnDay($proceso);
+              $movimiento->setFaenaDiaria($faena);
+              $movimiento->setArtProcFaena($data['artProcFaena']);
+              //$movimiento->setConcepto($data['conMovProc']);
+              $validator = $this->get('validator');
+              $errors = $validator->validate($movimiento);
+              if (count($errors) == 0) 
+              {
+                  $errorsString = (string) $errors;
+                  $movimiento->generateAtributes();
+                  $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $data['artProcFaena'], 'bd_adm_proc_mov_st', $faena);
+                  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
+              }
+            }
+          }
+
+          $repository = $em->getRepository('GestionFaenaBundle:faena\MovimientoStock');
+          $movimientos = $repository->findAllMovimientos($proceso);
+          $conceptos = array();
+          $movStock = array();
+          $datos = array();
+          $formsDelete = array();
+          $totales = array();
+          $concMovimientos = array();
+          foreach ($movimientos as $mov)
+          {
+              $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
+              $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
+              $movStock[] = $mov->getId();
+              $keyMov = array_search($mov->getId(), $movStock);
+              $datos[$keyMov] = array();
+              $concMovimientos[$keyMov] = array('con'=> $mov->getArtProcFaena()->getConcepto(), 'art' => $mov->getArtProcFaena(), 'mov' => $mov);
+              foreach ($mov->getValores() as $valor) { 
+                
+                if (($valor->getAtributo()?$valor->getAtributo()->getMostrar():$valor->getMostrar()))
+                {        
+                    if (!in_array(($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto
+                      ()), $conceptos)){
+                      $conceptos[] = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
+                    }
+                    $keyConcepto = array_search($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto(), $conceptos);
+                    $datos[$keyMov][$keyConcepto] = array('data' => $valor->getData(), 'mov' => $mov->getId(), 'art' => $mov->getArtProcFaena()->getId(), 'proc' => $mov->getProcesoFnDay()->getId(), 'trx' => $idTrx);
+                    if (($valor->getAtributo()?$valor->getAtributo()->getAcumula():$valor->getAcumula()))
+                    {
+                      if (!isset($totales[$keyConcepto]))
+                      {
+                          $totales[$keyConcepto] = array('cant' => 0, 'total' => 0);
+                      }
+                      if (($valor->getAtributo()?$valor->getAtributo()->getPromedia():$valor->getPromedia()))
+                        $totales[$keyConcepto]['cant']++;
+                      else
+                        $totales[$keyConcepto]['cant'] = 1;
+                      $totales[$keyConcepto]['total']+= $valor->getData(false);
+                    }
+                }
+              }
+          }
+          return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('errors' => $errors, 'con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
+    }
+
+    private function getFormProccessMedium(ProcesoFaenaDiaria $proceso, FaenaDiaria $faena)
+    {
+        $form = $this->getFormBeginMovStockAction($proceso, $faena->getId());
+        $detalle = $this->getFormTipoMovimienos($proceso, $faena);
+        return $this->render('@GestionFaena/faena/adminProcFanDayMedium.html.twig', 
+                             ['form' => $form->createView(), 
+                              'proceso' => $proceso,
+                              'faena' => $faena,
+                              'formDetalle' => $detalle->createView()
+                             ]);
+    }
+
+    /**
+     * @Route("/gstmovproc/{proc}/{fd}", name="bd_adm_get_movimientos_proceso", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarFormMovimientosProceso(Request $request, $proc, $fd)
+    {   
+        $em = $this->getDoctrine()->getManager();
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $faena = $em->find(FaenaDiaria::class, $fd);
+        $form = $this->getFormTipoMovimienos($proceso, $faena);
+        $form->handleRequest($request);
+        $data = $form->getData();
+        $repo = $em->getRepository(MovimientoStock::class);
+        $articulo = $data['articulos'];   
+        $formsDelete = [];
+        if ($data['tipoMovimiento'] == 'M') //selecciono la opcion de mostrar los movimientos
+        {                         
+              $movimientos = $repo->findAllMovimientos($proceso);
+              $headers = ['tipo' => ['data' => 'Tipo Movimiento', 'numeric' => false], 
+                          'conc' => ['data'=> 'Concepto', 'numeric' => false], 
+                          'art' => ['data' => 'Articulo', 'numeric' => false]
+                         ];
+              $body = [];
+              $i = 0;
+              $totales = ['tipo' => 'TOTALES', 'conc' => '', 'art' => ''];
+              $informaTotales = false;
+              if ($articulo)
+              {
+                $informaTotales = true;
+              }
+              
+              foreach ($movimientos as $mov) 
+              {
+                  $computar = true;
+                  $acumular = false;
+                  if ($articulo)
+                  {
+                      if ($mov->getArtProcFaena()->getArticulo() != $articulo)
+                      {
+                          $computar = false;
+                      }
+                      else
+                      {
+                          $acumular = true;
+                      }
+                  }
+
+                  if ($computar)
+                  {
+                    $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
+                    $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
+
+                    $body[$i] = ['tipo' => $mov, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto().""];
+                    $body[$i]['id'] = $mov->getId();
+                    $body[$i]['trx'] = $idTrx;
+                    foreach ($mov->getValores() as $valor) 
+                    {
+                        $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
+                        if ($valor->getMostrar())
+                        {                            
+                            $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric()];
+                        }
+                        $body[$i][$atributo->getId()] = $valor->getData()."";
+                        $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
+                        if ($acumular)
+                        {
+                            if (!array_key_exists($atributo->getId(), $totales))
+                                $totales[$atributo->getId()] = 0;
+                            $totales[$atributo->getId()]+= $valor->getData();
+                        }
+                        
+                    }
+                    $i++;
+                  }
+              }
+        }
+        elseif ($data['tipoMovimiento'] == 'E')
+        {
+            $headers = ['tipo' => ['data' => 'Detalle', 'numeric' => false], 
+                        'art' => ['data' => 'Articulo', 'numeric' => false]
+                       ];
+            $body = [];
+            $movimientos = $repo->findAllMovimientos($proceso);
+            $informaTotales = false;
+            
+            foreach ($movimientos as $mov) 
+            {
+                $art = $mov->getArtProcFaena()->getArticulo();
+                if ((!$articulo) || ($articulo == $art))
+                {
+                    if (!array_key_exists($art->getId(), $body))
+                    {
+                        $body[$art->getId()] = ['tipo' => 'Existencias totales', 'art' => $art, 'trx' => 0];
+                    }
+                    foreach ($mov->getValores() as $valor) 
+                    {
+                        if ($valor->isNumeric())
+                        {
+                          $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
+                          if ($valor->getMostrar())
+                          {      
+                            $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => true];
+                          }
+                          if (!array_key_exists($atributo->getId(), $body[$art->getId()]))
+                          {
+                                $body[$art->getId()][$atributo->getId()] = 0;
+                          }
+                          $body[$art->getId()][$atributo->getId()]+= $valor->getData();
+                        }
+                        
+                    }
+                }
+            }
+        }
+
+        $formBegin = $this->getFormBeginMovStockAction($proceso, $fd);
+        $params = [ 'form' => $formBegin->createView(), 
+                    'proceso' => $proceso,
+                    'faena' => $faena,
+                    'formDetalle' => $form->createView(),
+                    'body' => $body,
+                    'headers' => $headers
+                   ];
+        if ($informaTotales)
+        {
+            $params['totales'] = $totales;
+        }
+        if (count($formsDelete))
+        {
+          $params['formsDelete'] = $formsDelete;
+        }
+        return $this->render('@GestionFaena/faena/adminProcFanDayMedium.html.twig', $params);
     }
 
 
-    /**
-     * @Route("/gstMovProc/{proc}/{art}/{conc}/{type}/{fanday}", name="bd_adm_proc_mov_st", methods={"POST"})
-     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
-     */
-    public function procesarMovimientoStockAction(Request $request, $proc, $art, $conc, $type, $fanday)
+    private function getFormTipoMovimienos($proceso, $faena)
     {
-        $em = $this->getDoctrine()->getManager();
-        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
-        $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
-        $concepto = $em->find(ConceptoMovimientoProceso::class, $conc);
-        $faena = $em->find(FaenaDiaria::class, $fanday);
-        if ($type == 2){
-              $movimiento = new EntradaStock();   
-              $stock = 0;     
-        }
-        elseif($type == 3){
-        //      $repo = $em->getRepository(MovimientoStock::class);
-            //  $stock = $repo->pesoPromedio($proceso, $articulo)['valor'];
-              $stock = 0;
-              $movimiento = new SalidaStock(); 
-        }
-        elseif($type == 4)
-        {
+          $form = $this->createFormBuilder()
+                        ->add('articulos', 
+                              EntityType::class, 
+                              [
+                                'class' => Articulo::class,
+                                'query_builder' => function (EntityRepository $er) use ($proceso){
+                                                                                          return $er->createQueryBuilder('a')
+                                                                                                    ->join('a.artsAtrConc', 'aac')
+                                                                                                    ->join('aac.concepto', 'cmp')
+                                                                                                    ->join('cmp.procesoFaena', 'pf')
+                                                                                                    ->join('pf.procesosFaenaDiaria', 'pfd')
+                                                                                                    ->join('aac.atributos', 'atr')
+                                                                                                    ->join('atr.valoresAtributos', 'valatr')
+                                                                                                    ->where('pfd = :proceso')
+                                                                                                    ->setParameter('proceso', $proceso)
+                                                                                                    ->groupBy('a, atr')
+                                                                                                    ->orderBy('a.nombre', 'ASC');
+                                                                                                  },
+                                'empty_data' => null,
+                                'required' => false,
+                                'placeholder' => 'Todos',
+                              ])
+                          ->add('tipoMovimiento', 
+                              ChoiceType::class, 
+                              [
+                                'choices' => ['Existencias' => 'E', 'Movimientos' => 'M']
+                              ])
+                          ->add('load', SubmitType::class, ['label' => 'Cargar'])   
+                          ->setAction($this->generateUrl('bd_adm_get_movimientos_proceso', ['proc' => $proceso->getId(), 'fd' => $faena->getId()]))
+                          ->setMethod('POST')
+                          ->getForm();
+          return $form;
+    }
+
+    private function procesarTransformarStock(ProcesoFaenaDiaria $proceso,
+                                              ArticuloAtributoConcepto $articulo,
+                                              ConceptoMovimientoProceso $concepto,
+                                              FaenaDiaria $faena,
+                                              $em)
+    {
               $stock = 0;
               $movimiento = new TransformarStock(); 
-
               $movimiento->setArtProcFaena($articulo);
               $movimiento->setProcesoFnDay($proceso);
               $movimiento->setFaenaDiaria($faena);
               $movimiento->generateAtributes();
               $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
-              $formAtr->handleRequest($request);
+             // $formAtr->handleRequest($request);
               $movimiento->updateValues($stock, $em);
 
 
@@ -431,6 +661,26 @@ class GestionFaenaController extends Controller
 
 
               ///Ya puede generar la salida del stcok del articulo base
+              $salida = new SalidaStock();
+              $salida->setFaenaDiaria($faena);
+              //$salida->addValore($valorAtr);
+              $salida->setProcesoFnDay($proceso);
+              $salida->setArtProcFaena($artAtrConSalida);
+
+            /*  foreach ($movimiento->getValores() as $valor) {
+
+                 // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                  $valorAtr = new ValorNumerico();
+                  $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+                  $dataValue = $valor->getValor();
+                  $valorAtr->setValor($dataValue);
+                  $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                  $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                  $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                  $valorAtr->setAcumula(true);
+                  $salida->addValore($valorAtr);
+              }*/
+
               $valorAtr = new ValorNumerico();
               $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
               $valorAtr->setValor($valorAtributo->getValor());
@@ -438,12 +688,7 @@ class GestionFaenaController extends Controller
               $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
               $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
               $valorAtr->setAcumula(true);
-
-              $salida = new SalidaStock();
-              $salida->setFaenaDiaria($faena);
               $salida->addValore($valorAtr);
-              $salida->setProcesoFnDay($proceso);
-              $salida->setArtProcFaena($artAtrConSalida);
               $em->persist($salida);
 
               ///Una vez realizada la salida delstock del articulo base, debe proceder a realizar la entrada del articulo destino (Corazon)
@@ -453,26 +698,109 @@ class GestionFaenaController extends Controller
                                                                                   EntradaStock::getInstance(),
                                                                                   $proceso->getProcesoFaena(),
                                                                                   $em);
-              $valorAtr = new ValorNumerico();
+
+
+             /* $valorAtr = new ValorNumerico();
               $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
               $valorAtr->setValor($valorAtributo->getValor());
               $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
               $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
               $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
-              $valorAtr->setAcumula(true);
+              $valorAtr->setAcumula(true);*/
 
               $entrada = new EntradaStock();
               $entrada->setFaenaDiaria($faena);
-              $entrada->addValore($valorAtr);
+           //   $entrada->addValore($valorAtr);
               $entrada->setProcesoFnDay($proceso);
               $entrada->setArtProcFaena($artAtrConEntrada);
+              foreach ($movimiento->getValores() as $valor) {
+
+                 // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                  $valorAtr = new ValorNumerico();
+                  $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+                  $dataValue = $valor->getValor();
+                  $valorAtr->setValor($dataValue);
+                  $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                  $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                  $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                  $valorAtr->setAcumula(true);
+                  $entrada->addValore($valorAtr);
+              }
+
               $em->persist($entrada);
               
+
               $movimiento->setMovimientoDestino($entrada);
               $movimiento->setMovimientoOrigen($salida);
               $em->persist($movimiento);
-              $em->flush();
+    }
 
+    private function procesarEntradaSalidaStock(ProcesoFaenaDiaria $proceso,
+                                                ArticuloAtributoConcepto $articulo,
+                                                ConceptoMovimientoProceso $concepto,
+                                                FaenaDiaria $faena,
+                                                $type,
+                                                $em, 
+                                                Request $request = null)
+    {
+     // throw new \Exception("Error Processing Request ".$type, 1);
+        if ($type == 2)
+        {
+              $movimiento = new EntradaStock();   
+              $stock = 0;     
+        }
+        elseif($type == 3)
+        {
+              $stock = 0;
+              $movimiento = new SalidaStock(); 
+        }
+
+        $movimiento->setArtProcFaena($articulo);
+        $movimiento->setFaenaDiaria($faena);
+        $movimiento->setProcesoFnDay($proceso);
+        $movimiento->generateAtributes();
+        $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
+        if ($request)
+        {
+          $formAtr->handleRequest($request);
+        }
+        $movimiento->updateValues($stock, $em);
+        $valid = $movimiento->verificarValores();
+        if (!$valid['ok'])
+        {
+           // throw new \Exception("Error Processing Request ".var_dump($valid));
+            $this->addFlash(
+                                'errorLoad',
+                                $valid['messages']
+                            );
+            return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));                    
+        }
+//        throw new \Exception("Error Processing Request", 1);
+        
+        $em->persist($movimiento);
+    }
+
+
+    /**
+     * @Route("/gstMovProc/{proc}/{art}/{conc}/{type}/{fanday}", name="bd_adm_proc_mov_st", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarMovimientoStockAction(Request $request, $proc, $art, $conc, $type, $fanday)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+        $repository = $em->getRepository(TipoMovimientoConcepto::class);
+        
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
+        $concepto = $em->find(ConceptoMovimientoProceso::class, $conc);
+        $faena = $em->find(FaenaDiaria::class, $fanday);
+        if($type == 4) //TransformarStock
+        {
+              $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em);
+              $proceso->setUltimoMovimiento(new \DateTime());
+              $em->flush();
         }
         elseif($type == 5)  //comienza proceso Transferencia de stockk
         {
@@ -486,6 +814,8 @@ class GestionFaenaController extends Controller
               $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
               $formAtr->handleRequest($request);
               $movimiento->updateValues($stock, $em);
+            //  throw new \Exception("Error Processing Request ".($movimiento->getValores()->next()->getData()), 1);
+              
               $procesoDestino = $formAtr['destino']->getData();
 
               if ($procesoDestino)
@@ -518,26 +848,58 @@ class GestionFaenaController extends Controller
                                                                                           EntradaStock::getInstance(),
                                                                                           $procesoDestino->getProcesoFaena(),
                                                                                           $em);
+
                       //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
                       $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
-                     // throw new \Exception($articuloManejaStock->getAtributo()."  -  ".$movimiento->getValores()->first()->getAtributo()->getAtributoAbstracto());
                       if (!$valorAtributo)
                       {
                         throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
                       }
+                      
 
-                      $valorAtr = new ValorNumerico();
-                      $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
-                      $valorAtr->setValor($valorAtributo->getValor());
-                      $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
-                      $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
-                      $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
-                      $valorAtr->setAcumula(true);
+                      $tipoMovimiento = $repository->getTipoWithInstance(EntradaStock::getInstance());
+                      $procFaena = $procFanDay->getProcesoFaena();
+
+                      $ajuste = $procFaena->getAjusteAAplicar($tipoMovimiento, 
+                                                            $artAtrConDestino->getConcepto()->getConcepto(),
+                                                            $artAtrConDestino->getArticulo()
+                                                            );
+
                       $entrada = new EntradaStock();
                       $entrada->setFaenaDiaria($faena);
-                      $entrada->addValore($valorAtr);
+                     // $entrada->addValore($valorAtr);
                       $entrada->setProcesoFnDay($procFanDay);
                       $entrada->setArtProcFaena($artAtrConDestino);
+
+                      ///recorre la lista de atributos del movimiento Transferencia de Stock para aplicarlos a la salida
+                      foreach ($movimiento->getValores() as $valor) {
+
+                         // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                          $valorAtr = new ValorNumerico();
+                          $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+
+                          $dataValue = $valor->getValor();
+
+                          if ($articuloManejaStock->getAtributo() == $valor->getAtributo()->getAtributoAbstracto())
+                          {
+                            $valorAtr->setValor(($dataValue*$ajuste));
+                          }
+                          else
+                          {
+                            $valorAtr->setValor($dataValue);
+                          }
+
+                          $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                          $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                          $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                          $valorAtr->setAcumula(true);
+                          $entrada->addValore($valorAtr);
+                      }
+
+
+
+                      
+
                       $em->persist($entrada);
                   /////////////////////////FIN GENERACION ENTRADA A PROCESO DESTINO//////////////////////////////////////////
 
@@ -639,6 +1001,7 @@ class GestionFaenaController extends Controller
                     $movimiento->setMovimientoDestino($entrada);
                     $movimiento->setMovimientoOrigen($salida);
                     $em->persist($movimiento);
+                    $proceso->setUltimoMovimiento(new \DateTime());
                     $em->flush();
                     return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
               }
@@ -646,36 +1009,20 @@ class GestionFaenaController extends Controller
                 return new Response('pedazo de japi');
               }
         }
-        if (in_array($type,array(2,3)))
+
+        if (in_array($type, [2, 3, '2', '3']))
         {
-                $movimiento->setArtProcFaena($articulo);
-                $movimiento->setFaenaDiaria($faena);
-                $movimiento->setProcesoFnDay($proceso);
-                $movimiento->generateAtributes();
-                $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
-                $formAtr->handleRequest($request);
-                $valid = $movimiento->verificarValores();
-                if (!$valid['ok'])
-                {
-                    $this->addFlash(
-                                        'errorLoad',
-                                        $valid['messages']
-                                    );
-                    return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));                    
-                }
-                $movimiento->updateValues($stock, $em);
-                if ($formAtr->isValid())
-                {
-                    $em->persist($movimiento);
-                    $em->flush();
-                    return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
-                }
+//          throw new \Exception("Error Processing Request ".$type, 1);
+          $this->procesarEntradaSalidaStock($proceso, $articulo, $concepto, $faena, $type, $em, $request);
+          $proceso->setUltimoMovimiento(new \DateTime());
+          $em->flush();
+          return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
         }
         else
         {
           return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
         }
-        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));
+      //  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));
         
     }
 

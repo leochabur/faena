@@ -46,6 +46,13 @@
 						{{ form_widget(form.guardar) }}
 				</div>
 			</div>
+			{% if form.automatic is defined %}
+				<div class="row">
+					<div class="col">
+							{{ form_widget(form.automatic, {'attr' : {'class' : 'btn btn-warning'}}) }}
+					</div>
+				</div>
+			{% endif %}
 			{{ form_end(form) }}
 		</div>
 	</div>

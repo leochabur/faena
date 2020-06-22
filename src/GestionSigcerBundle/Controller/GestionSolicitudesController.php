@@ -28,6 +28,8 @@ use GestionSigcerBundle\Form\TropaSolicitudType;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+
 /**
  * @Route("/sigcer/solic")
  */
@@ -215,6 +217,7 @@ class GestionSolicitudesController extends Controller
         $formInf = $this->createForm(\GestionSigcerBundle\Form\SolicitudType::class, 
                                       $solicitud, 
                                       ['method' => 'POST',
+                                       'grupo' => $grupo,
                                        'action' => $this->generateUrl('sigcer_add_solictud_a_grupo_procesar', array('gpo' => $gpo))]);
         return $this->render('@GestionSigcer/addSolicitudAGrupo.html.twig', 
                             ['form' => $formInf->createView(), 'grupo' => $grupo]);
@@ -234,6 +237,7 @@ class GestionSolicitudesController extends Controller
         $form = $this->createForm(\GestionSigcerBundle\Form\SolicitudType::class, 
                                       $solicitud, 
                                       ['method' => 'POST',
+                                        'grupo' => $grupo,
                                        'action' => $this->generateUrl('sigcer_add_solictud_a_grupo_procesar', array('gpo' => $gpo))]);
         $form->handleRequest($request);
         if ($form->isValid())
@@ -264,9 +268,10 @@ class GestionSolicitudesController extends Controller
         $formInf = $this->createForm(\GestionSigcerBundle\Form\SolicitudType::class, 
                                       $solicitud, 
                                       ['method' => 'POST',
+                                       'grupo' => $solicitud->getGrupo(),
                                        'action' => $this->generateUrl('sigcer_editar_solicitud_procesar', array('sol' => $sol))]);
         return $this->render('@GestionSigcer/editSolicitud.html.twig', 
-                            ['form' => $formInf->createView()]);
+                            ['grupo' => $solicitud->getGrupo(), 'form' => $formInf->createView()]);
     }
 
     /**
@@ -281,6 +286,7 @@ class GestionSolicitudesController extends Controller
         $form = $this->createForm(\GestionSigcerBundle\Form\SolicitudType::class, 
                                       $solicitud, 
                                       ['method' => 'POST',
+                                       'grupo' => $solicitud->getGrupo(),
                                        'action' => $this->generateUrl('sigcer_editar_solicitud_procesar', array('sol' => $sol))]);
         $form->handleRequest($request);
         if ($form->isValid())
@@ -361,6 +367,93 @@ class GestionSolicitudesController extends Controller
     }
 
 
+    private function getFormAddArticuloExportacion($solicitud)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('solicitud', 
+                              EntityType::class, 
+                              [
+                              'class' => Solicitud::class,
+                              'choices' => [$solicitud]
+                                ])
+                        ->add('producto', 
+                              EntityType::class, 
+                              [
+                              'class' => Producto::class
+                                ])
+                        ->add('fecha', DateType::class, ['widget' => 'single_text'])
+                        ->add('cant',TextType::class, [ 'data' => ''])
+                        ->add('pbruto',TextType::class, ['data' => ''])
+                        ->add('pneto',TextType::class, ['data' => ''])
+                        ->add('guardar', SubmitType::class, ['label' => 'Agregar'])
+                        ->setAction($this->generateUrl('sigcer_add_articulos_a_solicitud_exportacion', ['sol' => $solicitud->getId()]))
+                        ->setMethod('POST')      
+                        ->getForm();
+        return $form;
+    }
+
+    /**
+     * @Route("/addartsolexp/{sol}", name="sigcer_add_articulos_a_solicitud_exportacion")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addArticuloSolicitudExportacion($sol, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $solicitud = $em->find(Solicitud::class, $sol);
+        $form = $this->getFormAddArticuloExportacion($solicitud);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $data = $form->getData();
+            $fechaFaena = $data['fecha'];
+            $fechaElaboracion = clone $fechaFaena;
+            $fechaVencimiento = clone $fechaElaboracion;
+            $fechaVencimiento->add(new \DateInterval('P1Y'));
+            $lote = $fechaFaena->format('ymd');
+            $tropa = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
+            if (!$tropa)
+            {
+              $tropa = new TropaSolicitud();
+              $tropa->setFechaElaboracion($fechaElaboracion);
+              $tropa->setFechaFaena($fechaFaena);
+              $tropa->setFechaVto($fechaVencimiento);
+              $tropa->setNumeroTropa($lote);
+              $tropa->setLote($lote);
+              $tropa->setGrupoSolicitud($solicitud->getGrupo());
+            }
+            else
+            {
+              $detalle = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
+              if ($detalle)
+              {
+                  $detalle->setCantidad($detalle->getCantidad() + $data['cant']);
+                  $detalle->setPesoBruto($detalle->getPesoBruto() + $data['pbruto']);
+                  $detalle->setPesoNeto($detalle->getPesoNeto() + $data['pneto']);
+                  $em->flush();
+                  return $this->render('@GestionSigcer/addArticulo.html.twig', 
+                                       ['form' => $form->createView(), 'sol' => $solicitud]);
+              } 
+            }
+            $producto = $data['producto'];
+            $detalle = new DetalleSolicitud();
+            $detalle->setCantidad($data['cant']);
+            $detalle->setPesoBruto($data['pbruto']);
+            $detalle->setPesoNeto($data['pneto']);
+            $detalle->setTropa($tropa);
+            $detalle->setEnvasePrimario($producto->getEnvasePrimario());
+            $detalle->setEnvaseSecundario($producto->getEnvaseSecundario());
+            $detalle->setSolicitud($solicitud);
+            $detalle->setArticulo($producto);
+            $detalle->setCantidadSanitario($data['cant']);
+            $em->persist($detalle);
+            $em->flush();
+            return $this->render('@GestionSigcer/addArticulo.html.twig', 
+                                 ['form' => $form->createView(), 'sol' => $solicitud]);
+        }
+        
+        return $this->render('@GestionSigcer/addArticulo.html.twig', 
+                              ['form' => $form->createView(), 'sol' => $solicitud]);
+    }
 
     /**
      * @Route("/addart/{sol}", name="sigcer_add_articulos_a_solicitud")
@@ -371,6 +464,12 @@ class GestionSolicitudesController extends Controller
         $em = $this->getDoctrine()->getManager();
         $solicitud = $em->find(Solicitud::class, $sol);
 
+        if ($solicitud->getGrupo()->getExportacion())
+        {
+          $form = $this->getFormAddArticuloExportacion($solicitud);
+          return $this->render('@GestionSigcer/addArticulo.html.twig', 
+                              ['form' => $form->createView(), 'sol' => $solicitud]);
+        }
         $detalle = new DetalleSolicitud();
         $detalle->setSolicitud($solicitud);
         $formInf = $this->createForm(\GestionSigcerBundle\Form\DetalleSolicitudType::class, 
@@ -379,6 +478,7 @@ class GestionSolicitudesController extends Controller
                                        'action' => $this->generateUrl('sigcer_add_articulos_a_solicitud_procesar', array('sol' => $sol))]);
         return $this->render('@GestionSigcer/addArticulo.html.twig', 
                             ['form' => $formInf->createView(), 'sol' => $solicitud]);
+        
     }
 
     /**
@@ -733,7 +833,7 @@ class GestionSolicitudesController extends Controller
      * @Route("/genxml/{gpo}/{rgn}", name="sigcer_generar_archivos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function generateXML($gpo, $rgn)
+    public function generateXML($gpo, $rgn = 0)
     {
         $xsd = $this->get('kernel')->getRootDir() . '/../web/resources/multiplesSolicitudesCarnicos.xsd';
 
@@ -742,89 +842,191 @@ class GestionSolicitudesController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $grupo = $em->find(GrupoSolicitud::class, $gpo);
-        $region = $em->find(Region::class, $rgn);
-        $solicitudes = $em->getRepository(Solicitud::class)->findSolicitudes($grupo, $region);
-        $tr = $grupo->getTropa();
         $files = array();
         $generateZip = false;
-        foreach ($solicitudes as $sol) 
+        if (!$grupo->getExportacion())
         {
-            $dom = new \DOMDocument('1.0', 'utf-8');
-            $dom->xmlStandalone = true;
-            $solicitud = $dom->createElement('se:solicitud');
-            $solicitud->setAttribute( "xmlns:se", "http://www.senasa.gov.ar/solicitud" );
-            $solicitud->setAttribute( "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
-            $solicitud->setAttribute( "xsi:schemaLocation", "http://www.senasa.gov.ar/solicitud solicitudCertCarnicos.xsd");
-            $version = $dom->createElement( "se:version", $grupo->getVersion());
-            $solicitud->appendChild($version);
-            $tpp = $dom->createElement( "se:tropasPorProducto", 'true');
-            $solicitud->appendChild($tpp);
-            $paisDestino = $dom->createElement( "se:paisDestino", $grupo->getPaisDestino()->getCodigo());
-            $solicitud->appendChild($paisDestino);
-            $establecimiento = $dom->createElement( "se:establecimiento", $grupo->getCodigoEstablecimiento());
-            $solicitud->appendChild($establecimiento);
-            $lugarDestino = $dom->createElement( "se:lugarDestino", $sol->getLugarDestino());
-            $solicitud->appendChild($lugarDestino);
-            
-            $detalles = $dom->createElement('se:detalles');
-            $ok = false;
-            foreach ($sol->getDetalles() as $deta)
-            {
-                if ($deta->getCantidad())
+                $region = $em->find(Region::class, $rgn);
+                $solicitudes = $em->getRepository(Solicitud::class)->findSolicitudes($grupo, $region);
+                $tr = $grupo->getTropa();
+                $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'Region'.$region->getRegion().'.zip';
+                foreach ($solicitudes as $sol) 
                 {
-                    $detalle = $dom->createElement('se:detalle');
-                        $producto = $dom->createElement('se:producto');
-                          $codigo = $dom->createElement('se:codigoProducto', $deta->getArticulo()->getCodigoCapa());
-                        $producto->appendChild($codigo);
-                    $detalle->appendChild($producto);
-                   // $congelado = $tr->getFechaCongelado()->format('Y-m-d');
-                    $tropa = $dom->createElement('se:tropa');
-                    $tropa->setAttribute( "fechaDeCongelado", "" .$tr->getFechaElaboracion()->format('Y-m-d'));
-                    $tropa->setAttribute( "fechaDeElaboracion", "".$tr->getFechaElaboracion()->format('Y-m-d'));
-                    $tropa->setAttribute( "fechaDeFaena", "".$tr->getFechaFaena()->format('Y-m-d') );
-                    $tropa->setAttribute( "fechaDeVencimiento", ''.$tr->getFechaVto()->format('Y-m-d'));
-                    //$tropa->setAttribute( "numeroTropa", ''.$tr->getNumeroTropa() );
-                    $tropa->setAttribute( "numeroTropa", ''.$tr->getLote() );
-                    $tropa->setAttribute( "lote", ''.$tr->getLote());
-                    $detalle->appendChild($tropa);
-                    $detalle->appendChild($dom->createElement('se:pesoNeto', $deta->getPesoNeto()));
-                    $detalle->appendChild($dom->createElement('se:pesoBruto', $deta->getPesoBruto()));
-                    $detalle->appendChild($dom->createElement('se:cantidad', $deta->getCantidad()));
-                    $detalle->appendChild($dom->createElement('se:envasePrimario', $deta->getEnvasePrimario()->getNombre()));
-                    $detalle->appendChild($dom->createElement('se:envaseSecundario', $deta->getEnvaseSecundario()->getNombre()));
-                    $detalle->appendChild($dom->createElement('se:codEnvasePrimarioSENASA', $deta->getEnvasePrimario()->getCodigo()));
-                    $detalle->appendChild($dom->createElement('se:codEnvaseSecundarioSENASA', $deta->getEnvaseSecundario()->getCodigo()));
-                    $detalle->appendChild($dom->createElement('se:marca', $deta->getArticulo()->getMarca()));
-                    $detalles->appendChild($detalle);
-                    $ok = true;
+                    $dom = new \DOMDocument('1.0', 'utf-8');
+                    $dom->xmlStandalone = true;
+                    $solicitud = $dom->createElement('se:solicitud');
+                    $solicitud->setAttribute( "xmlns:se", "http://www.senasa.gov.ar/solicitud" );
+                    $solicitud->setAttribute( "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
+                    $solicitud->setAttribute( "xsi:schemaLocation", "http://www.senasa.gov.ar/solicitud solicitudCertCarnicos.xsd");
+                    $version = $dom->createElement( "se:version", $grupo->getVersion());
+                    $solicitud->appendChild($version);
+                    $tpp = $dom->createElement( "se:tropasPorProducto", 'true');
+                    $solicitud->appendChild($tpp);
+                    $paisDestino = $dom->createElement( "se:paisDestino", $grupo->getPaisDestino()->getCodigo());
+                    $solicitud->appendChild($paisDestino);
+                    $establecimiento = $dom->createElement( "se:establecimiento", $grupo->getCodigoEstablecimiento());
+                    $solicitud->appendChild($establecimiento);
+                    $lugarDestino = $dom->createElement( "se:lugarDestino", $sol->getLugarDestino());
+                    $solicitud->appendChild($lugarDestino);
+                    
+                    $detalles = $dom->createElement('se:detalles');
+                    $ok = false;
+                    foreach ($sol->getDetalles() as $deta)
+                    {
+                        if ($deta->getCantidad())
+                        {
+                            $detalle = $dom->createElement('se:detalle');
+                                $producto = $dom->createElement('se:producto');
+                                  $codigo = $dom->createElement('se:codigoProducto', $deta->getArticulo()->getCodigoCapa());
+                                $producto->appendChild($codigo);
+                            $detalle->appendChild($producto);
+                           // $congelado = $tr->getFechaCongelado()->format('Y-m-d');
+                            $tropa = $dom->createElement('se:tropa');
+                            $tropa->setAttribute( "fechaDeCongelado", "" .$tr->getFechaElaboracion()->format('Y-m-d'));
+                            $tropa->setAttribute( "fechaDeElaboracion", "".$tr->getFechaElaboracion()->format('Y-m-d'));
+                            $tropa->setAttribute( "fechaDeFaena", "".$tr->getFechaFaena()->format('Y-m-d') );
+                            $tropa->setAttribute( "fechaDeVencimiento", ''.$tr->getFechaVto()->format('Y-m-d'));
+                            //$tropa->setAttribute( "numeroTropa", ''.$tr->getNumeroTropa() );
+                            $tropa->setAttribute( "numeroTropa", ''.$tr->getLote() );
+                            $tropa->setAttribute( "lote", ''.$tr->getLote());
+                            $detalle->appendChild($tropa);
+                            $detalle->appendChild($dom->createElement('se:pesoNeto', $deta->getPesoNeto()));
+                            $detalle->appendChild($dom->createElement('se:pesoBruto', $deta->getPesoBruto()));
+                            $detalle->appendChild($dom->createElement('se:cantidad', $deta->getCantidad()));
+                            $detalle->appendChild($dom->createElement('se:envasePrimario', $deta->getEnvasePrimario()->getNombre()));
+                            $detalle->appendChild($dom->createElement('se:envaseSecundario', $deta->getEnvaseSecundario()->getNombre()));
+                            $detalle->appendChild($dom->createElement('se:codEnvasePrimarioSENASA', $deta->getEnvasePrimario()->getCodigo()));
+                            $detalle->appendChild($dom->createElement('se:codEnvaseSecundarioSENASA', $deta->getEnvaseSecundario()->getCodigo()));
+                            $detalle->appendChild($dom->createElement('se:marca', $deta->getArticulo()->getMarca()));
+                            $detalles->appendChild($detalle);
+                            $ok = true;
+                        }
+                    }
+                    if ($ok)
+                    {
+                        $generateZip = true;
+                        $solicitud->appendChild($detalles);
+                        $solicitud->appendChild($dom->createElement('se:precintoSENASA', $sol->getPrecintoSenasa()));
+                        $camion = $dom->createElement('se:camion');
+                          $camion->appendChild($dom->createElement('se:tipoDeTransporte', $sol->getCamion()->getTipo()));
+                          $camion->appendChild($dom->createElement('se:patenteCamion', $sol->getCamion()->getPatente()));
+                          $camion->appendChild($dom->createElement('se:habilitacionTransporte', $sol->getCamion()->getSenasa()));
+                        $solicitud->appendChild($camion);
+                        $solicitud->appendChild($dom->createElement('se:temperatura', $sol->getTemperatura()));
+                        $solicitud->appendChild($dom->createElement('se:territorio', 'AR-1'));
+                        $solicitud->appendChild($dom->createElement('se:rolDelEstablecimiento', $grupo->getRoleEstablecimiento()));
+                        $dom->appendChild($solicitud);
+                        $name = $zip."sol_".$sol->getId().".xml";
+                        $dom->save($name);
+                        $files["sol_".$sol->getId().".xml"] = $name;
+                    }
                 }
-            }
-            if ($ok)
-            {
-                $generateZip = true;
-                $solicitud->appendChild($detalles);
-                $solicitud->appendChild($dom->createElement('se:precintoSENASA', $sol->getPrecintoSenasa()));
-                $camion = $dom->createElement('se:camion');
-                  $camion->appendChild($dom->createElement('se:tipoDeTransporte', $sol->getCamion()->getTipo()));
-                  $camion->appendChild($dom->createElement('se:patenteCamion', $sol->getCamion()->getPatente()));
-                  $camion->appendChild($dom->createElement('se:habilitacionTransporte', $sol->getCamion()->getSenasa()));
-                $solicitud->appendChild($camion);
-                $solicitud->appendChild($dom->createElement('se:temperatura', $sol->getTemperatura()));
-                $solicitud->appendChild($dom->createElement('se:territorio', 'AR-1'));
-                $solicitud->appendChild($dom->createElement('se:rolDelEstablecimiento', $grupo->getRoleEstablecimiento()));
-                $dom->appendChild($solicitud);
-              //  $dom->schemaValidate($xsd);
+        }
+        else
+        {
+                foreach ($grupo->getSolicitudes() as $sol) 
+                {
+                    $dom = new \DOMDocument('1.0', 'utf-8');
+                    $dom->xmlStandalone = true;
+                    $solicitud = $dom->createElement('se:solicitud');
+                    $solicitud->setAttribute( "xmlns:se", "http://www.senasa.gov.ar/solicitud" );
+                    $solicitud->setAttribute( "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
+                    $solicitud->setAttribute( "xsi:schemaLocation", "http://www.senasa.gov.ar/solicitud solicitudCertCarnicos.xsd");
+                    $version = $dom->createElement( "se:version", $grupo->getVersion());
+                    $solicitud->appendChild($version);
+                    $tpp = $dom->createElement( "se:tropasPorProducto", 'true');
+                    $solicitud->appendChild($tpp);
+                    $paisDestino = $dom->createElement( "se:paisDestino", $grupo->getPaisDestino()->getCodigo());
+                    $solicitud->appendChild($paisDestino);
+                    $establecimiento = $dom->createElement( "se:establecimiento", $grupo->getCodigoEstablecimiento());
+                    $solicitud->appendChild($establecimiento);
 
-                $name = $zip."sol_".$sol->getId().".xml";
-                $dom->save($name);
-                $files["sol_".$sol->getId().".xml"] = $name;
-            }
+                    /*
+                    $lugarDestino = $dom->createElement( "se:lugarDestino", $sol->getLugarDestino());
+                    $solicitud->appendChild($lugarDestino);
+                    */
+
+                    $detalles = $dom->createElement('se:detalles');
+                    $ok = false;
+                    foreach ($sol->getDetalles() as $deta)
+                    {
+                        if ($deta->getCantidad())
+                        {
+                            $detalle = $dom->createElement('se:detalle');
+                                $producto = $dom->createElement('se:producto');
+                                  $codigo = $dom->createElement('se:codigoProducto', $deta->getArticulo()->getCodigoCapa());
+                                $producto->appendChild($codigo);
+                                  $nombre = $dom->createElement('se:nombre', $deta->getArticulo()->getNombre());
+                                $producto->appendChild($nombre);                                
+                            $detalle->appendChild($producto);
+                           // $congelado = $tr->getFechaCongelado()->format('Y-m-d');
+                            //$tropa->setAttribute( "fechaDeCongelado", "" .$tr->getFechaElaboracion()->format('Y-m-d'));
+                            $tr = $deta->getTropa();
+                            $tropa = $dom->createElement('se:tropa');                            
+                            $tropa->setAttribute( "fechaDeElaboracion", "".$tr->getFechaElaboracion()->format('Y-m-d'));
+                            $tropa->setAttribute( "fechaDeFaena", "".$tr->getFechaFaena()->format('Y-m-d') );
+                            $tropa->setAttribute( "fechaDeVencimiento", ''.$tr->getFechaVto()->format('Y-m-d'));
+                            $tropa->setAttribute( "numeroTropa", $tr->getLote());
+                            //$tropa->setAttribute( "numeroTropa", ''.$tr->getNumeroTropa() );
+                           // $tropa->setAttribute( "numeroTropa", ''.$tr->getLote() );
+                            $tropa->setAttribute( "lote", ''.$tr->getLote());
+                            $detalle->appendChild($tropa);
+                            $detalle->appendChild($dom->createElement('se:pesoNeto', $deta->getPesoNeto()));
+                            $detalle->appendChild($dom->createElement('se:pesoBruto', $deta->getPesoBruto()));
+                            $detalle->appendChild($dom->createElement('se:cantidad', $deta->getCantidad()));
+                            $detalle->appendChild($dom->createElement('se:envasePrimario', $deta->getEnvasePrimario()->getNombre()));
+                            $detalle->appendChild($dom->createElement('se:envaseSecundario', $deta->getEnvaseSecundario()->getNombre()));
+                            $detalle->appendChild($dom->createElement('se:codEnvasePrimarioSENASA', $deta->getEnvasePrimario()->getCodigo()));
+                            $detalle->appendChild($dom->createElement('se:codEnvaseSecundarioSENASA', $deta->getEnvaseSecundario()->getCodigo()));
+                            $detalle->appendChild($dom->createElement('se:marca', $deta->getArticulo()->getMarca()));
+                            $detalles->appendChild($detalle);
+                            $ok = true;
+                        }
+                    }
+                    if ($ok)
+                    {
+                        $generateZip = true;
+                        $solicitud->appendChild($detalles);
+                        $solicitud->appendChild($dom->createElement('se:precintoSENASA', $sol->getPrecintoSenasa()));
+                        $solicitud->appendChild($dom->createElement('se:destinatarioNombre', $sol->getDestinatarioExportacion()->getRazonSocial()));
+
+                        $solicitud->appendChild($dom->createElement('se:exportador', $grupo->getRegistroExportador()));
+                        
+                        $camion = $dom->createElement('se:camion');
+                        $camion->appendChild($dom->createElement('se:tipoDeTransporte', 'TE'));
+                        //$camion->appendChild($dom->createElement('se:habilitacionTransporte', $sol->getCamion()->getSenasa()));
+                        $patente = $sol->getPatenteCamion();
+                        if ($sol->getPatenteAcoplado())
+                        {
+                          $patente.=' / '.$sol->getPatenteAcoplado();
+                        }
+
+                        $camion->appendChild($dom->createElement('se:patenteCamion', $patente));//$sol->getCamion()->getPatente()));
+                        $solicitud->appendChild($camion);
+
+                        $medioDeTransporte = $dom->createElement('se:medioDeTransporte');
+                        $medioDeTransporte->appendChild($dom->createElement('se:tipoDeTransporte', $sol->getTipoTransporte()));
+                        $medioDeTransporte->appendChild($dom->createElement('se:nombreBuque', $sol->getNombreBuque()));
+                        $solicitud->appendChild($medioDeTransporte);
+
+                        $solicitud->appendChild($dom->createElement('se:remitoNumero', $sol->getRemitoNumero()));
+
+                        $solicitud->appendChild($dom->createElement('se:temperatura', $sol->getTemperatura()));
+                        $solicitud->appendChild($dom->createElement('se:territorio', 'AR-1'));
+                        $solicitud->appendChild($dom->createElement('se:numeroContenedor', $sol->getNumeroContenedor()));
+
+                        $solicitud->appendChild($dom->createElement('se:rolDelEstablecimiento', $grupo->getRoleEstablecimiento()));
+                        $dom->appendChild($solicitud);
+                        $name = $zip."sol_".$sol->getId().".xml";
+                        $dom->save($name);
+                        $files["sol_exp_".$sol->getId().".xml"] = $name;
+                    }
+                }
+                $zipName = 'solicitudesExportacionFecha'.$grupo->getFecha()->format('dmY').'.zip';
         }
 
-        
-        ///gyuardar
         $archivo = new \ZipArchive();
-        $zipName = 'solicitudesFecha'.$grupo->getFecha()->format('dmY').'Region'.$region->getRegion().'.zip';
+        
         $archivo->open($zip.$zipName,  \ZipArchive::CREATE|\ZipArchive::OVERWRITE);
 
         foreach ($files as $k => $v) 

@@ -77,12 +77,10 @@ abstract class ProcesoFaena
      */
     private $usuarios;
 
-
     /**
      * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria", mappedBy="procesoFaena")
      */
     private $procesosFaenaDiaria;
-
 
     /**
      * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\FactorCalculo")
@@ -97,7 +95,18 @@ abstract class ProcesoFaena
      * @ORM\Column(name="orden", type="integer", options={"default":0})
      */
     private $orden = 0; 
-    
+
+    /**
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\AjusteMovimiento", mappedBy="proceso")
+     */
+    private $ajustes;
+
+    /**
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto", mappedBy="procesoFaena")
+     */
+    private $automaticos;
+
+
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
     {
@@ -109,6 +118,7 @@ abstract class ProcesoFaena
     }
 
     public abstract function getType();
+    public abstract function getInstance();
 
     /**
      * Get id
@@ -261,6 +271,7 @@ abstract class ProcesoFaena
         $this->procesosDestino = new \Doctrine\Common\Collections\ArrayCollection();
         $this->conceptos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->manejosStock = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->ajustes = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -490,5 +501,90 @@ abstract class ProcesoFaena
     public function getOrden()
     {
         return $this->orden;
+    }
+
+    /**
+     * Add ajuste
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $ajuste
+     *
+     * @return ProcesoFaena
+     */
+    public function addAjuste(\GestionFaenaBundle\Entity\ProcesoFaena $ajuste)
+    {
+        $this->ajustes[] = $ajuste;
+
+        return $this;
+    }
+
+    /**
+     * Remove ajuste
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $ajuste
+     */
+    public function removeAjuste(\GestionFaenaBundle\Entity\ProcesoFaena $ajuste)
+    {
+        $this->ajustes->removeElement($ajuste);
+    }
+
+    /**
+     * Get ajustes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAjustes()
+    {
+        return $this->ajustes;
+    }
+
+    public function getAjusteAAplicar(\GestionFaenaBundle\Entity\faena\TipoMovimientoConcepto $tipoMovimiento,
+                                         \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptoMovimiento,
+                                         \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    {
+        foreach ($this->ajustes as $ajuste) 
+        {
+            if (($ajuste->getConceptoMovimiento() == $conceptoMovimiento) &&
+                ($ajuste->getArticulo() == $articulo) &&
+                ($ajuste->getProceso() == $this) &&
+                ($ajuste->getTipoMovimiento() == $tipoMovimiento))
+            {
+                return $ajuste->getFactorAjuste();
+            }
+        }
+        return 1;
+    }
+
+    /**
+     * Add automatico
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
+     *
+     * @return ProcesoFaena
+     */
+    public function addAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
+    {
+        $this->automaticos[] = $automatico;
+
+        return $this;
+    }
+
+    /**
+     * Remove automatico
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
+     */
+    public function removeAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
+    {
+        $this->automaticos->removeElement($automatico);
+    }
+
+    /**
+     * Get automaticos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAutomaticos()
+    {
+        return $this->automaticos;
     }
 }

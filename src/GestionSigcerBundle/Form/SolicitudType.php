@@ -10,6 +10,9 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class SolicitudType extends AbstractType
 {
@@ -18,20 +21,47 @@ class SolicitudType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('lugarDestino')
-                ->add('precintoAduana')
-                ->add('precintoSenasa')
-                ->add('observaciones')
-                ->add('remitoNumero')
-                ->add('temperatura')
-                ->add('zona')
-                ->add('precintos')
-                ->add('termoTemperatura')
-                ->add('termoTiempo', TimeType::class, ['widget' => 'single_text',])
-                ->add('cliente')
-                ->add('camion')
-                ->add('guardar', SubmitType::class);
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
+        $grupo = $options['grupo'];
+
+        if ($grupo->getExportacion())
+        {
+            $builder->add('patenteCamion', TextType::class, ['constraints' => [new NotNull(['message' => "El campo no puede permanecer en blanco!!"])]])
+                    ->add('patenteAcoplado')
+                    ->add('precintoSenasa', TextType::class, ['data' => '1'])
+                    ->add('remitoNumero', TextType::class, ['constraints' => [new NotNull(['message' => "El campo no puede permanecer en blanco!!"])]])
+                    ->add('temperatura', TextType::class, ['data' => '-18'])
+                    ->add('destinatarioExportacion',
+                          EntityType::class,
+                          [
+                            'class' => 'GestionSigcerBundle:opciones\DestinatarioExportacion',
+                            'constraints' => [new NotNull(['message' => "Debe seleccionar una opcion!!"])]
+                          ])
+                    ->add('numeroContenedor', TextType::class, ['constraints' => [new NotNull(['message' => "El campo no puede permanecer en blanco!!"])]])
+                    ->add('nombreBuque', TextType::class, ['constraints' => [new NotNull(['message' => "El campo no puede permanecer en blanco!!"])]])                    
+                    ->add('tipoTransporte', ChoiceType::class, [
+                                        'choices'  => [
+                                                        'Maritimo' => 'MA',
+                                                        'Aereo' => 'AE',
+                                                        'Terrestre' => 'TE'
+                                        ],
+                                    ]);
+        }
+        else
+        {
+            $builder->add('lugarDestino')
+                    ->add('precintoAduana')
+                    ->add('precintoSenasa')
+                    ->add('observaciones')                    
+                    ->add('temperatura')
+                    ->add('zona')
+                    ->add('precintos')
+                    ->add('termoTemperatura')
+                    ->add('termoTiempo', TimeType::class, ['widget' => 'single_text',])
+                    ->add('cliente')
+                    ->add('camion');                    
+        }
+        $builder->add('guardar', SubmitType::class)
+                ->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
     }
 
     public function onPreSetData(FormEvent $event)
@@ -53,6 +83,7 @@ class SolicitudType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'GestionSigcerBundle\Entity\Solicitud'
         ));
+        $resolver->setRequired('grupo');
     }
 
     /**

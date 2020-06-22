@@ -99,6 +99,8 @@ abstract class ValorAtributo
 
     public abstract function getData();
 
+    public abstract function isNumeric();
+
     /**
      * Set atributo
      *

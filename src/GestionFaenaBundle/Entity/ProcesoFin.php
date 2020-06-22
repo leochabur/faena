@@ -18,4 +18,9 @@ class ProcesoFin extends ProcesoFaena
         return "Proceso Fin";
     }
 
+    public function getInstance()
+    {
+    	return 4;
+    }
+
 }

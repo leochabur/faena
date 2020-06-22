@@ -14,7 +14,12 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
     public function findAllMovimientos($proceso)
     {
         return $this->getEntityManager()
-            		->createQuery('SELECT p FROM GestionFaenaBundle:faena\MovimientoStock p WHERE p.procesoFnDay = :proceso AND p.visible = :visible AND p.eliminado = :eliminado')
+            		->createQuery('SELECT p 
+                               FROM GestionFaenaBundle:faena\MovimientoStock p 
+                               JOIN p.artProcFaena artAtrCon
+                               JOIN artAtrCon.articulo art
+                               WHERE p.procesoFnDay = :proceso AND p.visible = :visible AND p.eliminado = :eliminado
+                               ORDER BY art.nombre')
             		->setParameter('proceso', $proceso)
                 ->setParameter('visible', true)
                 ->setParameter('eliminado', false)

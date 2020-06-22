@@ -1,0 +1,52 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+	<br>
+	<hr>
+<spam class="h5 mb-5">Editar articulos generados</spam>
+<hr>
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	<div class="form-row">
+		<div class="col-6">
+			{{ form_label(form.proceso) }}
+			{{ form_widget(form.proceso, {'attr' : {'class' : 'articulos'}}) }}
+			
+		</div>
+	</div>
+	{{ form_end(form) }}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+
+	$('.btn-delete').click(function(event){
+											event.preventDefault();
+											var btn = $(this);
+											var route = btn.attr('href');
+											bootbox.confirm({
+											    message: "Seguro eliminar el articulo?",
+											    buttons: {
+											        confirm: {
+											            label: 'Si',
+											            className: 'btn-success'
+											        },
+											        cancel: {
+											            label: 'No',
+											            className: 'btn-danger'
+											        }
+											    },
+											    callback: function (result) {
+											        if (result){
+											        	$.post(route.replace('_ID_ART', $('.articulos').val()),
+											        		   function(data){
+											        		   			bootbox.alert(data.msge);
+											        		   });
+											        }
+											    }
+											});
+	});
+	</script>
+{% endblock %}

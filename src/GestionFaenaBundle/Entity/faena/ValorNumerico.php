@@ -250,6 +250,10 @@ class ValorNumerico extends ValorAtributo
                                 {
                                     $this->valor = round($this->valor, -1);
                                 }
+                                else
+                                {
+                                    //$this->valor = number_format($this->valor, $this->getAtributo()->getDecimales());
+                                }
                             }
                             
                     }
@@ -347,5 +351,10 @@ class ValorNumerico extends ValorAtributo
     {
         //para el caso de la salida de stock, transforma el valor en negativo
         $this->valor = $this->getMovimiento()->updateValueAtribute($this->valor);
+    }
+
+    public function isNumeric()
+    {
+        return true;
     }
 }

@@ -10,7 +10,7 @@
 	
 
 	    <p class="h4 mb-4 text-center">{{ proccess.nombre }}</p>
-		<div class="row">
+		<div class="row mt-4">
 		  <div class="col-6">
 				<div class="card">
 				  <div class="card-header">
@@ -38,7 +38,7 @@
 				  </div>
 				  
 				  </div>
-				</div>
+		  </div>
 		
 		  <div class="col-6">
 				<div class="card">
@@ -82,6 +82,105 @@
 				</div>
 			</div>
 		</div>
+
+
+		<div class="row mt-4">
+		  <div class="col-6">
+				<div class="card">
+				  <div class="card-header">
+				     Ajusta movimiento
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Articulo</th>
+											<th>Tipo Movimiento</th>
+											<th>Concepto Movimiento</th>
+											<th>Factor Ajuste</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for aj in proccess.ajustes %}
+											<tr>
+												<td>{{ aj.articulo }}</td>
+												<td>{{ aj.tipoMovimiento }}</td>
+												<td>{{ aj.conceptoMovimiento }}</td>
+												<td>{{ aj.factorAjuste }}</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+						</table>
+				  	{{ form_start(ajuste) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(ajuste.proceso, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  		</div>
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(ajuste.tipoMovimiento, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col">
+				  				{{ form_widget(ajuste.conceptoMovimiento, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-2">
+				  				{{ form_widget(ajuste.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-2">
+				  				{{ form_widget(ajuste.factorAjuste, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-1">
+				  				{{ form_widget(ajuste.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	
+				  	{{ form_end(ajuste) }}		
+	
+				  </div>
+				  
+				  </div>
+		  </div>
+		  <div class="col-6">
+				<div class="card">
+				  <div class="card-header">
+				     Movimientos Automaticos
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Definicion</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for aj in proccess.automaticos %}
+											<tr>
+												<td>{{ aj.vistaEdicion }}</td>
+												<td></td>
+											</tr>
+										{% endfor %}
+									</tbody>
+						</table>
+				  	{{ form_start(auto) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(auto.artAtrCon, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-2">
+				  				{{ form_widget(auto.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	
+				  	{{ form_end(auto) }}		
+	
+				  </div>
+				  
+				  </div>
+		  </div>
+		</div>
+
 
 
 <div class="modal fade" id="modalSubscriptionForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"

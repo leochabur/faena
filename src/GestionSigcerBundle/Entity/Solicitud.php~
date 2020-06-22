@@ -117,7 +117,38 @@ class Solicitud
     * @ORM\JoinColumn(name="id_gr_sol", referencedColumnName="id")
     */      
     private $grupo;
+
+    /**
+     * @ORM\Column(name="patenteCamion", type="string", length=255, nullable=true)
+     */
+    private $patenteCamion;
+
+    /**
+     * @ORM\Column(name="patenteAcoplado", type="string", length=255, nullable=true)
+     */
+    private $patenteAcoplado;
     
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionSigcerBundle\Entity\opciones\DestinatarioExportacion") 
+    * @ORM\JoinColumn(name="id_dest_exportacion", referencedColumnName="id", nullable=true)
+    */      
+    private $destinatarioExportacion;
+
+    /**
+     * @ORM\Column(name="tipoTransporte", type="string", length=3, nullable=true)
+     */
+    private $tipoTransporte;
+
+    /**
+     * @ORM\Column(name="numeroContenedor", type="string", length=255, nullable=true)
+     */
+    private $numeroContenedor;
+
+    /**
+     * @ORM\Column(name="nombreBuque", type="string", length=255, nullable=true)
+     */
+    private $nombreBuque;
+
     public function __toString()
     {
         try{
@@ -487,5 +518,125 @@ class Solicitud
     public function getPrecintos()
     {
         return $this->precintos;
+    }
+
+    /**
+     * Set patenteCamion
+     *
+     * @param string $patenteCamion
+     *
+     * @return Solicitud
+     */
+    public function setPatenteCamion($patenteCamion)
+    {
+        $this->patenteCamion = $patenteCamion;
+
+        return $this;
+    }
+
+    /**
+     * Get patenteCamion
+     *
+     * @return string
+     */
+    public function getPatenteCamion()
+    {
+        return $this->patenteCamion;
+    }
+
+    /**
+     * Set patenteAcoplado
+     *
+     * @param string $patenteAcoplado
+     *
+     * @return Solicitud
+     */
+    public function setPatenteAcoplado($patenteAcoplado)
+    {
+        $this->patenteAcoplado = $patenteAcoplado;
+
+        return $this;
+    }
+
+    /**
+     * Get patenteAcoplado
+     *
+     * @return string
+     */
+    public function getPatenteAcoplado()
+    {
+        return $this->patenteAcoplado;
+    }
+
+    /**
+     * Set destinatarioExportacion
+     *
+     * @param \GestionSigcerBundle\Entity\opciones\DestinatarioExportacion $destinatarioExportacion
+     *
+     * @return Solicitud
+     */
+    public function setDestinatarioExportacion(\GestionSigcerBundle\Entity\opciones\DestinatarioExportacion $destinatarioExportacion = null)
+    {
+        $this->destinatarioExportacion = $destinatarioExportacion;
+
+        return $this;
+    }
+
+    /**
+     * Get destinatarioExportacion
+     *
+     * @return \GestionSigcerBundle\Entity\opciones\DestinatarioExportacion
+     */
+    public function getDestinatarioExportacion()
+    {
+        return $this->destinatarioExportacion;
+    }
+
+    /**
+     * Set tipoTransporte
+     *
+     * @param string $tipoTransporte
+     *
+     * @return Solicitud
+     */
+    public function setTipoTransporte($tipoTransporte)
+    {
+        $this->tipoTransporte = $tipoTransporte;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoTransporte
+     *
+     * @return string
+     */
+    public function getTipoTransporte()
+    {
+        return $this->tipoTransporte;
+    }
+
+    /**
+     * Set numeroContenedor
+     *
+     * @param string $numeroContenedor
+     *
+     * @return Solicitud
+     */
+    public function setNumeroContenedor($numeroContenedor)
+    {
+        $this->numeroContenedor = $numeroContenedor;
+
+        return $this;
+    }
+
+    /**
+     * Get numeroContenedor
+     *
+     * @return string
+     */
+    public function getNumeroContenedor()
+    {
+        return $this->numeroContenedor;
     }
 }

@@ -26,6 +26,12 @@ class GrupoSolicitudType extends AbstractType
                                                                         'MIRALEJOS SACIFIyA.' => '1567'
                                                                     ],
                                                                 ])
+                ->add('exportacion', ChoiceType::class, [
+                                                        'choices'  => [
+                                                                        'Cons. Interno' => false,
+                                                                        'Exportacion' => true
+                                                        ],
+                                                    ])
                 ->add('roleEstablecimiento', ChoiceType::class, [
                                                                     'choices'  => [
                                                                         'FAENADOR' => 'FAENADOR',

@@ -65,6 +65,11 @@ class ConceptoMovimientoProceso
      */
     private $automatico = false; //cuano genera una transferencia, debe existir la entrada y salida asociadoa al concepto estos son marcadas como automaticos
 
+    /**
+     *
+     * @ORM\Column(name="activo", type="boolean", options={"default":true})
+     */
+    private $activo = true; 
 
     public function getVistaEdicion()
     {
@@ -281,5 +286,29 @@ class ConceptoMovimientoProceso
     public function getAutomatico()
     {
         return $this->automatico;
+    }
+
+    /**
+     * Set activo
+     *
+     * @param boolean $activo
+     *
+     * @return ConceptoMovimientoProceso
+     */
+    public function setActivo($activo)
+    {
+        $this->activo = $activo;
+
+        return $this;
+    }
+
+    /**
+     * Get activo
+     *
+     * @return boolean
+     */
+    public function getActivo()
+    {
+        return $this->activo;
     }
 }

@@ -36,6 +36,44 @@ class AtributoMedibleAutomatico extends AtributoMedible
     private $factorAjuste = null;
     
 
+    public function getCalculo()
+    {
+        $action1 = $action2 = $formular = '';
+
+        if ($this->factor1)
+        {
+            $action1 = $this->factor1->getAction();
+        }
+
+        if ($this->factor2)
+        {
+            $action2 = $this->factor2->getAction();
+        }
+
+        switch ($this->operacion) {
+            case 'R':
+                    $formula = $action1.$action2.' * '.$this->factorAjuste;
+                break;                                  
+            default:
+                    $formula = $action1.' '.$this->operacion.''.$action2;
+                break;
+        }
+
+        return $formula;
+
+        $formula = $this->factor1;
+        if ($this->factor2)
+        {
+                $formula.=$this->operacion.$this->factor2;
+        }
+        else
+            if ($this->getFactorAjuste())
+            {
+                $formula.=$this->getOperacion().$this->getFactorAjuste();
+            }
+        return $formula;
+    }
+
     /**
      * Set operacion
      *
@@ -63,18 +101,6 @@ class AtributoMedibleAutomatico extends AtributoMedible
     public function getCarga()
     {
         return 'Automatico';
-    }
-
-    public function getCalculo()
-    {
-        $formula = $this->factor1;
-        if ($this->factor2)
-                $formula.=$this->operacion.$this->factor2;
-        else
-            if ($this->getFactorAjuste()){
-                $formula.=$this->getOperacion().$this->getFactorAjuste();
-            }
-        return $formula;
     }
 
     public function getManual()

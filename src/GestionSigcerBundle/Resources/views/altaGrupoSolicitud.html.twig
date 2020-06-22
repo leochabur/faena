@@ -13,13 +13,17 @@
 <div class="">
 	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <div class="form-row">
-      <div class="col-3">
+      <div class="col-2">
         {{ form_label(form.fecha) }}
         {{ form_widget(form.fecha) }}
       </div>
       <div class="col-1">
         {{ form_label(form.version) }}
         {{ form_widget(form.version) }}
+      </div>
+      <div class="col-2">
+        {{ form_label(form.exportacion, 'Destino') }}
+        {{ form_widget(form.exportacion) }}
       </div>
       <div class="col-2">
         {{ form_label(form.paisDestino) }}
@@ -29,7 +33,7 @@
         {{ form_label(form.codigoEstablecimiento) }}
         {{ form_widget(form.codigoEstablecimiento) }}
       </div>
-      <div class="col-3">
+      <div class="col-2">
         {{ form_label(form.roleEstablecimiento, 'Rol establecimineto') }}
         {{ form_widget(form.roleEstablecimiento) }}
       </div>
@@ -48,6 +52,8 @@
           <tr>
             <th>#</th>
             <th>Fecha</th>
+            <th>Destino</th>
+            <th>Pais Destino</th>
             <th>Establecimiento</th>
             <th>Role Establecimiento</th>
             <th>Cant. Solic.</th>
@@ -59,16 +65,31 @@
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ g.fecha|date('d/m/Y')}}</td>
+                <td>
+                    {% if g.exportacion %}
+                      Exportacion
+                    {% else %}
+                      Cons. Interno
+                    {% endif %}
+                </td>
+                <td>{{ g.paisDestino }}</td>
                 <td>{{ g.codigoEstablecimiento }}</td>
                 <td>{{ g.roleEstablecimiento }}</td>
                 <td>{{ g.solicitudes|length }}</td>
                 <td>
               <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify"></i></a>
                 <div class="dropdown-menu">
-                  <a class="dropdown-item"  href="{{ path('sigcer_add_tropa_grupo_solicitud', { gpo : g.id}) }}">Agregar Tropa</a>
-                  <a class="dropdown-item"  href="{{ path('sigcer_generate_multiples', { gpo : g.id}) }}">Generar solicitudes multiples</a>
+                  {%  if not g.exportacion %}
+                    <a class="dropdown-item"  href="{{ path('sigcer_add_tropa_grupo_solicitud', { gpo : g.id}) }}">Agregar Tropa</a>                  
+                    <a class="dropdown-item"  href="{{ path('sigcer_generate_multiples', { gpo : g.id}) }}">Generar solicitudes multiples</a>
+                  {% endif %}
                   <a class="dropdown-item"  href="{{ path('sigcer_add_solictud_a_grupo', { gpo : g.id}) }}">Gestionar solicitudes</a>
-                  <a class="dropdown-item"  href="{{ path('sigcer_modificacion_multiple', { gpo : g.id}) }}">Modificar Multiples Solicitudes</a>
+                  {%  if not g.exportacion %}
+                    <a class="dropdown-item"  href="{{ path('sigcer_modificacion_multiple', { gpo : g.id}) }}">Modificar Multiples Solicitudes</a>
+                  {% endif %}
+                  {% if g.exportacion %}
+                    <a class="dropdown-item"  target="_blanck" href="{{ path('sigcer_generar_archivos', { gpo : g.id}) }}">Generar archivos</a>
+                  {% endif %}
                   <a class="dropdown-item delete"  href="{{ path('sigcer_delete_grupos_solicitudes', { gpo : g.id}) }}">Eliminar</a>
                 </div>
                 </td>

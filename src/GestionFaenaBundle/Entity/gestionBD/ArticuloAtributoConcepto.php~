@@ -41,7 +41,7 @@ class ArticuloAtributoConcepto
 
     /**
      * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\Atributo", mappedBy="articuloAtrConc", cascade={"persist", "remove"})
-     * @ORM\OrderBy({"posicion" = "ASC"}) 
+     * @ORM\OrderBy({"posicion" = "ASC", "id" = "ASC"}) 
      */
     private $atributos;
 
@@ -51,21 +51,33 @@ class ArticuloAtributoConcepto
      * @ORM\Column(name="asignado", type="boolean", options={"default":true})
      */
     private $activo = true;
-
-    /**
-    * @ORM\ManyToOne(targetEntity="AtributoAbstracto") 
-    * @ORM\JoinColumn(name="id_atr_def_stock", referencedColumnName="id")
-    */      
-    private $defineStock;
     
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="automaticos") 
+    * @ORM\JoinColumn(name="id_proceso_faena", referencedColumnName="id")
+    */      
+    private $procesoFaena;
+
     /**
      * Get id
      *
      * @return int
      */
 
-    public function getVistaEdicion(){
-        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo;
+    public function existeAtributoActivo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo) //verifica si se encuentra definido el atributo
+    {
+        foreach ($this->atributos as $atr) {
+            if (($atr->getAtributoAbstracto() === $atributo) && ($atr->getActivo()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getVistaEdicion()
+    {
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento() ;
     }
 
     public function getId()
@@ -208,5 +220,4 @@ class ArticuloAtributoConcepto
     {
         $this->atributos = new \Doctrine\Common\Collections\ArrayCollection();
     }
-
 }
