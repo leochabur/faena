@@ -928,7 +928,9 @@ class GestionFaenaController extends Controller
                 $valorAtr->setAcumula(true);
 
                 $repositoryMovimiento = $em->getRepository(MovimientoStock::class);
-                $stockArticulo = $repositoryMovimiento->getStockDeArticulo($proceso, $articuloManejaStock->getArticulo(), $articuloManejaStock->getAtributo());
+                $stockArticulo = $proceso->getStockArticulo($faena, $articulo->getArticulo(), $articuloManejaStock->getAtributo());
+
+                //$repositoryMovimiento->getStockDeArticulo($proceso, $articuloManejaStock->getArticulo(), $articuloManejaStock->getAtributo());
                 if (!$stockArticulo)
                 {
                   $this->addFlash(
@@ -942,9 +944,9 @@ class GestionFaenaController extends Controller
                                        'faena' => $faena]);
 
                 }
-                elseif($stockArticulo['stock'] < $valorAtributo->getValor())
+                elseif($stockArticulo < $valorAtributo->getValor())
                 {
-                  //throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
+                  throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
                   $this->addFlash(
                                       'error',
                                       "El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!"
