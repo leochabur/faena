@@ -98,6 +98,7 @@
 											<th>Tipo Movimiento</th>
 											<th>Concepto Movimiento</th>
 											<th>Factor Ajuste</th>
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -107,6 +108,9 @@
 												<td>{{ aj.tipoMovimiento }}</td>
 												<td>{{ aj.conceptoMovimiento }}</td>
 												<td>{{ aj.factorAjuste }}</td>
+												<td>
+													<td class="text-center"><a href="{{ path('bd_edit_procesos_delete_ajuste', {ajuste : aj.id}) }}" class="btn btn-sm btn-danger">-</a></td>
+												</td>
 											</tr>
 										{% endfor %}
 									</tbody>

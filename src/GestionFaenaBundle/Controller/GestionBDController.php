@@ -883,6 +883,20 @@ class GestionBDController extends Controller
     }
 
     /**
+     * @Route("/config/delajuste/{ajuste}", name="bd_edit_procesos_delete_ajuste")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteAjusteProceso($ajuste)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $ajuste = $entityManager->find(AjusteMovimiento::class, $ajuste);
+        $proceso = $ajuste->getProceso();
+        $ajuste->setProceso(null);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proceso->getId()]);
+    }
+
+    /**
      * @Route("/config/deletDest/{origen}/{destino}", name="delete_destination")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
