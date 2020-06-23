@@ -269,6 +269,10 @@ class GestionFaenaController extends Controller
           {
             $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
           }
+          elseif($instance == 5)
+          {
+            $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
+          }
           elseif (in_array($instance, [2,3])) 
           {
             $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
@@ -735,6 +739,8 @@ class GestionFaenaController extends Controller
               $em->persist($movimiento);
     }
 
+
+
     private function procesarEntradaSalidaStock(ProcesoFaenaDiaria $proceso,
                                                 ArticuloAtributoConcepto $articulo,
                                                 ConceptoMovimientoProceso $concepto,
@@ -781,6 +787,222 @@ class GestionFaenaController extends Controller
         $em->persist($movimiento);
     }
 
+    private function procesarTransferirStock(ProcesoFaenaDiaria $proceso,
+                                              ArticuloAtributoConcepto $articulo,
+                                              ConceptoMovimientoProceso $concepto,
+                                              FaenaDiaria $faena,
+                                              $em,
+                                              Request $request = null)
+    {
+        $repository = $em->getRepository(TipoMovimientoConcepto::class);
+        $stock = 0;
+        $movimiento = new TransferirStock(); 
+        $movimiento->setArtProcFaena($articulo);
+
+        $movimiento->setProcesoFnDay($proceso);
+        $movimiento->setFaenaDiaria($faena);
+        $movimiento->generateAtributes();
+        $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
+      //  $formAtr->handleRequest($request);
+        if ($request)
+        {
+          $formAtr->handleRequest($request);
+        }
+        $movimiento->updateValues($stock, $em);
+
+        $procesoDestino = $formAtr['destino']->getData();
+
+        if ($procesoDestino)
+        {
+            /////////////////////////////ENTRADA DE STOCK A PROCESO DESTINO///////////////////////////////////////
+                //El proceso destino existe, debe verificar que se encuentre definido el articulo de la transferencia como habilitado para manejar stock
+                $articuloManejaStock = $procesoDestino->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo->getArticulo());
+                if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
+                {
+                  $this->addFlash(
+                                      'error',
+                                      "El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock"
+                                  );
+                  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                      ['fatr' => $formAtr->createView(), 
+                                       'movimiento' => $movimiento, 
+                                       'proceso' => $proceso, 
+                                       'faena' => $faena]);
+                  // throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock");
+                }
+                //Busca en la FaenaDiaria correspondiente el ProcesoFaenaDiaria correspondiente al ProcesoFanea
+                $procFanDay = $faena->getProceso($procesoDestino->getProcesoFaena()->getId());
+                if (!$procFanDay) //no esta configurado el articulo para manejar el stock
+                {
+                    throw new \Exception("El proceso de destino es inexistente!!!");
+                }
+                //1º: Recupera del proceso destino, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
+                $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
+                                                                                    $articulo->getConcepto()->getConcepto(),
+                                                                                    EntradaStock::getInstance(),
+                                                                                    $procesoDestino->getProcesoFaena(),
+                                                                                    $em);
+
+                //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
+                $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                if (!$valorAtributo)
+                {
+                  throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
+                }
+                
+
+                $tipoMovimiento = $repository->getTipoWithInstance(EntradaStock::getInstance());
+                $procFaena = $procFanDay->getProcesoFaena();
+
+                $ajuste = $procFaena->getAjusteAAplicar($tipoMovimiento, 
+                                                      $artAtrConDestino->getConcepto()->getConcepto(),
+                                                      $artAtrConDestino->getArticulo()
+                                                      );
+
+                $entrada = new EntradaStock();
+                $entrada->setFaenaDiaria($faena);
+               // $entrada->addValore($valorAtr);
+                $entrada->setProcesoFnDay($procFanDay);
+                $entrada->setArtProcFaena($artAtrConDestino);
+
+                ///recorre la lista de atributos del movimiento Transferencia de Stock para aplicarlos a la salida
+                foreach ($movimiento->getValores() as $valor) {
+
+                   // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                    $valorAtr = new ValorNumerico();
+                    $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+
+                    $dataValue = $valor->getValor();
+
+                    if ($articuloManejaStock->getAtributo() == $valor->getAtributo()->getAtributoAbstracto())
+                    {
+                      $valorAtr->setValor(($dataValue*$ajuste));
+                    }
+                    else
+                    {
+                      $valorAtr->setValor($dataValue);
+                    }
+
+                    $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                    $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                    $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                    $valorAtr->setAcumula(true);
+                    $entrada->addValore($valorAtr);
+                }
+
+
+
+                
+
+                $em->persist($entrada);
+            /////////////////////////FIN GENERACION ENTRADA A PROCESO DESTINO//////////////////////////////////////////
+
+            /////////////////////////////SALIDA DE STOCK DE PROCESO ORIGEN///////////////////////////////////////
+                //El proceso destino existe, debe verificar que se encuentre definido el articulo de la transferencia como habilitado para manejar stock
+                $procesoOrigen = $proceso->getProcesoFaena();
+                $articuloManejaStock = $procesoOrigen->existeArticuloDefinidoManejoStock($articulo->getArticulo());
+                if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
+                {
+                   throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso <b>".$procesoOrigen."</b> para manejar stock");
+                }
+
+                //1º: Recupera del proceso origen, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
+                $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
+                                                                                    $articulo->getConcepto()->getConcepto(),
+                                                                                    SalidaStock::getInstance(),
+                                                                                    $procesoOrigen,
+                                                                                    $em);
+                //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
+                $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                if (!$valorAtributo)
+                {
+                  throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
+                }
+                
+                $valorAtr = new ValorNumerico();
+                $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
+                $valorAtr->setValor($valorAtributo->getValor());
+                $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
+                $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
+                $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
+                $valorAtr->setAcumula(true);
+
+                $repositoryMovimiento = $em->getRepository(MovimientoStock::class);
+                $stockArticulo = $repositoryMovimiento->getStockDeArticulo($proceso, $articuloManejaStock->getArticulo(), $articuloManejaStock->getAtributo());
+                if (!$stockArticulo)
+                {
+                  $this->addFlash(
+                                      'error',
+                                      "No se pudo calcular el stock del articulo ".$articuloManejaStock->getArticulo().", en el proceso ".$proceso."!!"
+                                  );
+                  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                      ['fatr' => $formAtr->createView(), 
+                                       'movimiento' => $movimiento, 
+                                       'proceso' => $proceso, 
+                                       'faena' => $faena]);
+
+                }
+                elseif($stockArticulo['stock'] < $valorAtributo->getValor())
+                {
+                  //throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
+                  $this->addFlash(
+                                      'error',
+                                      "El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!"
+                                  );
+                  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                      ['fatr' => $formAtr->createView(), 
+                                       'movimiento' => $movimiento, 
+                                       'proceso' => $proceso, 
+                                       'faena' => $faena]);
+                }
+                elseif($valorAtributo->getValor() == 0)
+                {
+                  //throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
+                  $this->addFlash(
+                                      'error',
+                                      "La cantidad a transferir debe ser mayor a 0!!"
+                                  );
+                  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                      ['fatr' => $formAtr->createView(), 
+                                       'movimiento' => $movimiento, 
+                                       'proceso' => $proceso, 
+                                       'faena' => $faena]);
+                }
+                $salida = new SalidaStock();
+                $salida->setFaenaDiaria($faena);
+                $salida->addValore($valorAtr);
+                $salida->setProcesoFnDay($proceso);
+                $salida->setArtProcFaena($artAtrConOrigen);
+                $em->persist($salida);
+                
+            /////////////////////////FIN GENERACION SALIDA DE PROCESO ORIGEN//////////////////////////////////////////
+        }
+        else
+        {
+                  $this->addFlash(
+                                      'error',
+                                      "Debe seleccionar un proceso destino"
+                                  );
+                  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                                      ['fatr' => $formAtr->createView(), 
+                                       'movimiento' => $movimiento, 
+                                       'proceso' => $proceso, 
+                                       'faena' => $faena]);
+        }
+        
+        if ($formAtr->isValid())
+        {
+              $movimiento->setMovimientoDestino($entrada);
+              $movimiento->setMovimientoOrigen($salida);
+              $em->persist($movimiento);
+              $proceso->setUltimoMovimiento(new \DateTime());
+            //  $em->flush();
+              //return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
+        }
+        else{
+          return new Response('pedazo de japi');
+        }
+    }
 
     /**
      * @Route("/gstMovProc/{proc}/{art}/{conc}/{type}/{fanday}", name="bd_adm_proc_mov_st", methods={"POST"})
@@ -790,7 +1012,7 @@ class GestionFaenaController extends Controller
     {
 
         $em = $this->getDoctrine()->getManager();
-        $repository = $em->getRepository(TipoMovimientoConcepto::class);
+       // $repository = $em->getRepository(TipoMovimientoConcepto::class);
         
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
@@ -804,210 +1026,9 @@ class GestionFaenaController extends Controller
         }
         elseif($type == 5)  //comienza proceso Transferencia de stockk
         {
-              $stock = 0;
-              $movimiento = new TransferirStock(); 
-              $movimiento->setArtProcFaena($articulo);
-
-              $movimiento->setProcesoFnDay($proceso);
-              $movimiento->setFaenaDiaria($faena);
-              $movimiento->generateAtributes();
-              $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
-              $formAtr->handleRequest($request);
-              $movimiento->updateValues($stock, $em);
-            //  throw new \Exception("Error Processing Request ".($movimiento->getValores()->next()->getData()), 1);
-              
-              $procesoDestino = $formAtr['destino']->getData();
-
-              if ($procesoDestino)
-              {
-                  /////////////////////////////ENTRADA DE STOCK A PROCESO DESTINO///////////////////////////////////////
-                      //El proceso destino existe, debe verificar que se encuentre definido el articulo de la transferencia como habilitado para manejar stock
-                      $articuloManejaStock = $procesoDestino->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo->getArticulo());
-                      if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
-                      {
-                        $this->addFlash(
-                                            'error',
-                                            "El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock"
-                                        );
-                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
-                                            ['fatr' => $formAtr->createView(), 
-                                             'movimiento' => $movimiento, 
-                                             'proceso' => $proceso, 
-                                             'faena' => $faena]);
-                        // throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock");
-                      }
-                      //Busca en la FaenaDiaria correspondiente el ProcesoFaenaDiaria correspondiente al ProcesoFanea
-                      $procFanDay = $faena->getProceso($procesoDestino->getProcesoFaena()->getId());
-                      if (!$procFanDay) //no esta configurado el articulo para manejar el stock
-                      {
-                          throw new \Exception("El proceso de destino es inexistente!!!");
-                      }
-                      //1º: Recupera del proceso destino, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
-                      $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
-                                                                                          $articulo->getConcepto()->getConcepto(),
-                                                                                          EntradaStock::getInstance(),
-                                                                                          $procesoDestino->getProcesoFaena(),
-                                                                                          $em);
-
-                      //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
-                      $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
-                      if (!$valorAtributo)
-                      {
-                        throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
-                      }
-                      
-
-                      $tipoMovimiento = $repository->getTipoWithInstance(EntradaStock::getInstance());
-                      $procFaena = $procFanDay->getProcesoFaena();
-
-                      $ajuste = $procFaena->getAjusteAAplicar($tipoMovimiento, 
-                                                            $artAtrConDestino->getConcepto()->getConcepto(),
-                                                            $artAtrConDestino->getArticulo()
-                                                            );
-
-                      $entrada = new EntradaStock();
-                      $entrada->setFaenaDiaria($faena);
-                     // $entrada->addValore($valorAtr);
-                      $entrada->setProcesoFnDay($procFanDay);
-                      $entrada->setArtProcFaena($artAtrConDestino);
-
-                      ///recorre la lista de atributos del movimiento Transferencia de Stock para aplicarlos a la salida
-                      foreach ($movimiento->getValores() as $valor) {
-
-                         // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
-                          $valorAtr = new ValorNumerico();
-                          $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
-
-                          $dataValue = $valor->getValor();
-
-                          if ($articuloManejaStock->getAtributo() == $valor->getAtributo()->getAtributoAbstracto())
-                          {
-                            $valorAtr->setValor(($dataValue*$ajuste));
-                          }
-                          else
-                          {
-                            $valorAtr->setValor($dataValue);
-                          }
-
-                          $valorAtr->setUnidadMedida($valor->getUnidadMedida());
-                          $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
-                          $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
-                          $valorAtr->setAcumula(true);
-                          $entrada->addValore($valorAtr);
-                      }
-
-
-
-                      
-
-                      $em->persist($entrada);
-                  /////////////////////////FIN GENERACION ENTRADA A PROCESO DESTINO//////////////////////////////////////////
-
-                  /////////////////////////////SALIDA DE STOCK DE PROCESO ORIGEN///////////////////////////////////////
-                      //El proceso destino existe, debe verificar que se encuentre definido el articulo de la transferencia como habilitado para manejar stock
-                      $procesoOrigen = $proceso->getProcesoFaena();
-                      $articuloManejaStock = $procesoOrigen->existeArticuloDefinidoManejoStock($articulo->getArticulo());
-                      if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
-                      {
-                         throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso <b>".$procesoOrigen."</b> para manejar stock");
-                      }
-
-                      //1º: Recupera del proceso origen, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
-                      $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
-                                                                                          $articulo->getConcepto()->getConcepto(),
-                                                                                          SalidaStock::getInstance(),
-                                                                                          $procesoOrigen,
-                                                                                          $em);
-                      //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
-                      $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
-                      if (!$valorAtributo)
-                      {
-                        throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
-                      }
-                      
-                      $valorAtr = new ValorNumerico();
-                      $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
-                      $valorAtr->setValor($valorAtributo->getValor());
-                      $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
-                      $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
-                      $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
-                      $valorAtr->setAcumula(true);
-
-                      $repositoryMovimiento = $em->getRepository(MovimientoStock::class);
-                      $stockArticulo = $repositoryMovimiento->getStockDeArticulo($proceso, $articuloManejaStock->getArticulo(), $articuloManejaStock->getAtributo());
-                      if (!$stockArticulo)
-                      {
-                        $this->addFlash(
-                                            'error',
-                                            "No se pudo calcular el stock del articulo ".$articuloManejaStock->getArticulo().", en el proceso ".$proceso."!!"
-                                        );
-                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
-                                            ['fatr' => $formAtr->createView(), 
-                                             'movimiento' => $movimiento, 
-                                             'proceso' => $proceso, 
-                                             'faena' => $faena]);
-
-                      }
-                      elseif($stockArticulo['stock'] < $valorAtributo->getValor())
-                      {
-                        //throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
-                        $this->addFlash(
-                                            'error',
-                                            "El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!"
-                                        );
-                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
-                                            ['fatr' => $formAtr->createView(), 
-                                             'movimiento' => $movimiento, 
-                                             'proceso' => $proceso, 
-                                             'faena' => $faena]);
-                      }
-                      elseif($valorAtributo->getValor() == 0)
-                      {
-                        //throw new \Exception("El stock del articulo ".$articuloManejaStock->getArticulo()." es insuficiente!!");
-                        $this->addFlash(
-                                            'error',
-                                            "La cantidad a transferir debe ser mayor a 0!!"
-                                        );
-                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
-                                            ['fatr' => $formAtr->createView(), 
-                                             'movimiento' => $movimiento, 
-                                             'proceso' => $proceso, 
-                                             'faena' => $faena]);
-                      }
-                      $salida = new SalidaStock();
-                      $salida->setFaenaDiaria($faena);
-                      $salida->addValore($valorAtr);
-                      $salida->setProcesoFnDay($proceso);
-                      $salida->setArtProcFaena($artAtrConOrigen);
-                      $em->persist($salida);
-                      
-                  /////////////////////////FIN GENERACION SALIDA DE PROCESO ORIGEN//////////////////////////////////////////
-              }
-              else
-              {
-                        $this->addFlash(
-                                            'error',
-                                            "Debe seleccionar un proceso destino"
-                                        );
-                        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
-                                            ['fatr' => $formAtr->createView(), 
-                                             'movimiento' => $movimiento, 
-                                             'proceso' => $proceso, 
-                                             'faena' => $faena]);
-              }
-              
-              if ($formAtr->isValid())
-              {
-                    $movimiento->setMovimientoDestino($entrada);
-                    $movimiento->setMovimientoOrigen($salida);
-                    $em->persist($movimiento);
-                    $proceso->setUltimoMovimiento(new \DateTime());
-                    $em->flush();
-                    return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
-              }
-              else{
-                return new Response('pedazo de japi');
-              }
+              $this->procesarTransferirStock($proceso, $articulo, $concepto, $faena, $em, $request);
+              $proceso->setUltimoMovimiento(new \DateTime());
+              $em->flush();
         }
 
         if (in_array($type, [2, 3, '2', '3']))

@@ -158,7 +158,7 @@
 										{% for aj in proccess.automaticos %}
 											<tr>
 												<td>{{ aj.vistaEdicion }}</td>
-												<td></td>
+												<td><a href="{{ path('bd_edit_procesos_delete_automatic', {proccess : proccess.id, concepto : aj.id }) }}" class="btn btn-sm btn-warning">-</a></td>
 											</tr>
 										{% endfor %}
 									</tbody>

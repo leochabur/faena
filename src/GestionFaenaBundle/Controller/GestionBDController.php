@@ -868,6 +868,21 @@ class GestionBDController extends Controller
     }
 
     /**
+     * @Route("/config/delauto/{proccess}/{concepto}", name="bd_edit_procesos_delete_automatic")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteAutomaticConcepto($proccess, $concepto)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proccess);
+        $concepto = $entityManager->find(ArticuloAtributoConcepto::class, $concepto);
+        $proceso->removeAutomatico($concepto);
+        $concepto->setProcesoFaena(null);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proccess]);
+    }
+
+    /**
      * @Route("/config/deletDest/{origen}/{destino}", name="delete_destination")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
