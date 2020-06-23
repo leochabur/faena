@@ -247,7 +247,8 @@ class GestionFaenaController extends Controller
       $concepto = $em->find(ConceptoMovimientoProceso::class, $idConcepto);
       $articulos = array();
       foreach ($concepto->getArticulos() as $art) {
-        $articulos[] = array('id' => $art->getId(), 'show' => $art."");
+        if ($art->getActivo())
+          $articulos[] = array('id' => $art->getId(), 'show' => $art."");
       }
       return new JsonResponse($articulos);
     }
