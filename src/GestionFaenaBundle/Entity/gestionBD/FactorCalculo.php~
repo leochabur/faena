@@ -43,8 +43,34 @@ class FactorCalculo
      *
      * @ORM\Column(name="soloIngreso", type="boolean", nullable=false)
      */
-    private $soloIngreso;  //define si solo se debe realizar el calculo sobre los ingresos unicamente o sobre todos los movimientos, para el caso que se deba calcular las transformaciones X ej de Aves a Corazon, tome solo el ingreso
+    private $soloIngreso = false;  //define si solo se debe realizar el calculo sobre los ingresos unicamente o sobre todos los movimientos, para el caso que se deba calcular las transformaciones X ej de Aves a Corazon, tome solo el ingreso
 
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento")
+     * @ORM\JoinTable(name="sp_gst_exc_cn_fc",
+     *      joinColumns={@ORM\JoinColumn(name="id_fc", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_cm", referencedColumnName="id")}
+     *      )
+     */
+    private $conceptosExcentos;
+
+    public function getAction()
+    {
+        $action = '';
+        switch ($this->tipoCalculo) 
+        {
+            case 'S':
+                    $action = 'ACUMULADO';
+                break;
+            case 'P':
+                    $action = 'PROMEDIO';
+                break;
+            case 'U':
+                    $action = 'UNITARIO';
+                break;
+        }
+        return $action .' ('.$this->atributo.' DE '.$this->articulo.')';
+    }
 
     /**
      * Get id
@@ -131,5 +157,29 @@ class FactorCalculo
     public function getTipoCalculo()
     {
         return $this->tipoCalculo;
+    }
+
+    /**
+     * Set soloIngreso
+     *
+     * @param boolean $soloIngreso
+     *
+     * @return FactorCalculo
+     */
+    public function setSoloIngreso($soloIngreso)
+    {
+        $this->soloIngreso = $soloIngreso;
+
+        return $this;
+    }
+
+    /**
+     * Get soloIngreso
+     *
+     * @return boolean
+     */
+    public function getSoloIngreso()
+    {
+        return $this->soloIngreso;
     }
 }

@@ -37,7 +37,7 @@
 					{% set atr = formsAtr[atrib.id] %}
 					{{ form_start(atr, {'attr' : {'novalidate' : 'novalidate', 'class' : 'editatr'}}) }}
 					<tr class="h6 small">
-						<td title="{{ atrib.calculo }}">{{ atrib }}</td>
+						<td title="{{ atrib.calculo }}"><a href="{{ path('bd_editar_factor_calculo', {atr : atrib.id})}}">{{ atrib }}</a></td>
 						<td title="{{ atrib.calculo }}">{{ atrib.tipo }}</td>
 						<td class="text-center">{{ form_widget(atr.acumula, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td class="text-center">{{ form_widget(atr.promedia, {'attr' : {'class' : 'form-control-sm'}}) }}</td>

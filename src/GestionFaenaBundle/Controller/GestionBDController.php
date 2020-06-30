@@ -1477,19 +1477,120 @@ class GestionBDController extends Controller
      * @Route("/config/editAtr/{atr}", name="bd_editar_atributo", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function editarAtributo($atr, Request $request){
-
-        try {
+    public function editarAtributo($atr, Request $request)
+    {
+        try 
+        {
             $entityManager = $this->getDoctrine()->getManager();
             $atributo = $entityManager->find('GestionFaenaBundle:gestionBD\AtributoProceso', $atr);
             $form = $this->createForm(AtrProcType::class, $atributo, ['action' => $this->generateUrl('bd_editar_atributo', array('atr' => $atr)),'method' => 'POST']);
             $form->handleRequest($request);
             $entityManager->flush();
             return new JsonResponse(array('status' => true));
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
              return new JsonResponse(array('status' => false, 'msge' => $e->getMessage()));
         }
 
         //return $this->render('@GestionFaena/gestionBD/atrProc.html.twig', array('form' => $form->createView()));
+    }
+
+    /**
+     * @Route("/config/editFc/{atr}", name="bd_editar_factor_calculo", methods={"POST", "GET"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarFactorCalculo($atr, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $atributo = $entityManager->find('GestionFaenaBundle:gestionBD\AtributoMedibleAutomatico', $atr);
+        $form = $this->getFormSelectFactorCalculo($atributo);
+        if ($request->isMethod('POST'))
+        {
+            $form->handleRequest($request);
+            $data = $form->getData();
+            $factor = $data['factores'];
+            $formAsignar = $this->getFormEditFactorCalculo($factor, $atributo);
+            return $this->render('@GestionFaena/gestionBD/editFactores.html.twig', array('factor' => $factor, 'atributo' => $atributo, 'formAdd' => $formAsignar->createView()));
+
+        }
+        return $this->render('@GestionFaena/gestionBD/editFactores.html.twig', array('atributo' => $atributo, 'form' => $form->createView()));
+    }
+
+    /**
+     * @Route("/config/addconfc/{fc}/{atr}", name="bd_editar_factor_calculo_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addConceptoFactorCalculoProcesar($fc, $atr, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $factor = $entityManager->find(FactorCalculo::class, $fc);
+        $atributo = $entityManager->find(AtributoMedibleAutomatico::class, $atr);
+        $formAsignar = $this->getFormEditFactorCalculo($factor, $atributo);
+        $formAsignar->handleRequest($request);
+        $data = $formAsignar->getData();
+        $factor = $data['factores'];
+        $concepto = $data['conceptos'];
+        $factor->addConceptosExcento($concepto);
+        $entityManager->flush();
+        return $this->render('@GestionFaena/gestionBD/editFactores.html.twig', array('factor' => $factor, 'atributo' => $atributo, 'formAdd' => $formAsignar->createView()));
+    }
+
+    /**
+     * @Route("/config/chonling/{fc}", name="bd_editar_factor_calculo_cambiar_solo_ingreso", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function changeOnlyIngresoFactorCalculo($fc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $factor = $entityManager->find(FactorCalculo::class, $fc);
+        $data = ($request->get('state')?true:false);
+        $factor->setSoloIngreso($data);
+        $entityManager->flush();
+        return new JsonResponse(['state' => $data]);
+    }
+
+    private function getFormEditFactorCalculo(FactorCalculo $factor, AtributoMedibleAutomatico $atributo)
+    {
+       $form = $this->createFormBuilder()
+                    ->add('factores', 
+                          EntityType::class, [
+                          'class' => FactorCalculo::class,
+                          'choices' => [$factor],
+                    ])
+                    ->add('conceptos', 
+                          EntityType::class, [
+                          'class' => 'GestionFaenaBundle:faena\ConceptoMovimiento',
+                    ])
+                    ->add('asignar',
+                          SubmitType::class) 
+                    ->setAction($this->generateUrl('bd_editar_factor_calculo_procesar', ['fc' => $factor->getId(), 'atr' => $atributo->getId()]))
+                    ->setMethod('POST')
+                    ->getForm();
+        return $form;
+    }
+
+    private function getFormSelectFactorCalculo(AtributoMedibleAutomatico $atributo)
+    {
+       $choices = [];
+       if ($atributo->getFactor1())
+       {
+            $choices[] = $atributo->getFactor1();
+       }
+
+       if ($atributo->getFactor2())
+       {
+            $choices[] = $atributo->getFactor2();
+       }
+       $form = $this->createFormBuilder()
+                    ->add('factores', 
+                          EntityType::class, [
+                          'class' => FactorCalculo::class,
+                          'choices' => $choices,
+                    ])
+                    ->add('cargar',
+                          SubmitType::class) 
+                    ->getForm();
+        return $form;
     }
 }

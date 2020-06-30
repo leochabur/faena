@@ -184,7 +184,8 @@ class ProcesoFaenaDiaria
     public function getStockArticuloConAtributo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo, 
                                                 \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
                                                 $soloIngreso,
-                                                $accion)
+                                                $accion,
+                                                \GestionFaenaBundle\Entity\gestionBD\FactorCalculo $factor = null)
     //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
     {
         $stock = 0;
@@ -200,18 +201,21 @@ class ProcesoFaenaDiaria
                         return $valor->getData();
                     if ($valor)
                     {
-                        if($soloIngreso)//solo debe levantar los movimientos de Ingreso de Stock
+                        if ((!$factor) || (!$factor->getConceptosExcentos()->contains($mov->getArtProcFaena()->getConcepto()->getConcepto())))
                         {
-                            if (get_class($mov) === EntradaStock::class)
+                            if($soloIngreso)//solo debe levantar los movimientos de Ingreso de Stock
                             {
-                                    $stock+=  $valor->getData();     
-                                    $count++;                           
+                                if (get_class($mov) === EntradaStock::class)
+                                {
+                                        $stock+=  $valor->getData();     
+                                        $count++;                           
+                                }
                             }
-                        }
-                        else
-                        {
-                            $stock+=  $valor->getData();   
-                            $count++;  
+                            else
+                            {
+                                $stock+=  $valor->getData();   
+                                $count++;  
+                            }
                         }
                     }
                 }

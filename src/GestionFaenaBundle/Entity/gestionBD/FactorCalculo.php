@@ -45,6 +45,14 @@ class FactorCalculo
      */
     private $soloIngreso = false;  //define si solo se debe realizar el calculo sobre los ingresos unicamente o sobre todos los movimientos, para el caso que se deba calcular las transformaciones X ej de Aves a Corazon, tome solo el ingreso
 
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento")
+     * @ORM\JoinTable(name="sp_gst_exc_cn_fc",
+     *      joinColumns={@ORM\JoinColumn(name="id_fc", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_cm", referencedColumnName="id")}
+     *      )
+     */
+    private $conceptosExcentos;
 
     public function getAction()
     {
@@ -61,7 +69,7 @@ class FactorCalculo
                     $action = 'UNITARIO';
                 break;
         }
-        return $action .' ('.$this->atributo.' DE '.$this->articulo.')';
+        return $action .' ('.$this->atributo.' DE '.$this->articulo.')'.($this->soloIngreso?'(Ingresos)':'(Todos)');
     }
 
     /**
@@ -173,5 +181,46 @@ class FactorCalculo
     public function getSoloIngreso()
     {
         return $this->soloIngreso;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->conceptosExcentos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add conceptosExcento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento
+     *
+     * @return FactorCalculo
+     */
+    public function addConceptosExcento(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento)
+    {
+        $this->conceptosExcentos[] = $conceptosExcento;
+
+        return $this;
+    }
+
+    /**
+     * Remove conceptosExcento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento
+     */
+    public function removeConceptosExcento(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento)
+    {
+        $this->conceptosExcentos->removeElement($conceptosExcento);
+    }
+
+    /**
+     * Get conceptosExcentos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getConceptosExcentos()
+    {
+        return $this->conceptosExcentos;
     }
 }

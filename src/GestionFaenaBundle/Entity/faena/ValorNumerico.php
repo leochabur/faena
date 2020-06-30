@@ -161,7 +161,8 @@ class ValorNumerico extends ValorAtributo
                                     $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f1->getArticulo(),
                                                                                                        $f1->getAtributo(),
                                                                                                        $f1->getSoloIngreso(),
-                                                                                                       $accion
+                                                                                                       $accion,
+                                                                                                       $f1
                                                                                                       );
                                   // throw new \Exception($f1->getId()." ");
                                     $factor1 = $due;//['stock'];
@@ -204,7 +205,8 @@ class ValorNumerico extends ValorAtributo
                                     $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f2->getArticulo(),
                                                                                                        $f2->getAtributo(),
                                                                                                        $f2->getSoloIngreso(),
-                                                                                                       $accion
+                                                                                                       $accion,
+                                                                                                       $f2
                                                                                                       );
                                    // if ($due === null)
                                    //   throw new \Exception("Error nulllllll Request ".print_r($due)."  ".$f2->getArticulo()."  ".$f2->getAtributo(), 1);

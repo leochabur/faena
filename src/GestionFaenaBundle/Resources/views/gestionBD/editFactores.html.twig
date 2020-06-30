@@ -1,0 +1,96 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+<div class="container">
+    <br>
+    {% if form is defined %}
+        <p class="h5 card-title">{{ atributo.articuloAtrConc.vistaEdicion }}</p>
+        <p class="h5 card-title">{{ atributo.atributoAbstracto}}</p>
+        <hr>
+        {% for message in app.flashes('sussecc') %}
+          <div class="alert alert-success" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+          <div class="form-row">
+              <div class="col-4">
+                {{ form_label(form.factores) }}
+                {{ form_widget(form.factores) }}
+              </div>
+          </div>
+                {{ form_widget(form.cargar) }}
+
+            {{ form_end(form) }}
+    {% else %}
+        <p class="h5 card-title">{{ atributo.atributoAbstracto}}</p>
+        <p class="h5 card-title">{{ factor.action}}</p>
+        <hr>
+        {% for message in app.flashes('sussecc') %}
+          <div class="alert alert-success" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+        {{ form_start(formAdd, {'attr': {'novalidate': 'novalidate'}}) }}
+          <div class="form-row">
+              <div class="col-4">
+                {{ form_label(formAdd.factores) }}
+                {{ form_widget(formAdd.factores) }}
+              </div>
+          </div>
+          <div class="form-row">
+              <div class="col-4">
+                {{ form_label(formAdd.conceptos) }}
+                {{ form_widget(formAdd.conceptos) }}
+              </div>
+          </div>
+                {{ form_widget(formAdd.asignar) }}
+            {{ form_end(formAdd) }}
+          <br>
+  <div class="form-check">
+    <input type="checkbox" class="form-check-input chonly" id="exampleCheck1"  {% if factor.soloIngreso %} checked {% endif %}>
+    <label class="form-check-label" for="exampleCheck1">Solo a Ingresos</label>
+  </div>
+  <br>
+          <p class="h5">Conceptos a excluir al momento de calcular el factor</p>
+          <table class="table table-bordered table-hover table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in factor.conceptosExcentos %}
+                <tr>
+                    <td>{{ c }}</td>
+                    <td></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <a href="{{ path('bd_editar_factor_calculo', {atr : atributo.id}) }}"  class="btn btn-success"><< Volver </a>
+    {% endif %}
+</div>
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+{% if factor is defined %}
+
+  $('.chonly').change(function() {                            
+                            var estado = 0;
+                            if ($(this).is(':checked'))
+                              estado = 1;
+                            $.post("{{ path('bd_editar_factor_calculo_cambiar_solo_ingreso', {fc : factor.id}) }}",
+                                   {state : estado},
+                                   function(data){
+                                                  alert(data.state);
+                                    
+                                });
+  });
+  {% endif %}
+  </script>
+{% endblock %}
