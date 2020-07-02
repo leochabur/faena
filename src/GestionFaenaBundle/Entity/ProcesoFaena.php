@@ -54,6 +54,13 @@ abstract class ProcesoFaena
     private $procesosDestino;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ProcesoFaena")
+     * @ORM\JoinColumn(name="id_proc_dest_def", referencedColumnName="id")
+    */
+    
+    private $procesosDestinoDefault; //para las trasferencias, cuando se configura automaticas, indica a cual es el proceso que se le debe transferir el stock de los articulos
+
+    /**
      * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso", mappedBy="procesoFaena")
      */
     private $conceptos;
@@ -586,5 +593,29 @@ abstract class ProcesoFaena
     public function getAutomaticos()
     {
         return $this->automaticos;
+    }
+
+    /**
+     * Set procesosDestinoDefault
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesosDestinoDefault
+     *
+     * @return ProcesoFaena
+     */
+    public function setProcesosDestinoDefault(\GestionFaenaBundle\Entity\ProcesoFaena $procesosDestinoDefault = null)
+    {
+        $this->procesosDestinoDefault = $procesosDestinoDefault;
+
+        return $this;
+    }
+
+    /**
+     * Get procesosDestinoDefault
+     *
+     * @return \GestionFaenaBundle\Entity\ProcesoFaena
+     */
+    public function getProcesosDestinoDefault()
+    {
+        return $this->procesosDestinoDefault;
     }
 }

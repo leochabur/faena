@@ -95,7 +95,7 @@ abstract class ValorAtributo
         return $this->movimiento;
     }
 
-    public abstract function calcularValor($movimiento, $entityManager, $promedio = 0);
+    public abstract function calcularValor($movimiento, $entityManager, $automatico = false); //el parametro automatico, se utiliza cuando se generan movimientos de esta manera, los valores manuales toman el valor por defecto
 
     public abstract function getData();
 

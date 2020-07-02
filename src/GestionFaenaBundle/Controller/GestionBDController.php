@@ -864,6 +864,7 @@ class GestionBDController extends Controller
                                   'form' => $this->getFormAddDestinoProceso($proccess)->createView(),
                                   'stock' => $this->getFormConfigurarManejoStock($proceso)->createView(),
                                   'ajuste' => $this->getFormSetAjusteProceso($ajuste, $proceso)->createView(),
+                                  'default' => $this->getFormSetDefaultProcesoDestino($proceso)->createView(),
                                   'auto' => $this->getFormSetAutomaticMov($proceso)->createView()));
     }
 
@@ -1003,6 +1004,61 @@ class GestionBDController extends Controller
                         ->setMethod('POST')               
                         ->getForm();
         return $form;
+    }
+
+    private function getFormSetDefaultProcesoDestino($proceso)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('proceso', 
+                              EntityType::class, 
+                              [
+                              'class' => ProcesoFaena::class,                             
+                              'choices' => $proceso->getProcesosDestino(),
+                        ])
+                        ->add('asignar', SubmitType::class, ['label' => '+'])    
+                        ->setAction($this->generateUrl('bd_set_proceso_default_procesar', array('proc' => $proceso->getId())))  
+                        ->setMethod('POST')               
+                        ->getForm();
+        return $form;
+    }
+
+    /**
+     * @Route("/config/setdefproc/{proc}", name="bd_set_proceso_default_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function setDefaultProcesoDestinoProcesar($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $form = $this->getFormSetDefaultProcesoDestino($proceso);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $data = $form->getData();
+            $default = $data['proceso'];
+            $proceso->setProcesosDestinoDefault($default);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        }
+    }
+
+    /**
+     * @Route("/config/delfefault/{proc}", name="bd_delete_proceso_default")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteProcesoDefault($proc)
+    {
+            try
+            {
+                $entityManager = $this->getDoctrine()->getManager();
+                $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+                $proceso->setProcesosDestinoDefault(null);
+                $entityManager->flush();
+            }
+            catch (\Exception $e){
+
+            }
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
     }
 
     private function getFormConfigurarManejoStock($proceso)

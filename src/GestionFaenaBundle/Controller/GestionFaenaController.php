@@ -263,20 +263,42 @@ class GestionFaenaController extends Controller
       $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
       $faena = $em->find(FaenaDiaria::class, $fan);
       $procFaena = $proceso->getProcesoFaena();
-      foreach ($procFaena->getAutomaticos() as $auto) 
+
+      $automaticos = $procFaena->getAutomaticos();
+
+      if ($automaticos)
       {
+          $automaticos = $procFaena->getAutomaticos()->getIterator();
+          $automaticos->uasort(
+                                  function ($p1, $p2)
+                                  {
+                                          if ($p1->getConcepto()->getTipoMovimiento()->getInstancia() < $p2->getConcepto()->getTipoMovimiento()->getInstancia() ) {
+                                              return -1;
+                                          }
+                                          else {
+                                              return 1;
+                                          }          
+                                  }
+                              );
+      }
+
+      foreach ($automaticos as $auto) 
+      {
+       //   throw new \Exception("Error Processing Request ".$auto->getConcepto()->getTipoMovimiento()->getInstancia(), 1);
+          
           $instance = $auto->getConcepto()->getTipoMovimiento()->getInstancia();
           if ($instance == 4)
           {
-            $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
+            $proceso = $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
           }
           elseif($instance == 5)
           {
-            $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
+            $var = (bool)true;
+            $proceso = $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em, null, $var);
           }
           elseif (in_array($instance, [2,3])) 
           {
-            $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
+            $proceso = $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
           }
       }
       $em->flush();
@@ -750,7 +772,6 @@ class GestionFaenaController extends Controller
                                                 $em, 
                                                 Request $request = null)
     {
-     // throw new \Exception("Error Processing Request ".$type, 1);
         if ($type == 2)
         {
               $movimiento = new EntradaStock();   
@@ -775,7 +796,6 @@ class GestionFaenaController extends Controller
         $valid = $movimiento->verificarValores();
         if (!$valid['ok'])
         {
-           // throw new \Exception("Error Processing Request ".var_dump($valid));
             $this->addFlash(
                                 'errorLoad',
                                 $valid['messages']
@@ -783,9 +803,9 @@ class GestionFaenaController extends Controller
             return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
                                 array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));                    
         }
-//        throw new \Exception("Error Processing Request", 1);
-        
         $em->persist($movimiento);
+        $proceso->addMovimiento($movimiento);
+        return $proceso;
     }
 
     private function procesarTransferirStock(ProcesoFaenaDiaria $proceso,
@@ -793,7 +813,8 @@ class GestionFaenaController extends Controller
                                               ConceptoMovimientoProceso $concepto,
                                               FaenaDiaria $faena,
                                               $em,
-                                              Request $request = null)
+                                              Request $request = null,
+                                              $automatico = false)
     {
         $repository = $em->getRepository(TipoMovimientoConcepto::class);
         $stock = 0;
@@ -809,9 +830,21 @@ class GestionFaenaController extends Controller
         {
           $formAtr->handleRequest($request);
         }
-        $movimiento->updateValues($stock, $em);
+
+        $movimiento->updateValues($stock, $em, $automatico);
 
         $procesoDestino = $formAtr['destino']->getData();
+
+        if (!$procesoDestino)
+        {
+           if ($automatico == true) //debe estar configurado el destino por defecto en el proceso correspondiente
+           {
+              if ($proceso->getProcesoFaena()->getProcesosDestinoDefault())
+              {
+                  $procesoDestino = $faena->getProceso($proceso->getProcesoFaena()->getProcesosDestinoDefault()->getId());
+              }
+           }
+        }
 
         if ($procesoDestino)
         {
@@ -868,8 +901,6 @@ class GestionFaenaController extends Controller
 
                 ///recorre la lista de atributos del movimiento Transferencia de Stock para aplicarlos a la salida
                 foreach ($movimiento->getValores() as $valor) {
-
-                   // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
                     $valorAtr = new ValorNumerico();
                     $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
 
@@ -890,12 +921,8 @@ class GestionFaenaController extends Controller
                     $valorAtr->setAcumula(true);
                     $entrada->addValore($valorAtr);
                 }
-
-
-
-                
-
                 $em->persist($entrada);
+                $proceso->addMovimiento($entrada);
             /////////////////////////FIN GENERACION ENTRADA A PROCESO DESTINO//////////////////////////////////////////
 
             /////////////////////////////SALIDA DE STOCK DE PROCESO ORIGEN///////////////////////////////////////
@@ -919,14 +946,6 @@ class GestionFaenaController extends Controller
                 {
                   throw new \Exception("No se encuentra el atributo en la lista de valores del movimiento!!");
                 }
-                
-                $valorAtr = new ValorNumerico();
-                $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
-                $valorAtr->setValor($valorAtributo->getValor());
-                $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
-                $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
-                $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
-                $valorAtr->setAcumula(true);
 
                 $repositoryMovimiento = $em->getRepository(MovimientoStock::class);
                 $stockArticulo = $proceso->getStockArticulo($faena, $articulo->getArticulo(), $articuloManejaStock->getAtributo());
@@ -971,13 +990,42 @@ class GestionFaenaController extends Controller
                                        'proceso' => $proceso, 
                                        'faena' => $faena]);
                 }
+
+             //   $valorAtr = new ValorNumerico();
+             //   $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
+             //   $valorAtr->setValor($valorAtributo->getValor());
+              //  $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
+              //  $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
+              //  $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
+             //   $valorAtr->setAcumula(true);
                 $salida = new SalidaStock();
                 $salida->setFaenaDiaria($faena);
                 $salida->addValore($valorAtr);
                 $salida->setProcesoFnDay($proceso);
-                $salida->setArtProcFaena($artAtrConOrigen);
+                $salida->setArtProcFaena($artAtrConOrigen);  
+                foreach ($movimiento->getValores() as $valor) {
+                    $valorAtr = new ValorNumerico();
+                    $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+
+                    $dataValue = $valor->getValor();
+
+                    if ($articuloManejaStock->getAtributo() == $valor->getAtributo()->getAtributoAbstracto())
+                    {
+                      $valorAtr->setValor(($dataValue*$ajuste));
+                    }
+                    else
+                    {
+                      $valorAtr->setValor($dataValue);
+                    }
+                    $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                    $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                    $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                    $valorAtr->setAcumula($valor->getAtributo()->getAcumula());
+                    $salida->addValore($valorAtr);
+                }
+              
                 $em->persist($salida);
-                
+                $proceso->addMovimiento($salida);
             /////////////////////////FIN GENERACION SALIDA DE PROCESO ORIGEN//////////////////////////////////////////
         }
         else
@@ -993,17 +1041,23 @@ class GestionFaenaController extends Controller
                                        'faena' => $faena]);
         }
         
-        if ($formAtr->isValid())
+        $ok = true;
+        if ($request)
+        {
+            $ok = $formAtr->isValid();
+        }
+
+        if ($ok)
         {
               $movimiento->setMovimientoDestino($entrada);
-              $movimiento->setMovimientoOrigen($salida);
+              $movimiento->setMovimientoOrigen($salida);              
               $em->persist($movimiento);
+              $proceso->addMovimiento($movimiento);
               $proceso->setUltimoMovimiento(new \DateTime());
-            //  $em->flush();
-              //return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
+              return $proceso;
         }
         else{
-          return new Response('pedazo de japi');
+          return new Response('pedazo de japi '.$formAtr->getErrors());
         }
     }
 

@@ -17,14 +17,14 @@ class SalidaStock extends MovimientoStock
 		return 3;
 	}
 
-    public function updateValues($promedio, $entityManager)
+    public function updateValues($promedio, $entityManager, $automatico = false)
     {
         $iterator = $this->getValores()->getIterator();
         $iterator->uasort(function ($first, $second) {
             return (int) $first->getAtributo()->getPosition() > (int) $second->getAtributo()->getPosition() ? 1 : -1;
         });
         foreach ($this->getValores() as $valor) {
-            $valor->calcularValor($this, $entityManager, 0);
+            $valor->calcularValor($this, $entityManager, $automatico);
         }
     }
 

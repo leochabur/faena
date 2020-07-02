@@ -44,7 +44,7 @@ class ValorTexto extends ValorAtributo
         return $this->valor;
     }
 
-    public function calcularValor($movimiento, $entityManager, $promedio = 0)
+    public function calcularValor($movimiento, $entityManager, $automatico = false)
     {
         
     }

@@ -184,8 +184,47 @@
 				  </div>
 		  </div>
 		</div>
-
-
+		<div class="row mt-4">
+		  <div class="col-6">
+				<div class="card">
+				  <div class="card-header">
+				     Proceso destino defecto..
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Proceso</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% if proccess.procesosDestinoDefault is defined %}
+											<tr>
+												<td>{{ proccess.procesosDestinoDefault}}</td>
+												
+													<td class="text-center"><a href="{{ path('bd_delete_proceso_default', {proc : proccess.id}) }}" class="btn btn-sm btn-danger">-</a></td>
+												
+											</tr>
+										{% endif %}
+									</tbody>
+						</table>
+				  	{{ form_start(default) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(default.proceso, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-1">
+				  				{{ form_widget(default.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	{{ form_end(default) }}		
+	
+				  </div>
+				  
+				  </div>
+		  </div>
+	</div>
 
 <div class="modal fade" id="modalSubscriptionForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
   aria-hidden="true">

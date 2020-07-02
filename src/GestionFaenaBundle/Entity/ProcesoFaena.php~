@@ -54,6 +54,13 @@ abstract class ProcesoFaena
     private $procesosDestino;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ProcesoFaena")
+     * @ORM\JoinColumn(name="id_proc_dest_def", referencedColumnName="id")
+    */
+    
+    private $procesosDestinoDefault; //para las trasferencias, cuando se configura automaticas, indica a cual es el proceso que se le debe transferir el stock de los articulos
+
+    /**
      * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso", mappedBy="procesoFaena")
      */
     private $conceptos;
@@ -118,6 +125,7 @@ abstract class ProcesoFaena
     }
 
     public abstract function getType();
+    public abstract function getInstance();
 
     /**
      * Get id
@@ -551,5 +559,39 @@ abstract class ProcesoFaena
             }
         }
         return 1;
+    }
+
+    /**
+     * Add automatico
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
+     *
+     * @return ProcesoFaena
+     */
+    public function addAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
+    {
+        $this->automaticos[] = $automatico;
+
+        return $this;
+    }
+
+    /**
+     * Remove automatico
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
+     */
+    public function removeAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
+    {
+        $this->automaticos->removeElement($automatico);
+    }
+
+    /**
+     * Get automaticos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAutomaticos()
+    {
+        return $this->automaticos;
     }
 }

@@ -289,7 +289,7 @@ abstract class MovimientoStock
         return null;
     }
 
-    public abstract function updateValues($promedio, $entityManager);
+    public abstract function updateValues($promedio, $entityManager, $automatico = false);
 
     public abstract function getType();
 
