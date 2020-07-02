@@ -1009,14 +1009,14 @@ class GestionFaenaController extends Controller
 
                     $dataValue = $valor->getValor();
 
-                    if ($articuloManejaStock->getAtributo() == $valor->getAtributo()->getAtributoAbstracto())
-                    {
-                      $valorAtr->setValor(($dataValue*$ajuste));
-                    }
-                    else
-                    {
+                  //  if ($articuloManejaStock->getAtributo() == $valor->getAtributo()->getAtributoAbstracto())
+                  //  {
+                   //   $valorAtr->setValor(($dataValue*$ajuste));
+                  //  }
+                 //   else
+                 //   {
                       $valorAtr->setValor($dataValue);
-                    }
+                //    }
                     $valorAtr->setUnidadMedida($valor->getUnidadMedida());
                     $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
                     $valorAtr->setDecimales($valor->getAtributo()->getDecimales());

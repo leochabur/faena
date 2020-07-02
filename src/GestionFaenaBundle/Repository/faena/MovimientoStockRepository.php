@@ -19,7 +19,7 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                                JOIN p.artProcFaena artAtrCon
                                JOIN artAtrCon.articulo art
                                WHERE p.procesoFnDay = :proceso AND p.visible = :visible AND p.eliminado = :eliminado
-                               ORDER BY art.nombre')
+                               ORDER BY art.nombre, p.id')
             		->setParameter('proceso', $proceso)
                 ->setParameter('visible', true)
                 ->setParameter('eliminado', false)
