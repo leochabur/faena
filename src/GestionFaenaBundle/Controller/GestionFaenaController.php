@@ -289,8 +289,6 @@ class GestionFaenaController extends Controller
           $instance = $auto->getConcepto()->getTipoMovimiento()->getInstancia();
           if ($instance == 4)
           {
-            if (!$proceso)
-              throw new \Exception("Proceso inexistente", 1);
             $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
           }
           elseif($instance == 5)
@@ -300,7 +298,7 @@ class GestionFaenaController extends Controller
           }
           elseif (in_array($instance, [2,3])) 
           {
-           return $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
+            $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
           }
       }
       $em->flush();
