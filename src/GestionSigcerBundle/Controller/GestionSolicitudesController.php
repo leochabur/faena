@@ -29,6 +29,9 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FileType; 
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\File;
 
 /**
  * @Route("/sigcer/solic")
@@ -369,7 +372,7 @@ class GestionSolicitudesController extends Controller
 
     private function getFormAddArticuloExportacion($solicitud)
     {
-        $form =    $this->createFormBuilder()
+       /* $form =    $this->createFormBuilder()
                         ->add('solicitud', 
                               EntityType::class, 
                               [
@@ -381,11 +384,37 @@ class GestionSolicitudesController extends Controller
                               [
                               'class' => Producto::class
                                 ])
+                        ->add('file', FileType::class, ['label' => 'Archivo (XLS - XLSX']) 
                         ->add('fecha', DateType::class, ['widget' => 'single_text'])
                         ->add('cant',TextType::class, [ 'data' => ''])
                         ->add('pbruto',TextType::class, ['data' => ''])
                         ->add('pneto',TextType::class, ['data' => ''])
                         ->add('guardar', SubmitType::class, ['label' => 'Agregar'])
+                        ->setAction($this->generateUrl('sigcer_add_articulos_a_solicitud_exportacion', ['sol' => $solicitud->getId()]))
+                        ->setMethod('POST')      
+                        ->getForm();*/
+        $form =    $this->createFormBuilder()
+                        ->add('solicitud', 
+                              EntityType::class, 
+                              [
+                              'class' => Solicitud::class,
+                              'choices' => [$solicitud]
+                                ])
+                        ->add('producto', 
+                              EntityType::class, 
+                              [
+                              'class' => Producto::class,
+                                ])
+                        ->add('archivo', 
+                               FileType::class, 
+                               [
+                                                'label' => 'Seleccione un archivo (xls - xlsx)',
+                                                'required' => true,
+                                                'constraints' => [
+                                                    new NotNull(['message' => 'No ha cargado ningunarchivo!!!']),
+                                                ],
+                                            ])
+                        ->add('guardar', SubmitType::class, ['label' => 'Importar'])
                         ->setAction($this->generateUrl('sigcer_add_articulos_a_solicitud_exportacion', ['sol' => $solicitud->getId()]))
                         ->setMethod('POST')      
                         ->getForm();
@@ -398,6 +427,9 @@ class GestionSolicitudesController extends Controller
      */
     public function addArticuloSolicitudExportacion($sol, Request $request)
     {
+        $import = $this->get('kernel')->getRootDir() . '/../web/import/';
+
+        $fecha = new \DateTime();
         $em = $this->getDoctrine()->getManager();
         $solicitud = $em->find(Solicitud::class, $sol);
         $form = $this->getFormAddArticuloExportacion($solicitud);
@@ -405,6 +437,71 @@ class GestionSolicitudesController extends Controller
         if ($form->isValid())
         {
             $data = $form->getData();
+            $file = $data['archivo'];
+            $name = "$import".'archivo_importado_'.$fecha->format('d-m-Y_H-i-s').'.xls';
+            move_uploaded_file($file, $name);
+            $excel = $this->get('phpexcel')->createPHPExcelObject($name);
+            $hoja = $excel->getSheet(0); 
+            $rowCount = $hoja->getHighestRow(); 
+
+            $fecha = '';
+            for ($i = 2; $i <= $rowCount; $i++) ///recorre las filas
+            {                
+                $lote = $hoja->getCellByColumnAndRow(6,$i)->getValue();
+                if ($lote)
+                {
+                  $tropa = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
+                  if (!$tropa)
+                  {
+                        $fechaElaboracion = \DateTime::createFromFormat('j/n/Y', $hoja->getCellByColumnAndRow(4,$i)->getValue());
+                        $tropa = new TropaSolicitud();
+                        $tropa->setFechaElaboracion($fechaElaboracion);
+                        $tropa->setFechaFaena($fechaElaboracion);
+                        $fechaVencimiento = \DateTime::createFromFormat('j/n/Y', $hoja->getCellByColumnAndRow(5,$i)->getValue());
+                        $tropa->setFechaVto($fechaVencimiento);
+                        $tropa->setNumeroTropa($lote);
+                        $tropa->setLote($lote);
+                        $tropa->setGrupoSolicitud($solicitud->getGrupo());
+                        $em->persist($tropa);
+                  }
+                  else
+                  {
+                    $detalle = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
+                    $cant = $hoja->getCellByColumnAndRow(1,$i)->getValue();
+                    $bruto = $hoja->getCellByColumnAndRow(3,$i)->getValue();
+                    $neto = $hoja->getCellByColumnAndRow(2,$i)->getValue();
+                    if ($detalle)
+                    {
+                        $detalle->setCantidad($detalle->getCantidad() + $cant);
+                        $detalle->setPesoBruto($detalle->getPesoBruto() + $bruto);
+                        $detalle->setPesoNeto($detalle->getPesoNeto() + $neto);
+                    }
+                    else
+                    {
+                        $producto = $data['producto'];
+                        $detalle = new DetalleSolicitud();
+                        $detalle->setCantidad($cant);
+                        $detalle->setPesoBruto($bruto);
+                        $detalle->setPesoNeto($neto);
+                        $detalle->setTropa($tropa);
+                        $detalle->setEnvasePrimario($producto->getEnvasePrimario());
+                        $detalle->setEnvaseSecundario($producto->getEnvaseSecundario());
+                        $detalle->setSolicitud($solicitud);
+                        $detalle->setArticulo($producto);
+                        $detalle->setCantidadSanitario($cant);
+                        $em->persist($detalle);
+                    }
+                  }
+                }
+            }
+            $em->flush();
+
+        }
+        
+        return $this->render('@GestionSigcer/addArticulo.html.twig', 
+                              ['form' => $form->createView(), 'sol' => $solicitud]);
+          //  throw new \Exception("row ".$fecha);
+            /*
             $fechaFaena = $data['fecha'];
             $fechaElaboracion = clone $fechaFaena;
             $fechaVencimiento = clone $fechaElaboracion;
@@ -448,9 +545,23 @@ class GestionSolicitudesController extends Controller
             $em->persist($detalle);
             $em->flush();
             return $this->render('@GestionSigcer/addArticulo.html.twig', 
-                                 ['form' => $form->createView(), 'sol' => $solicitud]);
+                                 ['form' => $form->createView(), 'sol' => $solicitud]);*/
+    }
+
+    /**
+     * @Route("/delall/{sol}", name="sigcer_delete_all_detalle")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function eliminarDetallesDeSolicitud($sol)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $solicitud = $em->find(Solicitud::class, $sol);
+        foreach ($solicitud->getDetalles() as $detalle)
+        {
+          $em->remove($detalle);
         }
-        
+        $em->flush();
+        $form = $this->getFormAddArticuloExportacion($solicitud);
         return $this->render('@GestionSigcer/addArticulo.html.twig', 
                               ['form' => $form->createView(), 'sol' => $solicitud]);
     }

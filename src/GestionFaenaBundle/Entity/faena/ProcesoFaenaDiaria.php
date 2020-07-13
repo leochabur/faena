@@ -208,7 +208,8 @@ class ProcesoFaenaDiaria
                                 if (get_class($mov) === EntradaStock::class)
                                 {
                                         $stock+=  $valor->getData();     
-                                        $count++;                           
+                                        $count++;    
+                                      //  throw new \Exception("Pedazo de verga");                       
                                 }
                             }
                             else

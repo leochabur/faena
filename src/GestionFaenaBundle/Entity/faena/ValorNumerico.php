@@ -120,15 +120,7 @@ class ValorNumerico extends ValorAtributo
 
     public function calcularValor($movimiento, $entityManager, $automatico = false)
     {
-       // throw new \Exception("Alguno de los atributos del articulo  ".$movimiento->getValores()->first()->getData());
-        if (false){//$movimiento->getType() == 3){  ///////////////////REVEEERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
-           /* if (get_class($this->getAtributo()->getAtributo()) == AtributoMedibleAutomatico::class)
-                $this->valor = $movimiento->getFactor()*$movimiento->getValorAtributoConNombre('Aves') * $promedio;*/
-        }
-        else
-        {
             $factores = $this->getAtributo()->getFactoresCalculo(); //obtiene todos los atributos para realizar el calculo del valor del atributo
-
             if ($factores)
             {
                 $repository = $entityManager->getRepository(MovimientoStock::class);
@@ -155,10 +147,6 @@ class ValorNumerico extends ValorAtributo
                                 else
                                 { //significa que debe recuperar el valor del acumulado del atributo
                                     $accion = ($f1->getTipoCalculo()=='S'?'s':'p');
-                                   /* $due = $repository->getPromedioAtributoV2___($movimiento->getProcesoFnDay(),
-                                                                            $f1->getArticulo(),
-                                                                            $f1->getAtributo(),
-                                                                            $accion);*/
                                     $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f1->getArticulo(),
                                                                                                        $f1->getAtributo(),
                                                                                                        $f1->getSoloIngreso(),
@@ -189,6 +177,7 @@ class ValorNumerico extends ValorAtributo
                             else //existe el factor 2
                             {     
                                 $f2 = $factores['factores'][2];
+                            //    throw new \Exception("Caption ".$f2->getAtributo()." ".$f2->getArticulo());
                                 if ($f2->getTipoCalculo() == 'U')//Significa que se debe buscar el valor unitario del registro dentro del movimiento
                                 {
                                     $factor2 = $movimiento->getValorConAtributo($f2->getAtributo());
@@ -199,6 +188,8 @@ class ValorNumerico extends ValorAtributo
                                     $accion = ($f2->getTipoCalculo()=='S'?'s':'p');
                                     if ($f2->getArticulo())
                                     {
+
+                                        
                                         $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f2->getArticulo(),
                                                                                                            $f2->getAtributo(),
                                                                                                            $f2->getSoloIngreso(),
@@ -206,6 +197,7 @@ class ValorNumerico extends ValorAtributo
                                                                                                            $f2
                                                                                                           );
                                         $factor2 = $due;
+                                     //   throw new \Exception("Valor ".$factor2." ".$f2->getAtributo());
                                     }
                                     else
                                     {
@@ -274,8 +266,6 @@ class ValorNumerico extends ValorAtributo
                 }
                 
             }
-
-        }
     }
 
     public function getData($redonedo = true)

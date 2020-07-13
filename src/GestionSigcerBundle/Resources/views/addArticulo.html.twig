@@ -82,6 +82,11 @@
             </div>
           </div>
           <div class="form-row">
+            <div class="col-6">
+              {{ form_label(form.archivo) }}
+              {{ form_widget(form.archivo) }}
+            </div>
+            {#
             <div class="col-3">
               {{ form_label(form.fecha, 'Fecha Faena') }}
               {{ form_widget(form.fecha) }}
@@ -98,6 +103,7 @@
               {{ form_label(form.pneto, 'Peso Neto') }}
               {{ form_widget(form.pneto) }}
             </div>
+            #}
           </div>
           <div class="form-row">
             <div class="col">
@@ -144,6 +150,9 @@
             </tbody>
         </table>
     {% else %}
+        <form action="{{ path('sigcer_delete_all_detalle', { sol : sol.id }) }}" method="post" class="form-delete">
+            <input type="submit" class="btn btn-danger delete-all" value="Eliminar Todos"/>
+        </form>
         <table class="table table-striped table-bordered table-hover table-sm ">
             <thead>
               <tr>
@@ -188,3 +197,36 @@
         <a href="{{ path('sigcer_add_solictud_a_grupo', {gpo : sol.grupo.id}) }}" class="btn btn-success"><< Volver</a>
     </div>
 {% endblock fos_user_content %}
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+          $('.delete-all').click(function(event){
+                                            event.preventDefault();
+                                            var btn = $(this);
+                                            bootbox.confirm({
+                                                              message: 'Seguro eliminar todos los articulos cargados a la solicitud?',
+                                                              size: "large",
+                                                              buttons: {
+                                                                  confirm: {
+                                                                      label: 'Si, eliminar',
+                                                                      className: 'btn-success'
+                                                                  },
+                                                                  cancel: {
+                                                                      label: 'No, cancelar',
+                                                                      className: 'btn-danger'
+                                                                  }
+                                                              },
+                                                              callback: function (result) 
+                                                              {
+                                                                  if (result)
+                                                                  {
+                                                                    $(".form-delete").submit();
+                                                                  }
+                                                              }
+                                                          });
+                                            
+          });
+</script>
+
+{% endblock  %}

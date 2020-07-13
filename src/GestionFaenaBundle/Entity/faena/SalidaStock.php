@@ -23,7 +23,8 @@ class SalidaStock extends MovimientoStock
         $iterator->uasort(function ($first, $second) {
             return (int) $first->getAtributo()->getPosition() > (int) $second->getAtributo()->getPosition() ? 1 : -1;
         });
-        foreach ($this->getValores() as $valor) {
+        foreach ($this->getValores() as $valor)
+        {
             $valor->calcularValor($this, $entityManager, $automatico);
         }
     }

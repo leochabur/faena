@@ -95,7 +95,6 @@ abstract class MovimientoStock
         $value = null;
         foreach ($this->valores as $v) 
         {
-            //$val = $v->getAtributo()?$v->getAtributo()->getAtributoAbstracto():$v->getAtributoAbstracto();
             if ($v->getAtributo())
             {
                 if ($v->getAtributo()->getAtributoBase())

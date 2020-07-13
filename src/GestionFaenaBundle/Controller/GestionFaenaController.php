@@ -289,16 +289,18 @@ class GestionFaenaController extends Controller
           $instance = $auto->getConcepto()->getTipoMovimiento()->getInstancia();
           if ($instance == 4)
           {
-            $proceso = $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
+            if (!$proceso)
+              throw new \Exception("Proceso inexistente", 1);
+            $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
           }
           elseif($instance == 5)
           {
             $var = (bool)true;
-            $proceso = $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em, null, $var);
+            $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em, null, $var);
           }
           elseif (in_array($instance, [2,3])) 
           {
-            $proceso = $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
+           return $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
           }
       }
       $em->flush();
@@ -486,12 +488,13 @@ class GestionFaenaController extends Controller
         {                         
               $movimientos = $repo->findAllMovimientos($proceso);
               $headers = ['tipo' => ['data' => 'Tipo Movimiento', 'numeric' => false], 
+                          'numero' => ['data' => 'Numero', 'numeric' => false], 
                           'conc' => ['data'=> 'Concepto', 'numeric' => false], 
                           'art' => ['data' => 'Articulo', 'numeric' => false]
                          ];
               $body = [];
               $i = 0;
-              $totales = ['tipo' => 'TOTALES', 'conc' => '', 'art' => ''];
+              $totales = ['tipo' => 'TOTALES', 'conc' => '', 'art' => '', 'numero' => ''];
               $informaTotales = false;
               if ($articulo)
               {
@@ -519,7 +522,7 @@ class GestionFaenaController extends Controller
                     $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
                     $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
 
-                    $body[$i] = ['tipo' => $mov, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto().""];
+                    $body[$i] = ['tipo' => $mov, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto()."", 'numero' => $mov->getId()];
                     $body[$i]['id'] = $mov->getId();
                     $body[$i]['trx'] = $idTrx;
                     foreach ($mov->getValores() as $valor) 
@@ -793,6 +796,7 @@ class GestionFaenaController extends Controller
           $formAtr->handleRequest($request);
         }
         $movimiento->updateValues($stock, $em);
+
         $valid = $movimiento->verificarValores();
         if (!$valid['ok'])
         {
@@ -1000,7 +1004,7 @@ class GestionFaenaController extends Controller
              //   $valorAtr->setAcumula(true);
                 $salida = new SalidaStock();
                 $salida->setFaenaDiaria($faena);
-                $salida->addValore($valorAtr);
+            //   $salida->addValore($valorAtr);
                 $salida->setProcesoFnDay($proceso);
                 $salida->setArtProcFaena($artAtrConOrigen);  
                 foreach ($movimiento->getValores() as $valor) {
