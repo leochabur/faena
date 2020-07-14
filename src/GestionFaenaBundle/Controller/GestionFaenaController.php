@@ -306,17 +306,17 @@ class GestionFaenaController extends Controller
     }
 
     /**
-     * @Route("/gstProcFanDay/{proc}/{fd}", name="bd_adm_proc_fan_day")
+     * @Route("/gstProcFanDay/{proc}/{fd}/{typ}", name="bd_adm_proc_fan_day")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function administrarProcesoFaenaDiaria($proc, $fd)
+    public function administrarProcesoFaenaDiaria($proc, $fd, $typ = null)
     {   
         $em = $this->getDoctrine()->getManager();
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $faena = $em->find(FaenaDiaria::class, $fd);
         if ($proceso->getProcesoFaena()->getInstance() == 3)
         {
-           return $this->getFormProccessMedium($proceso, $faena);
+           return $this->getFormProccessMedium($proceso, $faena, $typ);
         }
         $repository = $em->getRepository('GestionFaenaBundle:faena\MovimientoStock');
         $movimientos = $repository->findAllMovimientos($proceso);
@@ -455,16 +455,21 @@ class GestionFaenaController extends Controller
           return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('errors' => $errors, 'con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
     }
 
-    private function getFormProccessMedium(ProcesoFaenaDiaria $proceso, FaenaDiaria $faena)
+    private function getFormProccessMedium(ProcesoFaenaDiaria $proceso, FaenaDiaria $faena, $typ = null)
     {
         $form = $this->getFormBeginMovStockAction($proceso, $faena->getId());
         $detalle = $this->getFormTipoMovimienos($proceso, $faena);
-        return $this->render('@GestionFaena/faena/adminProcFanDayMedium.html.twig', 
-                             ['form' => $form->createView(), 
-                              'proceso' => $proceso,
-                              'faena' => $faena,
-                              'formDetalle' => $detalle->createView()
-                             ]);
+        $params = [
+                      'form' => $form->createView(), 
+                      'proceso' => $proceso,
+                      'faena' => $faena,
+                      'formDetalle' => $detalle->createView()
+                  ];
+        if ($typ)
+        {
+            $params['tipo'] = $typ;
+        }
+        return $this->render('@GestionFaena/faena/adminProcFanDayMedium.html.twig', $params);
     }
 
     /**
@@ -486,13 +491,12 @@ class GestionFaenaController extends Controller
         {                         
               $movimientos = $repo->findAllMovimientos($proceso);
               $headers = ['tipo' => ['data' => 'Tipo Movimiento', 'numeric' => false], 
-                          'numero' => ['data' => 'Numero', 'numeric' => false], 
                           'conc' => ['data'=> 'Concepto', 'numeric' => false], 
                           'art' => ['data' => 'Articulo', 'numeric' => false]
                          ];
               $body = [];
               $i = 0;
-              $totales = ['tipo' => 'TOTALES', 'conc' => '', 'art' => '', 'numero' => ''];
+              $totales = ['tipo' => 'TOTALES', 'conc' => '', 'art' => ''];
               $informaTotales = false;
               if ($articulo)
               {
@@ -518,9 +522,9 @@ class GestionFaenaController extends Controller
                   if ($computar)
                   {
                     $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
-                    $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
+                    $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd, $data['tipoMovimiento'])->createView();
 
-                    $body[$i] = ['tipo' => $mov, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto()."", 'numero' => $mov->getId()];
+                    $body[$i] = ['tipo' => $mov, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto().""];
                     $body[$i]['id'] = $mov->getId();
                     $body[$i]['trx'] = $idTrx;
                     foreach ($mov->getValores() as $valor) 
@@ -589,7 +593,8 @@ class GestionFaenaController extends Controller
                     'faena' => $faena,
                     'formDetalle' => $form->createView(),
                     'body' => $body,
-                    'headers' => $headers
+                    'headers' => $headers,
+                    'tipo' => $data['tipoMovimiento']
                    ];
         if ($informaTotales)
         {
@@ -1343,20 +1348,25 @@ class GestionFaenaController extends Controller
     }
 
 
-    private function getFormDeleteMovimiento($mov, $trx, $faena)
+    private function getFormDeleteMovimiento($mov, $trx, $faena, $type = null)
     {
+        $params = array('mov' => $mov, 'trx' => $trx, 'faena' => $faena);
+        if ($type)
+        {
+          $params['typ'] = $type;
+        }
         $form = $this->createFormBuilder()
                       ->add('delete', SubmitType::class, ['label' => 'Eliminar']) 
-                      ->setAction($this->generateUrl('bd_adm_mov_st_delete', array('mov' => $mov, 'trx' => $trx, 'faena' => $faena)))     
+                      ->setAction($this->generateUrl('bd_adm_mov_st_delete', $params))     
                       ->setMethod('DELETE')   
                       ->getForm();
         return $form;
     }
     /**
-     * @Route("/gst/{mov}/{trx}/{faena}", name="bd_adm_mov_st_delete", methods={"DELETE"})
-     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     * Route("/gst/{mov}/{trx}/{faena}/{typ}", name="bd_adm_mov_st_delete", methods={"DELETE"})
+     * Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function eliminarMovimientoStockAction($mov, $trx, $faena)
+    public function eliminarMovimientoStockAction($mov, $trx, $faena, $typ = null)
     {
         $em = $this->getDoctrine()->getManager();
         $movimiento = $em->find(MovimientoStock::class, $mov);
@@ -1372,10 +1382,43 @@ class GestionFaenaController extends Controller
             $movimiento->setEliminado(true);
         }
         $em->flush();
-        return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $id, 'fd' => $faena]);
+        $params = ['proc' => $id, 'fd' => $faena];
+        if ($typ)
+        {
+          $params['typ'] = $typ;
+        }
+        return $this->redirectToRoute('bd_adm_proc_fan_day', $params);
     }
 
-
+////////////////remove from AJAX ///////////////////////////////
+    /**
+     * @Route("/gst/{mov}/{trx}/{faena}/{typ}", name="bd_adm_mov_st_delete", methods={"POST", "DELETE"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function eliminarMovimientoStockAjaxAction($mov, $trx, $faena, $typ = null)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $movimiento = $em->find(MovimientoStock::class, $mov);
+        $id = $movimiento->getProcesoFnDay()->getId();
+        if ($trx)
+        {
+            $transferencia = $em->find(MovimientoCompuesto::class, $trx);
+            $transferencia->getMovimientoOrigen()->setEliminado(true);
+            $transferencia->getMovimientoDestino()->setEliminado(true);
+        }
+        else
+        {
+            $movimiento->setEliminado(true);
+        }
+        $em->flush();
+        return new JsonResponse(['status' => true]);
+      /*  $params = ['proc' => $id, 'fd' => $faena];
+        if ($typ)
+        {
+          $params['typ'] = $typ;
+        }
+        return $this->redirectToRoute('bd_adm_proc_fan_day', $params);*/
+    }
 
 ////////////////////Alta concepto movmiento
     /**

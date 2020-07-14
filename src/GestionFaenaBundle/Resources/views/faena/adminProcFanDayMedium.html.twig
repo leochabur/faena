@@ -59,7 +59,7 @@
     	<div class="form-row">
     		<div class="col-3">
     				{{ form_label(formDetalle.tipoMovimiento) }}
-    				{{ form_widget(formDetalle.tipoMovimiento) }}
+    				{{ form_widget(formDetalle.tipoMovimiento, {'attr' : {'class' : 'type'}}) }}
     		</div>
     		<div class="col-3">
     				{{ form_label(formDetalle.articulos) }}
@@ -67,7 +67,7 @@
     		</div>
     		<div class="col">
     			<div class="mt-4">
-    				{{ form_widget(formDetalle.load, {'attr' : {'class' : 'btn btn-success btn-sm'}}) }}
+    				{{ form_widget(formDetalle.load, {'attr' : {'class' : 'btn btn-success btn-sm enviar'}}) }}
     			</div>
     				
     		</div>
@@ -219,8 +219,16 @@
 																		        }
 																		    },
 																		    callback: function (result) {
-																		        if (result){
-																		        	btn.parent().submit();
+																		        if (result)
+																		        {
+																		        	var route = btn.parent().attr('action');
+																		        	$.post(route,
+																		        		   function (result){
+																		        		   					 if (result.status)
+																		        		   					 {
+																		        		   					 	$('.enviar').trigger('click');
+																		        		   					 }
+																		        		   });
 																		        }
 																		    }
 																		});
@@ -243,7 +251,14 @@
 												    },
 												    callback: function (result) {
 												        if (result){
-												        	btn.parent().submit();
+												        	var route = btn.parent().attr('action');
+												        	$.post(route,
+												        		   function (result){
+												        		   					 if (result.status)
+												        		   					 {
+												        		   					 	$('.enviar').trigger('click');
+												        		   					 }
+												        		   });
 												        }
 												    }
 												});
@@ -276,6 +291,13 @@
 										 		});
 										
 	});
+
+	{% if tipo is defined %}
+		{% if tipo == 'M' %}
+		$(".type option[value='{{ tipo }}']").attr('selected','selected');
+
+		{% endif %}
+	{% endif %}
 </script>
 
 {% endblock %}
