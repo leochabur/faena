@@ -1,0 +1,53 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Nueva Categoria Articulo</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+
+<div class="">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-row">
+      <div class="col col-lg-4">
+        {{ form_label(form.categoria, 'Categoria') }}
+        {{ form_widget(form.categoria) }}
+      </div>
+      <div class="col col-lg-2">
+        {{ form_label(form.orden, 'Orden Aparicion') }}
+        {{ form_widget(form.orden) }}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col">
+        {{ form_widget(form.guardar) }}
+      </div>
+    </div>
+	{{ form_end(form) }}
+    <br>
+    <span class="h5">Ctegorias Existentes</span>
+    <hr>
+    <table class="table table-striped table-bordered table-hover table-sm ">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Categoria</th>
+            <th>Orden</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for f in categorias %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ f }}</td>             
+              <td>{{ f.orden }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock fos_user_content %}

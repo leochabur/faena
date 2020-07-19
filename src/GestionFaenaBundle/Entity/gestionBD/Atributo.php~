@@ -541,4 +541,28 @@ abstract class Atributo
     {
         return $this->defecto;
     }
+
+    /**
+     * Set redondea
+     *
+     * @param boolean $redondea
+     *
+     * @return Atributo
+     */
+    public function setRedondea($redondea)
+    {
+        $this->redondea = $redondea;
+
+        return $this;
+    }
+
+    /**
+     * Get redondea
+     *
+     * @return boolean
+     */
+    public function getRedondea()
+    {
+        return $this->redondea;
+    }
 }

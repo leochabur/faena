@@ -25,16 +25,54 @@ class AtributoMedibleAutomatico extends AtributoMedible
     private $factor2;
 
     /** 
-    * @ORM\Column(type="string", columnDefinition="ENUM('+', '-', '*', '/')") 
+    * @ORM\Column(type="string", columnDefinition="ENUM('+', '-', '*', '/', 'R')") 
     */
     private $operacion;
 
     /**
      *
-     * @ORM\Column(name="factorAjuste", type="integer")
+     * @ORM\Column(name="factorAjuste", type="float", nullable=true)
      */
-    private $factorAjuste;
+    private $factorAjuste = null;
     
+
+    public function getCalculo()
+    {
+        $action1 = $action2 = $formular = '';
+
+        if ($this->factor1)
+        {
+            $action1 = $this->factor1->getAction();
+        }
+
+        if ($this->factor2)
+        {
+            $action2 = $this->factor2->getAction();
+        }
+
+        switch ($this->operacion) {
+            case 'R':
+                    $formula = $action1.$action2.' * '.$this->factorAjuste;
+                break;                                  
+            default:
+                    $formula = $action1.' '.$this->operacion.''.$action2;
+                break;
+        }
+
+        return $formula;
+
+        $formula = $this->factor1;
+        if ($this->factor2)
+        {
+                $formula.=$this->operacion.$this->factor2;
+        }
+        else
+            if ($this->getFactorAjuste())
+            {
+                $formula.=$this->getOperacion().$this->getFactorAjuste();
+            }
+        return $formula;
+    }
 
     /**
      * Set operacion
@@ -65,18 +103,6 @@ class AtributoMedibleAutomatico extends AtributoMedible
         return 'Automatico';
     }
 
-    public function getCalculo()
-    {
-        $formula = $this->factor1;
-        if ($this->factor2)
-                $formula.=$this->operacion.$this->factor2;
-        else
-            if ($this->getFactorAjuste()){
-                $formula.=$this->getOperacion().$this->getFactorAjuste();
-            }
-        return $formula;
-    }
-
     public function getManual()
     {
         return true;
@@ -84,7 +110,7 @@ class AtributoMedibleAutomatico extends AtributoMedible
 
     public function getFactoresCalculo()
     {
-        $factores = array('ajustable' => $this->getAjustable(), 'factor' => $this->getFactorAjuste(), 'operacion' => $this->getOperacion(), 'factores' => array());
+        $factores = array('ajustable' => true, 'factorAjuste' => $this->factorAjuste, 'operacion' => $this->operacion, 'factores' => array());
 
         $factores['factores'][1] = $this->factor1;
         if ($this->factor2)
@@ -94,7 +120,7 @@ class AtributoMedibleAutomatico extends AtributoMedible
 
     public function getPosition()
     {
-        if ($this->getAjustable())
+        if (true)
             return 2;
         else
             return 1;
@@ -197,5 +223,34 @@ class AtributoMedibleAutomatico extends AtributoMedible
     public function getFactor2()
     {
         return $this->factor2;
+    }
+
+    /**
+     * Set factorAjuste
+     *
+     * @param float $factorAjuste
+     *
+     * @return AtributoMedibleAutomatico
+     */
+    public function setFactorAjuste($factorAjuste)
+    {
+        $this->factorAjuste = $factorAjuste;
+
+        return $this;
+    }
+
+    /**
+     * Get factorAjuste
+     *
+     * @return float
+     */
+    public function getFactorAjuste()
+    {
+        return $this->factorAjuste;
+    }
+
+    public function getTipo()
+    {
+        return 'Medible Aut.';
     }
 }

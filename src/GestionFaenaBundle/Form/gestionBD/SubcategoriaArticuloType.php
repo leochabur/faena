@@ -7,28 +7,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
-class ArticuloType extends AbstractType
+class SubcategoriaArticuloType extends AbstractType
 {
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('nombre')
-                ->add('nombreResumido')
-                ->add('codigoInterno')
-                ->add('categoria')
-                ->add('subcategoria')
-                ->add('presentacionKg')
-                ->add('presentacionUnidad')
-                ->add('guardar', SubmitType::class);
+        $builder->add('subcategoria')->add('orden')->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'GestionFaenaBundle\Entity\gestionBD\Articulo'
+            'data_class' => 'GestionFaenaBundle\Entity\gestionBD\SubcategoriaArticulo'
         ));
     }
 
@@ -37,7 +30,7 @@ class ArticuloType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'gestionfaenabundle_articulo';
+        return 'gestionfaenabundle_gestionbd_subcategoriaarticulo';
     }
 
 

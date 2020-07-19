@@ -69,7 +69,7 @@ class FactorCalculo
                     $action = 'UNITARIO';
                 break;
         }
-        return $action .' ('.$this->atributo.' DE '.$this->articulo.')';
+        return $action .' ('.$this->atributo.' DE '.$this->articulo.')'.($this->soloIngreso?'(Ingresos)':'(Todos)');
     }
 
     /**
@@ -181,5 +181,46 @@ class FactorCalculo
     public function getSoloIngreso()
     {
         return $this->soloIngreso;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->conceptosExcentos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add conceptosExcento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento
+     *
+     * @return FactorCalculo
+     */
+    public function addConceptosExcento(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento)
+    {
+        $this->conceptosExcentos[] = $conceptosExcento;
+
+        return $this;
+    }
+
+    /**
+     * Remove conceptosExcento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento
+     */
+    public function removeConceptosExcento(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptosExcento)
+    {
+        $this->conceptosExcentos->removeElement($conceptosExcento);
+    }
+
+    /**
+     * Get conceptosExcentos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getConceptosExcentos()
+    {
+        return $this->conceptosExcentos;
     }
 }

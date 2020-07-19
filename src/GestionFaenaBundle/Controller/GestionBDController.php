@@ -43,9 +43,13 @@ use GestionFaenaBundle\Form\gestionBD\AtrProcType;
 use GestionFaenaBundle\Form\gestionBD\EntidadExternaType;
 use GestionFaenaBundle\Form\gestionBD\EditArtAtrConType;
 use GestionFaenaBundle\Form\gestionBD\UnidadMedidaType;
+use GestionFaenaBundle\Form\gestionBD\CategoriaArticuloType;
+use GestionFaenaBundle\Form\gestionBD\SubcategoriaArticuloType;
 use GestionFaenaBundle\Entity\gestionBD\AtributoProceso;
 use GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto;
 use GestionFaenaBundle\Entity\gestionBD\FactorCalculo;
+use GestionFaenaBundle\Entity\gestionBD\CategoriaArticulo;
+use GestionFaenaBundle\Entity\gestionBD\SubcategoriaArticulo;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso;
@@ -112,10 +116,96 @@ class GestionBDController extends Controller
         return $this->render('@GestionFaena/gestionBD/articuloAtributoConceptoAlta.html.twig', array('form' => $form->createView()));
     }
     /////////////////FIN///////////////////////////////////
-    ///////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////
 
 
+    /////////////////Alta CategoriaArticulo
+    /**
+     * @Route("/config/addcat", name="bd_add_categoria_articulo")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addCategoriaArticulo()
+    {
+        $categoria = new CategoriaArticulo();
+        $form = $this->getFormAltaCategoria($categoria);
+        $categorias = $this->getDoctrine()->getManager()->getRepository(CategoriaArticulo::class)->findAll();
+        return $this->render('@GestionFaena/gestionBD/categoriaArticuloAlta.html.twig', array('categorias' => $categorias, 'form' => $form->createView()));
+    }
+
+    private function getFormAltaCategoria($categoria)
+    {
+        return $this->createForm(CategoriaArticuloType::class, 
+                                  $categoria, 
+                                  ['action' => $this->generateUrl('bd_add_categoria_articulo_procesar'),'method' => 'POST']);
+    }
+
+    /**
+     * @Route("/config/addcatproc", name="bd_add_categoria_articulo_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarFormularioAltaCategoria(Request $request)
+    {
+        $categoria = new CategoriaArticulo();
+        $form = $this->getFormAltaCategoria($categoria);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($categoria);
+            $entityManager->flush();
+            $this->addFlash(
+                        'sussecc',
+                        'Categoria almacenada exitosamente!'
+                    );
+            return $this->redirectToRoute('bd_add_categoria_articulo');
+        }
+        return $this->render('@GestionFaena/gestionBD/categoriaArticuloAlta.html.twig', array('form' => $form->createView()));
+    }
+    //////////////////Fin Alta CategoriaArticulo
+
+
+    /////////////////Alta SubcategoriaArticulo
+    /**
+     * @Route("/config/addsub", name="bd_add_subcategoria_articulo")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addSubategoriaArticulo()
+    {
+        $subcategoria = new SubcategoriaArticulo();
+        $form = $this->getFormAltaSubcategoria($subcategoria);
+        $subcategorias = $this->getDoctrine()->getManager()->getRepository(SubcategoriaArticulo::class)->findAll();
+        return $this->render('@GestionFaena/gestionBD/subcategoriaArticuloAlta.html.twig', array('subcategorias' => $subcategorias, 'form' => $form->createView()));
+    }
+
+    private function getFormAltaSubcategoria($subcategoria)
+    {
+        return $this->createForm(SubcategoriaArticuloType::class, 
+                                  $subcategoria, 
+                                  ['action' => $this->generateUrl('bd_add_subcategoria_articulo_procesar'),'method' => 'POST']);
+    }
+
+    /**
+     * @Route("/config/addsubcatproc", name="bd_add_subcategoria_articulo_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarFormularioAltaSubcategoria(Request $request)
+    {
+        $subcategoria = new SubcategoriaArticulo();
+        $form = $this->getFormAltaSubcategoria($subcategoria);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($subcategoria);
+            $entityManager->flush();
+            $this->addFlash(
+                        'sussecc',
+                        'Subcategoria almacenada exitosamente!'
+                    );
+            return $this->redirectToRoute('bd_add_subcategoria_articulo');
+        }
+        return $this->render('@GestionFaena/gestionBD/subcategoriaArticuloAlta.html.twig', array('form' => $form->createView()));
+    }
+    //////////////////Fin Alta SubcategoriaArticulo
 
     /////////////////Alta Atributo Abstracto
     /**
@@ -306,9 +396,10 @@ class GestionBDController extends Controller
      */
     public function addArticuloAction()
     {
+        $articulos = $this->getDoctrine()->getManager()->getRepository(Articulo::class)->getListaArticulos();
         $articulo = new Articulo();
         $form = $this->getFormABMArticulo($articulo);
-        return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('form' => $form->createView()));
+        return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('articulos' => $articulos, 'form' => $form->createView()));
     }
 
     /**

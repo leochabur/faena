@@ -1045,7 +1045,8 @@ class GestionSolicitudesController extends Controller
                     $solicitud->setAttribute( "xsi:schemaLocation", "http://www.senasa.gov.ar/solicitud solicitudCertCarnicos.xsd");
                     $version = $dom->createElement( "se:version", $grupo->getVersion());
                     $solicitud->appendChild($version);
-                    $tpp = $dom->createElement( "se:tropasPorProducto", 'true');
+                   // $tpp = $dom->createElement( "se:tropasPorProducto", 'true');
+                    $tpp = $dom->createElement( "se:tropasPorProducto", 'false');
                     $solicitud->appendChild($tpp);
                     $paisDestino = $dom->createElement( "se:paisDestino", $grupo->getPaisDestino()->getCodigo());
                     $solicitud->appendChild($paisDestino);
@@ -1058,6 +1059,7 @@ class GestionSolicitudesController extends Controller
                     */
 
                     $detalles = $dom->createElement('se:detalles');
+                    $tropas = $dom->createElement('se:tropas');
                     $ok = false;
                     foreach ($sol->getDetalles() as $deta)
                     {
@@ -1078,10 +1080,13 @@ class GestionSolicitudesController extends Controller
                             $tropa->setAttribute( "fechaDeFaena", "".$tr->getFechaFaena()->format('Y-m-d') );
                             $tropa->setAttribute( "fechaDeVencimiento", ''.$tr->getFechaVto()->format('Y-m-d'));
                             $tropa->setAttribute( "numeroTropa", $tr->getLote());
+                            $tropas->appendChild($tropa);
                             //$tropa->setAttribute( "numeroTropa", ''.$tr->getNumeroTropa() );
                            // $tropa->setAttribute( "numeroTropa", ''.$tr->getLote() );
                             $tropa->setAttribute( "lote", ''.$tr->getLote());
-                            $detalle->appendChild($tropa);
+
+                          //  $detalle->appendChild($tropa);   ///14/07/2020
+
                             $detalle->appendChild($dom->createElement('se:pesoNeto', $deta->getPesoNeto()));
                             $detalle->appendChild($dom->createElement('se:pesoBruto', $deta->getPesoBruto()));
                             $detalle->appendChild($dom->createElement('se:cantidad', $deta->getCantidad()));
@@ -1097,7 +1102,9 @@ class GestionSolicitudesController extends Controller
                     if ($ok)
                     {
                         $generateZip = true;
+                        $solicitud->appendChild($tropas);//2020-07-14
                         $solicitud->appendChild($detalles);
+
                         $solicitud->appendChild($dom->createElement('se:precintoSENASA', $sol->getPrecintoSenasa()));
                         $solicitud->appendChild($dom->createElement('se:destinatarioNombre', $sol->getDestinatarioExportacion()->getRazonSocial()));
 

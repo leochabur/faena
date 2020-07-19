@@ -37,10 +37,6 @@ class AtributoAbstracto
      */
     private $atributos;
 
-    /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\ValorAtributo", mappedBy="atributo")
-     */
-    private $valoresAtributos;
     
     /**
      * Get id

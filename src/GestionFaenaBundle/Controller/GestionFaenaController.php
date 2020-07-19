@@ -458,12 +458,50 @@ class GestionFaenaController extends Controller
     private function getFormProccessMedium(ProcesoFaenaDiaria $proceso, FaenaDiaria $faena, $typ = null)
     {
         $form = $this->getFormBeginMovStockAction($proceso, $faena->getId());
-        $detalle = $this->getFormTipoMovimienos($proceso, $faena);
+        ////actualizacion solo se mostraran las existencia para ver los movimientos se creara un linck en la vista donde se rediroccionara a dicha vista
+        /// 2020-07-18
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository(MovimientoStock::class);
+
+        $headers = ['tipo' => ['data' => 'Detalle', 'numeric' => false], 
+                    'art' => ['data' => 'Articulo', 'numeric' => false]
+                   ];
+        $body = [];
+        $movimientos = $repo->findAllMovimientos($proceso);
+        $informaTotales = false;
+        
+        foreach ($movimientos as $mov) 
+        {
+            $art = $mov->getArtProcFaena()->getArticulo();
+            if (!array_key_exists($art->getId(), $body))
+            {
+                $body[$art->getId()] = ['tipo' => 'Existencias totales', 'art' => $art, 'trx' => 0];
+            }
+            foreach ($mov->getValores() as $valor) 
+            {
+                if ($valor->isNumeric())
+                {
+                  $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
+                  if ($valor->getMostrar())
+                  {      
+                    $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => true];
+                  }
+                  if (!array_key_exists($atributo->getId(), $body[$art->getId()]))
+                  {
+                        $body[$art->getId()][$atributo->getId()] = 0;
+                  }
+                  $body[$art->getId()][$atributo->getId()]+= $valor->getData();
+                }                  
+            }
+        }
+      ///fin actualizacion
+      //  $detalle = $this->getFormTipoMovimienos($proceso, $faena);
         $params = [
                       'form' => $form->createView(), 
                       'proceso' => $proceso,
                       'faena' => $faena,
-                      'formDetalle' => $detalle->createView()
+                      'body' => $body,
+                      'headers' => $headers,
                   ];
         if ($typ)
         {

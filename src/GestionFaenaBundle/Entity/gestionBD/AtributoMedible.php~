@@ -79,7 +79,7 @@ abstract class AtributoMedible extends Atributo
         return $this->factorAjuste;
     }
 
-    public function getEntityValorAtributo($atributo)
+    public function getEntityValorAtributo(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributo)
     {
         $value = new ValorNumerico();
         $value->setUnidadMedida($this->unidadMedida);

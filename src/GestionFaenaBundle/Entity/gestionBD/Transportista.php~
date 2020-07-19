@@ -64,4 +64,100 @@ class Transportista extends EntidadExterna
     {
         return $this->cuit;
     }
+
+    /**
+     * Set chofer
+     *
+     * @param string $chofer
+     *
+     * @return Transportista
+     */
+    public function setChofer($chofer)
+    {
+        $this->chofer = $chofer;
+
+        return $this;
+    }
+
+    /**
+     * Get chofer
+     *
+     * @return string
+     */
+    public function getChofer()
+    {
+        return $this->chofer;
+    }
+
+    /**
+     * Set titular
+     *
+     * @param string $titular
+     *
+     * @return Transportista
+     */
+    public function setTitular($titular)
+    {
+        $this->titular = $titular;
+
+        return $this;
+    }
+
+    /**
+     * Get titular
+     *
+     * @return string
+     */
+    public function getTitular()
+    {
+        return $this->titular;
+    }
+
+    /**
+     * Set chasis
+     *
+     * @param string $chasis
+     *
+     * @return Transportista
+     */
+    public function setChasis($chasis)
+    {
+        $this->chasis = $chasis;
+
+        return $this;
+    }
+
+    /**
+     * Get chasis
+     *
+     * @return string
+     */
+    public function getChasis()
+    {
+        return $this->chasis;
+    }
+
+    /**
+     * Set acoplado
+     *
+     * @param string $acoplado
+     *
+     * @return Transportista
+     */
+    public function setAcoplado($acoplado)
+    {
+        $this->acoplado = $acoplado;
+
+        return $this;
+    }
+
+    /**
+     * Get acoplado
+     *
+     * @return string
+     */
+    public function getAcoplado()
+    {
+        return $this->acoplado;
+    }
 }

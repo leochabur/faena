@@ -11,7 +11,7 @@ namespace GestionFaenaBundle\Repository\faena;
 class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
 {
 
-    public function findAllMovimientos($proceso)
+    public function findAllMovimientos(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso)
     {
         return $this->getEntityManager()
             		->createQuery('SELECT p 

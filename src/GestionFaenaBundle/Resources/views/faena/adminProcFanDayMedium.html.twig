@@ -52,10 +52,10 @@
 <div class="card">
 	<div class="card-header">
 		<div class="h5">
-			Movimientos
+			Existencias Totales
 			<hr>
 		</div>
-    	{{ form_start(formDetalle) }}
+    	{#{ form_start(formDetalle) }}
     	<div class="form-row">
     		<div class="col-3">
     				{{ form_label(formDetalle.tipoMovimiento) }}
@@ -72,7 +72,7 @@
     				
     		</div>
     	</div>
-    	{{ form_end(formDetalle) }}
+    	{{ form_end(formDetalle) }#}
   	</div>
 	<div class="card-body">
 	{% if headers is defined %}

@@ -16,4 +16,9 @@ class AtributoMedibleManual extends AtributoMedible
     {
         return get_class($this);
     }
+
+    public function getTipo()
+    {
+        return 'Medible Man.';
+    }
 }
