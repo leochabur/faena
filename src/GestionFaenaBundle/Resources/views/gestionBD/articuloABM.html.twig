@@ -4,7 +4,7 @@
 {% block fos_user_content %}
 <div class="container">
 <br>
-<p class="h5 card-title">Nuevo articulo</p>
+<p class="h5 card-title">{% if edit is defined %}Editar Articulo {% else %} Nuevo articulo {% endif %}</p>
 <hr>
 {% for message in app.flashes('sussecc') %}
 <div class="alert alert-success" role="alert">
@@ -49,6 +49,7 @@
 {{ form_widget(form.guardar) }}
 {{ form_end(form) }}
 
+{% if not edit is defined %}
     <br>
     <span class="h5">Articulos Existentes</span>
     <hr>
@@ -63,6 +64,7 @@
             <th>Subategoria</th>
             <th>Pres. Kg.</th>
             <th>Pres. Uda.</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -76,9 +78,11 @@
               <td>{{ f.subcategoria }}</td> 
               <td>{{ f.presentacionKg }}</td> 
               <td>{{ f.presentacionUnidad }}</td> 
+              <td><a href="{{ path('bd_editar_articulo_basico', { 'art' : f.id }) }}" class="btn btn-warning btn-sm">Editar</a></td>
             </tr>
           {% endfor %}
         </tbody>
     </table>
+{% endif %}
 </div>
 {% endblock fos_user_content %}

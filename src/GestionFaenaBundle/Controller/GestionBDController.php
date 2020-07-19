@@ -388,8 +388,40 @@ class GestionBDController extends Controller
     }
     ///////////////////////////
 
+    /**
+     * @Route("/config/editarticulo/{art}", name="bd_editar_articulo_basico", methods={"POST", "GET"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarArticulo($art)
+    {
+        $articulo = $this->getDoctrine()->getManager()->find(Articulo::class, $art);
+        $form = $this->getFormABMArticulo($articulo, 'bd_editar_articulo_procesar', ['art' => $art]);
+        return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('edit' => true, 'form' => $form->createView()));
+    }
 
-    
+    /**
+     * @Route("/config/editartprocesar/{art}", name="bd_editar_articulo_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarFormularioEditArticulo($art, Request $request)
+    {
+        $articulo = $this->getDoctrine()->getManager()->find(Articulo::class, $art);
+        $form = $this->getFormABMArticulo($articulo, 'bd_editar_articulo_procesar', ['art' => $art]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($articulo);
+            $entityManager->flush();
+            $this->addFlash(
+                        'sussecc',
+                        'Articulo modificado exitosamente!'
+                    );
+            return $this->redirectToRoute('bd_add_articulo');
+        }
+        return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('edit' => true, 'form' => $form->createView()));
+    }
+
     /**
      * @Route("/config/addArt", name="bd_add_articulo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
@@ -398,7 +430,7 @@ class GestionBDController extends Controller
     {
         $articulos = $this->getDoctrine()->getManager()->getRepository(Articulo::class)->getListaArticulos();
         $articulo = new Articulo();
-        $form = $this->getFormABMArticulo($articulo);
+        $form = $this->getFormABMArticulo($articulo, 'bd_add_articulo_procesar');
         return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('articulos' => $articulos, 'form' => $form->createView()));
     }
 
@@ -409,7 +441,7 @@ class GestionBDController extends Controller
     public function procesarFormularioArticulo(Request $request)
     {
         $articulo = new Articulo();
-        $form = $this->getFormABMArticulo($articulo);
+        $form = $this->getFormABMArticulo($articulo, 'bd_add_articulo_procesar');
         $form->handleRequest($request);
         if ($form->isValid())
         {
@@ -425,9 +457,9 @@ class GestionBDController extends Controller
         return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('form' => $form->createView()));
     }
 
-    private function getFormABMArticulo($articulo)
+    private function getFormABMArticulo($articulo, $url, $params = [])
     {
-        return $this->createForm(ArticuloType::class, $articulo, ['action' => $this->generateUrl('bd_add_articulo_procesar'),'method' => 'POST']);
+        return $this->createForm(ArticuloType::class, $articulo, ['action' => $this->generateUrl($url, $params),'method' => 'POST']);
     }
 
     /**
