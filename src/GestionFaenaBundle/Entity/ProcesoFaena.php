@@ -113,6 +113,10 @@ abstract class ProcesoFaena
      */
     private $automaticos;
 
+    /**
+     * @ORM\Column(name="romanea", type="boolean", options={"default":false})
+     */
+    private $romanea = false; 
 
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
@@ -617,5 +621,29 @@ abstract class ProcesoFaena
     public function getProcesosDestinoDefault()
     {
         return $this->procesosDestinoDefault;
+    }
+
+    /**
+     * Set romanea
+     *
+     * @param boolean $romanea
+     *
+     * @return ProcesoFaena
+     */
+    public function setRomanea($romanea)
+    {
+        $this->romanea = $romanea;
+
+        return $this;
+    }
+
+    /**
+     * Get romanea
+     *
+     * @return boolean
+     */
+    public function getRomanea()
+    {
+        return $this->romanea;
     }
 }

@@ -1,0 +1,305 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<br>
+<hr>
+<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }}</p>
+<hr>
+{% if fatr is not defined %}
+	<div class="card">
+  		<div class="card-body">
+			{% if errors is defined %}
+				<ul>
+					{% for error in errors %}
+					    <li class="list-group-item list-group-item-danger">{{ error.message }}</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
+			{{ form_start(form, {'attr' : {'novalidate' : 'novalidate'}}) }}
+			<div class="row">
+				<div class="col">
+						{{ form_label(form.tipoMovimiento) }}
+						{{ form_widget(form.tipoMovimiento, {'attr' : {'class' : 'tipos'}}) }}
+				</div>
+				<div class="col">
+						{{ form_label(form.conMovProc, 'Concepto de Movimiento') }}
+						{{ form_widget(form.conMovProc, {'attr' : {'class' : 'conceptos'}}) }}
+				</div>
+				<div class="col">
+						{{ form_label(form.artProcFaena, 'Articulo') }}
+						{{ form_widget(form.artProcFaena, {'attr' : {'class' : 'articulos'}}) }}
+				</div>
+				{{ form_widget(form.proceso, {'attr' : {'class' : 'proceso'}}) }}
+			</div>
+			<div class="row">
+				<div class="col">
+						{{ form_widget(form.guardar) }}
+				</div>
+			</div>
+				{% if form.automatic is defined %}
+				<div class="row">
+					<div class="col">
+							{{ form_widget(form.automatic, {'attr' : {'class' : 'btn btn-warning'}}) }}
+					</div>
+				</div>
+			{% endif %}
+			{{ form_end(form) }}
+		</div>
+	</div>
+
+{% endif %}
+
+<div class="card">
+	<div class="card-header">
+		<div class="h5">
+			Existencias Totales
+			<hr>
+		</div>
+    	{#{ form_start(formDetalle) }}
+    	<div class="form-row">
+    		<div class="col-3">
+    				{{ form_label(formDetalle.tipoMovimiento) }}
+    				{{ form_widget(formDetalle.tipoMovimiento, {'attr' : {'class' : 'type'}}) }}
+    		</div>
+    		<div class="col-3">
+    				{{ form_label(formDetalle.articulos) }}
+    				{{ form_widget(formDetalle.articulos) }}
+    		</div>
+    		<div class="col">
+    			<div class="mt-4">
+    				{{ form_widget(formDetalle.load, {'attr' : {'class' : 'btn btn-success btn-sm enviar'}}) }}
+    			</div>
+    				
+    		</div>
+    	</div>
+    	{{ form_end(formDetalle) }#}
+  	</div>
+	<div class="card-body">
+		<table class="table table-bordered table-sm table-fit">
+			<tbody>
+				
+				{% for key, art in articulos %}
+					{% if loop.index0 is divisible by(2) %}
+					    {% set color = ' light-blue lighten-3' %}
+					{% else %}
+						{% set color = 'light-blue lighten-2' %}						
+					{% endif %}
+					<tr class="{{ color }}">
+						<td class="align-middle" rowspan="{{ ccat[key] }}">
+							{{  cates[key] }}
+						</td>
+						{% set count = 0 %}
+
+						{% for ks, sub in art %} 
+
+							{% if count == 0 %}
+								<td class="align-middle" rowspan="{{ csub[key][ks] }}">
+									{{ subcates[ks] }}
+								</td>
+								{% set count = 1 %}
+							{% else %}
+								<tr class="{{ color }}">
+									<td class="align-middle" rowspan="{{ csub[key][ks] }}">
+										{{ subcates[ks] }}
+									</td>
+							{% endif %}
+							{% set count2 = 0 %}
+							{% for k, v in sub %}
+								{% if count2 == 0 %}
+										<td>
+											{{ v[0].nombreResumido }}
+										</td>
+										{% set cant = 0 %}
+										{% for inp in v[1] %}
+											{% set cant = loop.index0 %}
+											<td>
+												<input type="text" class="form-control col-lg-4"/>
+											</td>
+										{% endfor %}
+										{% for i in cant..maxInputs %}
+											<td>
+												<input type="text" class="form-control col-lg-4"/>
+											</td>
+										{% endfor %}										
+									</tr>
+									{% set count2 = 1 %}
+								{% else %}
+									<tr class="{{ color }}">
+										<td>
+											{{ v[0].nombreResumido }}
+										</td>
+										{% set cant = 0 %}
+										{% for inp in v[1] %}
+											{% set cant = loop.index0 %}
+											<td>
+												<input type="text" class="form-control col-lg-4 align-center"/>
+											</td>
+										{% endfor %}
+										{% for i in cant..maxInputs %}
+											<td class="align-middle">
+												<input type="text" class="form-control col-lg-4"/>
+											</td>
+										{% endfor %}	
+									</tr>
+								{% endif %}
+							{% endfor %}
+						{% endfor %}
+				{% endfor %}
+
+			</tbody>
+		</table>
+	<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-success"><< Volver</a>
+	</div>
+</div>
+
+
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+	var tipos = $('.tipos');
+	var conceptos = $('.conceptos');
+	var articulos = $('.articulos');
+	conceptos.html('');
+	articulos.html('');
+	tipos.change(function() {
+	  var form = $(this).closest('form');
+	  $.ajax({
+			    url : "{{ path('bd_change_tipo_movimiento') }}",
+			    type: "POST",
+			    data : {proceso: form.find('.proceso').val(), tipoMovimiento: $(this).val()},
+			    success: function(data) {
+						articulos.html('');
+		                conceptos.html('<option>Selecciona...</option>');
+		                for (var i = 0, total = data.length; i < total; i++) {
+		                    conceptos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
+			    		}
+			    },
+			    failed: function(data){
+			    	alert('error');
+			    }
+	  		});
+	});
+
+	conceptos.change(function() {
+	  $.ajax({
+			    url : "{{ path('bd_change_concepto_movimiento') }}",
+			    type: "POST",
+			    data : {concepto: $(this).val()},
+			    success: function(data) {
+						articulos.html('<option value="null">Selecciona...</option>');
+		                for (var i = 0, total = data.length; i < total; i++) {
+		                    articulos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
+			    		}
+			    }
+	  		});
+	});
+
+
+	$('.btnDelete').click(function(event){
+											event.preventDefault();
+											var route = "{{ path ('query_consulta_movimiento', {mov: '_MOV', trx : '_TRX'})}}";
+											var btn = $(this);
+											if (btn.data('trx'))
+											{
+												var ruta = route.replace('_MOV', btn.data('mov')).replace('_TRX', btn.data('trx'));
+												$.post(ruta,
+													  function(response){
+																		bootbox.confirm({
+																		    message: response.msge,
+																		    size: "large",
+																		    buttons: {
+																		        confirm: {
+																		            label: 'Si',
+																		            className: 'btn-success'
+																		        },
+																		        cancel: {
+																		            label: 'No',
+																		            className: 'btn-danger'
+																		        }
+																		    },
+																		    callback: function (result) {
+																		        if (result)
+																		        {
+																		        	var route = btn.parent().attr('action');
+																		        	$.post(route,
+																		        		   function (result){
+																		        		   					 if (result.status)
+																		        		   					 {
+																		        		   					 	$('.enviar').trigger('click');
+																		        		   					 }
+																		        		   });
+																		        }
+																		    }
+																		});
+													  }
+												);
+											}
+											else
+											{
+													bootbox.confirm({
+												    message: "Seguro eliminar el item "+btn.data('index')+"?",
+												    buttons: {
+												        confirm: {
+												            label: 'Si',
+												            className: 'btn-success'
+												        },
+												        cancel: {
+												            label: 'No',
+												            className: 'btn-danger'
+												        }
+												    },
+												    callback: function (result) {
+												        if (result){
+												        	var route = btn.parent().attr('action');
+												        	$.post(route,
+												        		   function (result){
+												        		   					 if (result.status)
+												        		   					 {
+												        		   					 	$('.enviar').trigger('click');
+												        		   					 }
+												        		   });
+												        }
+												    }
+												});
+											}
+	});
+
+	$('.view-art').click(function(){
+									var url = "{{ path('bd_view_art_proc_fan', {'articulo' : 'id_article'}) }}"; 
+									url = url.replace('id_article', $(this).data('id'));
+									$('.modal-body-article').load(url);
+									$('#viewArticle').modal('show');
+	});
+
+	$('.sender').submit(function (event){
+										 event.preventDefault();
+										 var form = $(this);
+										 $.post(form.attr('action'),
+										 		form.serialize(),
+										 		function(data){
+										 						if (data.status)
+										 						{
+
+										 						}
+										 						else
+										 						{
+
+										 						}
+
+
+										 		});
+										
+	});
+
+	{% if tipo is defined %}
+		{% if tipo == 'M' %}
+		$(".type option[value='{{ tipo }}']").attr('selected','selected');
+
+		{% endif %}
+	{% endif %}
+</script>
+
+{% endblock %}

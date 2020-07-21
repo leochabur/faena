@@ -314,10 +314,84 @@ class GestionFaenaController extends Controller
         $em = $this->getDoctrine()->getManager();
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
         $faena = $em->find(FaenaDiaria::class, $fd);
+        $form = $this->getFormBeginMovStockAction($proceso, $fd);
         if ($proceso->getProcesoFaena()->getInstance() == 3)
         {
            return $this->getFormProccessMedium($proceso, $faena, $typ);
         }
+        if ($proceso->getProcesoFaena()->getRomanea())
+        {
+            $maxInputs = 3;
+            $categorias = [];
+            $subcategorias = [];
+            $data = [];
+            $articulos = $em->getRepository(Articulo::class)->getListaArticulos();
+            $cantCateg = [];
+            $cantSubcates = [];
+            foreach ($articulos as $art)
+            {   
+                //recupera todos los movimientos existentes para el articulo en el movimiento
+                $procesoFaena = $proceso->getProcesoFaena();
+                $factor = $procesoFaena->existeArticuloDefinidoManejoStock($art);
+                $valores = [];
+                if ($factor)
+                {
+                    $movimientos = $proceso->getMovimientosArticulo($art, $factor->getAtributo());
+                    foreach ($movimientos as $mov)
+                    {
+                        $val = $mov->getValorWhitAtribute($factor->getAtributo());
+                        if ($val)
+                        {
+                          $valores[] = $val;
+                        }
+                    }
+                }
+                ////finaliza recuperacion
+                $idCat = $art->getCategoria()->getId();
+                $idSub = $art->getSubcategoria()->getId();
+                if (!array_key_exists($idCat, $cantCateg))
+                {
+                  $cantCateg[$idCat] = 0;
+                }
+                $cantCateg[$idCat]++;
+                if (!array_key_exists($idCat, $cantSubcates))
+                {
+                  $cantSubcates[$idCat] = [];
+                }
+                if (!array_key_exists($idSub, $cantSubcates[$idCat]))
+                {
+                    $cantSubcates[$idCat][$idSub] = 0;
+                }
+                $cantSubcates[$idCat][$idSub]++;
+                $categorias[$idCat] = $art->getCategoria();
+                $subcategorias[$idSub] = $art->getSubcategoria();
+                if (!array_key_exists($idCat, $data))
+                {
+                  $data[$idCat] = [];
+                }
+                if (!array_key_exists($idSub, $data[$idCat]))
+                {
+                  $data[$idCat][$idSub] = [];
+                }
+                $aux = count($valores);
+                if ($aux > $maxInputs)
+                {
+                  $maxInputs = $aux;
+                }
+                $data[$idCat][$idSub][] = [0 => $art, 1 => $valores];
+            }
+            return $this->render('@GestionFaena/faena/adminProcFanDayRomanea.html.twig', 
+                                array( 'proceso' => $proceso, 
+                                       'form' => $form->createView(), 
+                                       'faena' => $faena, 
+                                       'articulos' => $data, 
+                                       'cates' => $categorias, 
+                                       'subcates' => $subcategorias,
+                                        'ccat' => $cantCateg,
+                                        'csub' => $cantSubcates,
+                                        'maxInputs' => $maxInputs));
+        }
+
         $repository = $em->getRepository('GestionFaenaBundle:faena\MovimientoStock');
         $movimientos = $repository->findAllMovimientos($proceso);
         $conceptos = array();
@@ -359,7 +433,7 @@ class GestionFaenaController extends Controller
               }
             }
         }
-        $form = $this->getFormBeginMovStockAction($proceso, $fd);
+        
         return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
     }
 

@@ -27,11 +27,15 @@
 	</div>
 </div>
 <div class="form-row">
-	<div class="col">
+  <div class="col col-lg-2">
+    {{ form_label(form.orden, 'Orden Aparicion') }}
+    {{ form_widget(form.orden) }}
+  </div>
+	<div class="col col-lg-4">
 		{{ form_label(form.categoria, 'Categoria') }}
 		{{ form_widget(form.categoria) }}
 	</div>
-	<div class="col">
+	<div class="col col-lg-4">
 		{{ form_label(form.subcategoria, 'Subcategoria') }}
 		{{ form_widget(form.subcategoria) }}
 	</div>

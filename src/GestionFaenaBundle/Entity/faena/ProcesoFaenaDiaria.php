@@ -181,6 +181,24 @@ class ProcesoFaenaDiaria
         return $stock;
     }
 
+    public function getMovimientosArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+                                           \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
+    //dados los parametros recupera todos los movimientos para el articulo dado
+    {
+        $movimientos = [];
+        foreach ($this->movimientos as $mov) 
+        {
+            if ((!$mov->getEliminado()) && ($mov->getVisible()))
+            {
+                    if ($mov->getArtProcFaena()->getArticulo() == $articulo)
+                    {      
+                        $movimientos[] = $mov;
+                    }
+            }
+        }
+        return $movimientos;
+    }
+
     public function getStockArticuloConAtributo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo, 
                                                 \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
                                                 $soloIngreso,

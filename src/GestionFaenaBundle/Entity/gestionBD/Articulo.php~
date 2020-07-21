@@ -93,6 +93,11 @@ class Articulo
     private $eliminado = false;
 
     /**
+     * @ORM\Column(name="orden", type="float", nullable=true)
+     */
+    private $orden;
+    
+    /**
      * Get id
      *
      * @return int
@@ -363,5 +368,29 @@ class Articulo
     public function getNombreResumido()
     {
         return $this->nombreResumido;
+    }
+
+    /**
+     * Set eliminado
+     *
+     * @param boolean $eliminado
+     *
+     * @return Articulo
+     */
+    public function setEliminado($eliminado)
+    {
+        $this->eliminado = $eliminado;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminado
+     *
+     * @return boolean
+     */
+    public function getEliminado()
+    {
+        return $this->eliminado;
     }
 }
