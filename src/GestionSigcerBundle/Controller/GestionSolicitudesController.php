@@ -1102,7 +1102,7 @@ class GestionSolicitudesController extends Controller
                     if ($ok)
                     {
                         $generateZip = true;
-                        $solicitud->appendChild($tropas);//2020-07-14
+                      //  $solicitud->appendChild($tropas);//2020-07-14
                         $solicitud->appendChild($detalles);
 
                         $solicitud->appendChild($dom->createElement('se:precintoSENASA', $sol->getPrecintoSenasa()));
