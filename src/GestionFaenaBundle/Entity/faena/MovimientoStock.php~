@@ -73,6 +73,12 @@ abstract class MovimientoStock
     private $origen;
 
     /**
+    * @ORM\OneToOne(targetEntity="MovimientoStock") 
+    * @ORM\JoinColumn(name="id_mov_asoc", referencedColumnName="id", nullable=true)
+    */      
+    private $movimientoAsociado;  //para el caso de las transferencias
+
+    /**
      * @Assert\IsFalse(
      *     message = "El tipo de movimiento requiere que defina cual articulo se transformara!!"
      * )
@@ -95,8 +101,28 @@ abstract class MovimientoStock
         $value = null;
         foreach ($this->valores as $v) 
         {
-            //$val = $v->getAtributo()?$v->getAtributo()->getAtributoAbstracto():$v->getAtributoAbstracto();
-             $val = $v->getAtributo()?$v->getAtributo()->getAtributoBase():$v->getAtributoAbstracto();
+            if ($v->getAtributo())
+            {
+                if ($v->getAtributo()->getAtributoBase())
+                {
+                    $val = $v->getAtributo()->getAtributoBase();
+                }
+                else
+                {
+                    $val = $v->getAtributo()->getAtributoAbstracto();
+                }
+            }
+            else
+            {
+                $val = $v->getAtributoAbstracto();
+            }
+
+            if (!$val)
+            {
+                throw new \Exception("No existe!!", 1);
+                
+            }
+
             if ($val && ($val == $atributo))
             {
                 if ($v->getAtributo())  //tiene el Atributo Asignado, puede verificar si debe devolver el valor espejo o no
@@ -268,7 +294,7 @@ abstract class MovimientoStock
         return null;
     }
 
-    public abstract function updateValues($promedio, $entityManager);
+    public abstract function updateValues($promedio, $entityManager, $automatico = false);
 
     public abstract function getType();
 
@@ -392,5 +418,53 @@ abstract class MovimientoStock
     public function getFaenaDiaria()
     {
         return $this->faenaDiaria;
+    }
+
+    /**
+     * Set destino
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoCompuesto $destino
+     *
+     * @return MovimientoStock
+     */
+    public function setDestino(\GestionFaenaBundle\Entity\faena\MovimientoCompuesto $destino = null)
+    {
+        $this->destino = $destino;
+
+        return $this;
+    }
+
+    /**
+     * Get destino
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoCompuesto
+     */
+    public function getDestino()
+    {
+        return $this->destino;
+    }
+
+    /**
+     * Set origen
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoCompuesto $origen
+     *
+     * @return MovimientoStock
+     */
+    public function setOrigen(\GestionFaenaBundle\Entity\faena\MovimientoCompuesto $origen = null)
+    {
+        $this->origen = $origen;
+
+        return $this;
+    }
+
+    /**
+     * Get origen
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoCompuesto
+     */
+    public function getOrigen()
+    {
+        return $this->origen;
     }
 }

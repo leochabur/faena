@@ -988,8 +988,48 @@ class GestionBDController extends Controller
                                   'stock' => $this->getFormConfigurarManejoStock($proceso)->createView(),
                                   'ajuste' => $this->getFormSetAjusteProceso($ajuste, $proceso)->createView(),
                                   'default' => $this->getFormSetDefaultProcesoDestino($proceso)->createView(),
-                                  'auto' => $this->getFormSetAutomaticMov($proceso)->createView()));
+                                  'auto' => $this->getFormSetAutomaticMov($proceso)->createView(),
+                                  'base' => $this->getFormSetArticuloBaseProceso($proceso)->createView(),
+                                  'atrBase' => $this->getFormSetAtributoBaseProceso($proceso)->createView()));
     }
+
+    //////////////////Set AtributoAbstracto
+    /**
+     * @Route("/config/setatrbase/{proc}", name="bd_set_atributo_base_proceso", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function setAtributoBaseProceso($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $form = $this->getFormSetAtributoBaseProceso($proceso);
+        $form->handleRequest($request);
+        if ($form->isValid()){
+            $data = $form->getData();
+            $atributo = $data['atributo'];
+            $proceso->setAtributoAbstractoBase($atributo);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        }
+    }
+
+    private function getFormSetAtributoBaseProceso($proceso)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('atributo', EntityType::class, [
+                              'class' => 'GestionFaenaBundle:gestionBD\AtributoAbstracto',                          
+                              'query_builder' => function (EntityRepository $er) use ($proceso){
+                                                                                                return $er->createQueryBuilder('a')
+                                                                                                          ->orderBy('a.atributo');
+                                                                                                }
+                        ])
+                        ->add('asignar', SubmitType::class, ['label' => '+'])    
+                        ->setAction($this->generateUrl('bd_set_atributo_base_proceso', array('proc' => $proceso->getId())))  
+                        ->setMethod('POST')               
+                        ->getForm();
+        return $form;
+    }
+    /////////////////////Fin Set AtributoAbstracto
 
     /**
      * @Route("/config/delauto/{proccess}/{concepto}", name="bd_edit_procesos_delete_automatic")
@@ -1103,6 +1143,42 @@ class GestionBDController extends Controller
             $entityManager->flush();
             return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
         }
+    }
+
+    /**
+     * @Route("/config/setarbase/{proc}", name="bd_set_articulo_base_proceso", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function setArticuloBaseProceso($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $form = $this->getFormSetArticuloBaseProceso($proceso);
+        $form->handleRequest($request);
+        if ($form->isValid()){
+            $data = $form->getData();
+            $articulo = $data['articulo'];
+            $proceso->setArticuloBase($articulo);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        }
+    }
+
+    private function getFormSetArticuloBaseProceso($proceso)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('articulo', EntityType::class, [
+                              'class' => 'GestionFaenaBundle:gestionBD\Articulo',                          
+                              'query_builder' => function (EntityRepository $er) use ($proceso){
+                                                                                                return $er->createQueryBuilder('a')
+                                                                                                          ->orderBy('a.nombre');
+                                                                                                }
+                        ])
+                        ->add('asignar', SubmitType::class, ['label' => '+'])    
+                        ->setAction($this->generateUrl('bd_set_articulo_base_proceso', array('proc' => $proceso->getId())))  
+                        ->setMethod('POST')               
+                        ->getForm();
+        return $form;
     }
 
     private function getFormSetAutomaticMov($proceso)

@@ -10,4 +10,12 @@ namespace GestionFaenaBundle\Repository\faena;
  */
 class ConceptoMovimientoRepository extends \Doctrine\ORM\EntityRepository
 {
+	public function getConceptoOfTransformacion()
+	{
+			return $this->createQueryBuilder('cm')
+						->where('cm.transforma = :transforma')
+						->setParameter('transforma', true)
+						->getQuery()
+						->getOneOrNullResult();
+	}
 }

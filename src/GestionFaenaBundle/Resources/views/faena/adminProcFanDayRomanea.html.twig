@@ -105,22 +105,19 @@
 							{% endif %}
 							{% set count2 = 0 %}
 							{% for k, v in sub %}
+								{% set idV = 0 %}
+								{% set valV = '' %}
+								{% if v[1] != null %}
+									{% set idV = v[1].id %}
+									{% set valV = v[1].data %}
+								{% endif %}
 								{% if count2 == 0 %}
 										<td>
 											{{ v[0].nombreResumido }}
 										</td>
-										{% set cant = 0 %}
-										{% for inp in v[1] %}
-											{% set cant = loop.index0 %}
-											<td>
-												<input type="text" class="form-control col-lg-4"/>
-											</td>
-										{% endfor %}
-										{% for i in cant..maxInputs %}
-											<td>
-												<input type="text" class="form-control col-lg-4"/>
-											</td>
-										{% endfor %}										
+										<td>
+											<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm col-lg-4 align-center update" value="{{ valV }}"/>
+										</td>									
 									</tr>
 									{% set count2 = 1 %}
 								{% else %}
@@ -128,18 +125,9 @@
 										<td>
 											{{ v[0].nombreResumido }}
 										</td>
-										{% set cant = 0 %}
-										{% for inp in v[1] %}
-											{% set cant = loop.index0 %}
-											<td>
-												<input type="text" class="form-control col-lg-4 align-center"/>
-											</td>
-										{% endfor %}
-										{% for i in cant..maxInputs %}
-											<td class="align-middle">
-												<input type="text" class="form-control col-lg-4"/>
-											</td>
-										{% endfor %}	
+										<td class="align-middle">
+											<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm  col-lg-4 align-center update" value="{{ valV }}"/>
+										</td>
 									</tr>
 								{% endif %}
 							{% endfor %}
@@ -198,73 +186,22 @@
 	});
 
 
-	$('.btnDelete').click(function(event){
-											event.preventDefault();
-											var route = "{{ path ('query_consulta_movimiento', {mov: '_MOV', trx : '_TRX'})}}";
+	$('.update').keypress(function(event) {
+									    var keycode = (event.keyCode ? event.keyCode : event.which);
+									    if(keycode == '13')
+									    {
+											var route = "{{ path ('bd_adm_proc_romaneo_articulos', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id})}}";
 											var btn = $(this);
-											if (btn.data('trx'))
-											{
-												var ruta = route.replace('_MOV', btn.data('mov')).replace('_TRX', btn.data('trx'));
-												$.post(ruta,
-													  function(response){
-																		bootbox.confirm({
-																		    message: response.msge,
-																		    size: "large",
-																		    buttons: {
-																		        confirm: {
-																		            label: 'Si',
-																		            className: 'btn-success'
-																		        },
-																		        cancel: {
-																		            label: 'No',
-																		            className: 'btn-danger'
-																		        }
-																		    },
-																		    callback: function (result) {
-																		        if (result)
-																		        {
-																		        	var route = btn.parent().attr('action');
-																		        	$.post(route,
-																		        		   function (result){
-																		        		   					 if (result.status)
-																		        		   					 {
-																		        		   					 	$('.enviar').trigger('click');
-																		        		   					 }
-																		        		   });
-																		        }
-																		    }
-																		});
-													  }
-												);
-											}
-											else
-											{
-													bootbox.confirm({
-												    message: "Seguro eliminar el item "+btn.data('index')+"?",
-												    buttons: {
-												        confirm: {
-												            label: 'Si',
-												            className: 'btn-success'
-												        },
-												        cancel: {
-												            label: 'No',
-												            className: 'btn-danger'
-												        }
-												    },
-												    callback: function (result) {
-												        if (result){
-												        	var route = btn.parent().attr('action');
-												        	$.post(route,
-												        		   function (result){
-												        		   					 if (result.status)
-												        		   					 {
-												        		   					 	$('.enviar').trigger('click');
-												        		   					 }
-												        		   });
-												        }
-												    }
-												});
-											}
+											var ruta = route.replace('_PROC', btn.data('proc')).replace('_ART', btn.data('art')).replace('_VAL', btn.data('idv'));
+											$.post(ruta,
+												   {data : btn.val()},
+												  function(response)
+												  {
+												  	alert(response.ok);
+												  }
+											);
+										}
+											
 	});
 
 	$('.view-art').click(function(){

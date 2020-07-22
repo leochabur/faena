@@ -76,6 +76,18 @@ class ArticuloAtributoConcepto
         return null;
     }
 
+    public function getAtributoMedibleManualActivo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo) 
+    //para un AtributoAbstracto recupera el AtributoMedibleManual correspondiente
+    {
+        foreach ($this->atributos as $atr) {
+            if (($atr->getAtributoAbstracto() === $atributo) && ($atr->getActivo()) && (get_class($atr) == AtributoMedibleManual::class))
+            {
+                return $atr;
+            }
+        }
+        return null;
+    }
+
     public function existeAtributoActivo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo) //verifica si se encuentra definido el atributo
     {
         foreach ($this->atributos as $atr) {

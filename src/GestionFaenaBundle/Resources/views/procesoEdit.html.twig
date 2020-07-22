@@ -224,8 +224,84 @@
 				  
 				  </div>
 		  </div>
-	</div>
+		  <div class="col-6">
+				<div class="card">
+				  <div class="card-header">
+				     Definir articulo base
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Articulo</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
 
+											<tr>
+												<td>{{ proccess.articuloBase}}</td>
+												
+													<td class="text-center"><a href="{{ path('bd_delete_proceso_default', {proc : proccess.id}) }}" class="btn btn-sm btn-danger">-</a></td>												
+											</tr>
+									</tbody>
+						</table>
+				  	{{ form_start(base) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(base.articulo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-lg-2">
+				  				{{ form_widget(base.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	{{ form_end(base) }}		
+	
+				  </div>
+				  
+				  </div>
+		  </div>
+	</div>
+ 	<!--        -->
+ 		<div class="row mt-4">
+		  <div class="col-6">
+				<div class="card">
+				  <div class="card-header">
+				     Atributo Base
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Atributo</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+											<tr>
+												<td>{{ proccess.atributoAbstractoBase}}</td>
+												
+													<td class="text-center"><a href="{{ path('bd_delete_proceso_default', {proc : proccess.id}) }}" class="btn btn-sm btn-danger">-</a></td>
+												
+											</tr>
+									</tbody>
+						</table>
+				  	{{ form_start(atrBase) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(atrBase.atributo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-1">
+				  				{{ form_widget(atrBase.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	{{ form_end(atrBase) }}		
+	
+				  </div>
+				  
+				  </div>
+		  </div>
+	</div>
 <div class="modal fade" id="modalSubscriptionForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
   aria-hidden="true">
   <div class="modal-dialog" role="document">

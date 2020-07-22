@@ -31,6 +31,10 @@ class ConceptoMovimiento
      */
     private $concepto;
 
+    /**
+     * @ORM\Column(name="transforma", type="boolean", nullable=true, options={"default" : false})
+     */
+    private $transforma;
 
     public function getAtributoConcepto(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $apf)
     {
@@ -89,4 +93,28 @@ class ConceptoMovimiento
         return $this->concepto;
     }
 
+
+    /**
+     * Set transforma
+     *
+     * @param boolean $transforma
+     *
+     * @return ConceptoMovimiento
+     */
+    public function setTransforma($transforma)
+    {
+        $this->transforma = $transforma;
+
+        return $this;
+    }
+
+    /**
+     * Get transforma
+     *
+     * @return boolean
+     */
+    public function getTransforma()
+    {
+        return $this->transforma;
+    }
 }

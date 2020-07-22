@@ -118,6 +118,19 @@ abstract class ProcesoFaena
      */
     private $romanea = false; 
 
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo") 
+    * @ORM\JoinColumn(name="id_art_base_tran", referencedColumnName="id", nullable=true)
+    */      
+    private $articuloBase; //utilizado en particular por el proceso que romanea para poder generar los ArticuloAtributoConepto y asignarle asi el articulo origen de transformacion de manera automatica
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atr_abst_base", referencedColumnName="id", nullable=true)
+    */      
+    private $atributoAbstractoBase; //utilizado en particular por el proceso que romanea para generar el atributo manual de manera automatica
+
+
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
     {
@@ -645,5 +658,53 @@ abstract class ProcesoFaena
     public function getRomanea()
     {
         return $this->romanea;
+    }
+
+    /**
+     * Set articuloBase
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articuloBase
+     *
+     * @return ProcesoFaena
+     */
+    public function setArticuloBase(\GestionFaenaBundle\Entity\gestionBD\Articulo $articuloBase = null)
+    {
+        $this->articuloBase = $articuloBase;
+
+        return $this;
+    }
+
+    /**
+     * Get articuloBase
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
+     */
+    public function getArticuloBase()
+    {
+        return $this->articuloBase;
+    }
+
+    /**
+     * Set atributoAbstractoBase
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoAbstractoBase
+     *
+     * @return ProcesoFaena
+     */
+    public function setAtributoAbstractoBase(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoAbstractoBase = null)
+    {
+        $this->atributoAbstractoBase = $atributoAbstractoBase;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoAbstractoBase
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto
+     */
+    public function getAtributoAbstractoBase()
+    {
+        return $this->atributoAbstractoBase;
     }
 }

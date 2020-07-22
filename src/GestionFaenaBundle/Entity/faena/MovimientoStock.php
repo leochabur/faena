@@ -73,6 +73,12 @@ abstract class MovimientoStock
     private $origen;
 
     /**
+    * @ORM\OneToOne(targetEntity="MovimientoStock") 
+    * @ORM\JoinColumn(name="id_mov_asoc", referencedColumnName="id", nullable=true)
+    */      
+    private $movimientoAsociado;  //para el caso de las transferencias
+
+    /**
      * @Assert\IsFalse(
      *     message = "El tipo de movimiento requiere que defina cual articulo se transformara!!"
      * )
@@ -460,5 +466,29 @@ abstract class MovimientoStock
     public function getOrigen()
     {
         return $this->origen;
+    }
+
+    /**
+     * Set movimientoAsociado
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoAsociado
+     *
+     * @return MovimientoStock
+     */
+    public function setMovimientoAsociado(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoAsociado = null)
+    {
+        $this->movimientoAsociado = $movimientoAsociado;
+
+        return $this;
+    }
+
+    /**
+     * Get movimientoAsociado
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
+     */
+    public function getMovimientoAsociado()
+    {
+        return $this->movimientoAsociado;
     }
 }

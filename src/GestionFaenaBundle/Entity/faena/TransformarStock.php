@@ -39,4 +39,9 @@ class TransformarStock extends MovimientoCompuesto
         $this->setVisible(false);
     }
 
+    public static function getInstance()
+    {
+        return 4;
+    }
+
 }
