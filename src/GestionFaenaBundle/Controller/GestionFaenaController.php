@@ -321,122 +321,129 @@ class GestionFaenaController extends Controller
 
         if ($val == 0) //no existe aun un valor para el articulo
         {
-            //Debe generar una EntradaStock con el valor del articulo y una SalidaStock del articulo Base
-            //recupera el concepto para
-            $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
-            $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
+          try{
+                //Debe generar una EntradaStock con el valor del articulo y una SalidaStock del articulo Base
+                //recupera el concepto para
+                $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
+                $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
 
-            if (!$conceptoMovimiento)
-            {
-              return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un concepto para admitir transformaciones']);
-            }
+                if (!$conceptoMovimiento)
+                {
+                  return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un concepto para admitir transformaciones']);
+                }
 
-            //Atributo abstracto base definido en el Proceso Faena
-            $atributoAbstractoBase = $procesoFaena->getAtributoAbstractoBase();
-            if (!$atributoAbstractoBase)
-            {
-              return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un atributo base en el proceso']);
-            }
+                //Atributo abstracto base definido en el Proceso Faena
+                $atributoAbstractoBase = $procesoFaena->getAtributoAbstractoBase();
+                if (!$atributoAbstractoBase)
+                {
+                  return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un atributo base en el proceso']);
+                }
 
-            //Atributo abstracto base definido en el Proceso Faena
-            $articuloBase = $procesoFaena->getArticuloBase();
-            if (!$articuloBase)
-            {
-              return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un articulo base en el proceso']);
-            }
+                //Atributo abstracto base definido en el Proceso Faena
+                $articuloBase = $procesoFaena->getArticuloBase();
+                if (!$articuloBase)
+                {
+                  return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un articulo base en el proceso']);
+                }
 
-            $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimiento($articulo, 
-                                                                                $conceptoMovimiento, 
-                                                                                EntradaStock::getInstance(),
-                                                                                $procesoFaena,
-                                                                                $em);
+                $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimiento($articulo, 
+                                                                                    $conceptoMovimiento, 
+                                                                                    EntradaStock::getInstance(),
+                                                                                    $procesoFaena,
+                                                                                    $em);
 
-            $atributoEntrada = $artAtrConEntrada->getAtributoMedibleManualActivo($atributoAbstractoBase);
-            if (!$atributoEntrada)//No existe un Atributo generado
-            {
-                $atributoEntrada = new AtributoMedibleManual();
-                ///deberia agregar la unidad de medida
-                $atributoEntrada->setAcumula(true);
-                $atributoEntrada->setNombre('Peso');
-                $atributoEntrada->setAsignado(true);
-                $atributoEntrada->setArticuloAtrConc($artAtrConEntrada);
-                $atributoEntrada->setAtributoAbstracto($atributoAbstractoBase);
-                $em->persist($atributoEntrada);
-            }
-            $entrada = new EntradaStock();
-            $entrada->setProcesoFnDay($procesoFaenaDiaria);
-            $entrada->setFaenaDiaria($faena);
-            $entrada->setArtProcFaena($artAtrConEntrada);
-            $entrada->setVisible(true);
-            $em->persist($entrada);
+                $atributoEntrada = $artAtrConEntrada->getAtributoMedibleManualActivo($atributoAbstractoBase);
+                if (!$atributoEntrada)//No existe un Atributo generado
+                {
+                    $atributoEntrada = new AtributoMedibleManual();
+                    ///deberia agregar la unidad de medida
+                    $atributoEntrada->setAcumula(true);
+                    $atributoEntrada->setNombre('Peso');
+                    $atributoEntrada->setAsignado(true);
+                    $atributoEntrada->setArticuloAtrConc($artAtrConEntrada);
+                    $atributoEntrada->setAtributoAbstracto($atributoAbstractoBase);
+                    $em->persist($atributoEntrada);
+                }
+                $entrada = new EntradaStock();
+                $entrada->setProcesoFnDay($procesoFaenaDiaria);
+                $entrada->setFaenaDiaria($faena);
+                $entrada->setArtProcFaena($artAtrConEntrada);
+                $entrada->setVisible(true);
+                $em->persist($entrada);
 
-            $valor = new ValorNumerico();
-            $valor->setAtributo($atributoEntrada);
-            $valor->setMovimiento($entrada);
-            $valor->setAtributoAbstracto($atributoAbstractoBase);
-            $valor->setMostrar(true);
-            $valor->setAcumula($atributoEntrada->getAcumula());
-            $valor->setValor($value);
-            $em->persist($valor);
+                $valor = new ValorNumerico();
+                $valor->setAtributo($atributoEntrada);
+                $valor->setMovimiento($entrada);
+                $valor->setAtributoAbstracto($atributoAbstractoBase);
+                $valor->setMostrar(true);
+                $valor->setAcumula($atributoEntrada->getAcumula());
+                $valor->setValor($value);
+                $em->persist($valor);
 
-            //debe generar ahora la salida de stock del articulo base
-            $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articuloBase, 
-                                                                                $conceptoMovimiento, 
-                                                                                SalidaStock::getInstance(),
-                                                                                $procesoFaena,
-                                                                                $em);
-            $atributoSalida = $artAtrConSalida->getAtributoMedibleManualActivo($atributoAbstractoBase);
-            if (!$atributoSalida)//No existe un Atributo generado
-            {
-                $atributoSalida = new AtributoMedibleManual();
-                ///deberia agregar la unidad de medida
-                $atributoSalida->setAcumula(true);
-                $atributoSalida->setNombre('Peso');
-                $atributoSalida->setAsignado(true);
-                $atributoSalida->setArticuloAtrConc($artAtrConSalida);
-                $atributoSalida->setAtributoAbstracto($atributoAbstractoBase);
-                $em->persist($atributoSalida);
-            }
-            $salida = new SalidaStock();
-            $salida->setProcesoFnDay($procesoFaenaDiaria);
-            $salida->setFaenaDiaria($faena);
-            $salida->setArtProcFaena($artAtrConSalida);
-            $salida->setVisible(true);
-            $em->persist($salida);
+                //debe generar ahora la salida de stock del articulo base
+                $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articuloBase, 
+                                                                                    $conceptoMovimiento, 
+                                                                                    SalidaStock::getInstance(),
+                                                                                    $procesoFaena,
+                                                                                    $em);
+                $atributoSalida = $artAtrConSalida->getAtributoMedibleManualActivo($atributoAbstractoBase);
+                if (!$atributoSalida)//No existe un Atributo generado
+                {
+                    $atributoSalida = new AtributoMedibleManual();
+                    ///deberia agregar la unidad de medida
+                    $atributoSalida->setAcumula(true);
+                    $atributoSalida->setNombre('Peso');
+                    $atributoSalida->setAsignado(true);
+                    $atributoSalida->setArticuloAtrConc($artAtrConSalida);
+                    $atributoSalida->setAtributoAbstracto($atributoAbstractoBase);
+                    $em->persist($atributoSalida);
+                }
+                $salida = new SalidaStock();
+                $salida->setProcesoFnDay($procesoFaenaDiaria);
+                $salida->setFaenaDiaria($faena);
+                $salida->setArtProcFaena($artAtrConSalida);
+                $salida->setVisible(true);
+                $em->persist($salida);
 
-            $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
-            $valorAjustado = ($ajuste*$value);
+                $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
+                $valorAjustado = ($ajuste*$value);
 
-            $valorS = new ValorNumerico();
-            $valorS->setAtributo($atributoSalida);
-            $valorS->setMovimiento($salida);
-            $valorS->setAtributoAbstracto($atributoAbstractoBase);
-            $valorS->setMostrar(true);
-            $valorS->setAcumula($atributoSalida->getAcumula());
-            $valorS->setValor($valorAjustado);
-            $em->persist($valorS);
+                $valorS = new ValorNumerico();
+                $valorS->setAtributo($atributoSalida);
+                $valorS->setMovimiento($salida);
+                $valorS->setAtributoAbstracto($atributoAbstractoBase);
+                $valorS->setMostrar(true);
+                $valorS->setAcumula($atributoSalida->getAcumula());
+                $valorS->setValor($valorAjustado);
+                $em->persist($valorS);
 
-            $entrada->setMovimientoAsociado($salida);
-            $em->flush();
-            return new JsonResponse(['status' => 'Se guardo ok']);
+                $entrada->setMovimientoAsociado($salida);
+                $em->flush();
+                return new JsonResponse(['status' => true]);
+              }
+              catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
         }
         else
         {
-           $valor = $em->find(ValorNumerico::class, $val);
-           $valor->setValor($value);
+          try
+          {
+             $valor = $em->find(ValorNumerico::class, $val);
+             $valor->setValor($value);
 
-           $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
-           $valorAjustado = ($ajuste*$value);
+             $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
+             $valorAjustado = ($ajuste*$value);
 
-           $entrada = $valor->getMovimiento();
-           $salida = $entrada->getMovimientoAsociado();
-           if ($salida) //existe la salida asociada
-           {
-              $valorAsoc = $salida->getValorWhitAtribute($valor->getAtributoAbstracto());
-              $valorAsoc->setValor($valorAjustado);
+             $entrada = $valor->getMovimiento();
+             $salida = $entrada->getMovimientoAsociado();
+             if ($salida) //existe la salida asociada
+             {
+                $valorAsoc = $salida->getValorWhitAtribute($valor->getAtributoAbstracto());
+                $valorAsoc->setValor($valorAjustado);
+             }
+             $em->flush();
+             return new JsonResponse(['status' => true]);
            }
-           $em->flush();
-           return new JsonResponse(['status' => 'Se guardo ok']);
+           catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
         }
 
     }
@@ -485,7 +492,7 @@ class GestionFaenaController extends Controller
                 $valor = 0;
                 if ($factor)
                 {
-                    $movimiento = $proceso->getMovimientosArticulo($art);
+                    $movimiento = $proceso->getMovimientosArticulo($art, $faena);
                     if ($movimiento)
                     {
                       $val = $movimiento->getValorWhitAtribute($factor->getAtributo());
@@ -728,6 +735,102 @@ class GestionFaenaController extends Controller
         }
         return $this->render('@GestionFaena/faena/adminProcFanDayMedium.html.twig', $params);
     }
+
+    //////////VIEW DETALLE DE MOVIMIENTOS
+   /**
+     * @Route("/detamov/{proc}/{fd}/{art}", name="bd_adm_get_detalle_movimientos_proceso")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function detalleMovimientos($proc, $fd, $art)
+    {   
+        $em = $this->getDoctrine()->getManager();
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $articulo = $em->find(Articulo::class, $art);
+        $faena = $em->find(FaenaDiaria::class, $fd);
+        $repo = $em->getRepository(MovimientoStock::class); 
+        $formsDelete = [];
+                   
+        $movimientos = $repo->findAllMovimientos($proceso);
+        $headers = ['tipo' => ['data' => 'Tipo Movimiento', 'numeric' => false], 
+                    'conc' => ['data'=> 'Concepto', 'numeric' => false], 
+                    'art' => ['data' => 'Articulo', 'numeric' => false]
+                   ];
+        $body = [];
+        $i = 0;
+        $totales = ['tipo' => 'TOTALES', 'conc' => '', 'art' => ''];
+        $informaTotales = false;
+        if ($articulo)
+        {
+          $informaTotales = true;
+        }
+        
+        foreach ($movimientos as $mov) 
+        {
+            $computar = true;
+            $acumular = false;
+            if ($articulo)
+            {
+                if ($mov->getArtProcFaena()->getArticulo() != $articulo)
+                {
+                    $computar = false;
+                }
+                else
+                {
+                    $acumular = true;
+                }
+            }
+            if ($computar)
+            {
+              $movOrigen = $mov->getOrigen();
+              $from = "";
+              if ($movOrigen)
+              {
+                $movOrigen = $movOrigen->getMovimientoDestino();
+                $from.= "(".$movOrigen->getArtProcFaena()->getArticulo().")";
+              }
+              $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
+              $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
+
+              $body[$i] = ['tipo' => $mov, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto()."$from"];
+              $body[$i]['id'] = $mov->getId();
+              $body[$i]['trx'] = $idTrx;
+              foreach ($mov->getValores() as $valor) 
+              {
+                  $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
+                  if ($valor->getMostrar())
+                  {                            
+                      $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric()];
+                  }
+                  $body[$i][$atributo->getId()] = $valor->getData()."";
+                  $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
+                  if ($acumular)
+                  {
+                      if (!array_key_exists($atributo->getId(), $totales))
+                          $totales[$atributo->getId()] = 0;
+                      $totales[$atributo->getId()]+= $valor->getData();
+                  }
+                  
+              }
+              $i++;
+            }
+        }
+        
+        $params = [ 'proceso' => $proceso,
+                    'faena' => $faena,
+                    'body' => $body,
+                    'headers' => $headers
+                   ];
+        if ($informaTotales)
+        {
+            $params['totales'] = $totales;
+        }
+        if (count($formsDelete))
+        {
+          $params['formsDelete'] = $formsDelete;
+        }
+        return $this->render('@GestionFaena/faena/detalleMovimientosProceso.html.twig', $params);
+    }
+    /////////////////////////////
 
     /**
      * @Route("/gstmovproc/{proc}/{fd}", name="bd_adm_get_movimientos_proceso", methods={"POST"})
@@ -1620,10 +1723,10 @@ class GestionFaenaController extends Controller
         return $form;
     }
     /**
-     * Route("/gst/{mov}/{trx}/{faena}/{typ}", name="bd_adm_mov_st_delete", methods={"DELETE"})
-     * Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     *@Route("/gst/{mov}/{trx}/{faena}/{typ}", name="bd_adm_mov_st_delete", methods={"DELETE", "POST"})
+     *@Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function eliminarMovimientoStockAction($mov, $trx, $faena, $typ = null)
+    public function eliminarMovimientoStockAction(Request $request, $mov, $trx, $faena, $typ = null)
     {
         $em = $this->getDoctrine()->getManager();
         $movimiento = $em->find(MovimientoStock::class, $mov);
@@ -1644,12 +1747,17 @@ class GestionFaenaController extends Controller
         {
           $params['typ'] = $typ;
         }
+
+        if ($request->isXmlHttpRequest()) 
+        {  
+            return new JsonResponse(['status' => true, 'message' => 'OKA']);
+        } 
         return $this->redirectToRoute('bd_adm_proc_fan_day', $params);
     }
 
 ////////////////remove from AJAX ///////////////////////////////
     /**
-     * @Route("/gst/{mov}/{trx}/{faena}/{typ}", name="bd_adm_mov_st_delete", methods={"POST", "DELETE"})
+     * @Route("/gstObsolet/{mov}/{trx}/{faena}/{typ}", name="bd_adm_mov_st_delete_obsolet", methods={"POST", "DELETE"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function eliminarMovimientoStockAjaxAction($mov, $trx, $faena, $typ = null)

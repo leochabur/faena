@@ -116,7 +116,13 @@
 											{{ v[0].nombreResumido }}
 										</td>
 										<td>
-											<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm col-lg-4 align-center update" value="{{ valV }}"/>
+											<div class="row">
+												<div class="col">
+													<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm align-center update" value="{{ valV }}"/>
+												</div>
+												<div class="col">
+												</div>
+											</div>
 										</td>									
 									</tr>
 									{% set count2 = 1 %}
@@ -126,7 +132,13 @@
 											{{ v[0].nombreResumido }}
 										</td>
 										<td class="align-middle">
-											<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm  col-lg-4 align-center update" value="{{ valV }}"/>
+											<div class="row">
+												<div class="col">
+													<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm align-center update" value="{{ valV }}"/>
+												</div>
+												<div class="col">
+												</div>
+											</div>
 										</td>
 									</tr>
 								{% endif %}
@@ -188,16 +200,26 @@
 
 	$('.update').keypress(function(event) {
 									    var keycode = (event.keyCode ? event.keyCode : event.which);
+									    var input = $(this);
 									    if(keycode == '13')
 									    {
 											var route = "{{ path ('bd_adm_proc_romaneo_articulos', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id})}}";
 											var btn = $(this);
 											var ruta = route.replace('_PROC', btn.data('proc')).replace('_ART', btn.data('art')).replace('_VAL', btn.data('idv'));
+											input.parent().siblings('div').html('');
 											$.post(ruta,
 												   {data : btn.val()},
 												  function(response)
 												  {
-												  	alert(response.ok);
+												  	if (response.status)
+												  	{
+												  		input.parent().siblings('div').html('<i class="far fa-check-circle fa-2x"></i>');
+														input.trigger("keypress", [9]);
+												  	}
+												  	else
+												  	{
+												  		input.parent().siblings('div').html('<i class="far fa-times-circle fa-2x"></i>');
+												  	}
 												  }
 											);
 										}
