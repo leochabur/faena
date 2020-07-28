@@ -73,6 +73,12 @@ class TropaSolicitud
     */      
     private $grupoSolicitud;
 
+    /**
+     * @ORM\OneToMany(targetEntity="DetalleSolicitud", mappedBy="tropa")
+     */
+    private $detalles;
+
+
     public function __toString()
     {
         return "Faena: ".$this->fechaFaena->format('d/m/Y')." - Vto: ".$this->fechaVto->format('d/m/Y');

@@ -64,7 +64,7 @@ class DetalleSolicitud
     private $articulo;
 
     /**
-    * @ORM\ManyToOne(targetEntity="TropaSolicitud", cascade={"persist", "remove"}) 
+    * @ORM\ManyToOne(targetEntity="TropaSolicitud", inversedBy="detalles") 
     * @ORM\JoinColumn(name="id_tropa", referencedColumnName="id", nullable=true)
     */      
     private $tropa;

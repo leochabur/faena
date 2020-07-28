@@ -450,13 +450,9 @@ class GestionSolicitudesController extends Controller
                 $lote = $hoja->getCellByColumnAndRow(6,$i)->getValue();
                 if ($lote)
                 {
-                  $tropaS = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
-                  $tropa = null;
-                  foreach ($tropaS as $t)
-                  {
-                    $tropa = $t;
-                  }
-                  if (!$tropa)
+                  $tropa = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
+                  $creoTropa = false;
+                  if (!$tropa)  //no existe la tropa, debe crearla
                   {
                         $fechaElaboracion = \DateTime::createFromFormat('j/n/Y', $hoja->getCellByColumnAndRow(4,$i)->getValue());
                         $tropa = new TropaSolicitud();
@@ -468,45 +464,41 @@ class GestionSolicitudesController extends Controller
                         $tropa->setLote($lote);
                         $tropa->setGrupoSolicitud($solicitud->getGrupo());
                         $em->persist($tropa);
+                        $creoTropa = true;
+                  }
+
+                  $detalle = null;
+                  if (!$creoTropa) //sino creo una tropa nueva es porque ya existe una, de ser asi debe buscar si existe un detalle asignado a la misma para asi sumar los valores y no generar una nueva
+                  {
+                      $detalle = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
+                  }
+                  $cant = $hoja->getCellByColumnAndRow(1,$i)->getValue();
+                  $bruto = $hoja->getCellByColumnAndRow(3,$i)->getValue();
+                  $neto = $hoja->getCellByColumnAndRow(2,$i)->getValue();
+                  if ($detalle)
+                  {
+                      $detalle->setCantidad($detalle->getCantidad() + $cant);
+                      $detalle->setPesoBruto($detalle->getPesoBruto() + $bruto);
+                      $detalle->setPesoNeto($detalle->getPesoNeto() + $neto);
                   }
                   else
                   {
-
-                    $detalleS = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
-                    $detalle = null;
-                    foreach ($detalleS as $d)
-                    {
-                      $detalle = $d;
-                    }
-                    $cant = $hoja->getCellByColumnAndRow(1,$i)->getValue();
-                    $bruto = $hoja->getCellByColumnAndRow(3,$i)->getValue();
-                    $neto = $hoja->getCellByColumnAndRow(2,$i)->getValue();
-                    if ($detalle)
-                    {
-                        $detalle->setCantidad($detalle->getCantidad() + $cant);
-                        $detalle->setPesoBruto($detalle->getPesoBruto() + $bruto);
-                        $detalle->setPesoNeto($detalle->getPesoNeto() + $neto);
-                    }
-                    else
-                    {
-                        $producto = $data['producto'];
-                        $detalle = new DetalleSolicitud();
-                        $detalle->setCantidad($cant);
-                        $detalle->setPesoBruto($bruto);
-                        $detalle->setPesoNeto($neto);
-                        $detalle->setTropa($tropa);
-                        $detalle->setEnvasePrimario($producto->getEnvasePrimario());
-                        $detalle->setEnvaseSecundario($producto->getEnvaseSecundario());
-                        $detalle->setSolicitud($solicitud);
-                        $detalle->setArticulo($producto);
-                        $detalle->setCantidadSanitario($cant);
-                        $em->persist($detalle);
-                    }
+                      $producto = $data['producto'];
+                      $detalle = new DetalleSolicitud();
+                      $detalle->setCantidad($cant);
+                      $detalle->setPesoBruto($bruto);
+                      $detalle->setPesoNeto($neto);
+                      $detalle->setTropa($tropa);
+                      $detalle->setEnvasePrimario($producto->getEnvasePrimario());
+                      $detalle->setEnvaseSecundario($producto->getEnvaseSecundario());
+                      $detalle->setSolicitud($solicitud);
+                      $detalle->setArticulo($producto);
+                      $detalle->setCantidadSanitario($cant);
+                      $em->persist($detalle);
                   }
+                  $em->flush();
                 }
             }
-            $em->flush();
-
         }
         
         return $this->render('@GestionSigcer/addArticulo.html.twig', 
