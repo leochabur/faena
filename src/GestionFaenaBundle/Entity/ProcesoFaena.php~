@@ -109,7 +109,7 @@ abstract class ProcesoFaena
     private $ajustes;
 
     /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto", mappedBy="procesoFaena")
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\MovimientoAutomatico", mappedBy="procesoFaena")
      */
     private $automaticos;
 
@@ -579,40 +579,6 @@ abstract class ProcesoFaena
     }
 
     /**
-     * Add automatico
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
-     *
-     * @return ProcesoFaena
-     */
-    public function addAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
-    {
-        $this->automaticos[] = $automatico;
-
-        return $this;
-    }
-
-    /**
-     * Remove automatico
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
-     */
-    public function removeAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
-    {
-        $this->automaticos->removeElement($automatico);
-    }
-
-    /**
-     * Get automaticos
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getAutomaticos()
-    {
-        return $this->automaticos;
-    }
-
-    /**
      * Set procesosDestinoDefault
      *
      * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesosDestinoDefault
@@ -682,5 +648,29 @@ abstract class ProcesoFaena
     public function getArticuloBase()
     {
         return $this->articuloBase;
+    }
+
+    /**
+     * Set atributoAbstractoBase
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoAbstractoBase
+     *
+     * @return ProcesoFaena
+     */
+    public function setAtributoAbstractoBase(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoAbstractoBase = null)
+    {
+        $this->atributoAbstractoBase = $atributoAbstractoBase;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoAbstractoBase
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto
+     */
+    public function getAtributoAbstractoBase()
+    {
+        return $this->atributoAbstractoBase;
     }
 }

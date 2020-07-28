@@ -46,12 +46,6 @@ class ArticuloAtributoConcepto
      * @ORM\Column(name="asignado", type="boolean", options={"default":true})
      */
     private $activo = true;
-    
-    /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="automaticos") 
-    * @ORM\JoinColumn(name="id_proceso_faena", referencedColumnName="id")
-    */      
-    private $procesoFaena;
 
     /**
      * Get id

@@ -18,6 +18,6 @@ class TropaSolicitudRepository extends \Doctrine\ORM\EntityRepository
 	    			->setParameter('grupo', $grupo)
 	    			->setParameter('lote', $lote)
 			        ->getQuery()
-			        ->getOneOrNullResult(); 
+			        ->getResult(); 
 	} 
 }

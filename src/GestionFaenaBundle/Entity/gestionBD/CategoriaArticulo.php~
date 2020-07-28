@@ -71,5 +71,28 @@ class CategoriaArticulo
     {
         return $this->categoria;
     }
-}
 
+    /**
+     * Set orden
+     *
+     * @param float $orden
+     *
+     * @return CategoriaArticulo
+     */
+    public function setOrden($orden)
+    {
+        $this->orden = $orden;
+
+        return $this;
+    }
+
+    /**
+     * Get orden
+     *
+     * @return float
+     */
+    public function getOrden()
+    {
+        return $this->orden;
+    }
+}

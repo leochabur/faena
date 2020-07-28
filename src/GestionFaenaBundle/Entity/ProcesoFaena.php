@@ -109,7 +109,7 @@ abstract class ProcesoFaena
     private $ajustes;
 
     /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto", mappedBy="procesoFaena")
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\MovimientoAutomatico", mappedBy="procesoFaena")
      */
     private $automaticos;
 
@@ -579,40 +579,6 @@ abstract class ProcesoFaena
     }
 
     /**
-     * Add automatico
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
-     *
-     * @return ProcesoFaena
-     */
-    public function addAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
-    {
-        $this->automaticos[] = $automatico;
-
-        return $this;
-    }
-
-    /**
-     * Remove automatico
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico
-     */
-    public function removeAutomatico(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $automatico)
-    {
-        $this->automaticos->removeElement($automatico);
-    }
-
-    /**
-     * Get automaticos
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getAutomaticos()
-    {
-        return $this->automaticos;
-    }
-
-    /**
      * Set procesosDestinoDefault
      *
      * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesosDestinoDefault
@@ -706,5 +672,39 @@ abstract class ProcesoFaena
     public function getAtributoAbstractoBase()
     {
         return $this->atributoAbstractoBase;
+    }
+
+    /**
+     * Add automatico
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico
+     *
+     * @return ProcesoFaena
+     */
+    public function addAutomatico(\GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico)
+    {
+        $this->automaticos[] = $automatico;
+
+        return $this;
+    }
+
+    /**
+     * Remove automatico
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico
+     */
+    public function removeAutomatico(\GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico)
+    {
+        $this->automaticos->removeElement($automatico);
+    }
+
+    /**
+     * Get automaticos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAutomaticos()
+    {
+        return $this->automaticos;
     }
 }

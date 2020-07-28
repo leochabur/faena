@@ -14,9 +14,10 @@ class DetalleSolicitudRepository extends \Doctrine\ORM\EntityRepository
 	public function getDetalleConTropa(\GestionSigcerBundle\Entity\TropaSolicitud $tropa) 
 	{ 
 	    return $this->createQueryBuilder('d')
-	    			->where('d.tropa = :tropa')
-	    			->setParameter('tropa', $tropa)
+	    			->join('d.tropa','t')
+	    			->where('t.id = :tropa')
+	    			->setParameter('tropa', $tropa->getId())
 			        ->getQuery()
-			        ->getOneOrNullResult(); 
+			        ->getResult(); 
 	} 
 }

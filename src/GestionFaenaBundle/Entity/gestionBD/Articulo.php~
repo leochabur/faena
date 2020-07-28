@@ -393,4 +393,28 @@ class Articulo
     {
         return $this->eliminado;
     }
+
+    /**
+     * Set orden
+     *
+     * @param float $orden
+     *
+     * @return Articulo
+     */
+    public function setOrden($orden)
+    {
+        $this->orden = $orden;
+
+        return $this;
+    }
+
+    /**
+     * Get orden
+     *
+     * @return float
+     */
+    public function getOrden()
+    {
+        return $this->orden;
+    }
 }

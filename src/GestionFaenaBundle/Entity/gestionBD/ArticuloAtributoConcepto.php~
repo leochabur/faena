@@ -46,12 +46,6 @@ class ArticuloAtributoConcepto
      * @ORM\Column(name="asignado", type="boolean", options={"default":true})
      */
     private $activo = true;
-    
-    /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="automaticos") 
-    * @ORM\JoinColumn(name="id_proceso_faena", referencedColumnName="id")
-    */      
-    private $procesoFaena;
 
     /**
      * Get id
@@ -72,6 +66,18 @@ class ArticuloAtributoConcepto
                 }
             }
 
+        }
+        return null;
+    }
+
+    public function getAtributoMedibleManualActivo(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo) 
+    //para un AtributoAbstracto recupera el AtributoMedibleManual correspondiente
+    {
+        foreach ($this->atributos as $atr) {
+            if (($atr->getAtributoAbstracto() === $atributo) && ($atr->getActivo()) && (get_class($atr) == AtributoMedibleManual::class))
+            {
+                return $atr;
+            }
         }
         return null;
     }

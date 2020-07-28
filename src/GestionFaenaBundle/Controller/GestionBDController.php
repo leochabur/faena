@@ -1192,7 +1192,6 @@ class GestionBDController extends Controller
                                                                                                           ->join('a.concepto', 'c')
                                                                                                           ->join('c.procesoFaena', 'p')
                                                                                                           ->where('p = :proceso')
-                                                                                                          ->andWhere('a.procesoFaena IS NULL')
                                                                                                           ->andWhere('a.activo = :activo')
                                                                                                           ->setParameter('activo', true)
                                                                                                           ->setParameter('proceso', $proceso);

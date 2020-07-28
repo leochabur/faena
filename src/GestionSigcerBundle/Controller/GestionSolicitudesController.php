@@ -450,7 +450,12 @@ class GestionSolicitudesController extends Controller
                 $lote = $hoja->getCellByColumnAndRow(6,$i)->getValue();
                 if ($lote)
                 {
-                  $tropa = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
+                  $tropaS = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
+                  $tropa = null;
+                  foreach ($tropaS as $t)
+                  {
+                    $tropa = $t;
+                  }
                   if (!$tropa)
                   {
                         $fechaElaboracion = \DateTime::createFromFormat('j/n/Y', $hoja->getCellByColumnAndRow(4,$i)->getValue());
@@ -466,7 +471,13 @@ class GestionSolicitudesController extends Controller
                   }
                   else
                   {
-                    $detalle = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
+
+                    $detalleS = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
+                    $detalle = null;
+                    foreach ($detalleS as $d)
+                    {
+                      $detalle = $d;
+                    }
                     $cant = $hoja->getCellByColumnAndRow(1,$i)->getValue();
                     $bruto = $hoja->getCellByColumnAndRow(3,$i)->getValue();
                     $neto = $hoja->getCellByColumnAndRow(2,$i)->getValue();

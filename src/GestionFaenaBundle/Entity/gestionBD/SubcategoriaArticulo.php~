@@ -71,5 +71,28 @@ class SubcategoriaArticulo
     {
         return $this->subcategoria;
     }
-}
 
+    /**
+     * Set orden
+     *
+     * @param float $orden
+     *
+     * @return SubcategoriaArticulo
+     */
+    public function setOrden($orden)
+    {
+        $this->orden = $orden;
+
+        return $this;
+    }
+
+    /**
+     * Get orden
+     *
+     * @return float
+     */
+    public function getOrden()
+    {
+        return $this->orden;
+    }
+}
