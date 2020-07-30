@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class ProductoType extends AbstractType
 {
@@ -21,8 +22,14 @@ class ProductoType extends AbstractType
                 ->add('envaseSecundario')      
                 ->add('ajusteBruto')
                 ->add('ajusteNeto')        
-                 ->add('ajusteCantidad')         
-                ->add('guardar', SubmitType::class);
+                 ->add('ajusteCantidad') 
+                ->add('destino', ChoiceType::class, [
+                                                        'choices'  => [
+                                                            'Mercado Interno' => 'MI',
+                                                            'Exportacion' => 'EX'
+                                                        ],
+                                                    ])        
+    ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}
      */

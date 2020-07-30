@@ -77,6 +77,10 @@ class Producto
      */
     private $ajusteCantidad;
     
+    /**
+     * @ORM\Column(name="destino", type="string", length=2, options={"default"="MI"})
+     */
+    private $destino; //MI : Mercado Interno  -   EX : Exportacion
 
     public function __toString()
     {
@@ -259,5 +263,29 @@ class Producto
     public function getAjusteNeto()
     {
         return $this->ajusteNeto;
+    }
+
+    /**
+     * Set ajusteCantidad
+     *
+     * @param float $ajusteCantidad
+     *
+     * @return Producto
+     */
+    public function setAjusteCantidad($ajusteCantidad)
+    {
+        $this->ajusteCantidad = $ajusteCantidad;
+
+        return $this;
+    }
+
+    /**
+     * Get ajusteCantidad
+     *
+     * @return float
+     */
+    public function getAjusteCantidad()
+    {
+        return $this->ajusteCantidad;
     }
 }

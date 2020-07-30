@@ -77,12 +77,20 @@ class Producto
      */
     private $ajusteCantidad;
     
+    /**
+     * @ORM\Column(name="destino", type="string", length=2, options={"default"="MI"})
+     */
+    private $destino; //MI : Mercado Interno  -   EX : Exportacion
 
     public function __toString()
     {
-        return $this->nombre." - ".$this->codigoCapa;
+        return strtoupper($this->nombre." - ".$this->codigoCapa);
     }
 
+    public function getDestinoTxt()
+    {
+        return ($this->destino=='MI'?'Mercado Interno':'Exportacion');
+    }
     /**
      * Get id
      *
@@ -283,5 +291,29 @@ class Producto
     public function getAjusteCantidad()
     {
         return $this->ajusteCantidad;
+    }
+
+    /**
+     * Set destino
+     *
+     * @param string $destino
+     *
+     * @return Producto
+     */
+    public function setDestino($destino)
+    {
+        $this->destino = $destino;
+
+        return $this;
+    }
+
+    /**
+     * Get destino
+     *
+     * @return string
+     */
+    public function getDestino()
+    {
+        return $this->destino;
     }
 }

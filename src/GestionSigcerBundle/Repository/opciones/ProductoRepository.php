@@ -10,4 +10,12 @@ namespace GestionSigcerBundle\Repository\opciones;
  */
 class ProductoRepository extends \Doctrine\ORM\EntityRepository
 {
+	public function getArticulosWhitDestino($destino) 
+	{ 
+	    return $this->createQueryBuilder('p')
+	    			->where('p.destino = :destino')
+	    			->setParameter('destino', $destino)
+			        ->getQuery()
+			        ->getResult(); 
+	} 
 }

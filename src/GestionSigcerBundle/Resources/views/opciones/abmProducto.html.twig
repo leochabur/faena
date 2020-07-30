@@ -35,6 +35,10 @@
         {{ form_label(form.envaseSecundario) }}
         {{ form_widget(form.envaseSecundario) }}
       </div>
+      <div class="col-4">
+        {{ form_label(form.destino) }}
+        {{ form_widget(form.destino) }}
+      </div>
       </div>
     <div class="form-row">
       <div class="col-4">
@@ -44,6 +48,10 @@
       <div class="col-4">
         {{ form_label(form.ajusteNeto, 'Factor Calculo Peso Neto') }}
         {{ form_widget(form.ajusteNeto) }}
+      </div>
+      <div class="col-4">
+        {{ form_label(form.ajusteCantidad, 'Ajuste Cantidad') }}
+        {{ form_widget(form.ajusteCantidad) }}
       </div>
       </div>
     </div>
@@ -65,8 +73,7 @@
             <th>Codigo CAPA</th>
             <th>Env. Prim.</th>
             <th>Env. Sec.</th>
-            <th>Fact. P. Bruto</th>
-            <th>Fact. P. Neto</th>
+            <th>Destino</th>
             <th></th>
           </tr>
         </thead>
@@ -79,8 +86,7 @@
                 <td>{{ p.codigoCapa|upper }}</td>
                 <td>{{ p.envasePrimario }}</td>
                 <td>{{ p.envaseSecundario }}</td>
-                <td>{{ p.ajusteBruto }}</td>
-                <td>{{ p.ajusteNeto }}</td>
+                <td>{{ p.destinoTxt }}</td>
                 <td><a class="btn btn-sm btn-success" href="{{ path('sigcer_editar_producto', {prod : p.id}) }}">Modificar</a></td>
             </tr>
           {% endfor %}

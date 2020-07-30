@@ -404,7 +404,13 @@ class GestionSolicitudesController extends Controller
                               EntityType::class, 
                               [
                               'class' => Producto::class,
-                                ])
+                              'query_builder' => function (EntityRepository $er){
+                                                          return $er->createQueryBuilder('p')
+                                                                    ->where('p.destino = :destino')     
+                                                                    ->setParameter('destino', 'EX')
+                                                                    ->orderBy('p.nombre');
+                                                                   },
+                        ])
                         ->add('archivo', 
                                FileType::class, 
                                [
@@ -686,7 +692,8 @@ class GestionSolicitudesController extends Controller
             $solicitudes = $repository->findSolicitudes($data['grupo'], $data['zona']);
             $forms = array();
             foreach ($solicitudes as $s) {
-              foreach ($s->getDetalles() as $d) {
+              foreach ($s->getDetalles() as $d) 
+              {
                 $forms[$d->getId()] = $this->getFormUpdateDetalle($d)->createView();
               }
             }
@@ -819,7 +826,8 @@ class GestionSolicitudesController extends Controller
                 if (!$grupo->generoSolicitudes($data['region']))
                 {
                       $allZonas = $em->getRepository(Zona::class)->findZonasOfGrupo($data['region']);
-                      $allProductos = $em->getRepository(Producto::class)->findAll();
+                      $destino = ($grupo->getExportacion()?'EXP':'MI');
+                      $allProductos = $em->getRepository(Producto::class)->getArticulosWhitDestino($destino);
                       $lastZona = null;
                       $inicioPrecinto = $data['precinto'];
                       $tropa = $data['tropa'];
