@@ -879,7 +879,8 @@ class GestionFaenaController extends Controller
 
               if ($mov->getDestino())
               {
-                  throw new \Exception("MOVIMIENTO ".$mov->getMovimientoAsociado());
+                  $nombreFaena = " (".$mov->getDestino()->getProcesoFnDay().")";
+                  //throw new \Exception("MOVIMIENTO ".$mov->getMovimientoAsociado());
               }
 
               $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
