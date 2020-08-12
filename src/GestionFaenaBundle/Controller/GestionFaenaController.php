@@ -867,8 +867,7 @@ class GestionFaenaController extends Controller
               if ($movOrigen)
               {
                 if ($mov->getInstance() == 2)
-                {
-
+                {                  
                   $from.= " (".$mov->getDestino()->getProcesoFnDay()." >> ".$movOrigen->getProcesoFnDay().")";
                 }
                 elseif($mov->getInstance() == 3)
@@ -877,10 +876,18 @@ class GestionFaenaController extends Controller
                 }
               }
 
-              if ($mov->getDestino())
+              if ($mov->getOrigen())
               {
-                  $nombreFaena = " (".$mov->getDestino()->getProcesoFnDay().")";
-                  //throw new \Exception("MOVIMIENTO ".$mov->getMovimientoAsociado());
+                  if ($mov->getOrigen()->getInstance() == 4)
+                  {
+                     $movComp = $mov->getOrigen();
+                     $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
+                  }
+              }
+              elseif ($mov->getDestino())
+              {
+                     $movComp = $mov->getDestino();
+                     $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
               }
 
               $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
