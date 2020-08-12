@@ -886,8 +886,11 @@ class GestionFaenaController extends Controller
               }
               elseif ($mov->getDestino())
               {
+                  if ($mov->getOrigen()->getInstance() == 4)
+                  {
                      $movComp = $mov->getDestino();
                      $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
+                   }
               }
 
               $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
