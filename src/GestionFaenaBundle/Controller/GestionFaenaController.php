@@ -864,7 +864,7 @@ class GestionFaenaController extends Controller
 
               $movOrigen = $mov->getOrigen();
               $from = "";
-              if ($movOrigen)
+           /*   if ($movOrigen)
               {
                 if ($mov->getInstance() == 2)
                 {                  
@@ -874,7 +874,7 @@ class GestionFaenaController extends Controller
                 {
                   $from.= " (".$movOrigen->getProcesoFnDay()." >> ".$movOrigen->getMovimientoDestino()->getProcesoFnDay().")";
                 }
-              }
+              }*/
 
               if ($mov->getOrigen())
               {
@@ -883,14 +883,24 @@ class GestionFaenaController extends Controller
                      $movComp = $mov->getOrigen();
                      $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
                   }
+                  elseif ($mov->getOrigen()->getInstance() == 5)
+                  {
+                     $movComp = $mov->getOrigen();
+                     $from = " (".$movComp->getMovimientoOrigen()->getProcesoFnDay()." >> ".$movComp->getMovimientoDestino()->getProcesoFnDay().")";
+                  }
               }
               elseif ($mov->getDestino())
               {
-                  if ($mov->getOrigen()->getInstance() == 4)
+                  if ($mov->getDestino()->getInstance() == 4)
                   {
                      $movComp = $mov->getDestino();
                      $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
                    }
+                  elseif ($mov->getDestino()->getInstance() == 5)
+                  {
+                     $movComp = $mov->getDestino();
+                     $from = " (".$movComp->getMovimientoOrigen()->getProcesoFnDay()." >> ".$movComp->getMovimientoDestino()->getProcesoFnDay().")";
+                  }
               }
 
               $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
