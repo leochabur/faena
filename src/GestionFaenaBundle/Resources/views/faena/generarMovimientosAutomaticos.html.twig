@@ -32,9 +32,9 @@
 				{% for auto in proceso.procesoFaena.automaticos %}
 					<tr>
 						<td>{{ loop.index }}</td>
-						<td>{{ auto.concepto.tipoMovimiento }}</td>
-						<td>{{ auto.concepto.articuloOrigenTransformacion }} >> {{ auto.articulo }}</td>
-						<td>{{ auto.formaCalculoAutomatico }}</td>
+						<td>{{ auto.articuloAtributoConcepto.concepto.tipoMovimiento }}</td>
+						<td>{{ auto.procesoDestinoDefault}} >> {{ auto.articuloAtributoConcepto.articulo }}</td>
+						<td>{{ auto.articuloAtributoConcepto.formaCalculoAutomatico }}</td>
 					</tr>
 				{% endfor %}
 

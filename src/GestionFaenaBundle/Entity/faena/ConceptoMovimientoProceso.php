@@ -73,7 +73,7 @@ class ConceptoMovimientoProceso
 
     public function getVistaEdicion()
     {
-        return $this->procesoFaena."  -  ".$this->concepto;
+        return $this->procesoFaena."  -  ".$this->concepto."  -  ".$this->tipoMovimiento;
     }
 
     /**

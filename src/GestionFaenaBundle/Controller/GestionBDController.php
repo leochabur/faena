@@ -64,6 +64,8 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use GestionFaenaBundle\Entity\AjusteMovimiento;
+use GestionFaenaBundle\Entity\faena\MovimientoAutomatico;
+use GestionFaenaBundle\Form\faena\MovimientoAutomaticoType;
 
 class GestionBDController extends Controller
 {
@@ -982,13 +984,14 @@ class GestionBDController extends Controller
         $entityManager = $this->getDoctrine()->getManager();
         $proceso = $entityManager->find(ProcesoFaena::class, $proccess);
         $ajuste = new AjusteMovimiento();
+        $movAuto = new MovimientoAutomatico();
         return $this->render('@GestionFaena/procesoEdit.html.twig', 
                             array('proccess' => $proceso, 
                                   'form' => $this->getFormAddDestinoProceso($proccess)->createView(),
                                   'stock' => $this->getFormConfigurarManejoStock($proceso)->createView(),
                                   'ajuste' => $this->getFormSetAjusteProceso($ajuste, $proceso)->createView(),
                                   'default' => $this->getFormSetDefaultProcesoDestino($proceso)->createView(),
-                                  'auto' => $this->getFormSetAutomaticMov($proceso)->createView(),
+                                  'auto' => $this->getFormSetAutomaticMov($proceso, $movAuto)->createView(),
                                   'base' => $this->getFormSetArticuloBaseProceso($proceso)->createView(),
                                   'atrBase' => $this->getFormSetAtributoBaseProceso($proceso)->createView()));
     }
@@ -1032,16 +1035,15 @@ class GestionBDController extends Controller
     /////////////////////Fin Set AtributoAbstracto
 
     /**
-     * @Route("/config/delauto/{proccess}/{concepto}", name="bd_edit_procesos_delete_automatic")
+     * @Route("/config/delauto/{proccess}/{automatic}", name="bd_edit_procesos_delete_automatic")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function deleteAutomaticConcepto($proccess, $concepto)
+    public function deleteAutomaticConcepto($proccess, $automatic)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $proceso = $entityManager->find(ProcesoFaena::class, $proccess);
-        $concepto = $entityManager->find(ArticuloAtributoConcepto::class, $concepto);
-        $proceso->removeAutomatico($concepto);
-        $concepto->setProcesoFaena(null);
+        $movAuto = $entityManager->find(MovimientoAutomatico::class, $automatic);
+        $entityManager->remove($movAuto);
         $entityManager->flush();
         return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proccess]);
     }
@@ -1132,17 +1134,22 @@ class GestionBDController extends Controller
     {
         $entityManager = $this->getDoctrine()->getManager();
         $proceso = $entityManager->find(ProcesoFaena::class, $proc);
-        $form = $this->getFormSetAutomaticMov($proceso);
+        $movAuto = new MovimientoAutomatico();
+        $form = $this->getFormSetAutomaticMov($proceso, $movAuto);
         $form->handleRequest($request);
-        if ($form->isValid()){
-            $data = $form->getData();
-            $atr = $data['artAtrCon'];
-            $atr->setProcesoFaena($proceso);
-            $proceso->addAutomatico($atr);
-
+        if ($form->isValid())
+        {
+            $entityManager->persist($movAuto);
             $entityManager->flush();
-            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
         }
+        else
+        {
+            $this->addFlash(
+                        'error',
+                        'No se ha podido generar el movimiento automatico!'
+                    );
+        }
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
     }
 
     /**
@@ -1181,8 +1188,15 @@ class GestionBDController extends Controller
         return $form;
     }
 
-    private function getFormSetAutomaticMov($proceso)
+    private function getFormSetAutomaticMov($proceso, $movAuto)
     {
+        return $this->createForm(MovimientoAutomaticoType::class, 
+                                $movAuto, 
+                                [
+                                    'action' => $this->generateUrl('bd_set_automatic_mov', array('proc' => $proceso->getId())),
+                                    'method' => 'POST',
+                                    'proceso' => $proceso
+                                ]);
         $form =    $this->createFormBuilder()
                         ->add('artAtrCon', EntityType::class, [
                               'class' => 'GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto',         

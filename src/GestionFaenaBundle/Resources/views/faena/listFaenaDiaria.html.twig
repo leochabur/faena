@@ -39,8 +39,9 @@
 							<a href="{{ path('bd_view_procesos_faena_diaria', {fan:f.id}) }}" class="btn btn-success btn-sm " >Gestionar...</a>
 							<a href="{{ path('bd_fan_day_close', {id:f.id}) }}" data-action="cerrar" class="btn btn-warning btn-sm btn-close" data-index="{{ loop.index }}">Cerrar</a>
 							{% if is_granted('ROLE_ADMIN') %}
-							<a href="{{ path('bd_fan_day_delete', {id:f.id}) }}" data-action="eliminar" class="btn btn-danger btn-sm btn-close" data-index="{{ loop.index }}">Eliminar</a>
-						{% endif %}
+								<a href="{{ path('bd_fan_day_delete', {id:f.id}) }}" data-action="eliminar" class="btn btn-danger btn-sm btn-close" data-index="{{ loop.index }}">Eliminar</a>
+								<a href="{{ path('informes_faena_diaria_informe', {fd:f.id}) }}" class="btn btn-default btn-sm" data-index="{{ loop.index }}">Resumen</a>
+							{% endif %}
 						</td>
 					</tr>
 				{% endfor %}

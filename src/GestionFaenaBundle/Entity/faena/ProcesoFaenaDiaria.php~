@@ -3,7 +3,7 @@
 namespace GestionFaenaBundle\Entity\faena;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use GestionFaenaBundle\Entity\faena\EntradaStock;
 /**
  * ProcesoFaenaDiaria
  *
@@ -39,6 +39,20 @@ class ProcesoFaenaDiaria
      * @ORM\OneToMany(targetEntity="MovimientoStock", mappedBy="procesoFnDay")
      */
     private $movimientos;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena")
+     * @ORM\JoinTable(name="sp_mov_aut_by_pfd",
+     *      joinColumns={@ORM\JoinColumn(name="id_proc", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_mov", referencedColumnName="id")}
+     *      )
+     */
+    private $movimientosRealizados; //almacena los movimientos realizados en el proceso diario, para no poder ejecutar dos veces el mismo movimiento
+
+    /**
+     * @ORM\Column(name="pesoPromedio", type="float", nullable=true)
+     */
+    private $pesoPromedio; //almacena el ultimo peso promedio generado
     /**
      * Get id
      *
@@ -150,29 +164,124 @@ class ProcesoFaenaDiaria
         return $this->movimientos;
     }
 
-    public function getStockArticulo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    public function getStockArticulo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, 
+                                     \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+                                     \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
     //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
     {
+       // throw new \Exception("Error Processing Request ".$atributo." ".$articulo, 1);
+        
         $stock = 0;
-        foreach ($this->movimientos as $mov) {
+        foreach ($this->movimientos as $mov) 
+        {
             if ((!$mov->getEliminado()) && ($mov->getVisible()))
             {
                     if ($mov->getArtProcFaena()->getArticulo() == $articulo)
-                    {
-                        if($mov->getFaenaDiaria() == $faena)
-                        {
-                            $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);
-                            if ($manejo)
+                    {      
+                     //   $manejo = $this->getProcesoFaena()->existeArticuloDefinidoManejoStock($articulo);                            
+                      //  if ($manejo)
+                      //  {                                
+                            //$valor = $mov->getValorWhitAtribute($manejo->getAtributo());
+                            $valor = $mov->getValorWhitAtribute($atributo);//$manejo->getAtributo());
+                            if ($valor)
                             {
-                                $valor = $mov->getValorWhitAtribute($manejo->getAtributo()->getId());
-                                if ($valor)
-                                    $stock+=  $valor->getValor();
+                                $stock+=  $valor->getData(false);
                             }
-                        }
+                      //  }
+                    
                     }
-                
             }
         }
         return $stock;
+    }
+
+    public function getMovimientosArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+                                           \GestionFaenaBundle\Entity\FaenaDiaria $faena = null)
+    //dados los parametros recupera todos los movimientos para el articulo dado
+    {
+        $movimientos = [];
+        foreach ($this->movimientos as $mov) 
+        {
+            if ((!$mov->getEliminado()) && ($mov->getVisible()))
+            {
+                    if ((get_class($mov) == EntradaStock::class) && ($mov->getArtProcFaena()->getArticulo() == $articulo))
+                    {      
+                        if (!$faena) //no importa de que faena es
+                        {
+                            return $mov;
+                        }
+                        else
+                        {
+                            if ($mov->getFaenaDiaria()->getId() == $faena->getId())
+                            {
+                                return $mov;
+                            }
+                        }
+                    }
+            }
+        }
+        return null;
+    }
+
+    public function getStockArticuloConAtributo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo, 
+                                                \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
+                                                $soloIngreso,
+                                                $accion,
+                                                \GestionFaenaBundle\Entity\gestionBD\FactorCalculo $factor = null)
+    //dados los parametros recupera cual es el stock del articulo recorriendo todos los movimientos correspondoientes asociados a la faena
+    {
+        $stock = 0;
+        $count = 0;
+        foreach ($this->movimientos as $mov) 
+        {
+            if ((!$mov->getEliminado()) && ($mov->getVisible()))
+            {
+                if ($mov->getArtProcFaena()->getArticulo() == $articulo)
+                {      
+                    $valor = $mov->getValorWhitAtribute($atributo);
+                    if ($accion == 'U')
+                        return $valor->getData();
+                    if ($valor)
+                    {
+                        if ((!$factor) || (!$factor->getConceptosExcentos()->contains($mov->getArtProcFaena()->getConcepto()->getConcepto())))
+                        {
+                            if($soloIngreso)//solo debe levantar los movimientos de Ingreso de Stock
+                            {
+                                if (get_class($mov) === EntradaStock::class)
+                                {
+                                        $stock+=  $valor->getData(false);     
+                                        $count++;    
+                                      //  throw new \Exception("Pedazo de verga");                       
+                                }
+                            }
+                            else
+                            {
+                                $stock+=  $valor->getData(false);   
+                                $count++;  
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if ($accion == 'P')
+            $stock = ($stock/$count);
+        return $stock;
+    }
+
+    public function realizoMovimientoConArticuloAtriutoConcepto(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artAtrCon)
+    //dado un ArticuloAtributoConcepto veriica si el mismo ya se ha realizado, esta accion se utiliza para no realizar dos veces el movimiento cuando se realizan de manera automatica
+    {
+        foreach ($this->movimientos as $mov)
+        {
+            if (!$mov->getEliminado())
+            {
+                if ($mov->getArtProcFaena() == $artAtrCon)
+                {      
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

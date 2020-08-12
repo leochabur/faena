@@ -16,7 +16,7 @@ use Symfony\Component\Form\FormEvents;
 class TransferirStockType extends AbstractType
 {
 
-    private $faena, $proceso, $articulo;  //FaenaDiaria - ProcesoFaenaDiaria - Articulo
+    private $faena, $proceso, $articulo, $automatico;  //FaenaDiaria - ProcesoFaenaDiaria - Articulo - Si el movimiento se genera automaticamente
     /**
      * {@inheritdoc}
      */
@@ -75,7 +75,9 @@ class TransferirStockType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'GestionFaenaBundle\Entity\faena\TransferirStock'
         ));
-        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo'); //para poder recuperar cuales son los ProcesosDiarios Instanciados
+        $resolver->setRequired('faena')
+                 ->setRequired('proceso')
+                 ->setRequired('articulo'); //para poder recuperar cuales son los ProcesosDiarios Instanciados
     }
 
     /**

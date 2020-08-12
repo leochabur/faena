@@ -3,8 +3,13 @@
 {% block fos_user_content %}
 <br>
 <hr>
-<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }}</p>
+<p class="h5 card-title">Proceso: {{ proceso|upper }} - Fecha: {{ faena }}</p>
 <hr>
+{% for message in app.flashes('errorLoad') %}
+	<div class="alert alert-danger" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
 {% if fatr is not defined %}
 	<div class="card">
   		<div class="card-body">

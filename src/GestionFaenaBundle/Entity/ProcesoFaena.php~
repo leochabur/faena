@@ -109,7 +109,8 @@ abstract class ProcesoFaena
     private $ajustes;
 
     /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\MovimientoAutomatico", mappedBy="procesoFaena")
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\MovimientoAutomatico", mappedBy="procesoFaena", cascade={"persist", "remove"})
+     * @ORM\OrderBy({"ordenEjecucion" = "ASC"})
      */
     private $automaticos;
 
@@ -129,6 +130,17 @@ abstract class ProcesoFaena
     * @ORM\JoinColumn(name="id_atr_abst_base", referencedColumnName="id", nullable=true)
     */      
     private $atributoAbstractoBase; //utilizado en particular por el proceso que romanea para generar el atributo manual de manera automatica
+
+    /**
+     * @ORM\Column(name="generaTransito", type="boolean", options={"default":false})
+     */
+    private $generaTransito = false; //indica si el proceso genera excesos que deben almacenarse para ser procesado otro dia
+
+
+    /**
+     * @ORM\Column(name="promedioDefault", type="boolean", options={"default":false})
+     */
+    private $promedioDefault = false; //indica si el proceso mantiene actualizado el peso promedio de aves (Es utilizado en el caso del proceso de transito para mantener el ultimo peso promedio generado)
 
 
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
@@ -672,5 +684,87 @@ abstract class ProcesoFaena
     public function getAtributoAbstractoBase()
     {
         return $this->atributoAbstractoBase;
+    }
+
+    /**
+     * Add automatico
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico
+     *
+     * @return ProcesoFaena
+     */
+    public function addAutomatico(\GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico)
+    {
+        $this->automaticos[] = $automatico;
+
+        return $this;
+    }
+
+    /**
+     * Remove automatico
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico
+     */
+    public function removeAutomatico(\GestionFaenaBundle\Entity\faena\MovimientoAutomatico $automatico)
+    {
+        $this->automaticos->removeElement($automatico);
+    }
+
+    /**
+     * Get automaticos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAutomaticos()
+    {
+        return $this->automaticos;
+    }
+
+    /**
+     * Set generaTransito
+     *
+     * @param boolean $generaTransito
+     *
+     * @return ProcesoFaena
+     */
+    public function setGeneraTransito($generaTransito)
+    {
+        $this->generaTransito = $generaTransito;
+
+        return $this;
+    }
+
+    /**
+     * Get generaTransito
+     *
+     * @return boolean
+     */
+    public function getGeneraTransito()
+    {
+        return $this->generaTransito;
+    }
+
+    /**
+     * Set promedioDefault
+     *
+     * @param boolean $promedioDefault
+     *
+     * @return ProcesoFaena
+     */
+    public function setPromedioDefault($promedioDefault)
+    {
+        $this->promedioDefault = $promedioDefault;
+
+        return $this;
+    }
+
+    /**
+     * Get promedioDefault
+     *
+     * @return boolean
+     */
+    public function getPromedioDefault()
+    {
+        return $this->promedioDefault;
     }
 }

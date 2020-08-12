@@ -82,16 +82,49 @@ class FaenaDiaria
     private $userClose;
 
 
-    /*Dado un ProcesoFaena devuelve el correspondiente ProcesoFaenaDiaria de la faena
-    public function getProcesoDiario(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+
+    public function getValuesForCalculo(\GestionFaenaBundle\Entity\opciones\CalculoFaena $calculo)
     {
-        foreach ($this->procesos as $proc) 
+        $result = [];
+        foreach ($calculo->getAtributos() as $atr)
         {
-            if ($proc->getProcesoFaena() == $proceso)
-                return $proc;
+            $result[$atr->getId()] = 0;
         }
-        return null;
-    }*/
+
+        foreach ($this->procesos as $pro) //recorro todos los procesos de la faena
+        {
+            if ($calculo->getProcesos()->contains($pro->getProcesoFaena())) //verifico si el proceso esta incluido para realizar el calculo
+            {
+                foreach ($pro->getMovimientos() as $mov) //recorro todos los movimientos correspondoientes al proceso
+                {
+                    if ($mov->getFaenaDiaria() == $this)
+                    {
+                        if ((!$mov->getEliminado()) && ($mov->getVisible())) //si el movimiento no esta eliminado
+                        {
+                            if ($calculo->getArticulos()->contains($mov->getArtProcFaena()->getArticulo()))
+                            {
+                                if ($calculo->getTipos()->contains($mov->getArtProcFaena()->getConcepto()->getTipoMovimiento())) //el Tipo de Movimiento del Movimeitno de Stock esta dentro de los Tipos definidos por el calcuilo
+                                {
+                                    if ($calculo->getConceptos()->contains($mov->getArtProcFaena()->getConcepto()->getConcepto()))
+                                    {
+                                        foreach ($calculo->getAtributos() as $atr)
+                                        {
+                                            $value = $mov->getValorWhitAtribute($atr);
+                                            if ($value)
+                                            {
+                                                $result[$atr->getId()]+= $value->getData();
+                                            }                                
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 
     public function getProceso($id)//dado un id devuelve el ProcesoFaenaDiaria Coreespondiente al id del ProcesoFaena
     {
@@ -360,4 +393,6 @@ class FaenaDiaria
         }
         return $destinos;
     }
+
+
 }

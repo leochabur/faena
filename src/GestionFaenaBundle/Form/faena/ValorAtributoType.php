@@ -53,15 +53,12 @@ class ValorAtributoType extends AbstractType
 
         if (ValorNumerico::class == get_class($valor))
         {
-            /*$form->add('unidadMedida', 
-                        EntityType::class, 
-                        ['attr' => ['class' => 'col-2'], 
-                         'class' => 'GestionFaenaBundle\Entity\gestionBD\UnidadMedida', 
-                         'choices' => [$valor->getAtributo()->getUnidadMedida()]]);*/
             $class = 'col-2';
 
             if (strtoupper($valor->getAtributo()->getNombre()) == 'DT-E') // para aplicar el formato de entrada delatributo
+            {
                 $class.=', dt-e';
+            }
             $options = ['attr' => ['class' => $class, 'disabled' => $valor->getAtributo()->getManual()], 'required' => true];
 
             if ($this->type)
@@ -71,7 +68,9 @@ class ValorAtributoType extends AbstractType
                 {
                     $val = null;
                     if (!$valor->getAtributo()->getManual())
+                    {
                         $val = $this->proceso->getStockArticulo($this->faena, $this->articulo, $valor->getAtributo()->getAtributoAbstracto());
+                    }
                     $data = $val; //, $valor->getAtributo()->getDecimales());
                 }
                 
@@ -113,7 +112,10 @@ class ValorAtributoType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired('faena')->setRequired('proceso')->setRequired('articulo')->setRequired('type');
+        $resolver->setRequired('faena')
+                 ->setRequired('proceso')
+                 ->setRequired('articulo')
+                 ->setRequired('type');
         $resolver->setDefaults(array(
             'data_class' => 'GestionFaenaBundle\Entity\faena\ValorAtributo',
             'type' => null

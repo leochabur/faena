@@ -19,14 +19,15 @@ class ArticuloAtributoConceptoRepository extends \Doctrine\ORM\EntityRepository
             		->createQuery('SELECT a
             					   FROM GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto a 
             					   JOIN a.concepto concepto
-                                             JOIN concepto.concepto conceptoMovimiento
+                                   JOIN concepto.concepto conceptoMovimiento
             					   JOIN a.articulo articulo
             					   JOIN concepto.tipoMovimiento tipoMovimiento
             					   JOIN concepto.procesoFaena proceso
-            					   WHERE conceptoMovimiento = :concepto AND articulo = :articulo AND proceso = :proceso AND tipoMovimiento.instancia = :instance')
+            					   WHERE a.activo = :activo AND conceptoMovimiento = :concepto AND articulo = :articulo AND proceso = :proceso AND tipoMovimiento.instancia = :instance')
             		->setParameter('proceso', $proceso)
             		->setParameter('articulo', $articulo)
             		->setParameter('concepto', $concepto)
+                    ->setParameter('activo', true)
             		->setParameter('instance', $instanceOfTipoMovimiento)
             		->getOneOrNullResult();
 	} 

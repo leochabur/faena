@@ -3,7 +3,9 @@
 {% block fos_user_content %}
 <br>
 <hr>
-<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }}</p>
+<p class="h5 card-title">
+	Proceso: {{ proceso|upper }} - Fecha Faena: {{ faena }}
+</p>
 <hr>
 
 <div class="card">
@@ -114,44 +116,6 @@
 {% block javascripts %}
 
 <script type="text/javascript">
-	var tipos = $('.tipos');
-	var conceptos = $('.conceptos');
-	var articulos = $('.articulos');
-	conceptos.html('');
-	articulos.html('');
-	tipos.change(function() {
-	  var form = $(this).closest('form');
-	  $.ajax({
-			    url : "{{ path('bd_change_tipo_movimiento') }}",
-			    type: "POST",
-			    data : {proceso: form.find('.proceso').val(), tipoMovimiento: $(this).val()},
-			    success: function(data) {
-						articulos.html('');
-		                conceptos.html('<option>Selecciona...</option>');
-		                for (var i = 0, total = data.length; i < total; i++) {
-		                    conceptos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
-			    		}
-			    },
-			    failed: function(data){
-			    	alert('error');
-			    }
-	  		});
-	});
-
-	conceptos.change(function() {
-	  $.ajax({
-			    url : "{{ path('bd_change_concepto_movimiento') }}",
-			    type: "POST",
-			    data : {concepto: $(this).val()},
-			    success: function(data) {
-						articulos.html('<option value="null">Selecciona...</option>');
-		                for (var i = 0, total = data.length; i < total; i++) {
-		                    articulos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
-			    		}
-			    }
-	  		});
-	});
-
 
 	$('.btnDelete').click(function(event){
 											event.preventDefault();

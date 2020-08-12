@@ -41,6 +41,17 @@ class MovimientoAutomatico
     private $procesoFaena;
 
     /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena") 
+    * @ORM\JoinColumn(name="id_proc_fan_destino", referencedColumnName="id", nullable=true)
+    */      
+    private $procesoDestinoDefault;
+
+
+    public function getVistaEdicion()
+    {
+        return $this->articuloAtributoConcepto->getVistaEdicion()."(".$this->ordenEjecucion.")";
+    }
+    /**
      * Get id
      *
      * @return int
@@ -120,5 +131,29 @@ class MovimientoAutomatico
     public function getProcesoFaena()
     {
         return $this->procesoFaena;
+    }
+
+    /**
+     * Set procesoDestinoDefault
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoDestinoDefault
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setProcesoDestinoDefault(\GestionFaenaBundle\Entity\ProcesoFaena $procesoDestinoDefault = null)
+    {
+        $this->procesoDestinoDefault = $procesoDestinoDefault;
+
+        return $this;
+    }
+
+    /**
+     * Get procesoDestinoDefault
+     *
+     * @return \GestionFaenaBundle\Entity\ProcesoFaena
+     */
+    public function getProcesoDestinoDefault()
+    {
+        return $this->procesoDestinoDefault;
     }
 }

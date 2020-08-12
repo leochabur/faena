@@ -39,6 +39,20 @@ class ProcesoFaenaDiaria
      * @ORM\OneToMany(targetEntity="MovimientoStock", mappedBy="procesoFnDay")
      */
     private $movimientos;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena")
+     * @ORM\JoinTable(name="sp_mov_aut_by_pfd",
+     *      joinColumns={@ORM\JoinColumn(name="id_proc", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_mov", referencedColumnName="id")}
+     *      )
+     */
+    private $movimientosRealizados; //almacena los movimientos realizados en el proceso diario, para no poder ejecutar dos veces el mismo movimiento
+
+    /**
+     * @ORM\Column(name="pesoPromedio", type="float", nullable=true)
+     */
+    private $pesoPromedio; //almacena el ultimo peso promedio generado
     /**
      * Get id
      *
@@ -235,14 +249,14 @@ class ProcesoFaenaDiaria
                             {
                                 if (get_class($mov) === EntradaStock::class)
                                 {
-                                        $stock+=  $valor->getData();     
+                                        $stock+=  $valor->getData(false);     
                                         $count++;    
                                       //  throw new \Exception("Pedazo de verga");                       
                                 }
                             }
                             else
                             {
-                                $stock+=  $valor->getData();   
+                                $stock+=  $valor->getData(false);   
                                 $count++;  
                             }
                         }
@@ -253,5 +267,79 @@ class ProcesoFaenaDiaria
         if ($accion == 'P')
             $stock = ($stock/$count);
         return $stock;
+    }
+
+    public function realizoMovimientoConArticuloAtriutoConcepto(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $artAtrCon)
+    //dado un ArticuloAtributoConcepto veriica si el mismo ya se ha realizado, esta accion se utiliza para no realizar dos veces el movimiento cuando se realizan de manera automatica
+    {
+        foreach ($this->movimientos as $mov)
+        {
+            if (!$mov->getEliminado())
+            {
+                if ($mov->getArtProcFaena() == $artAtrCon)
+                {      
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Set pesoPromedio
+     *
+     * @param float $pesoPromedio
+     *
+     * @return ProcesoFaenaDiaria
+     */
+    public function setPesoPromedio($pesoPromedio)
+    {
+        $this->pesoPromedio = $pesoPromedio;
+
+        return $this;
+    }
+
+    /**
+     * Get pesoPromedio
+     *
+     * @return float
+     */
+    public function getPesoPromedio()
+    {
+        return $this->pesoPromedio;
+    }
+
+    /**
+     * Add movimientosRealizado
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $movimientosRealizado
+     *
+     * @return ProcesoFaenaDiaria
+     */
+    public function addMovimientosRealizado(\GestionFaenaBundle\Entity\ProcesoFaena $movimientosRealizado)
+    {
+        $this->movimientosRealizados[] = $movimientosRealizado;
+
+        return $this;
+    }
+
+    /**
+     * Remove movimientosRealizado
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $movimientosRealizado
+     */
+    public function removeMovimientosRealizado(\GestionFaenaBundle\Entity\ProcesoFaena $movimientosRealizado)
+    {
+        $this->movimientosRealizados->removeElement($movimientosRealizado);
+    }
+
+    /**
+     * Get movimientosRealizados
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMovimientosRealizados()
+    {
+        return $this->movimientosRealizados;
     }
 }

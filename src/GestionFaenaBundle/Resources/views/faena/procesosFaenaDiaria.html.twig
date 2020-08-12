@@ -39,6 +39,13 @@
 
 {% endfor %}
 </div>
+<br>
+{% if is_granted('ROLE_SUPER_ADMIN') and formPendientes is defined %}
+<hr>
+	{{ form_start(formPendientes) }}
+	{{ form_widget(formPendientes) }}
+	{{ form_end(formPendientes) }}
+{% endif %}
 
 <hr>
 <a href="{{ path('bd_view_faena') }}" class="btn btn-success"><< Volver </a>

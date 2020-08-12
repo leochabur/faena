@@ -58,6 +58,8 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use GestionFaenaBundle\Entity\opciones\InformeProceso;
+use GestionFaenaBundle\Entity\opciones\CalculoFaena;
+use GestionFaenaBundle\Form\opciones\CalculoFaenaType;
 use GestionFaenaBundle\Entity\FaenaDiaria;
 use GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria;
 use GestionFaenaBundle\Entity\faena\MovimientoStock;
@@ -117,6 +119,247 @@ class InformesController extends Controller
                         ->add('cargar', SubmitType::class, ['label' => 'Cargar'])
                         ->getForm();
         return $form;
+    }
+
+
+
+    /**
+     * @Route("/informes/defineinf", name="informes_definir_informe")
+
+     */
+    public function definirInformeFaena()
+    {
+        $calculo = new CalculoFaena();
+        $allCalculos = $this->getDoctrine()->getRepository(CalculoFaena::class)->findAll();
+        $form = $this->createForm(CalculoFaenaType::class, 
+                                  $calculo, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('informes_definir_informe_procesar')]);
+        return $this->render('@GestionFaena/informes/definirCalculo.html.twig', ['all' => $allCalculos, 'form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/informes/defineinfproc", name="informes_definir_informe_procesar", methods={"POST"})
+     */
+    public function procesarDefinirInforme(Request $request)
+    {
+        $calculo = new CalculoFaena();
+        $form = $this->createForm(CalculoFaenaType::class, 
+                                  $calculo, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('informes_definir_informe_procesar')]);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+          $em = $this->getDoctrine()->getManager();
+          $em->persist($calculo);
+          $em->flush();
+          $this->addFlash(
+                  'sussecc',
+                  'Calculo generado exitosamente!'
+              );
+          return $this->redirectToRoute('informes_definir_informe');
+        }        
+        return $this->render('@GestionFaena/informes/definirCalculo.html.twig', ['form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/informes/editclfn/{cl}", name="informes_editarr_informe_procesar")
+     */
+    public function editarCalculoFaena($cl)
+    {
+        $calculo = $em = $this->getDoctrine()->getManager()->find(CalculoFaena::class, $cl);
+        $form = $this->createForm(CalculoFaenaType::class, 
+                                  $calculo, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('informes_procesar_editar_informe_procesar', ['cl' => $cl])]);     
+        return $this->render('@GestionFaena/informes/definirCalculo.html.twig', ['form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/informes/editproccl/{cl}", name="informes_procesar_editar_informe_procesar", methods={"POST"})
+     */
+    public function procesarEditarDefinirInforme($cl, Request $request)
+    {
+        $calculo = $em = $this->getDoctrine()->getManager()->find(CalculoFaena::class, $cl);
+        $form = $this->createForm(CalculoFaenaType::class, 
+                                  $calculo, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('informes_procesar_editar_informe_procesar', ['cl' => $cl])]);    
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+          $em = $this->getDoctrine()->getManager();
+          $em->flush();
+          $this->addFlash(
+                  'sussecc',
+                  'Calculo actualizado exitosamente!'
+              );
+          return $this->redirectToRoute('informes_definir_informe');
+        }        
+        return $this->render('@GestionFaena/informes/definirCalculo.html.twig', ['form' => $form->createView()]);
+    }
+
+
+    private function updateTable($calculo, $data, $faena)
+    {
+    /*    $em = $this->getDoctrine()->getManager();
+
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('INGPLANTA');
+
+        //['table' => [], 'parciales' => [], 'headers' => []];
+
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $data['headers'][$atr->getId()] = $atr;
+
+            if (!isset($data['parciales'][$atr->getId()]))
+            {
+              $data['parciales'][$atr->getId()] = 0;
+            }
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = $val;
+          $parciales[$key] = $val;
+        }*/
+    }
+
+    /**
+     * @Route("/informes/infmefna/{fd}", name="informes_faena_diaria_informe")
+
+     */
+    public function viewResumenFaena($fd)
+    {
+        //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY')
+        $form = $this->getFormSelectProceso();
+        $em = $this->getDoctrine()->getManager();
+        $faena = $em->find(FaenaDiaria::class, $fd);
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('INGPLANTA');
+
+        $data = ['table' => [], 'parciales' => [], 'headers' => []];
+        $atributos = [];
+        $parciales = [];
+
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $atributos[$atr->getId()] = $atr;
+            $parciales[$atr->getId()] = 0;
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = $val;
+          $parciales[$key] = $val;
+        }
+
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DAM');
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $atributos[$atr->getId()] = $atr;
+            if (!isset($parciales[$atr->getId()]))
+            {
+              $parciales[$atr->getId()] = 0;
+            }
+
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = $val;
+          $parciales[$key]+= $val;
+        }
+
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DPM');
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $atributos[$atr->getId()] = $atr;
+            if (!isset($parciales[$atr->getId()]))
+            {
+              $parciales[$atr->getId()] = 0;
+            }
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = $val;
+          $parciales[$key]+= $val;
+        }
+////////////
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('MERMAFAENA');
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $atributos[$atr->getId()] = $atr;
+            if (!isset($parciales[$atr->getId()]))
+            {
+              $parciales[$atr->getId()] = 0;
+            }
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = $val;
+          $parciales[$key]+= $val;
+        }
+///////////
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('ATR');
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $atributos[$atr->getId()] = $atr;
+            if (!isset($parciales[$atr->getId()]))
+            {
+              $parciales[$atr->getId()] = 0;
+            }
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = ((-1)*$val);
+          $parciales[$key]+= ((-1)*$val);
+        }
+/////////////////
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DTR');
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $atributos[$atr->getId()] = $atr;
+            if (!isset($parciales[$atr->getId()]))
+            {
+              $parciales[$atr->getId()] = 0;
+            }
+        }
+
+        $valores = $faena->getValuesForCalculo($calculo);
+        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+
+        foreach ($valores as $key => $val)
+        {
+          $tabla[$calculo->getId()][2][$key] = $val;
+          $parciales[$key]+= $val;
+        }
+//////
+        $tabla[] = [0 => 'TOTALES', 1 => '', 2 => $parciales];
+
+        return $this->render('@GestionFaena/informes/estadoFaena.html.twig', ['headers' => $atributos, 'table' => $tabla, 'faena' => $faena]);
     }
 
     /**

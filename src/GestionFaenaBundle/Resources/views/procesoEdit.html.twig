@@ -162,7 +162,7 @@
 										{% for aj in proccess.automaticos %}
 											<tr>
 												<td>{{ aj.vistaEdicion }}</td>
-												<td><a href="{{ path('bd_edit_procesos_delete_automatic', {proccess : proccess.id, concepto : aj.id }) }}" class="btn btn-sm btn-warning">-</a></td>
+												<td><a href="{{ path('bd_edit_procesos_delete_automatic', {proccess : proccess.id, automatic : aj.id }) }}" class="btn btn-sm btn-warning">-</a></td>
 											</tr>
 										{% endfor %}
 									</tbody>
@@ -170,10 +170,18 @@
 				  	{{ form_start(auto) }}
 				  		<div class="form-row align-items-center">
 				  			<div class="col">
-				  				{{ form_widget(auto.artAtrCon, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  				{{ form_widget(auto.procesoFaena, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  		</div>
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_widget(auto.articuloAtributoConcepto, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
 				  			<div class="col-2">
-				  				{{ form_widget(auto.asignar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  				{{ form_widget(auto.ordenEjecucion, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-2">
+				  				{{ form_widget(auto.guardar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
 				  			</div>
 				  		</div>
 				  	

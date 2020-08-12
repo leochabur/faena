@@ -30,16 +30,11 @@ class TransferirStock extends MovimientoCompuesto
         $iterator->uasort(function ($first, $second) {
             return (int) $first->getAtributo()->getPosition() > (int) $second->getAtributo()->getPosition() ? 1 : -1;
         });
-        foreach ($this->getValores() as $valor) {
+        
+        foreach ($this->getValores() as $valor) 
+        {
             $valor->calcularValor($this, $entityManager, $automatico);
         }
-     /*   $iterator = $this->getValores()->getIterator();
-        $iterator->uasort(function ($first, $second) {
-            return (int) $first->getAtributo()->getAtributo()->getPosition() > (int) $second->getAtributo()->getAtributo()->getPosition() ? 1 : -1;
-        });
-        foreach ($this->getValores() as $valor) {
-            $valor->calcularValor($this);
-        }*/
     }
 
     public static function getInstance()

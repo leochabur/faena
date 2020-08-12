@@ -123,7 +123,7 @@ class ValorNumerico extends ValorAtributo
             $factores = $this->getAtributo()->getFactoresCalculo(); //obtiene todos los atributos para realizar el calculo del valor del atributo
             if ($factores)
             {
-                $repository = $entityManager->getRepository(MovimientoStock::class);
+               // $repository = $entityManager->getRepository(MovimientoStock::class);
                 try{
                             $factor1 = $factor2 = null;
                             if (!isset($factores['factores'][1]))  //no se configuro el factor 1 de la operacion
@@ -248,6 +248,7 @@ class ValorNumerico extends ValorAtributo
             }
             elseif($automatico)
             {
+                //throw new \Exception("Alguno de los atributos del articulose encuentra mal");
                 $value = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($movimiento->getArtProcFaena()->getArticulo(),
                                                                                      $this->getAtributo()->getAtributoAbstracto(),
                                                                                      false,
