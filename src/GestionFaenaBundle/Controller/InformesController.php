@@ -246,115 +246,133 @@ class InformesController extends Controller
         $atributos = [];
         $parciales = [];
 
-        foreach ($calculo->getAtributos() as $atr)
+        if ($calculo)
         {
-            $atributos[$atr->getId()] = $atr;
-            $parciales[$atr->getId()] = 0;
-        }
+          foreach ($calculo->getAtributos() as $atr)
+          {
+              $atributos[$atr->getId()] = $atr;
+              $parciales[$atr->getId()] = 0;
+          }
 
-        $valores = $faena->getValuesForCalculo($calculo);
-        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+          $valores = $faena->getValuesForCalculo($calculo);
+          $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
-        foreach ($valores as $key => $val)
-        {
-          $tabla[$calculo->getId()][2][$key] = $val;
-          $parciales[$key] = $val;
+          foreach ($valores as $key => $val)
+          {
+            $tabla[$calculo->getId()][2][$key] = $val;
+            $parciales[$key] = $val;
+          }
         }
 
         $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DAM');
-        foreach ($calculo->getAtributos() as $atr)
+        if ($calculo)
         {
-            $atributos[$atr->getId()] = $atr;
-            if (!isset($parciales[$atr->getId()]))
-            {
-              $parciales[$atr->getId()] = 0;
-            }
+          foreach ($calculo->getAtributos() as $atr)
+          {
+              $atributos[$atr->getId()] = $atr;
+              if (!isset($parciales[$atr->getId()]))
+              {
+                $parciales[$atr->getId()] = 0;
+              }
 
-        }
+          }
 
-        $valores = $faena->getValuesForCalculo($calculo);
-        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+          $valores = $faena->getValuesForCalculo($calculo);
+          $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
-        foreach ($valores as $key => $val)
-        {
-          $tabla[$calculo->getId()][2][$key] = $val;
-          $parciales[$key]+= $val;
+          foreach ($valores as $key => $val)
+          {
+            $tabla[$calculo->getId()][2][$key] = $val;
+            $parciales[$key]+= $val;
+          }
         }
 
         $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DPM');
-        foreach ($calculo->getAtributos() as $atr)
+        if ($calculo)
         {
-            $atributos[$atr->getId()] = $atr;
-            if (!isset($parciales[$atr->getId()]))
-            {
-              $parciales[$atr->getId()] = 0;
-            }
-        }
+          foreach ($calculo->getAtributos() as $atr)
+          {
+              $atributos[$atr->getId()] = $atr;
+              if (!isset($parciales[$atr->getId()]))
+              {
+                $parciales[$atr->getId()] = 0;
+              }
+          }
 
-        $valores = $faena->getValuesForCalculo($calculo);
-        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+          $valores = $faena->getValuesForCalculo($calculo);
+          $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
-        foreach ($valores as $key => $val)
-        {
-          $tabla[$calculo->getId()][2][$key] = $val;
-          $parciales[$key]+= $val;
+          foreach ($valores as $key => $val)
+          {
+            $tabla[$calculo->getId()][2][$key] = $val;
+            $parciales[$key]+= $val;
+          }
         }
 ////////////
         $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('MERMAFAENA');
-        foreach ($calculo->getAtributos() as $atr)
+        if ($calculo)
         {
-            $atributos[$atr->getId()] = $atr;
-            if (!isset($parciales[$atr->getId()]))
-            {
-              $parciales[$atr->getId()] = 0;
-            }
-        }
+          foreach ($calculo->getAtributos() as $atr)
+          {
+              $atributos[$atr->getId()] = $atr;
+              if (!isset($parciales[$atr->getId()]))
+              {
+                $parciales[$atr->getId()] = 0;
+              }
+          }
 
-        $valores = $faena->getValuesForCalculo($calculo);
-        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+          $valores = $faena->getValuesForCalculo($calculo);
+          $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
-        foreach ($valores as $key => $val)
-        {
-          $tabla[$calculo->getId()][2][$key] = $val;
-          $parciales[$key]+= $val;
+          foreach ($valores as $key => $val)
+          {
+            $tabla[$calculo->getId()][2][$key] = $val;
+            $parciales[$key]+= $val;
+          }
         }
 ///////////
         $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('ATR');
-        foreach ($calculo->getAtributos() as $atr)
+        if ($calculo)
         {
-            $atributos[$atr->getId()] = $atr;
-            if (!isset($parciales[$atr->getId()]))
-            {
-              $parciales[$atr->getId()] = 0;
-            }
-        }
+          foreach ($calculo->getAtributos() as $atr)
+          {
+              $atributos[$atr->getId()] = $atr;
+              if (!isset($parciales[$atr->getId()]))
+              {
+                $parciales[$atr->getId()] = 0;
+              }
+          }
 
-        $valores = $faena->getValuesForCalculo($calculo);
-        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+          $valores = $faena->getValuesForCalculo($calculo);
+          $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
-        foreach ($valores as $key => $val)
-        {
-          $tabla[$calculo->getId()][2][$key] = ((-1)*$val);
-          $parciales[$key]+= ((-1)*$val);
+          foreach ($valores as $key => $val)
+          {
+            $tabla[$calculo->getId()][2][$key] = ((-1)*$val);
+            $parciales[$key]+= ((-1)*$val);
+          }
         }
 /////////////////
         $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DTR');
-        foreach ($calculo->getAtributos() as $atr)
+        if ($calculo)
         {
-            $atributos[$atr->getId()] = $atr;
-            if (!isset($parciales[$atr->getId()]))
-            {
-              $parciales[$atr->getId()] = 0;
-            }
-        }
+          foreach ($calculo->getAtributos() as $atr)
+          {
+              $atributos[$atr->getId()] = $atr;
+              if (!isset($parciales[$atr->getId()]))
+              {
+                $parciales[$atr->getId()] = 0;
+              }
+          }
 
-        $valores = $faena->getValuesForCalculo($calculo);
-        $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
+          $valores = $faena->getValuesForCalculo($calculo);
+          $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
-        foreach ($valores as $key => $val)
-        {
-          $tabla[$calculo->getId()][2][$key] = $val;
-          $parciales[$key]+= $val;
+          foreach ($valores as $key => $val)
+          {
+            $tabla[$calculo->getId()][2][$key] = $val;
+            $parciales[$key]+= $val;
+          }
         }
 //////
         $tabla[] = [0 => 'TOTALES', 1 => '', 2 => $parciales];
