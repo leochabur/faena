@@ -370,8 +370,8 @@ class InformesController extends Controller
 
           foreach ($valores as $key => $val)
           {
-            $tabla[$calculo->getId()][2][$key] = $val;
-            $parciales[$key]+= $val;
+            $tabla[$calculo->getId()][2][$key] = ((-1)*$val);
+            $parciales[$key]+= ((-1)*$val);
           }
         }
 //////

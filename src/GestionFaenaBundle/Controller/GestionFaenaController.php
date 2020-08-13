@@ -783,13 +783,13 @@ class GestionFaenaController extends Controller
                   {
                       if ($valor->getAcumula())
                       {
-                          $body[$art->getId()][$atributo->getId()]+= $valor->getData();
+                          $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
                       }
                   }
                   else
                   {
                     if ($valor->getMostrar())
-                      $body[$art->getId()][$atributo->getId()]+= $valor->getData();
+                      $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
                   }
                   
                 }                  
