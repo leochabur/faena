@@ -330,8 +330,8 @@ class InformesController extends Controller
             $parciales[$key]+= $val;
           }
         }
-///////////
-        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('ATR');
+/////////////////
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DTR');
         if ($calculo)
         {
           foreach ($calculo->getAtributos() as $atr)
@@ -352,8 +352,8 @@ class InformesController extends Controller
             $parciales[$key]+= ((-1)*$val);
           }
         }
-/////////////////
-        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('DTR');
+///////////
+        $calculo = $em->getRepository(CalculoFaena::class)->findCalculo('ATR');
         if ($calculo)
         {
           foreach ($calculo->getAtributos() as $atr)
