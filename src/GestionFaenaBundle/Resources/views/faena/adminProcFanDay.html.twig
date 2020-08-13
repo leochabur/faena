@@ -79,8 +79,10 @@
 	</ul>
 	<hr>
 	{% if fatr.destino is defined %}
-		{{ form_label(fatr.destino, 'Proceso destino') }}
-		{{ form_widget(fatr.destino, {'attr' : {'class' : 'col-md-6 col-sm-6'}}) }}
+		<div class="yellow lighten-1">
+			{{ form_label(fatr.destino, 'Proceso destino') }}
+			{{ form_widget(fatr.destino, {'attr' : {'class' : 'yellow lighten-1 col-md-6 col-sm-6'}}) }}
+		</div>
 	{% endif %}
 	{{ form_label(fatr.valores, 'Valores') }}
     {% for f in fatr.valores %}
