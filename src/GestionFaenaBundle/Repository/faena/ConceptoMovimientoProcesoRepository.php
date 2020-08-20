@@ -18,11 +18,12 @@ class ConceptoMovimientoProcesoRepository extends \Doctrine\ORM\EntityRepository
         return $this->getEntityManager()
             		->createQuery('SELECT c
             					   FROM GestionFaenaBundle:faena\ConceptoMovimientoProceso c
-                                   JOIN c.tipoMovimiento tm
-            					   WHERE c.procesoFaena = :proceso AND c.concepto = :concepto AND tm.instancia = :instance')
+                         JOIN c.tipoMovimiento tm
+            					   WHERE c.activo = :activo AND c.procesoFaena = :proceso AND c.concepto = :concepto AND tm.instancia = :instance')
             		->setParameter('proceso', $proceso)
             		->setParameter('concepto', $concepto)
-                    ->setParameter('instance', $instance)
+                ->setParameter('instance', $instance)
+                ->setParameter('activo', true)
             		->getOneOrNullResult();
     }
 

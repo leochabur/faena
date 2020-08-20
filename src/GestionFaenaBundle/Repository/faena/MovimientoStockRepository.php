@@ -216,4 +216,79 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                     ->getOneOrNullResult();
     }
 
+    public function getStockDeArticulosPorProcesoPor(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso)
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT articulo.nombre as art, sum(valor.valor) as stock
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor   
+                                   JOIN valor.atributo atributo
+                                   JOIN atributo.atributoAbstracto atributoAbstracto
+                                   JOIN atributo.articuloAtrConc articuloAtributoConcepto
+                                   JOIN articuloAtributoConcepto.articulo articulo
+                                   JOIN articuloAtributoConcepto.concepto conceptoMovimientoProceso
+                                   JOIN conceptoMovimientoProceso.procesoFaena procesoFaena 
+                                   JOIN procesoFaena.manejosStock manejoStock
+                                   JOIN procesoFaena.procesosFaenaDiaria procesoDiario                                         
+                                   WHERE procesoDiario = :proceso AND manejoStock.articulo = articulo AND manejoStock.atributo = atributoAbstracto
+                                   GROUP BY articulo")
+                    ->setParameter('proceso', $proceso)
+                    ->getResult();
+    }
+
+    /*public function getStockArticulosPorProceso(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+    /*para un ProcesoFaena, devuelve el stock de cada uno de los articulos del mismo, agrupados por Articulo y por FaenaDiaria, 
+      utilizado para el caso de los procesos permanentes para indicar de cuando es cada producto del mismo*/
+   /* {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT articulo.nombre as nombre, sum(valor.valor) as cantidad, faenaDiaria.fechaFaena as fecha
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   JOIN valor.movimiento movimiento 
+                                   JOIN movimiento.faenaDiaria faenaDiaria
+                                   JOIN movimiento.procesoFnDay procFanDay
+                                   JOIN procFanDay.procesoFaena procesoFaena
+                                   JOIN procesoFaena.manejosStock manejoStock
+                                   JOIN movimiento.artProcFaena artAtrCon
+                                   JOIN artAtrCon.articulo articulo                                    
+                                   WHERE (valor.atributoAbstracto = manejoStock.atributo) AND
+                                         (manejoStock.articulo = articulo) AND 
+                                         (procesoFaena = :proceso) AND
+                                         (movimiento.visible = :visible) AND
+                                         (movimiento.eliminado = :eliminado)
+                                   GROUP BY articulo, faenaDiaria")
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('visible', true)
+                    ->setParameter('eliminado', false)
+                    ->getResult();
+    }*/
+
+    public function getStockArticulosClasificablesPorProcesoParaFaena(\GestionFaenaBundle\Entity\ProcesoFaena $proceso,
+                                                                      \GestionFaenaBundle\Entity\FaenaDiaria $faena)
+    /*para un ProcesoFaena, devuelve el stock de cada uno de los articulos del mismo, agrupados por Articulo y por FaenaDiaria, 
+      utilizado para el caso de los procesos permanentes para indicar de cuando es cada producto del mismo*/
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT articulo.id as idArt, articulo.nombre as nombre, sum(valor.valor) as cantidad
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   JOIN valor.movimiento movimiento 
+                                   JOIN movimiento.procesoFnDay procFanDay
+                                   JOIN procFanDay.procesoFaena procesoFaena
+                                   JOIN procesoFaena.manejosStock manejoStock
+                                   JOIN movimiento.artProcFaena artAtrCon
+                                   JOIN artAtrCon.articulo articulo                                    
+                                   WHERE (valor.atributoAbstracto = manejoStock.atributo) AND
+                                         (manejoStock.articulo = articulo) AND 
+                                         (procesoFaena = :proceso) AND
+                                         (movimiento.visible = :visible) AND
+                                         (movimiento.eliminado = :eliminado) AND
+                                         (movimiento.faenaDiaria = :faenaDiaria) AND
+                                         (articulo.clasificable = :clasificable)
+                                   GROUP BY articulo")
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('visible', true)
+                    ->setParameter('eliminado', false)
+                    ->setParameter('faenaDiaria', $faena)
+                    ->setParameter('clasificable', true)
+                    ->getResult();
+    }
+
 }

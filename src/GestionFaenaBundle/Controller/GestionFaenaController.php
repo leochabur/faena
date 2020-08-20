@@ -370,17 +370,21 @@ class GestionFaenaController extends Controller
     }
 
     /**
-     * @Route("/updaterom/{proc}/{art}/{val}/{fd}", name="bd_adm_proc_romaneo_articulos", methods={"POST"})
+     * @Route("/updaterom/{proc}/{art}/{val}/{fd}/{base}", name="bd_adm_proc_romaneo_articulos", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function romaneoArticulo($proc, $art, $val, $fd, Request $request)
+    public function romaneoArticulo($proc, $art, $val, $fd, $base, Request $request)
     {
         $value = $request->request->get('data');
+
         $em = $this->getDoctrine()->getManager();
         $procesoFaenaDiaria = $em->find(ProcesoFaenaDiaria::class, $proc);
         $faena = $em->find(FaenaDiaria::class, $fd);
         $procesoFaena = $procesoFaenaDiaria->getProcesoFaena();
-        $articulo = $em->find(Articulo::class, $art);
+
+        $articulo = $em->find(Articulo::class, $art); //el articulo final de la transformacion
+
+        $articuloBase = $em->find(Articulo::class, $base); // articulo origen de la transformacion
 
         if ($val == 0) //no existe aun un valor para el articulo
         {
@@ -396,14 +400,26 @@ class GestionFaenaController extends Controller
                 }
 
                 //Atributo abstracto base definido en el Proceso Faena
-                $atributoAbstractoBase = $procesoFaena->getAtributoAbstractoBase();
+               // $atributoAbstractoBase = $procesoFaena->getAtributoAbstractoBase();
+
+
+                //debe recuperar el atributo del articulo destino de la transformacion
+                $atributoDestino = $procesoFaena->existeArticuloDefinidoManejoStock($articulo);
+                if (!$atributoDestino)
+                {
+                  return new JsonResponse(['status' => false, 'message' => 'El articulo '.$articulo.' no se encuentra configurado para manejar stock']);
+                }
+                $atributoDestino = $atributoDestino->getAtributo();
+
+                $atributoAbstractoBase = $procesoFaena->existeArticuloDefinidoManejoStock($articuloBase);
                 if (!$atributoAbstractoBase)
                 {
-                  return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un atributo base en el proceso']);
+                  return new JsonResponse(['status' => false, 'message' => 'El articulo '.$articuloBase.' no se encuentra configurado para manejar stock']);
                 }
+                $atributoAbstractoBase = $atributoAbstractoBase->getAtributo();
 
                 //Atributo abstracto base definido en el Proceso Faena
-                $articuloBase = $procesoFaena->getArticuloBase();
+              //  $articuloBase = $procesoFaena->getArticuloBase();
                 if (!$articuloBase)
                 {
                   return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un articulo base en el proceso']);
@@ -415,7 +431,9 @@ class GestionFaenaController extends Controller
                                                                                     $procesoFaena,
                                                                                     $em);
 
-                $atributoEntrada = $artAtrConEntrada->getAtributoMedibleManualActivo($atributoAbstractoBase);
+            //    return new JsonResponse(['status' => false, 'message' => 'Atributo Base '.$atributoDestino]);
+
+                $atributoEntrada = $artAtrConEntrada->getAtributoMedibleManualActivo($atributoDestino);
                 if (!$atributoEntrada)//No existe un Atributo generado
                 {
                     $atributoEntrada = new AtributoMedibleManual();
@@ -424,7 +442,7 @@ class GestionFaenaController extends Controller
                     $atributoEntrada->setNombre('Peso');
                     $atributoEntrada->setAsignado(true);
                     $atributoEntrada->setArticuloAtrConc($artAtrConEntrada);
-                    $atributoEntrada->setAtributoAbstracto($atributoAbstractoBase);
+                    $atributoEntrada->setAtributoAbstracto($atributoDestino);
                     $em->persist($atributoEntrada);
                 }
                 $entrada = new EntradaStock();
@@ -437,11 +455,12 @@ class GestionFaenaController extends Controller
                 $valor = new ValorNumerico();
                 $valor->setAtributo($atributoEntrada);
                 $valor->setMovimiento($entrada);
-                $valor->setAtributoAbstracto($atributoAbstractoBase);
+                $valor->setAtributoAbstracto($atributoDestino);
                 $valor->setMostrar(true);
                 $valor->setAcumula($atributoEntrada->getAcumula());
                 $valor->setValor($value);
                 $em->persist($valor);
+
 
                 //debe generar ahora la salida de stock del articulo base
                 $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articuloBase, 
@@ -468,8 +487,8 @@ class GestionFaenaController extends Controller
                 $salida->setVisible(true);
                 $em->persist($salida);
 
-                $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
-                $valorAjustado = ($ajuste*$value);
+               // $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
+                $valorAjustado = $value;//($ajuste*$value);
 
                 $valorS = new ValorNumerico();
                 $valorS->setAtributo($atributoSalida);
@@ -494,13 +513,19 @@ class GestionFaenaController extends Controller
              $valor->setValor($value);
 
              $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
-             $valorAjustado = ($ajuste*$value);
+             $valorAjustado = (-1)*$value;//($ajuste*$value);
 
              $entrada = $valor->getMovimiento();
              $salida = $entrada->getMovimientoAsociado();
              if ($salida) //existe la salida asociada
              {
-                $valorAsoc = $salida->getValorWhitAtribute($valor->getAtributoAbstracto());
+                //debe recuperar el articulo para asi poder traer el atribustro abstracto correspondiente, ya que se puede dar el caso que se transformen productos con distintos atributos abtrsctaos
+                $articuloBase = $salida->getArtProcFaena()->getArticulo();
+
+                ///ahora recupera el atributo abstracto de acuerdo al seteo de manejo de stock
+                $atributoAbstractoBase = $procesoFaena->existeArticuloDefinidoManejoStock($articuloBase);
+
+                $valorAsoc = $salida->getValorWhitAtribute($atributoAbstractoBase->getAtributo());
                 $valorAsoc->setValor($valorAjustado);
              }
              $em->flush();
@@ -510,6 +535,104 @@ class GestionFaenaController extends Controller
         }
 
     }
+
+    /**
+     * @Route("/clasartbse/{proc}/{fd}/{art}", name="clasifiar_articulo_base")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function clasificarArticulosBase($proc, $fd, $art)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $faena = $em->find(FaenaDiaria::class, $fd);
+        $articulo = $em->find(Articulo::class, $art);
+
+        $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($proceso, $articulo, $faena);
+
+        $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
+        $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
+        if (!$conceptoMovimiento)
+        {
+          throw new \Exception("no se encuentra el concepto del movimiento");
+        }
+        $articuloBase = $proceso->getProcesoFaena()->getArticuloBase();
+        if (!$articuloBase)  
+        {
+          throw new \Exception("no se encuentra definido el articulo base en el proceso");
+        }
+
+        $maxInputs = 3;
+        $categorias = [];
+        $subcategorias = [];
+        $data = [];
+        $articulos = $em->getRepository(Articulo::class)->getListaArticulosConCategoria();
+        $cantCateg = [];
+        $cantSubcates = [];
+        foreach ($articulos as $art)
+        {   
+          if ($articulo->getArticulosClasificables()->contains($art))
+          {
+              $procesoFaena = $proceso->getProcesoFaena();
+
+              $factor = $procesoFaena->existeArticuloDefinidoManejoStock($art); //obtiene si el articulo se encuentra en el proceso para realizar el manejo de stock
+              $valor = 0;
+              if ($factor)
+              {
+                  $movimiento = $proceso->getMovimientosArticulo($art, $faena);
+                  if ($movimiento)
+                  {
+                    $val = $movimiento->getValorWhitAtribute($factor->getAtributo());
+                    if ($val)
+                    {
+                      $valor = $val;
+                    }
+                  }
+              }
+              ////finaliza recuperacion
+              $idCat = $art->getCategoria()->getId();
+              $idSub = $art->getSubcategoria()->getId();
+              if (!array_key_exists($idCat, $cantCateg))
+              {
+                $cantCateg[$idCat] = 0;
+              }
+              $cantCateg[$idCat]++;
+              if (!array_key_exists($idCat, $cantSubcates))
+              {
+                $cantSubcates[$idCat] = [];
+              }
+              if (!array_key_exists($idSub, $cantSubcates[$idCat]))
+              {
+                  $cantSubcates[$idCat][$idSub] = 0;
+              }
+              $cantSubcates[$idCat][$idSub]++;
+              $categorias[$idCat] = $art->getCategoria();
+              $subcategorias[$idSub] = $art->getSubcategoria();
+              if (!array_key_exists($idCat, $data))
+              {
+                $data[$idCat] = [];
+              }
+              if (!array_key_exists($idSub, $data[$idCat]))
+              {
+                $data[$idCat][$idSub] = [];
+              }
+
+              $data[$idCat][$idSub][] = [0 => $art, 1 => $valor];
+            }
+        }
+        $em->flush();
+        return $this->render('@GestionFaena/faena/clasificarArticuloBase.html.twig', 
+                            array( 'proceso' => $proceso, 
+                                   'faena' => $faena, 
+                                   'articulos' => $data, 
+                                   'cates' => $categorias, 
+                                   'subcates' => $subcategorias,
+                                    'ccat' => $cantCateg,
+                                    'csub' => $cantSubcates,
+                                    'articulo' => $articulo,
+                                    'stock' => $stock));
+        
+    }
+
 
 
     /**
@@ -528,6 +651,9 @@ class GestionFaenaController extends Controller
         }
         if ($proceso->getProcesoFaena()->getRomanea())
         {
+            $clasificables = $em->getRepository(MovimientoStock::class)->getStockArticulosClasificablesPorProcesoParaFaena($proceso->getProcesoFaena(), $faena);
+
+
             $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
             $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
             if (!$conceptoMovimiento)
@@ -544,7 +670,7 @@ class GestionFaenaController extends Controller
             $categorias = [];
             $subcategorias = [];
             $data = [];
-            $articulos = $em->getRepository(Articulo::class)->getListaArticulos();
+            $articulos = $em->getRepository(Articulo::class)->getListaArticulosConCategoria();
             $cantCateg = [];
             $cantSubcates = [];
             foreach ($articulos as $art)
@@ -552,9 +678,11 @@ class GestionFaenaController extends Controller
                 $procesoFaena = $proceso->getProcesoFaena();
 
                 $factor = $procesoFaena->existeArticuloDefinidoManejoStock($art); //obtiene si el articulo se encuentra en el proceso para realizar el manejo de stock
+
                 $valor = 0;
                 if ($factor)
                 {
+                    //$valor = $proceso->getStockArticuloConFaenaDiaria($faena, $art, $factor->getAtributo());
                     $movimiento = $proceso->getMovimientosArticulo($art, $faena);
                     if ($movimiento)
                     {
@@ -565,6 +693,7 @@ class GestionFaenaController extends Controller
                       }
                     }
                 }
+             //   throw new \Exception("Articulo ".$art."  Factor ".$factor."  Valor ".$valor);
                 ////finaliza recuperacion
                 $idCat = $art->getCategoria()->getId();
                 $idSub = $art->getSubcategoria()->getId();
@@ -604,7 +733,8 @@ class GestionFaenaController extends Controller
                                        'cates' => $categorias, 
                                        'subcates' => $subcategorias,
                                         'ccat' => $cantCateg,
-                                        'csub' => $cantSubcates));
+                                        'csub' => $cantSubcates,
+                                        'clasificables' => $clasificables));
         }
 
         $repository = $em->getRepository('GestionFaenaBundle:faena\MovimientoStock');
@@ -758,7 +888,7 @@ class GestionFaenaController extends Controller
         $body = [];
         $movimientos = $repo->findAllMovimientos($proceso);
         $informaTotales = false;
-        
+        $rounded = [];
         foreach ($movimientos as $mov) 
         {
             $art = $mov->getArtProcFaena()->getArticulo();
@@ -783,16 +913,31 @@ class GestionFaenaController extends Controller
                   {
                       if ($valor->getAcumula())
                       {
+                          $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
                           $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
                       }
                   }
                   else
                   {
                     if ($valor->getMostrar())
+                    {
                       $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
-                  }
-                  
+                      $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
+                    }
+                  }                  
                 }                  
+            }
+        }
+        foreach ($rounded as $kar => $var)
+        {
+            foreach ($var as $katr => $vatr)
+            {
+              if ($body[$kar][$katr] < 0.1)
+              {
+                $body[$kar][$katr] = 0.0;
+              }
+              
+              $body[$kar][$katr] = number_format($body[$kar][$katr], $vatr,'.','');
             }
         }
       ///fin actualizacion
@@ -838,7 +983,7 @@ class GestionFaenaController extends Controller
         {
           $informaTotales = true;
         }
-
+        $rounded = [];
         foreach ($movimientos as $mov) 
         {
             $computar = true;
@@ -864,17 +1009,6 @@ class GestionFaenaController extends Controller
 
               $movOrigen = $mov->getOrigen();
               $from = "";
-           /*   if ($movOrigen)
-              {
-                if ($mov->getInstance() == 2)
-                {                  
-                  $from.= " (".$mov->getDestino()->getProcesoFnDay()." >> ".$movOrigen->getProcesoFnDay().")";
-                }
-                elseif($mov->getInstance() == 3)
-                {
-                  $from.= " (".$movOrigen->getProcesoFnDay()." >> ".$movOrigen->getMovimientoDestino()->getProcesoFnDay().")";
-                }
-              }*/
 
               if ($mov->getOrigen())
               {
@@ -911,36 +1045,40 @@ class GestionFaenaController extends Controller
               $body[$i]['trx'] = $idTrx;
               foreach ($mov->getValores() as $valor) 
               {
-                  $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
+                  $atributo = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
                   if ($valor->getMostrar())
                   {                            
-                      $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric()];
-                  
+                      $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric(), 'decimales' => 2];
+                  }
 
-                    $body[$i][$atributo->getId()] = $valor->getData()."";
-                    $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
-                    if ($acumular)
-                    {
-                        if (!array_key_exists($atributo->getId(), $totales))
-                        {
-                            $totales[$atributo->getId()] = 0;
-                        }
-                        if ($valor->getAtributo())
-                        {
-                          if ($valor->getAcumula())
-                          {
-                            $totales[$atributo->getId()]+= $valor->getData();
-                          }
-                        }
-                        else
+                  $rounded[$atributo->getId()] = $valor->getDecimales();
+
+                  $body[$i][$atributo->getId()] = $valor->getData()."";
+                  $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
+                  if ($acumular)
+                  {
+                      $rounded[$atributo->getId()] = $valor->getDecimales();
+                      if (!array_key_exists($atributo->getId(), $totales))
+                      {
+                          $totales[$atributo->getId()] = 0;
+                      }
+
+                      if ($valor->getAtributo())
+                      {
+                        if ($valor->getAcumula())
                         {
                           $totales[$atributo->getId()]+= $valor->getData();
                         }
-                    }
-                  }
-                  
-              }
+                      }
+                      else
+                      {
+                        $totales[$atributo->getId()]+= $valor->getData();
+                      }
+                  }                     
+              }         
+                   
               $i++;
+
             }
         }
         
@@ -951,8 +1089,16 @@ class GestionFaenaController extends Controller
                    ];
         if ($informaTotales)
         {
+            foreach ($rounded as $k => $v)
+            {
+              if ($totales[$k] < 0.1) //para corregir errores de redonedo y que no queden valores despreciables en la tabla
+                $totales[$k] = 0;
+
+              $totales[$k] = number_format($totales[$k], $v);
+            }
             $params['totales'] = $totales;
         }
+        
         if (count($formsDelete))
         {
           $params['formsDelete'] = $formsDelete;
@@ -1137,7 +1283,8 @@ class GestionFaenaController extends Controller
                                               ArticuloAtributoConcepto $articulo,
                                               ConceptoMovimientoProceso $concepto,
                                               FaenaDiaria $faena,
-                                              $em)
+                                              $em,
+                                              Request $request = null)
     {
               $stock = 0;
               $movimiento = new TransformarStock(); 
@@ -1146,7 +1293,10 @@ class GestionFaenaController extends Controller
               $movimiento->setFaenaDiaria($faena);
               $movimiento->generateAtributes();
               $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
-             // $formAtr->handleRequest($request);
+              if ($request)
+              {
+                $formAtr->handleRequest($request);
+              }
               $movimiento->updateValues($stock, $em);
 
 
@@ -1160,14 +1310,16 @@ class GestionFaenaController extends Controller
 
               if (!$articuloBaseManejaStock) //no esta configurado el articulo base para manejar el stock en el proceso
               {
-                $this->addFlash('error', "El articulo ".$articuloBase." no se encuentra definido para manejar stock");
-                return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', ['fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena]);
+               // $this->addFlash('error', "El articulo ".$articuloBase." no se encuentra definido para manejar stock");
+                throw new \Exception("El articulo ".$articuloBase." no se encuentra definido para manejar stock");
+                //return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', ['fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena]);
               }
 
               if (!$articuloDestinoManejaStock) //no esta configurado el articulo destino para manejar el stock en el proceso
               {
-                $this->addFlash('error', "El articulo ".$articuloDestino." no se encuentra definido para manejar stock");
-                return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', ['fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena]);
+                //$this->addFlash('error', "El articulo ".$articuloDestino." no se encuentra definido para manejar stock");
+                throw new \Exception("El articulo ".$articuloDestino." no se encuentra definido para manejar stock");
+                //return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', ['fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena]);
               }
 
               //1º: Recupera del proceso, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
@@ -1189,14 +1341,28 @@ class GestionFaenaController extends Controller
               $salida->setProcesoFnDay($proceso);
               $salida->setArtProcFaena($artAtrConSalida);
 
-              $valorAtr = new ValorNumerico();
+
+             /* $valorAtr = new ValorNumerico();
               $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
               $valorAtr->setValor($valorAtributo->getValor());
               $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
               $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
               $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
               $valorAtr->setAcumula($valorAtributo->getAtributo()->getAcumula());
-              $salida->addValore($valorAtr);
+              $salida->addValore($valorAtr);*/
+              foreach ($movimiento->getValores() as $valor) {
+
+                 // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+                  $valorAtr = new ValorNumerico();
+                  $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+                  $valorAtr->setValor($valor->getValor());
+                  $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                  $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                  $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                  $valorAtr->setAcumula($valor->getAtributo()->getAcumula());
+                  $salida->addValore($valorAtr);
+              }
+
               $em->persist($salida);
               $proceso->addMovimiento($salida);
               ///Una vez realizada la salida delstock del articulo base, debe proceder a realizar la entrada del articulo destino (Corazon)
@@ -1346,13 +1512,16 @@ class GestionFaenaController extends Controller
                 {
                     throw new \Exception("El proceso de destino es inexistente!!!");
                 }
-                //1º: Recupera del proceso destino, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
-                $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
-                                                                                    $articulo->getConcepto()->getConcepto(),
-                                                                                    EntradaStock::getInstance(),
-                                                                                    $procesoDestino->getProcesoFaena(),
-                                                                                    $em);
-
+                try
+                {
+                    //1º: Recupera del proceso destino, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
+                    $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
+                                                                                        $articulo->getConcepto()->getConcepto(),
+                                                                                        EntradaStock::getInstance(),
+                                                                                        $procesoDestino->getProcesoFaena(),
+                                                                                        $em);
+                }
+                catch (\Exception $e){throw $e;}
                 /*busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto 
                   que maneja el stock del proceso*/
                 $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
@@ -1437,12 +1606,15 @@ class GestionFaenaController extends Controller
                    throw new \Exception("El articulo ".$articulo->getArticulo()." no se encuentra definido en el proceso <b>".$procesoOrigen."</b> para manejar stock");
                 }
 
-                //1º: Recupera del proceso origen, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
-                $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
-                                                                                    $articulo->getConcepto()->getConcepto(),
-                                                                                    SalidaStock::getInstance(),
-                                                                                    $procesoOrigen,
-                                                                                    $em);
+                try{
+                    //1º: Recupera del proceso origen, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
+                    $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
+                                                                                        $articulo->getConcepto()->getConcepto(),
+                                                                                        SalidaStock::getInstance(),
+                                                                                        $procesoOrigen,
+                                                                                        $em);
+                }
+                catch (\Exception $e){throw $e;}
                 //busca en la lista de valores de atributos del movimiento si existe el valor correspondiente al AtributoAbstracto que maneja el stock del proceso
                 $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
                 if (!$valorAtributo)
@@ -1535,16 +1707,9 @@ class GestionFaenaController extends Controller
         $faena = $em->find(FaenaDiaria::class, $fanday);
         if($type == 4) //TransformarStock
         {
-              $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em);
-              $proceso->setUltimoMovimiento(new \DateTime());
-              $em->flush();
-        }
-        elseif($type == 5)  //comienza proceso Transferencia de stockk
-        {
             try
             {
-              $auto = new MovimientoAutomatico();
-              $this->procesarTransferirStock($proceso, $articulo, $concepto, $faena, $em, $auto, $request, false);
+              $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em, $request);
               $proceso->setUltimoMovimiento(new \DateTime());
               $em->flush();
             }
@@ -1552,7 +1717,21 @@ class GestionFaenaController extends Controller
             {
                 $this->addFlash('errorLoad', $e->getMessage());
                 return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
-                //return $this->redirectToRoute('bd_adm_proc_fan_day_procesar',['request' => $request, 'proc' => $proc, 'fd' => $fanday], 307);
+            }
+        }
+        elseif($type == 5)  //comienza proceso Transferencia de stockk
+        {
+            try
+            {
+              $auto = new MovimientoAutomatico();
+              $proceso = $this->procesarTransferirStock($proceso, $articulo, $concepto, $faena, $em, $auto, $request, false);
+              //$proceso->setUltimoMovimiento(new \DateTime());
+              $em->flush();
+            }
+            catch(\Exception $e)
+            {
+                $this->addFlash('errorLoad', $e->getMessage()." -ERROR");
+                return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
             }
 
             return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
@@ -1581,6 +1760,7 @@ class GestionFaenaController extends Controller
                                                               $em) 
     //para los parametro dados, devuelve un ArticuloAtributoConcepto si existe, sino crea uno
     {
+          try{
               //busca si existe el articulo atributo concepto para 
               $repositoryAAC = $em->getRepository(ArticuloAtributoConcepto::class);
               $artAtrCon = $repositoryAAC->findArticuloAtributoConcepto($articulo, $concepto, $instanceOfTipoMovimiento, $proceso);
@@ -1612,6 +1792,8 @@ class GestionFaenaController extends Controller
                 $em->persist($artAtrCon);
               }
               return $artAtrCon;
+            }
+            catch (\Exception $e) { throw new \Exception("Instancia: $instanceOfTipoMovimiento - Articulo: ".$articulo->getId()." - Concepto: ".$concepto->getId()."  Proceso: ".$proceso->getId()); }
     }
 
 

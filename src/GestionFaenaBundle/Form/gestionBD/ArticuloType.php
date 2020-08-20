@@ -22,6 +22,8 @@ class ArticuloType extends AbstractType
                 ->add('presentacionKg')
                 ->add('presentacionUnidad')
                 ->add('orden')
+                ->add('articuloBase')
+                ->add('clasificable')
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

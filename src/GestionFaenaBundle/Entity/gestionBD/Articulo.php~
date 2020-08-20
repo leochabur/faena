@@ -98,6 +98,22 @@ class Articulo
     private $orden;
     
     /**
+     * @ORM\Column(name="clasificable", type="boolean", options={"default":false})
+     */
+    private $clasificable = false; //indica si el articulo se debe clasificar en otros (Ej. Cajon de Pollo al ingresar a camara se clasifina en PP etc. se generara una transformacion 1 a 1 entre el Cajon de Pollo abstracto y la clasificacion final x ej PP Sin Bandeja Calibre 7)
+
+    /**
+     * @ORM\OneToMany(targetEntity="Articulo", mappedBy="articuloBase")
+     */
+    private $articulosClasificables;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Articulo", inversedBy="articulosClasificables")
+     * @ORM\JoinColumn(name="id_articulo", referencedColumnName="id", nullable=true)
+     */
+    private $articuloBase;
+
+    /**
      * Get id
      *
      * @return int
@@ -141,6 +157,7 @@ class Articulo
     public function __construct()
     {
         $this->artsAtrConc = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->articulosClasificables = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -416,5 +433,87 @@ class Articulo
     public function getOrden()
     {
         return $this->orden;
+    }
+
+    /**
+     * Set clasificable
+     *
+     * @param boolean $clasificable
+     *
+     * @return Articulo
+     */
+    public function setClasificable($clasificable)
+    {
+        $this->clasificable = $clasificable;
+
+        return $this;
+    }
+
+    /**
+     * Get clasificable
+     *
+     * @return boolean
+     */
+    public function getClasificable()
+    {
+        return $this->clasificable;
+    }
+
+    /**
+     * Add articulosClasificable
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulosClasificable
+     *
+     * @return Articulo
+     */
+    public function addArticulosClasificable(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulosClasificable)
+    {
+        $this->articulosClasificables[] = $articulosClasificable;
+
+        return $this;
+    }
+
+    /**
+     * Remove articulosClasificable
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulosClasificable
+     */
+    public function removeArticulosClasificable(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulosClasificable)
+    {
+        $this->articulosClasificables->removeElement($articulosClasificable);
+    }
+
+    /**
+     * Get articulosClasificables
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getArticulosClasificables()
+    {
+        return $this->articulosClasificables;
+    }
+
+    /**
+     * Set articuloBase
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articuloBase
+     *
+     * @return Articulo
+     */
+    public function setArticuloBase(\GestionFaenaBundle\Entity\gestionBD\Articulo $articuloBase = null)
+    {
+        $this->articuloBase = $articuloBase;
+
+        return $this;
+    }
+
+    /**
+     * Get articuloBase
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
+     */
+    public function getArticuloBase()
+    {
+        return $this->articuloBase;
     }
 }
