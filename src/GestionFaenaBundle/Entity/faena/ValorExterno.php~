@@ -43,7 +43,7 @@ class ValorExterno extends ValorAtributo
         return $this->entidadExterna;
     }
     
-    public function calcularValor($movimiento, $entityManager, $promedio = 0)
+    public function calcularValor($movimiento, $entityManager, $automatico = false)
     {
         
     }
@@ -65,5 +65,10 @@ class ValorExterno extends ValorAtributo
             return ['ok' => false, 'message' => 'El campo '.$this->getAtributo().' no puede permanecer en blanco!'];
         }
         return ['ok' => true];
+    }
+
+    public function isNumeric()
+    {
+        return false;
     }
 }

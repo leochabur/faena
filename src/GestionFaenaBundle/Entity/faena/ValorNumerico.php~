@@ -118,19 +118,12 @@ class ValorNumerico extends ValorAtributo
     }
 
 
-    public function calcularValor($movimiento, $entityManager, $promedio = 0)
+    public function calcularValor($movimiento, $entityManager, $automatico = false)
     {
-       // throw new \Exception("Alguno de los atributos del articulo  ".$movimiento->getValores()->first()->getData());
-        if (false){//$movimiento->getType() == 3){  ///////////////////REVEEERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
-           /* if (get_class($this->getAtributo()->getAtributo()) == AtributoMedibleAutomatico::class)
-                $this->valor = $movimiento->getFactor()*$movimiento->getValorAtributoConNombre('Aves') * $promedio;*/
-        }
-        else
-        {
             $factores = $this->getAtributo()->getFactoresCalculo(); //obtiene todos los atributos para realizar el calculo del valor del atributo
-
-            if ($factores){
-                $repository = $entityManager->getRepository(MovimientoStock::class);
+            if ($factores)
+            {
+               // $repository = $entityManager->getRepository(MovimientoStock::class);
                 try{
                             $factor1 = $factor2 = null;
                             if (!isset($factores['factores'][1]))  //no se configuro el factor 1 de la operacion
@@ -151,15 +144,17 @@ class ValorNumerico extends ValorAtributo
                                     $factor1 = $movimiento->getValorConAtributo($f1->getAtributo());
                                     $factor1 = $factor1->getValor();
                                 }     
-                                else{ //significa que debe recuperar el valor del acumulado del atributo
+                                else
+                                { //significa que debe recuperar el valor del acumulado del atributo
                                     $accion = ($f1->getTipoCalculo()=='S'?'s':'p');
-                                    $due = $repository->getPromedioAtributoV2___($movimiento->getProcesoFnDay(),
-                                                                            $f1->getArticulo(),
-                                                                            $f1->getAtributo(),
-                                                                            $accion);
-                                    
-                                 //  throw new \Exception($due." ".$movimiento->getProcesoFnDay()->getId()."  ".$f1->getArticulo()->getId()." ".$f1->getAtributo()->getId());
-                                    $factor1 = $due['stock'];
+                                    $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f1->getArticulo(),
+                                                                                                       $f1->getAtributo(),
+                                                                                                       $f1->getSoloIngreso(),
+                                                                                                       $accion,
+                                                                                                       $f1
+                                                                                                      );
+                                  // throw new \Exception($f1->getId()." ");
+                                    $factor1 = $due;//['stock'];
                                 }                  
                             }
 
@@ -182,25 +177,32 @@ class ValorNumerico extends ValorAtributo
                             else //existe el factor 2
                             {     
                                 $f2 = $factores['factores'][2];
+                            //    throw new \Exception("Caption ".$f2->getAtributo()." ".$f2->getArticulo());
                                 if ($f2->getTipoCalculo() == 'U')//Significa que se debe buscar el valor unitario del registro dentro del movimiento
                                 {
                                     $factor2 = $movimiento->getValorConAtributo($f2->getAtributo());
                                     $factor2 = $factor2->getValor();
                                 }     
-                                else{ //significa que debe recuperar el valor del acumulado del atributo
+                                else
+                                { //significa que debe recuperar el valor del acumulado del atributo
                                     $accion = ($f2->getTipoCalculo()=='S'?'s':'p');
-                                   // try{
-                                    $due = $repository->getPromedioAtributo($movimiento->getProcesoFnDay(),
-                                                                            $f2->getArticulo(),
-                                                                            $f2->getAtributo(),
-                                                                            $accion);
-                                   // if ($due === null)
-                                   //   throw new \Exception("Error nulllllll Request ".print_r($due)."  ".$f2->getArticulo()."  ".$f2->getAtributo(), 1);
-                                  //  }
-                                  //  catch(\Exception $e){ throw new \Exception("Error Processing Request ".$e->getMessage(), 1); }
-                                    
-                                    
-                                    $factor2 = $due['stock'];
+                                    if ($f2->getArticulo())
+                                    {
+
+                                        
+                                        $due = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($f2->getArticulo(),
+                                                                                                           $f2->getAtributo(),
+                                                                                                           $f2->getSoloIngreso(),
+                                                                                                           $accion,
+                                                                                                           $f2
+                                                                                                          );
+                                        $factor2 = $due;
+                                     //   throw new \Exception("Valor ".$factor2." ".$f2->getAtributo());
+                                    }
+                                    else
+                                    {
+                                        $factor2 = null;
+                                    }
                                 }                  
                             }
 
@@ -234,13 +236,37 @@ class ValorNumerico extends ValorAtributo
                                 {
                                     $this->valor = round($this->valor, -1);
                                 }
+                                else
+                                {
+                                    //$this->valor = number_format($this->valor, $this->getAtributo()->getDecimales());
+                                }
                             }
                             
                     }
                     catch (\Exception $e) {throw $e;
                      }
             }
-        }
+            elseif($automatico)
+            {
+                //throw new \Exception("Alguno de los atributos del articulose encuentra mal");
+                $value = $movimiento->getProcesoFnDay()->getStockArticuloConAtributo($movimiento->getArtProcFaena()->getArticulo(),
+                                                                                     $this->getAtributo()->getAtributoAbstracto(),
+                                                                                     false,
+                                                                                     'S');
+                $this->valor = $value;
+                if ($this->getAtributo()) //tiene un Atributo asociado
+                {
+                    if ($this->getAtributo()->getRedondea())
+                    {
+                        $this->valor = round($this->valor, -1);
+                    }
+                    else
+                    {
+                        //$this->valor = number_format($this->valor, $this->getAtributo()->getDecimales());
+                    }
+                }
+                
+            }
     }
 
     public function getData($redonedo = true)
@@ -331,5 +357,10 @@ class ValorNumerico extends ValorAtributo
     {
         //para el caso de la salida de stock, transforma el valor en negativo
         $this->valor = $this->getMovimiento()->updateValueAtribute($this->valor);
+    }
+
+    public function isNumeric()
+    {
+        return true;
     }
 }

@@ -284,4 +284,28 @@ class AtributoInforme
     {
         return $this->promedia;
     }
+
+    /**
+     * Set redondea
+     *
+     * @param boolean $redondea
+     *
+     * @return AtributoInforme
+     */
+    public function setRedondea($redondea)
+    {
+        $this->redondea = $redondea;
+
+        return $this;
+    }
+
+    /**
+     * Get redondea
+     *
+     * @return boolean
+     */
+    public function getRedondea()
+    {
+        return $this->redondea;
+    }
 }

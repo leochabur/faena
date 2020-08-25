@@ -35,21 +35,21 @@ class MovimientoAutomatico
     private $articuloAtributoConcepto;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="automaticos") 
-    * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", inversedBy="automaticos") 
+    * @ORM\JoinColumn(name="id_gpo_mov", referencedColumnName="id")
     */      
-    private $procesoFaena;
+    private $grupo;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena") 
-    * @ORM\JoinColumn(name="id_proc_fan_destino", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_proc_fan_destino", referencedColumnName="id", nullable=true)
     */      
     private $procesoDestinoDefault;
 
 
     public function getVistaEdicion()
     {
-        return $this->articuloAtributoConcepto->getVistaEdicion()."(".$this->ordenEjecucion.")";
+        return $this->articuloAtributoConcepto->getVistaEdicion();
     }
     /**
      * Get id
@@ -131,5 +131,29 @@ class MovimientoAutomatico
     public function getProcesoFaena()
     {
         return $this->procesoFaena;
+    }
+
+    /**
+     * Set procesoDestinoDefault
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoDestinoDefault
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setProcesoDestinoDefault(\GestionFaenaBundle\Entity\ProcesoFaena $procesoDestinoDefault = null)
+    {
+        $this->procesoDestinoDefault = $procesoDestinoDefault;
+
+        return $this;
+    }
+
+    /**
+     * Get procesoDestinoDefault
+     *
+     * @return \GestionFaenaBundle\Entity\ProcesoFaena
+     */
+    public function getProcesoDestinoDefault()
+    {
+        return $this->procesoDestinoDefault;
     }
 }

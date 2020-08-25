@@ -61,7 +61,7 @@ class FaenaDiaria
     private $finalizada;
 
     /**
-     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria")
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria", cascade={"persist"})
      * @ORM\JoinTable(name="sp_proc_for_fan_day",
      *      joinColumns={@ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id")}
@@ -82,18 +82,51 @@ class FaenaDiaria
     private $userClose;
 
 
-    /*Dado un ProcesoFaena devuelve el correspondiente ProcesoFaenaDiaria de la faena
-    public function getProcesoDiario(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
-    {
-        foreach ($this->procesos as $proc) 
-        {
-            if ($proc->getProcesoFaena() == $proceso)
-                return $proc;
-        }
-        return null;
-    }*/
 
-    public function getProceso($id)
+    public function getValuesForCalculo(\GestionFaenaBundle\Entity\opciones\CalculoFaena $calculo)
+    {
+        $result = [];
+        foreach ($calculo->getAtributos() as $atr)
+        {
+            $result[$atr->getId()] = 0;
+        }
+
+        foreach ($this->procesos as $pro) //recorro todos los procesos de la faena
+        {
+            if ($calculo->getProcesos()->contains($pro->getProcesoFaena())) //verifico si el proceso esta incluido para realizar el calculo
+            {
+                foreach ($pro->getMovimientos() as $mov) //recorro todos los movimientos correspondoientes al proceso
+                {
+                    if ($mov->getFaenaDiaria() == $this)
+                    {
+                        if ((!$mov->getEliminado()) && ($mov->getVisible())) //si el movimiento no esta eliminado
+                        {
+                            if ($calculo->getArticulos()->contains($mov->getArtProcFaena()->getArticulo()))
+                            {
+                                if ($calculo->getTipos()->contains($mov->getArtProcFaena()->getConcepto()->getTipoMovimiento())) //el Tipo de Movimiento del Movimeitno de Stock esta dentro de los Tipos definidos por el calcuilo
+                                {
+                                    if ($calculo->getConceptos()->contains($mov->getArtProcFaena()->getConcepto()->getConcepto()))
+                                    {
+                                        foreach ($calculo->getAtributos() as $atr)
+                                        {
+                                            $value = $mov->getValorWhitAtribute($atr);
+                                            if ($value)
+                                            {
+                                                $result[$atr->getId()]+= $value->getData();
+                                            }                                
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    public function getProceso($id)//dado un id devuelve el ProcesoFaenaDiaria Coreespondiente al id del ProcesoFaena
     {
         foreach ($this->procesos as $proc) {
             if ( $proc->getProcesoFaena()->getId() == $id)
@@ -349,4 +382,17 @@ class FaenaDiaria
         }
         return true;
     }
+
+    public function getProcesosDestinos(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)//dado un proceso recupera todos los procesos destinos del mismo que han sido instanciados en la faena
+    {
+        $destinos = array();
+        foreach ($proceso->getProcesosDestino() as $destino) {
+            $procFanDay = $this->getProceso($destino->getId());
+            if ($procFanDay)
+                $destinos[] = $procFanDay;
+        }
+        return $destinos;
+    }
+
+
 }

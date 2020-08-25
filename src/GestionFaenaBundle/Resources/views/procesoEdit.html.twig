@@ -10,8 +10,8 @@
 	
 
 	    <p class="h4 mb-4 text-center">{{ proccess.nombre }}</p>
-		<div class="row mt-4">
-		  <div class="col-6">
+		<div class="row">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				     Reporta articulos a...
@@ -39,8 +39,10 @@
 				  
 				  </div>
 		  </div>
-		
-		  <div class="col-6">
+		  </div>
+		  <br>
+		  <div class="row">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				    Configurar manejo stock
@@ -83,9 +85,9 @@
 			</div>
 		</div>
 
-
-		<div class="row mt-4">
-		  <div class="col-6">
+		<br>
+		<div class="row">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				     Ajusta movimiento
@@ -120,8 +122,7 @@
 				  			<div class="col">
 				  				{{ form_widget(ajuste.proceso, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
-				  		</div>
-				  		<div class="form-row align-items-center">
+
 				  			<div class="col">
 				  				{{ form_widget(ajuste.tipoMovimiento, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
@@ -145,55 +146,94 @@
 				  
 				  </div>
 		  </div>
-		  <div class="col-6">
+		</div>
+		<br>
+		<div class="row">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				     Movimientos Automaticos
 				  </div>
 				  <div class="card-body">
 						<table class="table table-striped table-bordered table-hover table-sm ">
-									<thead>
-										<tr>
-											<th>Definicion</th>
-											<th></th>
-										</tr>
-									</thead>
 									<tbody>
 										{% for aj in proccess.automaticos %}
 											<tr>
-												<td>{{ aj.vistaEdicion }}</td>
-												<td><a href="{{ path('bd_edit_procesos_delete_automatic', {proccess : proccess.id, automatic : aj.id }) }}" class="btn btn-sm btn-warning">-</a></td>
+												<td>Nombre: {{ aj.nombre }}</td>
+												<td></td>
+												<td></td>
+												<td></td>
+												<td><a href="{{ path('bd_edit_procesos_delete_grupo_movimientos_automatic', {proc : proccess.id, gpo : aj.id }) }}" class="btn btn-sm btn-danger">-</a></td>
 											</tr>
+											{% for auto in aj.automaticos %}
+												<tr>
+													<td></td>
+													<td>{{ auto.ordenEjecucion }}</td>
+													<td>{{ auto.articuloAtributoConcepto.vistaEdicion }}</td>
+													<td>{{ auto.procesoDestinoDefault }}</td>
+													<td><a href="{{ path('bd_edit_procesos_delete_automatic', {proccess : proccess.id, automatic : auto.id }) }}" class="btn btn-sm btn-warning">-</a></td>
+												</tr>
+											{% endfor %}
 										{% endfor %}
 									</tbody>
 						</table>
 				  	{{ form_start(auto) }}
 				  		<div class="form-row align-items-center">
 				  			<div class="col">
-				  				{{ form_widget(auto.procesoFaena, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  				{{ form_label(auto.grupo) }}
+				  				{{ form_widget(auto.grupo, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
-				  		</div>
-				  		<div class="form-row align-items-center">
 				  			<div class="col">
+				  				{{ form_label(auto.articuloAtributoConcepto) }}
 				  				{{ form_widget(auto.articuloAtributoConcepto, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
 				  			<div class="col-2">
+				  				{{ form_label(auto.ordenEjecucion) }}
 				  				{{ form_widget(auto.ordenEjecucion, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
 				  			<div class="col-2">
-				  				{{ form_widget(auto.guardar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  				{{ form_label(auto.procesoDestinoDefault) }}
+				  				{{ form_widget(auto.procesoDestinoDefault, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
-				  		</div>
-				  	
+
+				  			<div class="col-2 mt-3">
+				  				{{ form_widget(auto.guardar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block mt-2'}}) }}
+				  			</div>
+				  		</div>				  	
 				  	{{ form_end(auto) }}		
 	
+					{{ form_start(grupoMov) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col">
+				  				{{ form_label(grupoMov.orden) }}
+				  				{{ form_widget(grupoMov.orden, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col">
+				  				{{ form_label(grupoMov.nombre) }}
+				  				{{ form_widget(grupoMov.nombre, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-2">
+				  				{{ form_label(grupoMov.detalle) }}
+				  				{{ form_widget(grupoMov.detalle, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-2">
+				  				{{ form_label(grupoMov.procesoFaena) }}
+				  				{{ form_widget(grupoMov.procesoFaena, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+
+				  			<div class="col-2 mt-3">
+				  				{{ form_widget(grupoMov.guardar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block mt-2'}}) }}
+				  			</div>
+				  		</div>				  	
+				  	{{ form_end(grupoMov) }}	
 				  </div>
 				  
 				  </div>
 		  </div>
 		</div>
+		<br>
 		<div class="row mt-4">
-		  <div class="col-6">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				     Proceso destino defecto..
@@ -232,7 +272,10 @@
 				  
 				  </div>
 		  </div>
-		  <div class="col-6">
+		</div>
+		<br>
+		<div class="row">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				     Definir articulo base
@@ -270,9 +313,9 @@
 				  </div>
 		  </div>
 	</div>
- 	<!--        -->
+ 	<br>
  		<div class="row mt-4">
-		  <div class="col-6">
+		  <div class="col">
 				<div class="card">
 				  <div class="card-header">
 				     Atributo Base
@@ -310,6 +353,74 @@
 				  </div>
 		  </div>
 	</div>
+		<div class="row">
+		  <div class="col">
+				<div class="card">
+				  <div class="card-header">
+				     Pasos ejecucion proceso
+				  </div>
+				  <div class="card-body">
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Orden Ejecucion</th>
+											<th>Descripcion</th>
+											<th>Movimiento</th>
+											<th>Grupo Automatico</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for aj in proccess.pasos %}
+											<tr>
+												<td>{{ aj.orden }}</td>
+												<td>{{ aj.detalle }}</td>
+												{% if aj.articuloAtributoConcepto is defined %}
+													<td>{{ aj.articuloAtributoConcepto }}</td>
+												{% else %}
+													<td></td>
+												{% endif %}
+												<td>{{ aj.grupoMovimiento }}</td>
+												<td class="text-center"><a href="{{ path('bd_edit_procesos_delete_paso_proceso', {proc : proccess.id, paso : aj.id}) }}" class="btn btn-sm btn-danger">-</a></td>
+											</tr>
+										{% endfor %}
+									</tbody>
+						</table>
+				  	{{ form_start(fpaso) }}
+				  		<div class="form-row align-items-center">
+				  			<div class=" col-lg-1 col">
+				  				{{ form_label(fpaso.orden) }}
+				  				{{ form_widget(fpaso.orden, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class=" col-lg-2 col">
+				  				{{ form_label(fpaso.grupoMovimiento) }}
+				  				{{ form_widget(fpaso.grupoMovimiento, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-lg-4 mt-2">
+				  				{{ form_label(fpaso.detalle) }}
+				  				{{ form_widget(fpaso.detalle, {'attr' : {'class' : 'form-control-sm mt-2'}}) }}
+				  			</div>
+				  			<div class="col-lg-2">
+				  				{{ form_label(fpaso.articuloAtributoConcepto, 'Movimiento') }}
+				  				{{ form_widget(fpaso.articuloAtributoConcepto, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-lg-1">
+				  				{{ form_label(fpaso.procesoFaena, 'Proceso') }}
+				  				{{ form_widget(fpaso.procesoFaena, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-lg-2 mt-2">
+				  				{{ form_widget(fpaso.guardar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block mt-4'}}) }}
+				  			</div>
+				  		</div>
+				  	
+				  	{{ form_end(fpaso) }}		
+	
+				  </div>
+				  
+				  </div>
+		  </div>
+		</div>
+
 <div class="modal fade" id="modalSubscriptionForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
   aria-hidden="true">
   <div class="modal-dialog" role="document">

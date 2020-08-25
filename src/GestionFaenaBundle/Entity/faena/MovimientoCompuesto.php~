@@ -30,5 +30,76 @@ abstract class MovimientoCompuesto extends MovimientoStock
      */
     private $movimientoOrigen; //cual es el movimiento origen de la transferencia/transformacion (Es el proceso del cual se retira la mercaderia, debe generar una SalidaStock)
 
-}
 
+    /**
+     * Set procesoFnDayDestino
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesoFnDayDestino
+     *
+     * @return MovimientoCompuesto
+     */
+    public function setProcesoFnDayDestino(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesoFnDayDestino = null)
+    {
+        $this->procesoFnDayDestino = $procesoFnDayDestino;
+
+        return $this;
+    }
+
+    /**
+     * Get procesoFnDayDestino
+     *
+     * @return \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria
+     */
+    public function getProcesoFnDayDestino()
+    {
+        return $this->procesoFnDayDestino;
+    }
+
+    /**
+     * Set movimientoDestino
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoDestino
+     *
+     * @return MovimientoCompuesto
+     */
+    public function setMovimientoDestino(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoDestino = null)
+    {
+        $this->movimientoDestino = $movimientoDestino;
+
+        return $this;
+    }
+
+    /**
+     * Get movimientoDestino
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
+     */
+    public function getMovimientoDestino()
+    {
+        return $this->movimientoDestino;
+    }
+
+    /**
+     * Set movimientoOrigen
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoOrigen
+     *
+     * @return MovimientoCompuesto
+     */
+    public function setMovimientoOrigen(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoOrigen = null)
+    {
+        $this->movimientoOrigen = $movimientoOrigen;
+
+        return $this;
+    }
+
+    /**
+     * Get movimientoOrigen
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
+     */
+    public function getMovimientoOrigen()
+    {
+        return $this->movimientoOrigen;
+    }
+}

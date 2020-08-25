@@ -84,6 +84,9 @@ abstract class AtributoMedible extends Atributo
         $value = new ValorNumerico();
         $value->setUnidadMedida($this->unidadMedida);
         $value->setAtributo($atributo);
+        $value->setMostrar($atributo->getMostrar());
+        $value->setDecimales($this->getDecimales());
+        $value->setAcumula($this->getAcumula());
         return $value;
     }
 

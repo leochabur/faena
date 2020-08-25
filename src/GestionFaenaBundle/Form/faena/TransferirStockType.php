@@ -16,7 +16,7 @@ use Symfony\Component\Form\FormEvents;
 class TransferirStockType extends AbstractType
 {
 
-    private $faena, $proceso, $articulo, $automatico;  //FaenaDiaria - ProcesoFaenaDiaria - Articulo - Si el movimiento se genera automaticamente
+    private $faena, $proceso, $articulo, $automatico, $manager;  //FaenaDiaria - ProcesoFaenaDiaria - Articulo - Si el movimiento se genera automaticamente
     /**
      * {@inheritdoc}
      */
@@ -25,6 +25,7 @@ class TransferirStockType extends AbstractType
         $this->faena = $options['faena'];
         $this->proceso = $options['proceso'];
         $this->articulo = $options['articulo'];
+        $this->manager = $options['manager'];
         $transferir = $builder->getData();
         $builder->add('artProcFaena', 
                               EntityType::class, 
@@ -50,6 +51,13 @@ class TransferirStockType extends AbstractType
     {
         $valor = $event->getData();
         $form = $event->getForm();
+        
+        $default = null;
+        if ($destinoDefault = $valor->getArtProcFaena()->getProcesosDestino()->first())
+        {
+          $default = $this->faena->getProceso($destinoDefault->getId());
+        }       
+
         $form->add('concepto', 
                     EntityType::class, 
                     ['class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso', 
@@ -59,8 +67,9 @@ class TransferirStockType extends AbstractType
               ->add('destino', 
                     EntityType::class, 
                     ['class' => 'GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria', 
+                     'data' => $default,
                     'choices' => $this->faena->getProcesosDestinos($valor->getProcesoFnDay()->getProcesoFaena()),
-                    'mapped' => false,
+                    'mapped' => false,                    
                     'required' => true
                     ]);
 
@@ -77,6 +86,7 @@ class TransferirStockType extends AbstractType
         ));
         $resolver->setRequired('faena')
                  ->setRequired('proceso')
+                 ->setRequired('manager')
                  ->setRequired('articulo'); //para poder recuperar cuales son los ProcesosDiarios Instanciados
     }
 

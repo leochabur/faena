@@ -206,4 +206,28 @@ class InformeProceso
         return $atributos;
     }
 
+
+    /**
+     * Set atributoAjuste
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Atributo $atributoAjuste
+     *
+     * @return InformeProceso
+     */
+    public function setAtributoAjuste(\GestionFaenaBundle\Entity\gestionBD\Atributo $atributoAjuste = null)
+    {
+        $this->atributoAjuste = $atributoAjuste;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoAjuste
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Atributo
+     */
+    public function getAtributoAjuste()
+    {
+        return $this->atributoAjuste;
+    }
 }

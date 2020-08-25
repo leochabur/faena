@@ -56,6 +56,28 @@
 			{% endfor %}
 		</tbody>
 	</table>
+	{{ form_start(formAdd) }}
+		Procesos Destino
+		<div class="form-row">
+			{{ form_widget(formAdd.proceso, {'attr' : {'class' : 'form-control-sm col-lg-6 mt-2'}}) }}
+			{{ form_widget(formAdd.guardar, {'attr' : {'class' : 'btn btn-sm btn-default col-lg-1 assign'}}) }}
+		</div>
+	{{ form_end(formAdd) }}
+	Procesos destino asignados
+	<table class="table table-bordered table-hover table-striped table-sm">
+		<thead>
+			<tr>
+				<th>Proceso</th>
+			</tr>
+		</thead>
+		<tbody>
+				{% for proc in art.procesosDestino %}
+					<tr>
+						<td>{{ proc }}</td>
+					</tr>
+				{% endfor %}
+		</tbody>
+	</table>
 	<button class="btn btn-success back"><< Volver</button>
 
 {% endblock fos_user_content %}
@@ -101,6 +123,17 @@
 																			        }
 																			    }
 																			});
+									});
+									$('.assign').click(function(event){
+																			event.preventDefault();
+																			var btn = $(this);
+																			var form = btn.closest('form');
+																        	$.post(form.attr('action'),
+																        		   form.serialize(),
+																        		   function(data){
+																        		   			location.reload();
+																        		   });
+																			
 									});
 		});
 	</script>

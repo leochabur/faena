@@ -26,10 +26,13 @@ use GestionFaenaBundle\Entity\faena\SalidaStock;
 use GestionFaenaBundle\Entity\faena\TransformarStock;
 use GestionFaenaBundle\Entity\faena\TransferirStock;
 use GestionFaenaBundle\Entity\faena\MovimientoStock;
+use GestionFaenaBundle\Entity\GrupoMovimientosAutomatico;
 use GestionFaenaBundle\Entity\faena\MovimientoCompuesto;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimiento;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso;
 use GestionFaenaBundle\Entity\faena\ValorNumerico;
+use GestionFaenaBundle\Entity\PasoProcesoRealizado;
+use GestionFaenaBundle\Entity\PasoProceso;
 use GestionFaenaBundle\Entity\faena\MovimientoAutomatico;
 use GestionFaenaBundle\Entity\gestionBD\Granja;
 use GestionFaenaBundle\Entity\gestionBD\Articulo;
@@ -320,17 +323,18 @@ class GestionFaenaController extends Controller
     }
 
     /**
-     * @Route("/genauto/{proc}/{fan}", name="bd_generate_movimientos_automaticos")
+     * @Route("/genauto/{proc}/{fan}/{gpo}", name="bd_generate_movimientos_automaticos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function generateMovimientosAutmaticos($proc, $fan)
+    public function generateMovimientosAutmaticos($proc, $fan, $gpo)
     {
       $em = $this->getDoctrine()->getManager();
       $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
       $faena = $em->find(FaenaDiaria::class, $fan);
       $procFaena = $proceso->getProcesoFaena();
 
-      $automaticos = $procFaena->getAutomaticos();
+      $grupoAutoomatico = $em->find(GrupoMovimientosAutomatico::class, $gpo);
+      $automaticos = $grupoAutoomatico->getAutomaticos();
       try
       {
           foreach ($automaticos as $movAut) 
@@ -358,8 +362,28 @@ class GestionFaenaController extends Controller
                 $this->addFlash('errorLoad', "El movimiento ".$auto->getVistaEdicion().", ya se ha realizado!");
               }                             
           }
-          $em->flush(); 
           
+          $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($procFaena, $grupoAutoomatico); //recupera si existe el paso en el proceso para el grupo automatico de movimiento
+          if ($paso)
+          {
+              //como solo mantiene un paso realizado por cada grupo elimina si ya existe alguno
+              $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($proceso, $faena, $paso);
+              if ($pasoRealizado) //si ya existe solo actualiza la fecha hora de ejecucion
+              {
+                  $pasoRealizado->setFechaAccion(new \DateTime());
+              }
+              else
+              {   //sino existe lo crea
+                  $pasoRealizado = new PasoProcesoRealizado();
+                  $pasoRealizado->setFechaAccion(new \DateTime());
+                  $pasoRealizado->setProcesoFaenaDiaria($proceso);
+                  $pasoRealizado->setFaenaDiaria($faena);
+                  $pasoRealizado->setPaso($paso);
+                  $em->persist($pasoRealizado);
+              }              
+          }         
+
+          $em->flush(); 
       }
       catch(\Exception $e){
                          //   return new Response(var_dump($e->getTrace()));
@@ -782,6 +806,16 @@ class GestionFaenaController extends Controller
         return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
     }
 
+
+    private function getFormExecuteAutomaticMove($proceso, $faena, $grupo)
+    {
+        return  $this->createFormBuilder()
+                     ->add('generar', SubmitType::class, ['label' => 'Generar'])
+                     ->setAction($this->generateUrl('bd_generate_movimientos_automaticos', 
+                                                    ['proc' => $proceso, 'fan' => $faena, 'gpo' => $grupo]))
+                     ->getForm();     
+    }
+
     /**
      * @Route("/gstProcFanDayProc/{proc}/{fd}", name="bd_adm_proc_fan_day_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
@@ -797,13 +831,14 @@ class GestionFaenaController extends Controller
           $errors = array();
           if (!$form->get('guardar')->isClicked())
           {
-            $form = $this->createFormBuilder()
-                         ->add('generar', SubmitType::class, ['label' => 'Generar movimientos'])
-                         ->setAction($this->generateUrl('bd_generate_movimientos_automaticos', 
-                                                        ['proc' => $proceso->getId(), 'fan' => $faena->getId()]))
-                         ->getForm();     
-            return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
-                                ['form' => $form->createView(), 'faena' => $faena, 'proceso' => $proceso]);
+              $formsAutomaticos = [];
+              foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
+              {
+                $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo->getId())->createView();
+              }
+
+              return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
+                                  ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso]);
           }
           else
           {
@@ -891,41 +926,44 @@ class GestionFaenaController extends Controller
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            $art = $mov->getArtProcFaena()->getArticulo();
-            if (!array_key_exists($art->getId(), $body))
+            if ($mov->getFaenaDiaria() == $faena)
             {
-                $body[$art->getId()] = ['tipo' => 'Existencias totales', 'art' => $art, 'trx' => 0];
-            }
-            foreach ($mov->getValores() as $valor) 
-            {
-                if ($valor->isNumeric())
-                {
-                  $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
-                  if ($valor->getMostrar())
-                  {      
-                    $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => true];
-                  }
-                  if (!array_key_exists($atributo->getId(), $body[$art->getId()]))
+              $art = $mov->getArtProcFaena()->getArticulo();
+              if (!array_key_exists($art->getId(), $body))
+              {
+                  $body[$art->getId()] = ['tipo' => 'Existencias totales', 'art' => $art, 'trx' => 0];
+              }
+              foreach ($mov->getValores() as $valor) 
+              {
+                  if ($valor->isNumeric())
                   {
-                        $body[$art->getId()][$atributo->getId()] = 0;
-                  }
-                  if ($valor->getAtributo())
-                  {
-                      if ($valor->getAcumula())
-                      {
-                          $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
-                          $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
-                      }
-                  }
-                  else
-                  {
+                    $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
                     if ($valor->getMostrar())
-                    {
-                      $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
-                      $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
+                    {      
+                      $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => true];
                     }
+                    if (!array_key_exists($atributo->getId(), $body[$art->getId()]))
+                    {
+                          $body[$art->getId()][$atributo->getId()] = 0;
+                    }
+                    if ($valor->getAtributo())
+                    {
+                        if ($valor->getAcumula())
+                        {
+                            $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
+                            $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
+                        }
+                    }
+                    else
+                    {
+                      if ($valor->getMostrar())
+                      {
+                        $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
+                        $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
+                      }
+                    }                  
                   }                  
-                }                  
+              }
             }
         }
         foreach ($rounded as $kar => $var)
@@ -940,6 +978,14 @@ class GestionFaenaController extends Controller
               $body[$kar][$katr] = number_format($body[$kar][$katr], $vatr,'.','');
             }
         }
+        ///recupera todos loas pasos realizados para el proceso
+        $pasosRealizados = $em->getRepository(PasoProcesoRealizado::class)->findPasosRealizadoProceso($proceso, $faena);
+        $pasos = [];
+        foreach ($pasosRealizados as $p)
+        {
+          $pasos[$p->getPaso()->getId()] = true;
+        }
+        ///////////////
       ///fin actualizacion
       //  $detalle = $this->getFormTipoMovimienos($proceso, $faena);
         $params = [
@@ -948,6 +994,7 @@ class GestionFaenaController extends Controller
                       'faena' => $faena,
                       'body' => $body,
                       'headers' => $headers,
+                      'pasos' => $pasos
                   ];
         if ($typ)
         {
@@ -986,100 +1033,101 @@ class GestionFaenaController extends Controller
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            $computar = true;
-            $acumular = false;
-            if ($articulo)
+            if ($mov->getFaenaDiaria() == $faena)
             {
-                if ($mov->getArtProcFaena()->getArticulo() != $articulo)
+                $computar = true;
+                $acumular = false;
+                if ($articulo)
                 {
-                    $computar = false;
+                    if ($mov->getArtProcFaena()->getArticulo() != $articulo)
+                    {
+                        $computar = false;
+                    }
+                    else
+                    {
+                        $acumular = true;
+                    }
                 }
-                else
+                if ($computar)
                 {
-                    $acumular = true;
-                }
-            }
-            if ($computar)
-            {
-              $nombreFaena = "";
-              if ($mov->getProcesoFnDay()->getProcesoFaena()->getPermanente())
-              {
-                $nombreFaena = " (Faena: ".$mov->getFaenaDiaria().")";
-              }
-
-              $movOrigen = $mov->getOrigen();
-              $from = "";
-
-              if ($mov->getOrigen())
-              {
-                  if ($mov->getOrigen()->getInstance() == 4)
+                  $nombreFaena = "";
+                  if ($mov->getProcesoFnDay()->getProcesoFaena()->getPermanente())
                   {
-                     $movComp = $mov->getOrigen();
-                     $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
-                  }
-                  elseif ($mov->getOrigen()->getInstance() == 5)
-                  {
-                     $movComp = $mov->getOrigen();
-                     $from = " (".$movComp->getMovimientoOrigen()->getProcesoFnDay()." >> ".$movComp->getMovimientoDestino()->getProcesoFnDay().")";
-                  }
-              }
-              elseif ($mov->getDestino())
-              {
-                  if ($mov->getDestino()->getInstance() == 4)
-                  {
-                     $movComp = $mov->getDestino();
-                     $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
-                   }
-                  elseif ($mov->getDestino()->getInstance() == 5)
-                  {
-                     $movComp = $mov->getDestino();
-                     $from = " (".$movComp->getMovimientoOrigen()->getProcesoFnDay()." >> ".$movComp->getMovimientoDestino()->getProcesoFnDay().")";
-                  }
-              }
-
-              $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
-              $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
-
-              $body[$i] = ['tipo' => $mov.$nombreFaena, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto()."$from"];
-              $body[$i]['id'] = $mov->getId();
-              $body[$i]['trx'] = $idTrx;
-              foreach ($mov->getValores() as $valor) 
-              {
-                  $atributo = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
-                  if ($valor->getMostrar())
-                  {                            
-                      $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric(), 'decimales' => 2];
+                    $nombreFaena = " (Faena: ".$mov->getFaenaDiaria().")";
                   }
 
-                  $rounded[$atributo->getId()] = $valor->getDecimales();
+                  $movOrigen = $mov->getOrigen();
+                  $from = "";
 
-                  $body[$i][$atributo->getId()] = $valor->getData()."";
-                  $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
-                  if ($acumular)
+                  if ($mov->getOrigen())
                   {
+                      if ($mov->getOrigen()->getInstance() == 4)
+                      {
+                         $movComp = $mov->getOrigen();
+                         $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
+                      }
+                      elseif ($mov->getOrigen()->getInstance() == 5)
+                      {
+                         $movComp = $mov->getOrigen();
+                         $from = " (".$movComp->getMovimientoOrigen()->getProcesoFnDay()." >> ".$movComp->getMovimientoDestino()->getProcesoFnDay().")";
+                      }
+                  }
+                  elseif ($mov->getDestino())
+                  {
+                      if ($mov->getDestino()->getInstance() == 4)
+                      {
+                         $movComp = $mov->getDestino();
+                         $from = " (".$movComp->getMovimientoOrigen()->getArtProcFaena()->getArticulo()." >> ".$movComp->getMovimientoDestino()->getArtProcFaena()->getArticulo().")";
+                       }
+                      elseif ($mov->getDestino()->getInstance() == 5)
+                      {
+                         $movComp = $mov->getDestino();
+                         $from = " (".$movComp->getMovimientoOrigen()->getProcesoFnDay()." >> ".$movComp->getMovimientoDestino()->getProcesoFnDay().")";
+                      }
+                  }
+
+                  $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
+                  $formsDelete[$mov->getId()] = $this->getFormDeleteMovimiento($mov->getId(), $idTrx, $fd)->createView();
+
+                  $body[$i] = ['tipo' => $mov.$nombreFaena, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto()."$from"];
+                  $body[$i]['id'] = $mov->getId();
+                  $body[$i]['trx'] = $idTrx;
+                  foreach ($mov->getValores() as $valor) 
+                  {
+                      $atributo = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
+                      if ($valor->getMostrar())
+                      {                            
+                          $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric(), 'decimales' => 2];
+                      }
+
                       $rounded[$atributo->getId()] = $valor->getDecimales();
-                      if (!array_key_exists($atributo->getId(), $totales))
-                      {
-                          $totales[$atributo->getId()] = 0;
-                      }
 
-                      if ($valor->getAtributo())
+                      $body[$i][$atributo->getId()] = $valor->getData()."";
+                      $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
+                      if ($acumular)
                       {
-                        if ($valor->getAcumula())
-                        {
-                          $totales[$atributo->getId()]+= $valor->getData();
-                        }
-                      }
-                      else
-                      {
-                        $totales[$atributo->getId()]+= $valor->getData();
-                      }
-                  }                     
-              }         
-                   
-              $i++;
+                          $rounded[$atributo->getId()] = $valor->getDecimales();
+                          if (!array_key_exists($atributo->getId(), $totales))
+                          {
+                              $totales[$atributo->getId()] = 0;
+                          }
 
-            }
+                          if ($valor->getAtributo())
+                          {
+                            if ($valor->getAcumula())
+                            {
+                              $totales[$atributo->getId()]+= $valor->getData();
+                            }
+                          }
+                          else
+                          {
+                            $totales[$atributo->getId()]+= $valor->getData();
+                          }
+                      }                     
+                  }                          
+                  $i++;
+                }
+              }
         }
         
         $params = [ 'proceso' => $proceso,
@@ -1691,6 +1739,34 @@ class GestionFaenaController extends Controller
         }
     }
 
+
+    private function registrarPasoRealizado(ArticuloAtributoConcepto $articulo, 
+                                            ProcesoFaena $proceso, 
+                                            ProcesoFaenaDiaria $procesoFaena, 
+                                            FaenaDiaria $faena,
+                                            $em)
+    {
+
+        $paso = $em->getRepository(PasoProceso::class)->findPasoProcesoArtAtrConc($proceso, $articulo);
+        if ($paso)
+        {
+            $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($procesoFaena, $faena, $paso);
+            if ($pasoRealizado)
+            {
+                $pasoRealizado->setFechaAccion(new \DateTime());
+            }
+            else
+            {
+                  $pasoRealizado = new PasoProcesoRealizado();
+                  $pasoRealizado->setFechaAccion(new \DateTime());
+                  $pasoRealizado->setProcesoFaenaDiaria($procesoFaena);
+                  $pasoRealizado->setFaenaDiaria($faena);
+                  $pasoRealizado->setPaso($paso);
+                  $em->persist($pasoRealizado);
+            }
+        }
+    }
+
     /**
      * @Route("/gstMovProc/{proc}/{art}/{conc}/{type}/{fanday}", name="bd_adm_proc_mov_st", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
@@ -1711,6 +1787,7 @@ class GestionFaenaController extends Controller
             {
               $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em, $request);
               $proceso->setUltimoMovimiento(new \DateTime());
+              $this->registrarPasoRealizado($articulo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
               $em->flush();
             }
             catch(\Exception $e)
@@ -1725,7 +1802,8 @@ class GestionFaenaController extends Controller
             {
               $auto = new MovimientoAutomatico();
               $proceso = $this->procesarTransferirStock($proceso, $articulo, $concepto, $faena, $em, $auto, $request, false);
-              //$proceso->setUltimoMovimiento(new \DateTime());
+              $proceso->setUltimoMovimiento(new \DateTime());
+              $this->registrarPasoRealizado($articulo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
               $em->flush();
             }
             catch(\Exception $e)
@@ -1742,6 +1820,7 @@ class GestionFaenaController extends Controller
 //          throw new \Exception("Error Processing Request ".$type, 1);
           $this->procesarEntradaSalidaStock($proceso, $articulo, $concepto, $faena, $type, $em, $request);
           $proceso->setUltimoMovimiento(new \DateTime());
+          $this->registrarPasoRealizado($articulo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
           $em->flush();
           return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
         }
@@ -1926,12 +2005,13 @@ class GestionFaenaController extends Controller
                                            ['faena' => $fanday,
                                             'proceso' => $proc,
                                             'articulo' => $art->getArticulo(),
+                                            'manager' => $this->getDoctrine()->getManager(),
                                             'action' => $this->generateUrl($url, 
                                                                           ['type' => $movimiento->getType(), 
                                                                            'proc' => $proc->getId(), 
                                                                            'conc' => $movimiento->getArtProcFaena()->getConcepto()->getId(), 
                                                                            'art' => $art->getId(), 
-                                                                           'mov' => $movimiento->getId(),
+                                                                           'mov' => $movimiento->getId(),                          
                                                                            'fanday' => $fanday->getId()]),
                                            'method' => 'POST']);
         }

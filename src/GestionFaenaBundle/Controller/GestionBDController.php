@@ -46,6 +46,10 @@ use GestionFaenaBundle\Form\gestionBD\UnidadMedidaType;
 use GestionFaenaBundle\Form\gestionBD\CategoriaArticuloType;
 use GestionFaenaBundle\Form\gestionBD\SubcategoriaArticuloType;
 use GestionFaenaBundle\Entity\gestionBD\AtributoProceso;
+use GestionFaenaBundle\Form\GrupoMovimientosAutomaticoType;
+use GestionFaenaBundle\Entity\GrupoMovimientosAutomatico;
+use GestionFaenaBundle\Form\PasoProcesoType;
+use GestionFaenaBundle\Entity\PasoProceso;
 use GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto;
 use GestionFaenaBundle\Entity\gestionBD\FactorCalculo;
 use GestionFaenaBundle\Entity\gestionBD\CategoriaArticulo;
@@ -555,13 +559,6 @@ class GestionBDController extends Controller
      */
     public function editarArticuloAction(Request $request)
     {      
-
-      /*  $form =  $this->createFormBuilder()->add('proceso', 
-                                                  EntityType::class,
-                                                  [
-                                                    'class' => 'GestionFaenaBundle\Entity\ProcesoFaena'
-                                                  ])
-                                            ->getForm();*/
     
         $form =    $this->createFormBuilder()
                         ->add('articulos', 
@@ -600,13 +597,11 @@ class GestionBDController extends Controller
                 {
                     $forms[$atr->getId()] = $this->getFormUpdateAtributo($atr)->createView();                    
                 }
-                return $this->render('@GestionFaena/gestionBD/atributoABMV2Update.html.twig', array('art' => $articulo, 'formsAtr' => $forms));
+                $formAddDest = $this->getFormAddDestinoArtAtrCon($articulo->getId());
+                return $this->render('@GestionFaena/gestionBD/atributoABMV2Update.html.twig', array('formAdd' => $formAddDest->createView(),'art' => $articulo, 'formsAtr' => $forms));
             }
         }
         return $this->render('@GestionFaena/gestionBD/atributoABMV2.html.twig', array('form' => $form->createView()));
-        
-       // $form = $this->createForm(EditArtAtrConType::class, null);
-       // return $this->render('@GestionFaena/gestionBD/atributoABMV3.html.twig', array('form' => $form->createView()));
     }
 
     private function getFormUpdateAtributo($atr)
@@ -628,6 +623,47 @@ class GestionBDController extends Controller
         return $form;
     }
 
+    private function getFormAddDestinoArtAtrCon($art)
+    {        
+        $form =    $this->createFormBuilder(['message' => 'Type your message here'])
+                        ->add('proceso', 
+                              EntityType::class, 
+                              [
+                              'class' => 'GestionFaenaBundle:ProcesoFaena',
+                              'query_builder' => function (EntityRepository $er){
+                                                                                    return $er->createQueryBuilder('p')
+                                                                                              ->where('p.activo = :activo')
+                                                                                              ->setParameter('activo', true)
+                                                                                              ->orderBy('p.nombre');
+                                                                                }
+                               ])
+                        ->setAction($this->generateUrl('bd_add_proceso_destino_art_atr_con', array('art' => $art)))
+                        ->add('guardar', SubmitType::class, array('label' => '+'))              
+                        ->getForm();
+        return $form;
+    }
+
+    /**
+     * @Route("/config/addprocdest/{art}", name="bd_add_proceso_destino_art_atr_con", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addProcesoDestinoArtAtrConc($art, Request $request)
+    {
+        try{
+                $form = $this->getFormAddDestinoArtAtrCon($art);
+                $form->handleRequest($request);
+                if ($form->isValid())
+                {
+                    $em = $this->getDoctrine()->getManager();
+                    $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
+                    $data = $form->getData();
+                    $articulo->addProcesosDestino($data['proceso']);
+                    $em->flush();
+                    return new JsonResponse(array('ok' => true, 'message' => ''));
+                }
+            }            
+            catch(\Exception $e) {return new JsonResponse(array('ok' => false, 'message' => $e->getMessage()));}
+    }
 
     /**
      * @Route("/config/delatr/{atr}", name="bd_delete_atributo")
@@ -987,6 +1023,8 @@ class GestionBDController extends Controller
         $movAuto = new MovimientoAutomatico();
         return $this->render('@GestionFaena/procesoEdit.html.twig', 
                             array('proccess' => $proceso, 
+                                  'grupoMov' => $this->getFormAddPasoGrupoMovimiento(new GrupoMovimientosAutomatico(), $proceso)->createView(),
+                                  'fpaso' => $this->getFormAddPasoProceso($proceso, new PasoProceso())->createView(),
                                   'form' => $this->getFormAddDestinoProceso($proccess)->createView(),
                                   'stock' => $this->getFormConfigurarManejoStock($proceso)->createView(),
                                   'ajuste' => $this->getFormSetAjusteProceso($ajuste, $proceso)->createView(),
@@ -995,6 +1033,66 @@ class GestionBDController extends Controller
                                   'base' => $this->getFormSetArticuloBaseProceso($proceso)->createView(),
                                   'atrBase' => $this->getFormSetAtributoBaseProceso($proceso)->createView()));
     }
+
+    private function getFormAddPasoGrupoMovimiento($grupo, $proceso)
+    {
+        return $this->createForm(GrupoMovimientosAutomaticoType::class, 
+                                $grupo, 
+                                ['action' => $this->generateUrl('bd_add_grupo_movimientos_automaticos', ['proc' => $proceso->getId()]),
+                                 'method' => 'POST',
+                                 'proceso' => $proceso
+                                ]);
+    }
+
+    /**
+     * @Route("/config/addgpomvau/{proc}", name="bd_add_grupo_movimientos_automaticos", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addGrupoMovAutomaticoProcesoFaena(Request $request, $proc)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $grupo = new GrupoMovimientosAutomatico();
+        $form = $this->getFormAddPasoGrupoMovimiento($grupo, $proceso);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager->persist($grupo);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $grupo->getProcesoFaena()->getId()]);
+        }
+    }
+
+
+    private function getFormAddPasoProceso($proceso, $paso)
+    {
+        return $this->createForm(PasoProcesoType::class, 
+                                $paso, 
+                                ['action' => $this->generateUrl('bd_add_paso_proceso', ['proc' => $proceso->getId()]),
+                                 'method' => 'POST',
+                                 'proceso' => $proceso
+                                ]);
+    }
+
+    /**
+     * @Route("/config/addpasoproc/{proc}", name="bd_add_paso_proceso", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addPasoProcesoFaena($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $paso = new PasoProceso();
+        $form = $this->getFormAddPasoProceso($proceso, $paso);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager->persist($paso);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proceso->getId()]);
+        }
+    }
+
 
     //////////////////Set AtributoAbstracto
     /**
@@ -1033,6 +1131,35 @@ class GestionBDController extends Controller
         return $form;
     }
     /////////////////////Fin Set AtributoAbstracto
+
+    /**
+     * @Route("/config/delpp/{proc}/{paso}", name="bd_edit_procesos_delete_paso_proceso")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deletePasoProceso($proc, $paso)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $paso = $entityManager->find(PasoProceso::class, $paso);
+        $entityManager->remove($paso);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+    }
+
+
+    /**
+     * @Route("/config/delgpoauto/{proc}/{gpo}", name="bd_edit_procesos_delete_grupo_movimientos_automatic")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteGrupoMovimientosAutomatico($proc, $gpo)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $grupo = $entityManager->find(GrupoMovimientosAutomatico::class, $gpo);
+        $entityManager->remove($grupo);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+    }
 
     /**
      * @Route("/config/delauto/{proccess}/{automatic}", name="bd_edit_procesos_delete_automatic")

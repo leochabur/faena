@@ -45,7 +45,16 @@ class ArticuloAtributoConcepto
      *
      * @ORM\Column(name="asignado", type="boolean", options={"default":true})
      */
-    private $activo = true;
+    private $activo = true;  
+
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena")
+     * @ORM\JoinTable(name="sp_st_proc_def_by_art_atr_con",
+     *      joinColumns={@ORM\JoinColumn(name="id_art_atr_cn", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")}
+     *      )
+     */
+    private $procesosDestino; //para el caso de las transferencias, define cual o cuales son los procesos destino
 
     /**
      * Get id
@@ -237,6 +246,7 @@ class ArticuloAtributoConcepto
     public function __construct()
     {
         $this->atributos = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->procesosDestino = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -261,5 +271,39 @@ class ArticuloAtributoConcepto
     public function getProcesoFaena()
     {
         return $this->procesoFaena;
+    }
+
+    /**
+     * Add procesosDestino
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesosDestino
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function addProcesosDestino(\GestionFaenaBundle\Entity\ProcesoFaena $procesosDestino)
+    {
+        $this->procesosDestino[] = $procesosDestino;
+
+        return $this;
+    }
+
+    /**
+     * Remove procesosDestino
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesosDestino
+     */
+    public function removeProcesosDestino(\GestionFaenaBundle\Entity\ProcesoFaena $procesosDestino)
+    {
+        $this->procesosDestino->removeElement($procesosDestino);
+    }
+
+    /**
+     * Get procesosDestino
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getProcesosDestino()
+    {
+        return $this->procesosDestino;
     }
 }

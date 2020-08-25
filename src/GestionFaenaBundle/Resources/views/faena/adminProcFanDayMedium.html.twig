@@ -37,8 +37,11 @@
 				{{ form_widget(form.proceso, {'attr' : {'class' : 'proceso'}}) }}
 			</div>
 			<div class="row">
-				<div class="col">
+				<div class="col-lg-4 col-sm-12">
 						{{ form_widget(form.guardar) }}
+				</div>
+				<div class="col-lg-8 col-sm-12 text-right">
+						<a href="#" data-toggle="modal" data-target="#fullHeightModalRight"><i class="far fa-question-circle fa-2x mt-3"></i></a>
 				</div>
 			</div>
 				{% if form.automatic is defined %}
@@ -166,7 +169,38 @@
 	</div>
 </div>
 
+	<div class="modal fade top" id="fullHeightModalRight" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+	  aria-hidden="true">
 
+	  <div class="modal-dialog modal-full-height modal-top" role="document">
+
+
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h4 class="modal-title w-100" id="myModalLabel">Pasos a ejecutar...</h4>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        	<ul>
+					{% for aj in proceso.procesoFaena.pasos %}
+						<li>Paso {{ aj.orden }}: {{ aj.detalle }}
+							{% if pasos[aj.id] is defined %}
+								<i class="far fa-check-circle fa-2x"></i>
+							{% else %}
+								<i class="far fa-times-circle fa-2x mt-2"></i>
+							{% endif %}
+						</li>
+					{% endfor %}
+	        	</ul>
+	      </div>
+	      <div class="modal-footer justify-content-center">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 
 {% endblock fos_user_content %}
 

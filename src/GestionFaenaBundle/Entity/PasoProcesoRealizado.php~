@@ -1,0 +1,83 @@
+<?php
+
+namespace GestionFaenaBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * PasoProcesoRealizado
+ *
+ * @ORM\Table(name="paso_proceso_realizado")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\PasoProcesoRealizadoRepository")
+ */
+class PasoProcesoRealizado
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fechaAccion", type="datetime")
+     */
+    private $fechaAccion;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria")
+     * @ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id")
+    */    
+    private $procesoFaenaDiaria;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\FaenaDiaria")
+     * @ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")
+    */    
+    private $faenaDiaria;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\PasoProceso")
+     * @ORM\JoinColumn(name="id_paso_proc", referencedColumnName="id")
+    */    
+    private $paso;
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set fechaAccion
+     *
+     * @param \DateTime $fechaAccion
+     *
+     * @return PasoProcesoRealizado
+     */
+    public function setFechaAccion($fechaAccion)
+    {
+        $this->fechaAccion = $fechaAccion;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaAccion
+     *
+     * @return \DateTime
+     */
+    public function getFechaAccion()
+    {
+        return $this->fechaAccion;
+    }
+}
+

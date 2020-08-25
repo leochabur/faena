@@ -55,11 +55,16 @@ class MovimientoAutomaticoType extends AbstractType
                                       'choices' => $proceso->getProcesosDestino(),
                                       'required' => false
                  ])
-                ->add('procesoFaena', 
+                ->add('grupo', 
                       EntityType::class, 
                       [
-                          'class' => 'GestionFaenaBundle:ProcesoFaena', 
-                          'choices' => [$proceso]
+                          'class' => 'GestionFaenaBundle:GrupoMovimientosAutomatico',
+                          'query_builder' => function (EntityRepository $er) use ($proceso){
+                                                                                            return $er->createQueryBuilder('p')
+                                                                                                      ->join('p.procesoFaena', 'pr')
+                                                                                                      ->where('pr = :proceso')
+                                                                                                      ->setParameter('proceso', $proceso);
+                                                                                            }
                       ]);
     }
 

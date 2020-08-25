@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="sp_st_trans_st")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\TransferirStockRepository")
  */
-class TransferirStock extends MovimientoStock
+class TransferirStock extends MovimientoCompuesto
 {
 
 
@@ -24,90 +24,17 @@ class TransferirStock extends MovimientoStock
         return 5;
     }
 
-    public function updateValues($promedio, $entityManager)
+    public function updateValues($promedio, $entityManager, $automatico = false)
     {
-     /*   $iterator = $this->getValores()->getIterator();
+        $iterator = $this->getValores()->getIterator();
         $iterator->uasort(function ($first, $second) {
-            return (int) $first->getAtributo()->getAtributo()->getPosition() > (int) $second->getAtributo()->getAtributo()->getPosition() ? 1 : -1;
+            return (int) $first->getAtributo()->getPosition() > (int) $second->getAtributo()->getPosition() ? 1 : -1;
         });
-        foreach ($this->getValores() as $valor) {
-            $valor->calcularValor($this);
-        }*/
-    }
-
-
-
-
-    /**
-     * Set procesoFnDayDestino
-     *
-     * @param \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesoFnDayDestino
-     *
-     * @return TransferirStock
-     */
-    public function setProcesoFnDayDestino(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $procesoFnDayDestino = null)
-    {
-        $this->procesoFnDayDestino = $procesoFnDayDestino;
-
-        return $this;
-    }
-
-    /**
-     * Get procesoFnDayDestino
-     *
-     * @return \GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria
-     */
-    public function getProcesoFnDayDestino()
-    {
-        return $this->procesoFnDayDestino;
-    }
-
-    /**
-     * Set movimientoDestino
-     *
-     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoDestino
-     *
-     * @return TransferirStock
-     */
-    public function setMovimientoDestino(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoDestino = null)
-    {
-        $this->movimientoDestino = $movimientoDestino;
-
-        return $this;
-    }
-
-    /**
-     * Get movimientoDestino
-     *
-     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
-     */
-    public function getMovimientoDestino()
-    {
-        return $this->movimientoDestino;
-    }
-
-    /**
-     * Set movimientoOrigen
-     *
-     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoOrigen
-     *
-     * @return TransferirStock
-     */
-    public function setMovimientoOrigen(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoOrigen = null)
-    {
-        $this->movimientoOrigen = $movimientoOrigen;
-
-        return $this;
-    }
-
-    /**
-     * Get movimientoOrigen
-     *
-     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
-     */
-    public function getMovimientoOrigen()
-    {
-        return $this->movimientoOrigen;
+        
+        foreach ($this->getValores() as $valor) 
+        {
+            $valor->calcularValor($this, $entityManager, $automatico);
+        }
     }
 
     public static function getInstance()

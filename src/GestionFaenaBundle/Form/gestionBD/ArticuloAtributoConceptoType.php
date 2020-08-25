@@ -26,7 +26,9 @@ class ArticuloAtributoConceptoType extends AbstractType
                             'query_builder' => function (EntityRepository $er) {
                                                                                     return $er->createQueryBuilder('c')
                                                                                               ->where('c.automatico = :automatico')
-                                                                                              ->setParameter('automatico', false);
+                                                                                              ->andWhere('c.activo = :activo')
+                                                                                              ->setParameter('automatico', false)
+                                                                                              ->setParameter('activo', true);
                                                                                 }
                         ])
                 ->add('articulo')

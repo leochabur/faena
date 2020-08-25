@@ -83,5 +83,100 @@ class AjusteMovimiento
     {
         return $this->factorAjuste;
     }
-}
 
+    /**
+     * Set tipoMovimiento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\TipoMovimientoConcepto $tipoMovimiento
+     *
+     * @return AjusteMovimiento
+     */
+    public function setTipoMovimiento(\GestionFaenaBundle\Entity\faena\TipoMovimientoConcepto $tipoMovimiento = null)
+    {
+        $this->tipoMovimiento = $tipoMovimiento;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoMovimiento
+     *
+     * @return \GestionFaenaBundle\Entity\faena\TipoMovimientoConcepto
+     */
+    public function getTipoMovimiento()
+    {
+        return $this->tipoMovimiento;
+    }
+
+    /**
+     * Set conceptoMovimiento
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptoMovimiento
+     *
+     * @return AjusteMovimiento
+     */
+    public function setConceptoMovimiento(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $conceptoMovimiento = null)
+    {
+        $this->conceptoMovimiento = $conceptoMovimiento;
+
+        return $this;
+    }
+
+    /**
+     * Get conceptoMovimiento
+     *
+     * @return \GestionFaenaBundle\Entity\faena\ConceptoMovimiento
+     */
+    public function getConceptoMovimiento()
+    {
+        return $this->conceptoMovimiento;
+    }
+
+    /**
+     * Set articulo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo
+     *
+     * @return AjusteMovimiento
+     */
+    public function setArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo = null)
+    {
+        $this->articulo = $articulo;
+
+        return $this;
+    }
+
+    /**
+     * Get articulo
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
+     */
+    public function getArticulo()
+    {
+        return $this->articulo;
+    }
+
+    /**
+     * Set proceso
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $proceso
+     *
+     * @return AjusteMovimiento
+     */
+    public function setProceso(\GestionFaenaBundle\Entity\ProcesoFaena $proceso = null)
+    {
+        $this->proceso = $proceso;
+
+        return $this;
+    }
+
+    /**
+     * Get proceso
+     *
+     * @return \GestionFaenaBundle\Entity\ProcesoFaena
+     */
+    public function getProceso()
+    {
+        return $this->proceso;
+    }
+}

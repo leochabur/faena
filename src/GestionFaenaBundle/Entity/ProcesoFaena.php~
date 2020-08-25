@@ -109,8 +109,8 @@ abstract class ProcesoFaena
     private $ajustes;
 
     /**
-     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\MovimientoAutomatico", mappedBy="procesoFaena", cascade={"persist", "remove"})
-     * @ORM\OrderBy({"ordenEjecucion" = "ASC"})
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", mappedBy="procesoFaena", cascade={"persist", "remove"})
+     * @ORM\OrderBy({"orden" = "ASC"})
      */
     private $automaticos;
 
@@ -136,12 +136,15 @@ abstract class ProcesoFaena
      */
     private $generaTransito = false; //indica si el proceso genera excesos que deben almacenarse para ser procesado otro dia
 
-
     /**
      * @ORM\Column(name="promedioDefault", type="boolean", options={"default":false})
      */
     private $promedioDefault = false; //indica si el proceso mantiene actualizado el peso promedio de aves (Es utilizado en el caso del proceso de transito para mantener el ultimo peso promedio generado)
 
+    /**
+     * @ORM\OneToMany(targetEntity="PasoProceso", mappedBy="procesoFaena")
+     */
+    private $pasos;
 
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
@@ -308,6 +311,7 @@ abstract class ProcesoFaena
         $this->conceptos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->manejosStock = new \Doctrine\Common\Collections\ArrayCollection();
         $this->ajustes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->pasos = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -766,5 +770,39 @@ abstract class ProcesoFaena
     public function getPromedioDefault()
     {
         return $this->promedioDefault;
+    }
+
+    /**
+     * Add paso
+     *
+     * @param \GestionFaenaBundle\Entity\PasoProceso $paso
+     *
+     * @return ProcesoFaena
+     */
+    public function addPaso(\GestionFaenaBundle\Entity\PasoProceso $paso)
+    {
+        $this->pasos[] = $paso;
+
+        return $this;
+    }
+
+    /**
+     * Remove paso
+     *
+     * @param \GestionFaenaBundle\Entity\PasoProceso $paso
+     */
+    public function removePaso(\GestionFaenaBundle\Entity\PasoProceso $paso)
+    {
+        $this->pasos->removeElement($paso);
+    }
+
+    /**
+     * Get pasos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPasos()
+    {
+        return $this->pasos;
     }
 }

@@ -55,7 +55,7 @@ abstract class MovimientoStock
     /**
      * @ORM\Column(name="visible", type="boolean", options={"default":true})
      */
-    private $visible; //flag utilizado para indicar si el movimiento debe ser tomado para calculos o para mostrar en los informes (Por ej, las TRX no se muestran, solo se muestran los movimientos de Egreso e Ingreso que se generarn automaticamente)
+    private $visible = true; //flag utilizado para indicar si el movimiento debe ser tomado para calculos o para mostrar en los informes (Por ej, las TRX no se muestran, solo se muestran los movimientos de Egreso e Ingreso que se generarn automaticamente)
 
     /**
      * @ORM\Column(name="eliminado", type="boolean", options={"default":false}, nullable=true)
@@ -466,5 +466,29 @@ abstract class MovimientoStock
     public function getOrigen()
     {
         return $this->origen;
+    }
+
+    /**
+     * Set movimientoAsociado
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoAsociado
+     *
+     * @return MovimientoStock
+     */
+    public function setMovimientoAsociado(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoAsociado = null)
+    {
+        $this->movimientoAsociado = $movimientoAsociado;
+
+        return $this;
+    }
+
+    /**
+     * Get movimientoAsociado
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
+     */
+    public function getMovimientoAsociado()
+    {
+        return $this->movimientoAsociado;
     }
 }

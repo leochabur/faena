@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * MovimientoAutomatico
  *
- * @ORM\Table(name="faena_movimiento_automatico")
+ * @ORM\Table(name="sp_gpo_mov_auto")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\MovimientoAutomaticoRepository")
  */
 class MovimientoAutomatico
@@ -35,10 +35,10 @@ class MovimientoAutomatico
     private $articuloAtributoConcepto;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="automaticos") 
-    * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", inversedBy="automaticos") 
+    * @ORM\JoinColumn(name="id_gpo_mov", referencedColumnName="id")
     */      
-    private $procesoFaena;
+    private $grupo;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena") 
@@ -49,7 +49,7 @@ class MovimientoAutomatico
 
     public function getVistaEdicion()
     {
-        return $this->articuloAtributoConcepto->getVistaEdicion()."(".$this->ordenEjecucion.")";
+        return $this->articuloAtributoConcepto->getVistaEdicion();
     }
     /**
      * Get id
@@ -110,30 +110,6 @@ class MovimientoAutomatico
     }
 
     /**
-     * Set procesoFaena
-     *
-     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena
-     *
-     * @return MovimientoAutomatico
-     */
-    public function setProcesoFaena(\GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena = null)
-    {
-        $this->procesoFaena = $procesoFaena;
-
-        return $this;
-    }
-
-    /**
-     * Get procesoFaena
-     *
-     * @return \GestionFaenaBundle\Entity\ProcesoFaena
-     */
-    public function getProcesoFaena()
-    {
-        return $this->procesoFaena;
-    }
-
-    /**
      * Set procesoDestinoDefault
      *
      * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoDestinoDefault
@@ -155,5 +131,29 @@ class MovimientoAutomatico
     public function getProcesoDestinoDefault()
     {
         return $this->procesoDestinoDefault;
+    }
+
+    /**
+     * Set grupo
+     *
+     * @param \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupo
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setGrupo(\GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupo = null)
+    {
+        $this->grupo = $grupo;
+
+        return $this;
+    }
+
+    /**
+     * Get grupo
+     *
+     * @return \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico
+     */
+    public function getGrupo()
+    {
+        return $this->grupo;
     }
 }

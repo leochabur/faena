@@ -93,4 +93,28 @@ class ConceptoMovimiento
         return $this->concepto;
     }
 
+
+    /**
+     * Set transforma
+     *
+     * @param boolean $transforma
+     *
+     * @return ConceptoMovimiento
+     */
+    public function setTransforma($transforma)
+    {
+        $this->transforma = $transforma;
+
+        return $this;
+    }
+
+    /**
+     * Get transforma
+     *
+     * @return boolean
+     */
+    public function getTransforma()
+    {
+        return $this->transforma;
+    }
 }
