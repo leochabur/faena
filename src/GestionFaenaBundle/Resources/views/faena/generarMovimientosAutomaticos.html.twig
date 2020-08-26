@@ -37,10 +37,16 @@
 						<td class="col-lg-6">{{ auto.detalle }}</td>
 						<td class="col-lg-1"><span class="badge badge-primary badge-pill">{{ auto.automaticos|length }}</span></td>
 						<td class="col-lg-2">
-							{{ form_start(formsAuto[auto.id]) }}
-							{{ form_widget(formsAuto[auto.id].generar, {'attr' : {'data-title' : auto.nombre,'class' : 'btn btn-warning btn-sm btn-generate'}}) }}
-							{{ form_end(formsAuto[auto.id]) }}
+							{% if auto.manual %}
+
+								<a class="btn btn-sm btn-warning" href="{{ path('bd_adm_generate_mov_manual_from_automatic', { proc : proceso.id , fd : faena.id , art : auto.movimientoManual.articuloAtributoConcepto.id})}}">Generar</a>
+							{% else %}
+								{{ form_start(formsAuto[auto.id]) }}
+								{{ form_widget(formsAuto[auto.id].generar, {'attr' : {'data-title' : auto.nombre,'class' : 'btn btn-warning btn-sm btn-generate'}}) }}
+								{{ form_end(formsAuto[auto.id]) }}
+							{% endif %}
 						</td>
+
 					</tr>
 				{% endfor %}
 

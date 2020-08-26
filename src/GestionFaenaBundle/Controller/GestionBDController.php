@@ -714,34 +714,34 @@ class GestionBDController extends Controller
     }
 
 
-    private function getFormSetArticuloOrigen($concMovProc)
+    private function getFormSetArticuloOrigen($articulo)
     {
         $form =    $this->createFormBuilder()
                         ->add('articulo', 
                               EntityType::class, [
                               'class' => 'GestionFaenaBundle:gestionBD\Articulo',
-                              'choices' => $concMovProc->getProcesoFaena()->getArticulosStock(),
+                              'choices' => $articulo->getConcepto()->getProcesoFaena()->getArticulosStock(),
                         ])
                         ->add('agregar', SubmitType::class, array('label' => 'Agregar atributos')) 
-                        ->setAction($this->generateUrl('bd_asignar_articulo_origen_transformacion', ['conc' => $concMovProc->getId()]))
+                        ->setAction($this->generateUrl('bd_asignar_articulo_origen_transformacion', ['art' => $articulo->getId()]))
                         ->setMethod('POST')              
                         ->getForm();
         return $form;
     }
 
     /**
-     * @Route("/config/assartor/{conc}", name="bd_asignar_articulo_origen_transformacion")
+     * @Route("/config/assartor/{art}", name="bd_asignar_articulo_origen_transformacion")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
-    public function asignarArticuloOrigenTransformacion($conc, Request $request)
+    public function asignarArticuloOrigenTransformacion($art, Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $concepto = $em->find(ConceptoMovimientoProceso::class, $conc);
-        $form = $this->getFormSetArticuloOrigen($concepto);
+        $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
+        $form = $this->getFormSetArticuloOrigen($articulo);
         $form->handleRequest($request);
         if ($form->isValid()){
             $data = $form->getData();
-            $concepto->setArticuloOrigenTransformacion($data['articulo']);
+            $articulo->setArticuloOrigenTransformacion($data['articulo']);
             $em->flush();
             return new JsonResponse(['status' => true]);
         }
@@ -763,8 +763,9 @@ class GestionBDController extends Controller
         $formAIM = $this->getFormABMAtributoInformableManual(new AtributoInformableArbitrario(), $articulo);
         if ($art)
         {
-            if ($articulo->getConcepto()->getTipoMovimiento()->getTransformaProductos()){
-                $trans = $this->getFormSetArticuloOrigen($articulo->getConcepto());
+            if ($articulo->getConcepto()->getTipoMovimiento()->getTransformaProductos())
+            {
+                $trans = $this->getFormSetArticuloOrigen($articulo);
                 return $this->render('@GestionFaena/gestionBD/atributoABM.html.twig', array('transf' => $trans->createView(), 'articulo' => $articulo, 'formAIM' => $formAIM->createView(),'formAI' => $formAIE->createView(),'form' => $formAMM->createView(), 'formAMA' => $formAMA->createView()));
             }
             return $this->render('@GestionFaena/gestionBD/atributoABM.html.twig', array('articulo' => $articulo, 'formAIM' => $formAIM->createView(),'formAI' => $formAIE->createView(),'form' => $formAMM->createView(), 'formAMA' => $formAMA->createView()));

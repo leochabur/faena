@@ -204,6 +204,11 @@
 	
 					{{ form_start(grupoMov) }}
 				  		<div class="form-row align-items-center">
+				  			<div class="col-1">
+				  				{{ form_label(grupoMov.manual, 'Manual') }}
+				  				{{ form_widget(grupoMov.manual, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+
 				  			<div class="col">
 				  				{{ form_label(grupoMov.orden) }}
 				  				{{ form_widget(grupoMov.orden, {'attr' : {'class' : 'form-control-sm'}}) }}
@@ -216,8 +221,8 @@
 				  				{{ form_label(grupoMov.detalle) }}
 				  				{{ form_widget(grupoMov.detalle, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
-				  			<div class="col-2">
-				  				{{ form_label(grupoMov.procesoFaena) }}
+				  			<div class="col-1">
+				  				{{ form_label(grupoMov.procesoFaena, 'Proc.') }}
 				  				{{ form_widget(grupoMov.procesoFaena, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
 

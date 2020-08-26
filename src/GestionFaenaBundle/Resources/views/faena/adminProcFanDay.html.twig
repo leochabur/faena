@@ -214,7 +214,13 @@
 	      <div class="modal-body">
 	        	<ul>
 					{% for aj in proceso.procesoFaena.pasos %}
-						<li>Paso {{ aj.orden }}: {{ aj.detalle }}</li>
+						<li>Paso {{ aj.orden }}: {{ aj.detalle }}
+							{% if pasos[aj.id] is defined %}
+								<i class="far fa-check-circle fa-2x"></i>
+							{% else %}
+								<i class="far fa-times-circle fa-2x mt-2"></i>
+							{% endif %}
+						</li>
 					{% endfor %}
 	        	</ul>
 	      </div>

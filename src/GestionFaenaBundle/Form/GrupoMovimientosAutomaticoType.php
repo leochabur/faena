@@ -20,6 +20,7 @@ class GrupoMovimientosAutomaticoType extends AbstractType
         $builder->add('orden')
                 ->add('nombre')
                 ->add('detalle')
+                ->add('manual')
                 ->add('procesoFaena',
                     EntityType::class, 
                       [

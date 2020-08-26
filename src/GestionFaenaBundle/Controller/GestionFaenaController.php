@@ -275,7 +275,7 @@ class GestionFaenaController extends Controller
                         ->add('guardar', SubmitType::class, ['label' => 'Siguiente >>']);
                         if (count($proceso->getProcesoFaena()->getAutomaticos()))
                         {
-                          $form->add('automatic', SubmitType::class, ['label' => 'Generar Movimientos Automaticos >>']);
+                          $form->add('automatic', SubmitType::class, ['label' => 'Movimientos Automaticos >>']);
                         }
                         $form->setAction($this->generateUrl('bd_adm_proc_fan_day_procesar', ['proc' => $proceso->getId(), 'fd' => $fd]));
                         
@@ -657,8 +657,6 @@ class GestionFaenaController extends Controller
         
     }
 
-
-
     /**
      * @Route("/gstProcFanDay/{proc}/{fd}/{typ}", name="bd_adm_proc_fan_day")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
@@ -769,6 +767,14 @@ class GestionFaenaController extends Controller
         $formsDelete = array();
         $totales = array();
         $concMovimientos = array();
+        ///recupera todos loas pasos realizados para el proceso
+        $pasosRealizados = $em->getRepository(PasoProcesoRealizado::class)->findPasosRealizadoProceso($proceso, $faena);
+        $pasos = [];
+        foreach ($pasosRealizados as $p)
+        {
+          $pasos[$p->getPaso()->getId()] = true;
+        }
+        ///////////////
         foreach ($movimientos as $mov)
         {
             $idTrx = ($mov->getOrigen()?$mov->getOrigen()->getId():($mov->getDestino()?$mov->getDestino()->getId():0));  
@@ -803,7 +809,7 @@ class GestionFaenaController extends Controller
             }
         }
         
-        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
+        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena, 'pasos' => $pasos));
     }
 
 
@@ -814,6 +820,29 @@ class GestionFaenaController extends Controller
                      ->setAction($this->generateUrl('bd_generate_movimientos_automaticos', 
                                                     ['proc' => $proceso, 'fan' => $faena, 'gpo' => $grupo]))
                      ->getForm();     
+    }
+
+    /**
+     * @Route("/genmanauto/{proc}/{fd}/{art}", name="bd_adm_generate_mov_manual_from_automatic")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function generateFormIngresoManualFromAutomatic($proc, $fd, $art)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $faena = $em->find(FaenaDiaria::class, $fd);
+
+        $tipoMovimiento = $articulo->getConcepto()->getTipoMovimiento();
+
+        $movimiento = $tipoMovimiento->getInstanciaMovimiento();
+        $movimiento->setProcesoFnDay($proceso);
+        $movimiento->setFaenaDiaria($faena);
+        $movimiento->setArtProcFaena($articulo);
+
+        $movimiento->generateAtributes();
+        $formAtr = $this->getFormAddMovStock($movimiento, $proceso, $articulo, 'bd_adm_proc_mov_st', $faena);
+        return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));
     }
 
     /**
@@ -834,7 +863,10 @@ class GestionFaenaController extends Controller
               $formsAutomaticos = [];
               foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
               {
-                $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo->getId())->createView();
+                if (!$grupo->getManual())
+                {
+                  $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo->getId())->createView();
+                }
               }
 
               return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
@@ -926,7 +958,7 @@ class GestionFaenaController extends Controller
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            if ($mov->getFaenaDiaria() == $faena)
+            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getGeneraTransito()))
             {
               $art = $mov->getArtProcFaena()->getArticulo();
               if (!array_key_exists($art->getId(), $body))
@@ -1033,7 +1065,7 @@ class GestionFaenaController extends Controller
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            if ($mov->getFaenaDiaria() == $faena)
+            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getGeneraTransito()))
             {
                 $computar = true;
                 $acumular = false;
@@ -1350,7 +1382,7 @@ class GestionFaenaController extends Controller
 
               ///////////Debe quitar del stock el articulo base   (Ejemplo: Aves -> Corazon)
               ///Verifica si el Articulo base del proceso se encuentra configurado para manejar el stock
-              $articuloBase = $concepto->getArticuloOrigenTransformacion();
+              $articuloBase = $articulo->getArticuloOrigenTransformacion();
               $articuloBaseManejaStock = $proceso->getProcesoFaena()->existeArticuloDefinidoManejoStock($articuloBase); //articulo base 
 
               $articuloDestino = $articulo->getArticulo();
@@ -1989,7 +2021,7 @@ class GestionFaenaController extends Controller
                                  $movimiento, 
                                  ['faena' => $fanday,
                                   'proceso' => $proc,
-                                  'articulo' => $art->getConcepto()->getArticuloOrigenTransformacion(),
+                                  'articulo' => $art->getArticuloOrigenTransformacion(),
                                   'action' => $this->generateUrl($url, 
                                                                 ['type' => $movimiento->getType(), 
                                                                  'proc' => $proc->getId(), 

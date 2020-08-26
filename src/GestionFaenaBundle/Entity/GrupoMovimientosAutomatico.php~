@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * GrupoMovimientosAutomatico
  *
- * @ORM\Table(name="grupo_movimientos_automatico")
+ * @ORM\Table(name="sp_gst_gpo_mov_auto")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\GrupoMovimientosAutomaticoRepository")
  */
 class GrupoMovimientosAutomatico
@@ -53,6 +53,17 @@ class GrupoMovimientosAutomatico
      * @ORM\OrderBy({"ordenEjecucion" = "ASC"})
      */
     private $automaticos;
+
+    /**
+     * @ORM\Column(name="manual", type="boolean", options={"default":false})
+     */
+    private $manual = false; //indica si el movimiento debe realizarce de manera manual o totalmente automatico
+
+
+    public function __toString()
+    {
+        return $this->nombre;
+    }
 
     /**
      * Get id
@@ -175,5 +186,29 @@ class GrupoMovimientosAutomatico
     public function getAutomaticos()
     {
         return $this->automaticos;
+    }
+
+    /**
+     * Set detalle
+     *
+     * @param string $detalle
+     *
+     * @return GrupoMovimientosAutomatico
+     */
+    public function setDetalle($detalle)
+    {
+        $this->detalle = $detalle;
+
+        return $this;
+    }
+
+    /**
+     * Get detalle
+     *
+     * @return string
+     */
+    public function getDetalle()
+    {
+        return $this->detalle;
     }
 }

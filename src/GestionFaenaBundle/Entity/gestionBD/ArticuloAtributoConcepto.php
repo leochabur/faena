@@ -57,6 +57,12 @@ class ArticuloAtributoConcepto
     private $procesosDestino; //para el caso de las transferencias, define cual o cuales son los procesos destino
 
     /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo")
+    * @ORM\JoinColumn(name="id_art_orig_trans", referencedColumnName="id", nullable=true)
+     */
+    private $articuloOrigenTransformacion; //para el caso de el movimiento Transformar Stock, define cual es el articulo de origen que se va a transformar
+    
+    /**
      * Get id
      *
      * @return int
@@ -305,5 +311,29 @@ class ArticuloAtributoConcepto
     public function getProcesosDestino()
     {
         return $this->procesosDestino;
+    }
+
+    /**
+     * Set articuloOrigenTransformacion
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articuloOrigenTransformacion
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setArticuloOrigenTransformacion(\GestionFaenaBundle\Entity\gestionBD\Articulo $articuloOrigenTransformacion = null)
+    {
+        $this->articuloOrigenTransformacion = $articuloOrigenTransformacion;
+
+        return $this;
+    }
+
+    /**
+     * Get articuloOrigenTransformacion
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
+     */
+    public function getArticuloOrigenTransformacion()
+    {
+        return $this->articuloOrigenTransformacion;
     }
 }

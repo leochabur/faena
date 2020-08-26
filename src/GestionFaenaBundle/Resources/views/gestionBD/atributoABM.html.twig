@@ -40,7 +40,7 @@
 		<li class="h6">Concepto : {{ articulo.concepto.concepto }}</li>
 		<li class="h6">Articulo : {{ articulo.articulo }}</li>
 		{% if transf is defined %}
-			<li class="h6">Articulo origen de transformacion: {% if articulo.concepto.articuloOrigenTransformacion is not null %} {{ articulo.concepto.articuloOrigenTransformacion }} {% else %}<small class="form-text text-muted">Sin configurar</small> {% endif %}</li>
+			<li class="h6">Articulo origen de transformacion: {% if articulo.articuloOrigenTransformacion is not null %} {{ articulo.articuloOrigenTransformacion }} {% else %}<small class="form-text text-muted">Sin configurar</small> {% endif %}</li>
 		{% endif %}
 	</ul>
 	<hr>

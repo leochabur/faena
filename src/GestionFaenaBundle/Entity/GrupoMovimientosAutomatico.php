@@ -54,6 +54,21 @@ class GrupoMovimientosAutomatico
      */
     private $automaticos;
 
+    /**
+     * @ORM\Column(name="manual", type="boolean", options={"default":false})
+     */
+    private $manual = false; //indica si el movimiento debe realizarce de manera manual o totalmente automatico
+
+
+    public function getMovimientoManual()
+    {
+        if (count($this->automaticos))
+        {
+            return $this->automaticos->first();
+        }
+        return null;
+    }
+
     public function __toString()
     {
         return $this->nombre;
@@ -204,5 +219,29 @@ class GrupoMovimientosAutomatico
     public function getDetalle()
     {
         return $this->detalle;
+    }
+
+    /**
+     * Set manual
+     *
+     * @param boolean $manual
+     *
+     * @return GrupoMovimientosAutomatico
+     */
+    public function setManual($manual)
+    {
+        $this->manual = $manual;
+
+        return $this;
+    }
+
+    /**
+     * Get manual
+     *
+     * @return boolean
+     */
+    public function getManual()
+    {
+        return $this->manual;
     }
 }
