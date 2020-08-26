@@ -143,6 +143,7 @@ abstract class ProcesoFaena
 
     /**
      * @ORM\OneToMany(targetEntity="PasoProceso", mappedBy="procesoFaena")
+     * @ORM\OrderBy({"orden" = "ASC"})
      */
     private $pasos;
 
