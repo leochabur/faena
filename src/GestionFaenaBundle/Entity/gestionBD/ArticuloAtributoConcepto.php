@@ -110,7 +110,12 @@ class ArticuloAtributoConcepto
 
     public function getVistaEdicion()
     {
-        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento() ;
+        $destino = "";
+        if ($this->articuloOrigenTransformacion)
+        {
+            $destino = " (".$this->articuloOrigenTransformacion.")";
+        }
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino;
     }
 
     public function getId()
