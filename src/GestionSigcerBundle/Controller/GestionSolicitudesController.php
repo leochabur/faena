@@ -456,6 +456,8 @@ class GestionSolicitudesController extends Controller
                 $lote = $hoja->getCellByColumnAndRow(6,$i)->getValue();
                 if ($lote)
                 {
+                  $lote = substr($lote, 2);
+                  throw new \Exception("$lote");
                   $tropa = $em->getRepository(TropaSolicitud::class)->findTropaWithLote($solicitud->getGrupo(), $lote);
                   $creoTropa = false;
                   if (!$tropa)  //no existe la tropa, debe crearla
