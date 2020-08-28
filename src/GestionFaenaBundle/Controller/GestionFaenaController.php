@@ -868,7 +868,6 @@ class GestionFaenaController extends Controller
                   $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo->getId())->createView();
                 }
               }
-
               return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
                                   ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso]);
           }
