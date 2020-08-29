@@ -14,14 +14,15 @@ class GrupoMovimientosAutomaticoRepository extends \Doctrine\ORM\EntityRepositor
 	public function findAllMovimientosRealizadosProceso(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso,
 											  			\GestionFaenaBundle\Entity\FaenaDiaria $faena) 
 	{ 
-	    return $this->createQueryBuilder('g')
-	    			->join('g.pasoProceso', 'pp')
-	    			->join('pp.pasoRealizado', 'ppr')
-			        ->where('ppr.procesoFaenaDiaria = :proceso')
-			        ->andWhere('ppr.faenaDiaria = :faena')
+        return $this->getEntityManager()
+            		->createQuery('SELECT g 
+	                               FROM GestionFaenaBundle:GrupoMovimientosAutomatico g 
+	                               JOIN GestionFaenaBundle:PasoProceso pp WITH pp.grupoMovimiento = g
+	                               JOIN GestionFaenaBundle:PasoProcesoRealizado ppr WITH ppr.paso = pp
+	                               WHERE ppr.procesoFaenaDiaria = :proceso AND 
+	                               		 ppr.faenaDiaria = :faena')
 			        ->setParameter('proceso', $proceso)
 			        ->setParameter('faena', $faena)
-			        ->getQuery()
 			        ->getResult(); 
 	}  
 

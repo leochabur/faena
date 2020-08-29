@@ -41,7 +41,7 @@ class PasoProcesoRealizado
     private $faenaDiaria;
 
     /**
-     * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\PasoProceso", inversedBy="pasoRealizado")
+     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\PasoProceso")
      * @ORM\JoinColumn(name="id_paso_proc", referencedColumnName="id")
     */    
     private $paso;

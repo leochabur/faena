@@ -42,15 +42,10 @@ class PasoProceso
     private $procesoFaena;
 
     /**
-    * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", inversedBy="pasoProceso") 
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico") 
     * @ORM\JoinColumn(name="id_grupo_mov_auto", referencedColumnName="id", nullable=true)
     */   
     private $grupoMovimiento;
-    
-    /**
-     * @ORM\OneToOne(targetEntity="PasoProcesoRealizado", mappedBy="paso")
-     */
-    private $pasoRealizado;
 
     /**
      * @ORM\Column(name="eliminado", type="boolean", options={"default":false})

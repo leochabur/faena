@@ -42,15 +42,10 @@ class PasoProceso
     private $procesoFaena;
 
     /**
-    * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", inversedBy="pasoProceso") 
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico") 
     * @ORM\JoinColumn(name="id_grupo_mov_auto", referencedColumnName="id", nullable=true)
     */   
     private $grupoMovimiento;
-    
-    /**
-     * @ORM\OneToOne(targetEntity="PasoProcesoRealizado", mappedBy="paso")
-     */
-    private $pasoRealizado;
 
     /**
      * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
@@ -184,5 +179,29 @@ class PasoProceso
     public function getPasoRealizado()
     {
         return $this->pasoRealizado;
+    }
+
+    /**
+     * Set eliminado
+     *
+     * @param boolean $eliminado
+     *
+     * @return PasoProceso
+     */
+    public function setEliminado($eliminado)
+    {
+        $this->eliminado = $eliminado;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminado
+     *
+     * @return boolean
+     */
+    public function getEliminado()
+    {
+        return $this->eliminado;
     }
 }
