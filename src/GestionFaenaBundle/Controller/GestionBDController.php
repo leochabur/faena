@@ -463,6 +463,8 @@ class GestionBDController extends Controller
         return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('form' => $form->createView()));
     }
 
+
+
     private function getFormABMArticulo($articulo, $url, $params = [])
     {
         return $this->createForm(ArticuloType::class, $articulo, ['action' => $this->generateUrl($url, $params),'method' => 'POST']);
@@ -1278,6 +1280,83 @@ class GestionBDController extends Controller
                     );
         }
         return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+    }
+
+
+    /**
+     * @Route("/config/editgpomvaut/{gpo}", name="bd_edit_grupo_movimientos_automaticos")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editGrupoMovimientoAutomatico($gpo)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $grupo = $entityManager->find(GrupoMovimientosAutomatico::class, $gpo);
+        $form = $this->createForm(GrupoMovimientosAutomaticoType::class, 
+                                    $grupo, 
+                                    [
+                                        'action' => $this->generateUrl('bd_edit_grupo_movimientos_automaticos_procesar', array('gpo' => $grupo->getId())),
+                                        'method' => 'POST',
+                                        'proceso' => $grupo->getProcesoFaena()
+                                    ]);
+        return $this->render('@GestionFaena/grupoAutoEdit.html.twig', ['grupo' => $grupo, 'grupoMov' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/config/editgpomvautproc/{gpo}", name="bd_edit_grupo_movimientos_automaticos_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editGrupoMovimientoAutomaticoProcesar($gpo, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $grupo = $entityManager->find(GrupoMovimientosAutomatico::class, $gpo);
+        $form = $this->createForm(GrupoMovimientosAutomaticoType::class, 
+                                    $grupo, 
+                                    [
+                                        'action' => $this->generateUrl('bd_set_automatic_mov', array('proc' => $grupo->getId())),
+                                        'method' => 'POST',
+                                        'proceso' => $grupo->getProcesoFaena()
+                                    ]);
+        $form->handleRequest($request);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_grupo_movimientos_automaticos', ['gpo' => $grupo->getId()]);
+    }
+
+    /**
+     * @Route("/config/editmvaut/{mov}", name="bd_edit_movimiento_automatico")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editMovimientoAutomatico($mov)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $movimiento = $entityManager->find(MovimientoAutomatico::class, $mov);
+        $form = $this->createForm(MovimientoAutomaticoType::class, 
+                                    $movimiento, 
+                                    [
+                                        'action' => $this->generateUrl('bd_edit_movimiento_automatico_procesar', array('mov' => $movimiento->getId())),
+                                        'method' => 'POST',
+                                        'proceso' => $movimiento->getGrupo()->getProcesoFaena()
+                                    ]);
+        return $this->render('@GestionFaena/movimientoAutoEdit.html.twig', ['movimiento' => $movimiento, 'grupoMov' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/config/editmvautproc/{mov}", name="bd_edit_movimiento_automatico_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editMovimientoAutomaticoProcesar($mov, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $movimiento = $entityManager->find(MovimientoAutomatico::class, $mov);
+        $form = $this->createForm(MovimientoAutomaticoType::class, 
+                                    $movimiento, 
+                                    [
+                                        'action' => $this->generateUrl('bd_edit_movimiento_automatico_procesar', array('mov' => $movimiento->getId())),
+                                        'method' => 'POST',
+                                        'proceso' => $movimiento->getGrupo()->getProcesoFaena()
+                                    ]);
+        $form->handleRequest($request);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_movimiento_automatico', ['mov' => $movimiento->getId()]);
     }
 
     /**

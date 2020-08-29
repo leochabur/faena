@@ -159,7 +159,7 @@
 									<tbody>
 										{% for aj in proccess.automaticos %}
 											<tr>
-												<td>Nombre: {{ aj.nombre }}</td>
+												<td><a target="_blanck" href="{{ path('bd_edit_grupo_movimientos_automaticos', {gpo : aj.id}) }}">Nombre: {{ aj.nombre }}</a></td>
 												<td></td>
 												<td></td>
 												<td></td>

@@ -1,0 +1,55 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+        
+
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Editar Grupo Movimientos Automatico</span>
+<hr>
+
+	
+
+	    <p class="h4 mb-4 text-center"></p>
+
+
+		<br>
+		<div class="row">
+		  <div class="col card">		
+	
+					{{ form_start(grupoMov) }}
+				  		<div class="form-row align-items-center">
+				  			<div class="col-1">
+				  				{{ form_label(grupoMov.ordenEjecucion, 'Orden') }}
+				  				{{ form_widget(grupoMov.ordenEjecucion, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+
+				  			<div class="col">
+				  				{{ form_label(grupoMov.articuloAtributoConcepto) }}
+				  				{{ form_widget(grupoMov.articuloAtributoConcepto, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col">
+				  				{{ form_label(grupoMov.procesoDestinoDefault) }}
+				  				{{ form_widget(grupoMov.procesoDestinoDefault, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  		</div>
+				  		<div class="form-row align-items-center">
+				  			<div class="col-3">
+				  				{{ form_label(grupoMov.grupo, 'Proc.') }}
+				  				{{ form_widget(grupoMov.grupo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  		</div>
+				  		<div class="form-row align-items-center">
+				  			<div>
+				  				{{ form_widget(grupoMov.guardar, {'attr' : {'class' : 'btn btn-sm btn-success btn-block mt-2'}}) }}
+				  			</div>
+				  		</div>				  	
+				  	{{ form_end(grupoMov) }}	
+		  </div>
+		</div>
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+
+{% endblock %}
