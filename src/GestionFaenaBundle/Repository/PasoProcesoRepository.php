@@ -17,8 +17,10 @@ class PasoProcesoRepository extends \Doctrine\ORM\EntityRepository
 	    return $this->createQueryBuilder('g')
 			        ->where('g.procesoFaena = :proceso')
 			        ->andWhere('g.grupoMovimiento = :grupo')
+			        ->andWhere('g.eliminado = :eliminado')
 			        ->setParameter('proceso', $proceso)
 			        ->setParameter('grupo', $grupo)
+			        ->setParameter('eliminado', false)
 			        ->getQuery()
 			        ->getOneOrNullResult(); 
 	} 
@@ -29,8 +31,10 @@ class PasoProcesoRepository extends \Doctrine\ORM\EntityRepository
 	    return $this->createQueryBuilder('g')
 			        ->where('g.procesoFaena = :proceso')
 			        ->andWhere('g.articuloAtributoConcepto = :articulo')
+			        ->andWhere('g.eliminada = :eliminado')
 			        ->setParameter('proceso', $proceso)
 			        ->setParameter('articulo', $articulo)
+			        ->setParameter('eliminado', false)
 			        ->getQuery()
 			        ->getOneOrNullResult(); 
 	} 

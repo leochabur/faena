@@ -42,17 +42,20 @@ class PasoProceso
     private $procesoFaena;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto") 
-    * @ORM\JoinColumn(name="id_art_atr_con", referencedColumnName="id", nullable=true)
-    */   
-    private $articuloAtributoConcepto;
-
-    /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico") 
+    * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", inversedBy="pasoProceso") 
     * @ORM\JoinColumn(name="id_grupo_mov_auto", referencedColumnName="id", nullable=true)
     */   
     private $grupoMovimiento;
     
+    /**
+     * @ORM\OneToOne(targetEntity="PasoProcesoRealizado", mappedBy="paso")
+     */
+    private $pasoRealizado;
+
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
+     */
+    private $eliminado = false; 
     /**
      * Get id
      *
@@ -136,30 +139,6 @@ class PasoProceso
     }
 
     /**
-     * Set articuloAtributoConcepto
-     *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articuloAtributoConcepto
-     *
-     * @return PasoProceso
-     */
-    public function setArticuloAtributoConcepto(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articuloAtributoConcepto = null)
-    {
-        $this->articuloAtributoConcepto = $articuloAtributoConcepto;
-
-        return $this;
-    }
-
-    /**
-     * Get articuloAtributoConcepto
-     *
-     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto
-     */
-    public function getArticuloAtributoConcepto()
-    {
-        return $this->articuloAtributoConcepto;
-    }
-
-    /**
      * Set grupoMovimiento
      *
      * @param \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupoMovimiento
@@ -181,5 +160,53 @@ class PasoProceso
     public function getGrupoMovimiento()
     {
         return $this->grupoMovimiento;
+    }
+
+    /**
+     * Set pasoRealizado
+     *
+     * @param \GestionFaenaBundle\Entity\PasoProcesoRealizado $pasoRealizado
+     *
+     * @return PasoProceso
+     */
+    public function setPasoRealizado(\GestionFaenaBundle\Entity\PasoProcesoRealizado $pasoRealizado = null)
+    {
+        $this->pasoRealizado = $pasoRealizado;
+
+        return $this;
+    }
+
+    /**
+     * Get pasoRealizado
+     *
+     * @return \GestionFaenaBundle\Entity\PasoProcesoRealizado
+     */
+    public function getPasoRealizado()
+    {
+        return $this->pasoRealizado;
+    }
+
+    /**
+     * Set eliminado
+     *
+     * @param boolean $eliminado
+     *
+     * @return PasoProceso
+     */
+    public function setEliminado($eliminado)
+    {
+        $this->eliminado = $eliminado;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminado
+     *
+     * @return boolean
+     */
+    public function getEliminado()
+    {
+        return $this->eliminado;
     }
 }

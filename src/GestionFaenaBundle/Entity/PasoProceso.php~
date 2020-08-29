@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * PasoProceso
  *
- * @ORM\Table(name="paso_proceso")
+ * @ORM\Table(name="sp_gst_pso_proc")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\PasoProcesoRepository")
  */
 class PasoProceso
@@ -42,17 +42,20 @@ class PasoProceso
     private $procesoFaena;
 
     /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto") 
-    * @ORM\JoinColumn(name="id_art_atr_con", referencedColumnName="id", nullable=true)
-    */   
-    private $articuloAtributoConcepto;
-
-    /**
-    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico") 
+    * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\GrupoMovimientosAutomatico", inversedBy="pasoProceso") 
     * @ORM\JoinColumn(name="id_grupo_mov_auto", referencedColumnName="id", nullable=true)
     */   
     private $grupoMovimiento;
     
+    /**
+     * @ORM\OneToOne(targetEntity="PasoProcesoRealizado", mappedBy="paso")
+     */
+    private $pasoRealizado;
+
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
+     */
+    private $eliminado = false; 
     /**
      * Get id
      *
@@ -136,26 +139,50 @@ class PasoProceso
     }
 
     /**
-     * Set articuloAtributoConcepto
+     * Set grupoMovimiento
      *
-     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articuloAtributoConcepto
+     * @param \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupoMovimiento
      *
      * @return PasoProceso
      */
-    public function setArticuloAtributoConcepto(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articuloAtributoConcepto = null)
+    public function setGrupoMovimiento(\GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupoMovimiento = null)
     {
-        $this->articuloAtributoConcepto = $articuloAtributoConcepto;
+        $this->grupoMovimiento = $grupoMovimiento;
 
         return $this;
     }
 
     /**
-     * Get articuloAtributoConcepto
+     * Get grupoMovimiento
      *
-     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto
+     * @return \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico
      */
-    public function getArticuloAtributoConcepto()
+    public function getGrupoMovimiento()
     {
-        return $this->articuloAtributoConcepto;
+        return $this->grupoMovimiento;
+    }
+
+    /**
+     * Set pasoRealizado
+     *
+     * @param \GestionFaenaBundle\Entity\PasoProcesoRealizado $pasoRealizado
+     *
+     * @return PasoProceso
+     */
+    public function setPasoRealizado(\GestionFaenaBundle\Entity\PasoProcesoRealizado $pasoRealizado = null)
+    {
+        $this->pasoRealizado = $pasoRealizado;
+
+        return $this;
+    }
+
+    /**
+     * Get pasoRealizado
+     *
+     * @return \GestionFaenaBundle\Entity\PasoProcesoRealizado
+     */
+    public function getPasoRealizado()
+    {
+        return $this->pasoRealizado;
     }
 }

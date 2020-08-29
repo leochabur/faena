@@ -10,4 +10,31 @@ namespace GestionFaenaBundle\Repository;
  */
 class GrupoMovimientosAutomaticoRepository extends \Doctrine\ORM\EntityRepository
 {
+
+	public function findAllMovimientosRealizadosProceso(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso,
+											  			\GestionFaenaBundle\Entity\FaenaDiaria $faena) 
+	{ 
+	    return $this->createQueryBuilder('g')
+	    			->join('g.pasoProceso', 'pp')
+	    			->join('pp.pasoRealizado', 'ppr')
+			        ->where('ppr.procesoFaenaDiaria = :proceso')
+			        ->andWhere('ppr.faenaDiaria = :faena')
+			        ->setParameter('proceso', $proceso)
+			        ->setParameter('faena', $faena)
+			        ->getQuery()
+			        ->getResult(); 
+	}  
+
+	public function getMovimientoWithAtributo(\GestionFaenaBundle\Entity\ProcesoFaena $proceso,
+											  \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $articulo) 
+	{ 
+	    return $this->createQueryBuilder('g')
+	    			->join('g.automaticos', 'ma')
+			        ->where('g.procesoFaena = :proceso')
+			        ->andWhere('ma.articuloAtributoConcepto = :articulo')
+			        ->setParameter('proceso', $proceso)
+			        ->setParameter('articulo', $articulo)
+			        ->getQuery()
+			        ->getOneOrNullResult(); 
+	}  
 }

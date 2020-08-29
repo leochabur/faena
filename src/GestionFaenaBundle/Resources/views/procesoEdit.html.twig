@@ -370,24 +370,20 @@
 										<tr>
 											<th>Orden Ejecucion</th>
 											<th>Descripcion</th>
-											<th>Movimiento</th>
 											<th>Grupo Automatico</th>
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
 										{% for aj in proccess.pasos %}
-											<tr>
-												<td>{{ aj.orden }}</td>
-												<td>{{ aj.detalle }}</td>
-												{% if aj.articuloAtributoConcepto is defined %}
-													<td>{{ aj.articuloAtributoConcepto }}</td>
-												{% else %}
-													<td></td>
-												{% endif %}
-												<td>{{ aj.grupoMovimiento }}</td>
-												<td class="text-center"><a href="{{ path('bd_edit_procesos_delete_paso_proceso', {proc : proccess.id, paso : aj.id}) }}" class="btn btn-sm btn-danger">-</a></td>
-											</tr>
+											{% if not aj.eliminado %}
+												<tr>
+													<td>{{ aj.orden }}</td>
+													<td>{{ aj.detalle }}</td>
+													<td>{{ aj.grupoMovimiento }}</td>
+													<td class="text-center"><a href="{{ path('bd_edit_procesos_delete_paso_proceso', {proc : proccess.id, paso : aj.id}) }}" class="btn btn-sm btn-danger">-</a></td>
+												</tr>
+											{% endif %}
 										{% endfor %}
 									</tbody>
 						</table>
@@ -401,15 +397,11 @@
 				  				{{ form_label(fpaso.grupoMovimiento) }}
 				  				{{ form_widget(fpaso.grupoMovimiento, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>
-				  			<div class="col-lg-4 mt-2">
+				  			<div class="col-lg-5 mt-2">
 				  				{{ form_label(fpaso.detalle) }}
 				  				{{ form_widget(fpaso.detalle, {'attr' : {'class' : 'form-control-sm mt-2'}}) }}
 				  			</div>
 				  			<div class="col-lg-2">
-				  				{{ form_label(fpaso.articuloAtributoConcepto, 'Movimiento') }}
-				  				{{ form_widget(fpaso.articuloAtributoConcepto, {'attr' : {'class' : 'form-control-sm'}}) }}
-				  			</div>
-				  			<div class="col-lg-1">
 				  				{{ form_label(fpaso.procesoFaena, 'Proceso') }}
 				  				{{ form_widget(fpaso.procesoFaena, {'attr' : {'class' : 'form-control-sm'}}) }}
 				  			</div>

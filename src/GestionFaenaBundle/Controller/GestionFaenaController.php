@@ -275,7 +275,7 @@ class GestionFaenaController extends Controller
                         ->add('guardar', SubmitType::class, ['label' => 'Siguiente >>']);
                         if (count($proceso->getProcesoFaena()->getAutomaticos()))
                         {
-                          $form->add('automatic', SubmitType::class, ['label' => 'Movimientos Automaticos >>']);
+                          $form->add('automatic', SubmitType::class, ['label' => 'Movimientos A Generar >>']);
                         }
                         $form->setAction($this->generateUrl('bd_adm_proc_fan_day_procesar', ['proc' => $proceso->getId(), 'fd' => $fd]));
                         
@@ -355,6 +355,7 @@ class GestionFaenaController extends Controller
                   elseif (in_array($instance, [2,3])) 
                   {
                     $proceso = $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
+                    
                   }
               }
               else
@@ -362,8 +363,9 @@ class GestionFaenaController extends Controller
                 $this->addFlash('errorLoad', "El movimiento ".$auto->getVistaEdicion().", ya se ha realizado!");
               }                             
           }
+          $this->registrarPasoRealizado($grupoAutoomatico, $proceso->getProcesoFaena(), $proceso, $faena, $em);
           
-          $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($procFaena, $grupoAutoomatico); //recupera si existe el paso en el proceso para el grupo automatico de movimiento
+         /* $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($procFaena, $grupoAutoomatico); //recupera si existe el paso en el proceso para el grupo automatico de movimiento
           if ($paso)
           {
               //como solo mantiene un paso realizado por cada grupo elimina si ya existe alguno
@@ -381,7 +383,7 @@ class GestionFaenaController extends Controller
                   $pasoRealizado->setPaso($paso);
                   $em->persist($pasoRealizado);
               }              
-          }         
+          }*/         
 
           $em->flush(); 
       }
@@ -815,10 +817,19 @@ class GestionFaenaController extends Controller
 
     private function getFormExecuteAutomaticMove($proceso, $faena, $grupo)
     {
+        if ($grupo->getManual())
+        {
+          return  $this->createFormBuilder()
+                       ->add('generar', SubmitType::class, ['label' => 'Generar'])
+                       ->setAction($this->generateUrl('bd_adm_generate_mov_manual_from_automatic', 
+                                                      ['proc' => $proceso, 'fd' => $faena, 'art' => $grupo->getMovimientoManual()->getArticuloAtributoConcepto()->getId()]))
+                       ->getForm();  
+        }
+
         return  $this->createFormBuilder()
                      ->add('generar', SubmitType::class, ['label' => 'Generar'])
                      ->setAction($this->generateUrl('bd_generate_movimientos_automaticos', 
-                                                    ['proc' => $proceso, 'fan' => $faena, 'gpo' => $grupo]))
+                                                    ['proc' => $proceso, 'fan' => $faena, 'gpo' => $grupo->getId()]))
                      ->getForm();     
     }
 
@@ -860,16 +871,23 @@ class GestionFaenaController extends Controller
           $errors = array();
           if (!$form->get('guardar')->isClicked())
           {
+              $movAutoRealizados = $em->getRepository(GrupoMovimientosAutomatico::class)->findAllMovimientosRealizadosProceso($proceso, $faena);
+              $realizados = [];
+              foreach ($movAutoRealizados as $mr)
+              {
+                $realizados[$mr->getId()] = true;
+              }
+
               $formsAutomaticos = [];
               foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
               {
-                if (!$grupo->getManual())
-                {
-                  $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo->getId())->createView();
-                }
+               // if (!$grupo->getManual())
+              //  {
+                  $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo)->createView();
+              //  }
               }
               return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
-                                  ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso]);
+                                  ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso, 'realizados' => $realizados]);
           }
           else
           {
@@ -1771,31 +1789,38 @@ class GestionFaenaController extends Controller
     }
 
 
-    private function registrarPasoRealizado(ArticuloAtributoConcepto $articulo, 
+    private function registrarPasoRealizado(GrupoMovimientosAutomatico $grupo, 
                                             ProcesoFaena $proceso, 
                                             ProcesoFaenaDiaria $procesoFaena, 
                                             FaenaDiaria $faena,
                                             $em)
     {
+        //todos los movimientos son automaticos, cuando se crea un paso de un prceso siempre apunta a un grupo de movimientos automaticos
+        //$grupo = $em->getRepository(GrupoMovimientosAutomatico::class)->getMovimientoWithAtributo($proceso, $articulo);
 
-        $paso = $em->getRepository(PasoProceso::class)->findPasoProcesoArtAtrConc($proceso, $articulo);
-        if ($paso)
-        {
-            $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($procesoFaena, $faena, $paso);
-            if ($pasoRealizado)
+      //  if ($grupo) 
+      //  {
+     // throw new \Exception("asdad");
+            $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($proceso, $grupo);
+            if ($paso)
             {
-                $pasoRealizado->setFechaAccion(new \DateTime());
+                $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($procesoFaena, $faena, $paso);
+                if ($pasoRealizado)
+                {
+                    $pasoRealizado->setFechaAccion(new \DateTime());
+                }
+                else
+                {
+                      $pasoRealizado = new PasoProcesoRealizado();
+                      $pasoRealizado->setFechaAccion(new \DateTime());
+                      $pasoRealizado->setProcesoFaenaDiaria($procesoFaena);
+                      $pasoRealizado->setFaenaDiaria($faena);
+                      $pasoRealizado->setPaso($paso);
+                      $em->persist($pasoRealizado);
+                }
             }
-            else
-            {
-                  $pasoRealizado = new PasoProcesoRealizado();
-                  $pasoRealizado->setFechaAccion(new \DateTime());
-                  $pasoRealizado->setProcesoFaenaDiaria($procesoFaena);
-                  $pasoRealizado->setFaenaDiaria($faena);
-                  $pasoRealizado->setPaso($paso);
-                  $em->persist($pasoRealizado);
-            }
-        }
+        //}
+        
     }
 
     /**
@@ -1812,13 +1837,14 @@ class GestionFaenaController extends Controller
         $articulo = $em->find(ArticuloAtributoConcepto::class, $art);
         $concepto = $em->find(ConceptoMovimientoProceso::class, $conc);
         $faena = $em->find(FaenaDiaria::class, $fanday);
+        $grupo = $em->getRepository(GrupoMovimientosAutomatico::class)->getMovimientoWithAtributo($proceso->getProcesoFaena(), $articulo);
         if($type == 4) //TransformarStock
         {
             try
             {
               $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em, $request);
               $proceso->setUltimoMovimiento(new \DateTime());
-              $this->registrarPasoRealizado($articulo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
+              $this->registrarPasoRealizado($grupo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
               $em->flush();
             }
             catch(\Exception $e)
@@ -1834,7 +1860,8 @@ class GestionFaenaController extends Controller
               $auto = new MovimientoAutomatico();
               $proceso = $this->procesarTransferirStock($proceso, $articulo, $concepto, $faena, $em, $auto, $request, false);
               $proceso->setUltimoMovimiento(new \DateTime());
-              $this->registrarPasoRealizado($articulo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
+              $this->registrarPasoRealizado($grupo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
+
               $em->flush();
             }
             catch(\Exception $e)
@@ -1851,7 +1878,7 @@ class GestionFaenaController extends Controller
 //          throw new \Exception("Error Processing Request ".$type, 1);
           $this->procesarEntradaSalidaStock($proceso, $articulo, $concepto, $faena, $type, $em, $request);
           $proceso->setUltimoMovimiento(new \DateTime());
-          $this->registrarPasoRealizado($articulo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
+          $this->registrarPasoRealizado($grupo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
           $em->flush();
           return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
         }

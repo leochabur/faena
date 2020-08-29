@@ -59,6 +59,19 @@ class GrupoMovimientosAutomatico
      */
     private $manual = false; //indica si el movimiento debe realizarce de manera manual o totalmente automatico
 
+    /**
+     * @ORM\OneToOne(targetEntity="PasoProceso", mappedBy="grupoMovimiento")
+     */
+    private $pasoProceso;
+
+    public function getMovimientoManual()
+    {
+        if (count($this->automaticos))
+        {
+            return $this->automaticos->first();
+        }
+        return null;
+    }
 
     public function __toString()
     {
@@ -210,5 +223,29 @@ class GrupoMovimientosAutomatico
     public function getDetalle()
     {
         return $this->detalle;
+    }
+
+    /**
+     * Set manual
+     *
+     * @param boolean $manual
+     *
+     * @return GrupoMovimientosAutomatico
+     */
+    public function setManual($manual)
+    {
+        $this->manual = $manual;
+
+        return $this;
+    }
+
+    /**
+     * Get manual
+     *
+     * @return boolean
+     */
+    public function getManual()
+    {
+        return $this->manual;
     }
 }

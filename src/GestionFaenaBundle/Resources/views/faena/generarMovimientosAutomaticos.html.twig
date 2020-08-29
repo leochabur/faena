@@ -20,30 +20,24 @@
 	  </div>
   		<div class="card-body">
 		<table class="table table-striped table-bordered table-hover table-sm ">
-			<thead>
-				<tr class="row">
-					<th class="col-lg-1">#</th>
-					<th class="col-lg-2">Nombre</th>
-					<th class="col-lg-6">Detalle</th>
-					<th class="col-lg-1">Cant. Mov.</th>
-					<th class="col-lg-2"></th>
-				</tr>
-			</thead>
 			<tbody>
 				{% for auto in proceso.procesoFaena.automaticos %}
-					<tr class="row">
-						<td class="col-lg-1">{{ loop.index }}</td>
-						<td class="col-lg-2">{{ auto.nombre }}</td>
-						<td class="col-lg-6">{{ auto.detalle }}</td>
-						<td class="col-lg-1"><span class="badge badge-primary badge-pill">{{ auto.automaticos|length }}</span></td>
-						<td class="col-lg-2">
-							{% if auto.manual %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ auto.nombre }}</td>
+						<td>{{ auto.detalle }}</td>
+						<td>
 
-								<a class="btn btn-sm btn-warning" href="{{ path('bd_adm_generate_mov_manual_from_automatic', { proc : proceso.id , fd : faena.id , art : auto.movimientoManual.articuloAtributoConcepto.id})}}">Generar</a>
-							{% else %}
 								{{ form_start(formsAuto[auto.id]) }}
 								{{ form_widget(formsAuto[auto.id].generar, {'attr' : {'data-title' : auto.nombre,'class' : 'btn btn-warning btn-sm btn-generate'}}) }}
 								{{ form_end(formsAuto[auto.id]) }}
+							
+						</td>
+						<td>
+							{% if realizados[auto.id] is defined %}
+								<i class="far fa-check-circle fa-2x"></i>
+							{% else %}
+								<i class="far fa-times-circle fa-2x mt-2"></i>
 							{% endif %}
 						</td>
 

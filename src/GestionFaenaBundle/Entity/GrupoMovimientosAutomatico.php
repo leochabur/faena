@@ -59,6 +59,10 @@ class GrupoMovimientosAutomatico
      */
     private $manual = false; //indica si el movimiento debe realizarce de manera manual o totalmente automatico
 
+    /**
+     * @ORM\OneToOne(targetEntity="PasoProceso", mappedBy="grupoMovimiento")
+     */
+    private $pasoProceso;
 
     public function getMovimientoManual()
     {
@@ -243,5 +247,29 @@ class GrupoMovimientosAutomatico
     public function getManual()
     {
         return $this->manual;
+    }
+
+    /**
+     * Set pasoProceso
+     *
+     * @param \GestionFaenaBundle\Entity\PasoProceso $pasoProceso
+     *
+     * @return GrupoMovimientosAutomatico
+     */
+    public function setPasoProceso(\GestionFaenaBundle\Entity\PasoProceso $pasoProceso = null)
+    {
+        $this->pasoProceso = $pasoProceso;
+
+        return $this;
+    }
+
+    /**
+     * Get pasoProceso
+     *
+     * @return \GestionFaenaBundle\Entity\PasoProceso
+     */
+    public function getPasoProceso()
+    {
+        return $this->pasoProceso;
     }
 }

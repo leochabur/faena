@@ -1142,7 +1142,7 @@ class GestionBDController extends Controller
         $entityManager = $this->getDoctrine()->getManager();
 
         $paso = $entityManager->find(PasoProceso::class, $paso);
-        $entityManager->remove($paso);
+        $paso->setEliminado(true);
         $entityManager->flush();
         return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
     }

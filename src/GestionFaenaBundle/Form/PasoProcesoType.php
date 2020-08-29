@@ -26,22 +26,6 @@ class PasoProcesoType extends AbstractType
                       'class' => 'GestionFaenaBundle:ProcesoFaena',
                       'choices' => [$proceso],
                       ])
-                ->add('articuloAtributoConcepto', 
-                      EntityType::class, 
-                      [
-                      'class' => 'GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto',
-                      'choice_label' => 'vistaEdicion',
-                      'required' => false,
-                      'query_builder' => function (EntityRepository $er) {
-                                                        return $er->createQueryBuilder('a')
-                                                                  ->join('a.concepto', 'c')
-                                                                  ->where('c.automatico = :automatico')
-                                                                  ->andWhere('a.activo = :activo')
-                                                                  ->orderBy('c.procesoFaena')
-                                                                  ->setParameter('automatico', false)
-                                                                  ->setParameter('activo', true);
-                                                    }
-                      ])
                 ->add('grupoMovimiento', 
                       EntityType::class, 
                       [
