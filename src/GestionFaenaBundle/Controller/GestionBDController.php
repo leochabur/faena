@@ -554,6 +554,20 @@ class GestionBDController extends Controller
         catch(\Exception $e){return new JsonResponse(array('msge'=>$e->getMessage()));}
     }
 
+    /**
+     * @Route("/config/deldestdef/{art}/{proc}", name="bd_remove_proceso_default_art_atr_con")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function removeProcesoDestinoDefaultArticulo($art, $proc)
+    {
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $articulo = $entityManager->find(ArticuloAtributoConcepto::class, $art);
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $articulo->removeProcesosDestino($proceso);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_editar_articulo');
+    }
 
     /**
      * @Route("/config/editart", name="bd_editar_articulo")

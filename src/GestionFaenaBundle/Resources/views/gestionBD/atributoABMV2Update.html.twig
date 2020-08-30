@@ -68,12 +68,14 @@
 		<thead>
 			<tr>
 				<th>Proceso</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 				{% for proc in art.procesosDestino %}
 					<tr>
 						<td>{{ proc }}</td>
+						<td><a href="{{ path('bd_remove_proceso_default_art_atr_con', { art : art.id, proc : proc.id})}}" class="btn btn-sm btn-danger">Quitar</a></td>
 					</tr>
 				{% endfor %}
 		</tbody>
