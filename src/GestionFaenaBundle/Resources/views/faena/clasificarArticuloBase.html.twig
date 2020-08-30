@@ -3,12 +3,12 @@
 {% block fos_user_content %}
 <br>
 <hr>
-<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }} - Articulo : {{ articulo }} - Stock: {{ stock.cantidad }}</p>
+<p class="h5 card-title">{{ proceso }} - Fecha: {{ faena }}</p>
 
 <div class="card">
 	<div class="card-header">
 		<div class="h5">
-			Existencias Totales
+			Articulo : {{ articulo }} - Stock: <span id="stock">{{ stock.cantidad }}</span>
 		</div>
   	</div>
 	<div class="card-body">
@@ -152,6 +152,7 @@
 												  	{
 												  		input.parent().siblings('div').html('<i class="far fa-check-circle fa-2x"></i>');
 														input.trigger("keypress", [9]);
+														$('#stock').html(response.stb);
 												  	}
 												  	else
 												  	{

@@ -527,7 +527,8 @@ class GestionFaenaController extends Controller
 
                 $entrada->setMovimientoAsociado($salida);
                 $em->flush();
-                return new JsonResponse(['status' => true]);
+                $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiaria, $articuloBase, $faena);
+                return new JsonResponse(['status' => true, 'stb' => $stock['cantidad']]);
               }
               catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
         }
@@ -555,7 +556,8 @@ class GestionFaenaController extends Controller
                 $valorAsoc->setValor($valorAjustado);
              }
              $em->flush();
-             return new JsonResponse(['status' => true]);
+             $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiaria, $articuloBase, $faena);
+             return new JsonResponse(['status' => true, 'stb' => $stock['cantidad']]);
            }
            catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
         }
