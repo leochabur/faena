@@ -1298,6 +1298,44 @@ class GestionBDController extends Controller
 
 
     /**
+     * @Route("/config/editpp/{pp}", name="bd_edit_paso_proceso")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editPasoProducto($pp)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $paso = $entityManager->find(PasoProceso::class, $pp);
+        $form = $this->createForm(PasoProcesoType::class, 
+                                    $paso, 
+                                    [
+                                        'action' => $this->generateUrl('bd_edit_paso_proceso_procesar', array('pp' => $paso->getId())),
+                                        'method' => 'POST',
+                                        'proceso' => $paso->getGrupoMovimiento()->getProcesoFaena()
+                                    ]);
+        return $this->render('@GestionFaena/pasoProcesoEdit.html.twig', ['paso' => $paso, 'fpaso' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/config/editppproc/{pp}", name="bd_edit_paso_proceso_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editPasoProductoProcesar($pp, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $paso = $entityManager->find(PasoProceso::class, $pp);
+        $form = $this->createForm(PasoProcesoType::class, 
+                                    $paso, 
+                                    [
+                                        'action' => $this->generateUrl('bd_edit_paso_proceso_procesar', array('pp' => $paso->getId())),
+                                        'method' => 'POST',
+                                        'proceso' => $paso->getGrupoMovimiento()->getProcesoFaena()
+                                    ]);
+        $form->handleRequest($request);
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $paso->getGrupoMovimiento()->getProcesoFaena()->getId()]);
+    }
+
+    /**
      * @Route("/config/editgpomvaut/{gpo}", name="bd_edit_grupo_movimientos_automaticos")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */

@@ -378,7 +378,11 @@
 										{% for aj in proccess.pasos %}
 											{% if not aj.eliminado %}
 												<tr>
-													<td>{{ aj.orden }}</td>
+													<td>
+														<a href="{{ path('bd_edit_paso_proceso', { pp : aj.id}) }}">
+															{{ aj.orden }}
+														</a>
+													</td>
 													<td>{{ aj.detalle }}</td>
 													<td>{{ aj.grupoMovimiento }}</td>
 													<td class="text-center"><a href="{{ path('bd_edit_procesos_delete_paso_proceso', {proc : proccess.id, paso : aj.id}) }}" class="btn btn-sm btn-danger">-</a></td>
