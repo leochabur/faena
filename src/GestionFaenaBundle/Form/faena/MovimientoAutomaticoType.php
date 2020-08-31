@@ -43,10 +43,8 @@ class MovimientoAutomaticoType extends AbstractType
                                                                                                         return $er->createQueryBuilder('a')
                                                                                                                   ->join('a.concepto', 'c')
                                                                                                                   ->join('c.procesoFaena', 'p')
-                                                                                                                  ->where('p = :proceso')
-                                                                                                                  ->andWhere('a.activo = :activo')
-                                                                                                                  ->setParameter('activo', true)
-                                                                                                                  ->setParameter('proceso', $proceso);
+                                                                                                                  ->where('a.activo = :activo')
+                                                                                                                  ->setParameter('activo', true);
                                                                                                         }
                  ])
             ->add('procesoDestinoDefault', 

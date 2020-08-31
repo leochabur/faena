@@ -275,7 +275,7 @@ class GestionFaenaController extends Controller
                         ->add('guardar', SubmitType::class, ['label' => 'Siguiente >>']);
                         if (count($proceso->getProcesoFaena()->getAutomaticos()))
                         {
-                          $form->add('automatic', SubmitType::class, ['label' => 'Movimientos A Generar >>']);
+                          $form->add('automatic', SubmitType::class, ['label' => 'Generar Movimientos >>']);
                         }
                         $form->setAction($this->generateUrl('bd_adm_proc_fan_day_procesar', ['proc' => $proceso->getId(), 'fd' => $fd]));
                         
@@ -391,8 +391,8 @@ class GestionFaenaController extends Controller
                          //   return new Response(var_dump($e->getTrace()));
                             $this->addFlash('errorLoad', $e->getMessage());
                           }
-      
-      return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+      $proceso = $faena->getProceso($grupoAutoomatico->getProcesoFaena()->getId());
+      return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proceso->getId(), 'fd' => $fan]);
     }
 
     /**
@@ -837,19 +837,26 @@ class GestionFaenaController extends Controller
 
     private function getFormExecuteAutomaticMove($proceso, $faena, $grupo)
     {
+        
+        $articulo = $grupo->getMovimientoManual()->getArticuloAtributoConcepto();
+
+        if ($proceso->getProcesoFaena() != $articulo->getConcepto()->getProcesoFaena()) //quiere decir que debe desde un proceso, ejecutra una accion de otro proceso
+        {
+            $proceso = $faena->getProceso($articulo->getConcepto()->getProcesoFaena()->getId());
+        }
         if ($grupo->getManual())
         {
           return  $this->createFormBuilder()
                        ->add('generar', SubmitType::class, ['label' => 'Generar'])
                        ->setAction($this->generateUrl('bd_adm_generate_mov_manual_from_automatic', 
-                                                      ['proc' => $proceso, 'fd' => $faena, 'art' => $grupo->getMovimientoManual()->getArticuloAtributoConcepto()->getId()]))
+                                                      ['proc' => $proceso->getId(), 'fd' => $faena->getId(), 'art' => $articulo->getId()]))
                        ->getForm();  
         }
 
         return  $this->createFormBuilder()
                      ->add('generar', SubmitType::class, ['label' => 'Generar'])
                      ->setAction($this->generateUrl('bd_generate_movimientos_automaticos', 
-                                                    ['proc' => $proceso, 'fan' => $faena, 'gpo' => $grupo->getId()]))
+                                                    ['proc' => $proceso->getId(), 'fan' => $faena->getId(), 'gpo' => $grupo->getId()]))
                      ->getForm();     
     }
 
@@ -903,7 +910,7 @@ class GestionFaenaController extends Controller
               {
                // if (!$grupo->getManual())
               //  {
-                  $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso->getId(), $faena->getId(), $grupo)->createView();
+                  $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso, $faena, $grupo)->createView();
               //  }
               }
               return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
