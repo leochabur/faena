@@ -187,6 +187,64 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                     ->getResult();
     }
 
+    public function getStockArticulosPorProcesoAnteriorAFaena(\GestionFaenaBundle\Entity\ProcesoFaena $proceso,
+                                                              \GestionFaenaBundle\Entity\FaenaDiaria $faena)
+    /*para un ProcesoFaena, devuelve el stock de cada uno de los articulos del mismo, agrupados por Articulo y por FaenaDiaria, 
+      utilizado para el caso de los procesos permanentes para indicar de cuando es cada producto del mismo*/
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT articulo.id as idArt, sum(valor.valor) as cantidad
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   JOIN valor.movimiento movimiento 
+                                   JOIN movimiento.faenaDiaria faenaDiaria
+                                   JOIN movimiento.procesoFnDay procFanDay
+                                   JOIN procFanDay.procesoFaena procesoFaena
+                                   JOIN procesoFaena.manejosStock manejoStock
+                                   JOIN movimiento.artProcFaena artAtrCon
+                                   JOIN artAtrCon.articulo articulo                                    
+                                   WHERE (valor.atributoAbstracto = manejoStock.atributo) AND
+                                         (manejoStock.articulo = articulo) AND 
+                                         (procesoFaena = :proceso) AND
+                                         (movimiento.visible = :visible) AND
+                                         (movimiento.eliminado = :eliminado) AND
+                                         (faenaDiaria.fechaFaena < :fecha)
+                                   GROUP BY articulo")
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('visible', true)
+                    ->setParameter('eliminado', false)
+                    ->setParameter('fecha', $faena->getFechaFaena())
+                    ->getResult();
+    }
+
+    public function getStockArticulosPorProcesoHastaFaena(\GestionFaenaBundle\Entity\ProcesoFaena $proceso,
+                                                              \GestionFaenaBundle\Entity\FaenaDiaria $faena)
+    /*para un ProcesoFaena, devuelve el stock de cada uno de los articulos del mismo, agrupados por Articulo y por FaenaDiaria, 
+      utilizado para el caso de los procesos permanentes para indicar de cuando es cada producto del mismo*/
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT articulo.id as idArt, sum(valor.valor) as cantidad
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   JOIN valor.movimiento movimiento 
+                                   JOIN movimiento.faenaDiaria faenaDiaria
+                                   JOIN movimiento.procesoFnDay procFanDay
+                                   JOIN procFanDay.procesoFaena procesoFaena
+                                   JOIN procesoFaena.manejosStock manejoStock
+                                   JOIN movimiento.artProcFaena artAtrCon
+                                   JOIN artAtrCon.articulo articulo                                    
+                                   WHERE (valor.atributoAbstracto = manejoStock.atributo) AND
+                                         (manejoStock.articulo = articulo) AND 
+                                         (procesoFaena = :proceso) AND
+                                         (movimiento.visible = :visible) AND
+                                         (movimiento.eliminado = :eliminado) AND
+                                         (faenaDiaria.fechaFaena <= :fecha)
+                                   GROUP BY articulo")
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('visible', true)
+                    ->setParameter('eliminado', false)
+                    ->setParameter('fecha', $faena->getFechaFaena())
+                    ->getResult();
+    }
+
     public function getStockArticulos (\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso,
                                        \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
                                        \GestionFaenaBundle\Entity\FaenaDiaria $faena)

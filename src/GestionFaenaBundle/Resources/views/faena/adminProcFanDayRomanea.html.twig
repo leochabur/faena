@@ -35,6 +35,16 @@
   	</div>
 	<div class="card-body">
 		<table class="table table-bordered table-sm table-fit">
+			<thead>
+				<tr>
+					<th></th>
+					<th></th>
+					<th></th>
+					<th>Stock Inicial</th>
+					<th>Produccion</th>
+					<th>Stock Final</th>
+				</tr>
+			</thead>
 			<tbody>
 				
 				{% for key, art in articulos %}
@@ -75,14 +85,28 @@
 											{{ v[0].nombreResumido }}
 										</td>
 										<td>
+											{% if si[v[0].id]  is defined%}
+												<input readonly class="form-control form-control-sm align-center col-4" value="{{ si[v[0].id] }}"/>
+											{% else %}
+												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+											{% endif %}
+										</td>
+										<td>
 											<div class="row">
 												<div class="col">
-													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm align-center update" value="{{ valV }}"/>
+													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm align-center update col-7" value="{{ valV }}"/>
 												</div>
 												<div class="col">
 												</div>
 											</div>
-										</td>									
+										</td>	
+										<td>
+											{% if sf[v[0].id]  is defined%}
+												<input readonly class="form-control form-control-sm align-center col-4" value="{{ sf[v[0].id] }}"/>
+											{% else %}
+												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+											{% endif %}
+										</td>								
 									</tr>
 									{% set count2 = 1 %}
 								{% else %}
@@ -90,15 +114,29 @@
 										<td>
 											{{ v[0].nombreResumido }}
 										</td>
+										<td>
+											{% if si[v[0].id]  is defined%}
+												<input readonly class="form-control form-control-sm align-center col-4" value="{{ si[v[0].id] }}"/>
+											{% else %}
+												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+											{% endif %}
+										</td>
 										<td class="align-middle">
 											<div class="row">
 												<div class="col">
-													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm align-center update" value="{{ valV }}"/>
+													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm align-center update col-7" value="{{ valV }}"/>
 												</div>
 												<div class="col">
 												</div>
 											</div>
 										</td>
+										<td>
+											{% if sf[v[0].id]  is defined%}
+												<input readonly class="form-control form-control-sm align-center col-4" value="{{ sf[v[0].id] }}"/>
+											{% else %}
+												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+											{% endif %}
+										</td>	
 									</tr>
 								{% endif %}
 							{% endfor %}

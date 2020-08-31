@@ -677,8 +677,24 @@ class GestionFaenaController extends Controller
         }
         if ($proceso->getProcesoFaena()->getRomanea())
         {
-            $clasificables = $em->getRepository(MovimientoStock::class)->getStockArticulosClasificablesPorProcesoParaFaena($proceso->getProcesoFaena(), $faena);
+            $repoMov = $em->getRepository(MovimientoStock::class);
+            $clasificables = $repoMov->getStockArticulosClasificablesPorProcesoParaFaena($proceso->getProcesoFaena(), $faena);
 
+            $iniciales = $repoMov->getStockArticulosPorProcesoAnteriorAFaena($proceso->getProcesoFaena(), $faena);
+            $stockInicial = [];
+            foreach ($iniciales as $init)
+            {
+              $stockInicial[$init['idArt']] = $init['cantidad'];
+            }
+
+            ///////////calcula el stock total de cada articulo
+            $finales = $repoMov->getStockArticulosPorProcesoHastaFaena($proceso->getProcesoFaena(), $faena);
+            $stockFinal = [];
+            foreach ($finales as $fin)
+            {
+              $stockFinal[$fin['idArt']] = $fin['cantidad'];
+            }
+            /////////////////////////////////////
 
             $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
             $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
@@ -760,7 +776,9 @@ class GestionFaenaController extends Controller
                                        'subcates' => $subcategorias,
                                         'ccat' => $cantCateg,
                                         'csub' => $cantSubcates,
-                                        'clasificables' => $clasificables));
+                                        'clasificables' => $clasificables,
+                                        'si' => $stockInicial,
+                                        'sf' => $stockFinal));
         }
 
         $repository = $em->getRepository('GestionFaenaBundle:faena\MovimientoStock');
