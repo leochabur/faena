@@ -354,8 +354,7 @@ class GestionFaenaController extends Controller
                   }
                   elseif (in_array($instance, [2,3])) 
                   {
-                    $proceso = $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);
-                    
+                    $proceso = $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);               
                   }
               }
               else
@@ -364,35 +363,28 @@ class GestionFaenaController extends Controller
               }                             
           }
           $this->registrarPasoRealizado($grupoAutoomatico, $proceso->getProcesoFaena(), $proceso, $faena, $em);
-          
-         /* $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($procFaena, $grupoAutoomatico); //recupera si existe el paso en el proceso para el grupo automatico de movimiento
-          if ($paso)
-          {
-              //como solo mantiene un paso realizado por cada grupo elimina si ya existe alguno
-              $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($proceso, $faena, $paso);
-              if ($pasoRealizado) //si ya existe solo actualiza la fecha hora de ejecucion
-              {
-                  $pasoRealizado->setFechaAccion(new \DateTime());
-              }
-              else
-              {   //sino existe lo crea
-                  $pasoRealizado = new PasoProcesoRealizado();
-                  $pasoRealizado->setFechaAccion(new \DateTime());
-                  $pasoRealizado->setProcesoFaenaDiaria($proceso);
-                  $pasoRealizado->setFaenaDiaria($faena);
-                  $pasoRealizado->setPaso($paso);
-                  $em->persist($pasoRealizado);
-              }              
-          }*/         
-
           $em->flush(); 
       }
       catch(\Exception $e){
-                         //   return new Response(var_dump($e->getTrace()));
                             $this->addFlash('errorLoad', $e->getMessage());
                           }
       $proceso = $faena->getProceso($grupoAutoomatico->getProcesoFaena()->getId());
-      return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proceso->getId(), 'fd' => $fan]);
+
+      $movAutoRealizados = $em->getRepository(GrupoMovimientosAutomatico::class)->findAllMovimientosRealizadosProceso($proceso, $faena);
+      $realizados = [];
+      foreach ($movAutoRealizados as $mr)
+      {
+        $realizados[$mr->getId()] = true;
+      }
+
+      $formsAutomaticos = [];
+      foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
+      {
+          $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso, $faena, $grupo)->createView();
+      }
+      return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
+                          ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso, 'realizados' => $realizados]);
+      //return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proceso->getId(), 'fd' => $fan]);
     }
 
     /**
@@ -908,10 +900,7 @@ class GestionFaenaController extends Controller
               $formsAutomaticos = [];
               foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
               {
-               // if (!$grupo->getManual())
-              //  {
                   $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso, $faena, $grupo)->createView();
-              //  }
               }
               return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
                                   ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso, 'realizados' => $realizados]);
@@ -1560,12 +1549,13 @@ class GestionFaenaController extends Controller
         $valid = $movimiento->verificarValores();
         if (!$valid['ok'])
         {
-            $this->addFlash(
-                                'errorLoad',
-                                $valid['messages']
-                            );
-            return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
-                                array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));                    
+           /* $this->addFlash(
+                              'errorLoad',
+                              implode(' - ',$valid['messages'])
+                            );*/
+            throw new \Exception(implode(' - ',$valid['messages']));
+           // return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', 
+                             //   array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso, 'faena' => $faena));                    
         }
         $em->persist($movimiento);
         $proceso->addMovimiento($movimiento);
@@ -1823,31 +1813,24 @@ class GestionFaenaController extends Controller
                                             $em)
     {
         //todos los movimientos son automaticos, cuando se crea un paso de un prceso siempre apunta a un grupo de movimientos automaticos
-        //$grupo = $em->getRepository(GrupoMovimientosAutomatico::class)->getMovimientoWithAtributo($proceso, $articulo);
-
-      //  if ($grupo) 
-      //  {
-     // throw new \Exception("asdad");
-            $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($proceso, $grupo);
-            if ($paso)
+        $paso = $em->getRepository(PasoProceso::class)->findPasoProceso($proceso, $grupo);
+        if ($paso)
+        {
+            $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($procesoFaena, $faena, $paso);
+            if ($pasoRealizado)
             {
-                $pasoRealizado = $em->getRepository(PasoProcesoRealizado::class)->findPasoProcesoRealizado($procesoFaena, $faena, $paso);
-                if ($pasoRealizado)
-                {
-                    $pasoRealizado->setFechaAccion(new \DateTime());
-                }
-                else
-                {
-                      $pasoRealizado = new PasoProcesoRealizado();
-                      $pasoRealizado->setFechaAccion(new \DateTime());
-                      $pasoRealizado->setProcesoFaenaDiaria($procesoFaena);
-                      $pasoRealizado->setFaenaDiaria($faena);
-                      $pasoRealizado->setPaso($paso);
-                      $em->persist($pasoRealizado);
-                }
+                $pasoRealizado->setFechaAccion(new \DateTime());
             }
-        //}
-        
+            else
+            {
+                  $pasoRealizado = new PasoProcesoRealizado();
+                  $pasoRealizado->setFechaAccion(new \DateTime());
+                  $pasoRealizado->setProcesoFaenaDiaria($procesoFaena);
+                  $pasoRealizado->setFaenaDiaria($faena);
+                  $pasoRealizado->setPaso($paso);
+                  $em->persist($pasoRealizado);
+            }
+        }        
     }
 
     /**
@@ -1902,18 +1885,21 @@ class GestionFaenaController extends Controller
 
         if (in_array($type, [2, 3, '2', '3']))
         {
-//          throw new \Exception("Error Processing Request ".$type, 1);
-          $this->procesarEntradaSalidaStock($proceso, $articulo, $concepto, $faena, $type, $em, $request);
-          $proceso->setUltimoMovimiento(new \DateTime());
-          $this->registrarPasoRealizado($grupo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
-          $em->flush();
-          return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
+            try
+            {
+              $this->procesarEntradaSalidaStock($proceso, $articulo, $concepto, $faena, $type, $em, $request);
+              $proceso->setUltimoMovimiento(new \DateTime());
+              $this->registrarPasoRealizado($grupo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
+              $em->flush();
+            }
+            catch(\Exception $e)
+            {
+                $this->addFlash('errorLoad', $e->getMessage()." -ERROR");
+                return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
+            } 
         }
-        else
-        {
+
           return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fanday]);
-        }
-      //  return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('fatr' => $formAtr->createView(), 'movimiento' => $movimiento, 'proceso' => $proceso));
         
     }
 
