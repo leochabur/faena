@@ -70,6 +70,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use GestionFaenaBundle\Entity\AjusteMovimiento;
 use GestionFaenaBundle\Entity\faena\MovimientoAutomatico;
 use GestionFaenaBundle\Form\faena\MovimientoAutomaticoType;
+use GestionFaenaBundle\Entity\ConceptoVenta;
+use GestionFaenaBundle\Form\ConceptoVentaType; 
 
 class GestionBDController extends Controller
 {
@@ -1036,6 +1038,7 @@ class GestionBDController extends Controller
     {
         $entityManager = $this->getDoctrine()->getManager();
         $proceso = $entityManager->find(ProcesoFaena::class, $proccess);
+
         $ajuste = new AjusteMovimiento();
         $movAuto = new MovimientoAutomatico();
         return $this->render('@GestionFaena/procesoEdit.html.twig', 
@@ -1048,7 +1051,8 @@ class GestionBDController extends Controller
                                   'default' => $this->getFormSetDefaultProcesoDestino($proceso)->createView(),
                                   'auto' => $this->getFormSetAutomaticMov($proceso, $movAuto)->createView(),
                                   'base' => $this->getFormSetArticuloBaseProceso($proceso)->createView(),
-                                  'atrBase' => $this->getFormSetAtributoBaseProceso($proceso)->createView()));
+                                  'atrBase' => $this->getFormSetAtributoBaseProceso($proceso)->createView(),
+                                  'formConcepto' => $this->getFormAddConceptoVenta(new ConceptoVenta(), $proceso)->createView()));
     }
 
     private function getFormAddPasoGrupoMovimiento($grupo, $proceso)
@@ -1056,6 +1060,35 @@ class GestionBDController extends Controller
         return $this->createForm(GrupoMovimientosAutomaticoType::class, 
                                 $grupo, 
                                 ['action' => $this->generateUrl('bd_add_grupo_movimientos_automaticos', ['proc' => $proceso->getId()]),
+                                 'method' => 'POST',
+                                 'proceso' => $proceso
+                                ]);
+    }
+
+    /**
+     * @Route("/config/addconvta/{proc}", name="bd_add_concepto_venta", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addConceptoVentaProcesoFaena(Request $request, $proc)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+        $concepto = new ConceptoVenta();
+        $form = $this->getFormAddConceptoVenta($concepto, $proceso);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+            $entityManager->persist($concepto);
+            $entityManager->flush();
+            return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        }
+    }
+
+    private function getFormAddConceptoVenta($concepto, $proceso)
+    {
+        return $this->createForm(ConceptoVentaType::class, 
+                                $concepto, 
+                                ['action' => $this->generateUrl('bd_add_concepto_venta', ['proc' => $proceso->getId()]),
                                  'method' => 'POST',
                                  'proceso' => $proceso
                                 ]);

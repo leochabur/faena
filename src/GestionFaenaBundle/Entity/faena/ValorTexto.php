@@ -20,6 +20,12 @@ class ValorTexto extends ValorAtributo
      */
     private $valor;
 
+
+    public function getDataValue()
+    {
+        return $this->valor;
+    }
+
     /**
      * Set valor
      *

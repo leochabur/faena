@@ -12,18 +12,28 @@
 			Articulos pendientes de clasificar
 			<hr>
 		</div>
-
-<ul class="list-group">
-			{% for c in clasificables %}
-				  <li class="list-group-item d-flex justify-content-between align-items-center">
-				    {{ c.nombre }}:  {{ c.cantidad }} 
-				    <span class="badge" title="Clasificar">
-				    		<a href="{{ path('clasifiar_articulo_base', {proc : proceso.id, fd : faena.id, art : c.idArt})}}"><i class="far fa-calendar-check fa-2x"></i></a></span>
-				  </li>
-			{% endfor %}
-		</ul>
+			<ul class="list-group">
+				{% for c in clasificables %}
+					  <li class="list-group-item d-flex justify-content-between align-items-center">
+					    {{ c.nombre }}:  {{ c.cantidad }} 
+					    <span class="badge" title="Clasificar">
+					    		<a href="{{ path('clasifiar_articulo_base', {proc : proceso.id, fd : faena.id, art : c.idArt})}}"><i class="far fa-calendar-check fa-2x"></i></a></span>
+					  </li>
+				{% endfor %}
+			</ul>
   	</div>
 	<div class="card-body">
+		<span class="h5">
+			Registrar Salidas
+		</span>
+		{{ form_start(ventas, {'attr':{'novalidate':'novalidate'}})  }}
+		<div class="form-row">
+			{{ form_widget(ventas.conceptoVenta, {'attr' : {'class' : 'form-control col-lg-3'}}) }}
+		</div>
+		<div class="form-row">
+			{{ form_widget(ventas.asignar) }}
+		</div>
+		{{ form_end(ventas) }}
 	</div>
 </div>
 <br>

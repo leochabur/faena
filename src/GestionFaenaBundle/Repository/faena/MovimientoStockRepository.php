@@ -349,4 +349,27 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                     ->getResult();
     }
 
+    public function getMovimientosConConcepto(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso,
+                                             \GestionFaenaBundle\Entity\FaenaDiaria $faena,
+                                             \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto)
+    /*para un ProcesoFaena, devuelve el stock de cada uno de los articulos del mismo, agrupados por Articulo y por FaenaDiaria, 
+      utilizado para el caso de los procesos permanentes para indicar de cuando es cada producto del mismo*/
+    {
+        return $this->getEntityManager()
+                ->createQuery('SELECT valor, art.id as article
+                               FROM GestionFaenaBundle:faena\ValorExterno valor  
+                               JOIN valor.movimiento s 
+                               JOIN s.artProcFaena artAtrCon
+                               JOIN artAtrCon.articulo art
+                               JOIN artAtrCon.concepto concepto
+                               WHERE concepto.concepto = :concepto AND s.faenaDiaria = :faena AND s.procesoFnDay = :proceso AND s.visible = :visible AND s.eliminado = :eliminado')
+                ->setParameter('proceso', $proceso)
+                ->setParameter('concepto', $concepto)
+                ->setParameter('faena', $faena)
+                ->setParameter('visible', true)
+                ->setParameter('eliminado', false)
+                ->getResult();
+    }
+
+
 }

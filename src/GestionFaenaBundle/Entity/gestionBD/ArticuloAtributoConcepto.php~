@@ -110,7 +110,12 @@ class ArticuloAtributoConcepto
 
     public function getVistaEdicion()
     {
-        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento() ;
+        $destino = "";
+        if ($this->articuloOrigenTransformacion)
+        {
+            $destino = " (".$this->articuloOrigenTransformacion.")";
+        }
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino;
     }
 
     public function getId()
@@ -311,5 +316,29 @@ class ArticuloAtributoConcepto
     public function getProcesosDestino()
     {
         return $this->procesosDestino;
+    }
+
+    /**
+     * Set articuloOrigenTransformacion
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articuloOrigenTransformacion
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setArticuloOrigenTransformacion(\GestionFaenaBundle\Entity\gestionBD\Articulo $articuloOrigenTransformacion = null)
+    {
+        $this->articuloOrigenTransformacion = $articuloOrigenTransformacion;
+
+        return $this;
+    }
+
+    /**
+     * Get articuloOrigenTransformacion
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Articulo
+     */
+    public function getArticuloOrigenTransformacion()
+    {
+        return $this->articuloOrigenTransformacion;
     }
 }

@@ -61,6 +61,7 @@ abstract class ValorAtributo
 */
     public abstract function isValid();
 
+    public abstract function getDataValue();
     /**
      * Get id
      *

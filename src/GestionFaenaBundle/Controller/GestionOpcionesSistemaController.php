@@ -11,6 +11,10 @@ use GestionFaenaBundle\Entity\gestionBD\Granja;
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
 use GestionFaenaBundle\Entity\gestionBD\Ciudad;
 use GestionFaenaBundle\Entity\gestionBD\Cargador;
+use GestionFaenaBundle\Entity\gestionBD\Sucursal;
+use GestionFaenaBundle\Entity\gestionBD\Consignatario;
+use GestionFaenaBundle\Entity\gestionBD\Remito;
+use GestionFaenaBundle\Entity\gestionBD\Anexo;
 use GestionFaenaBundle\Entity\opciones\InformeProceso;
 
 class GestionOpcionesSistemaController extends Controller
@@ -135,6 +139,78 @@ class GestionOpcionesSistemaController extends Controller
     }
 
     /**
+     * @Route("/addsuc", name="bd_add_entity_sucursal")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntitySucursalAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $sucursales = $em->getRepository(Sucursal::class)->findAll();
+
+        $sucursal = new Sucursal();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\SucursalType::class, 
+                                  $sucursal, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 5))]);
+        return $this->render('@GestionFaena/gestionBD/abmSucursal.html.twig', 
+                            ['form' => $form->createView(), 'sucursales' => $sucursales]);
+    }
+
+    /**
+     * @Route("/addcons", name="bd_add_entity_consignatario")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntityConsignatarioAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $consignatarios = $em->getRepository(Consignatario::class)->findAll();
+
+        $consignatario = new Consignatario();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\ConsignatarioType::class, 
+                                  $consignatario, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 6))]);
+        return $this->render('@GestionFaena/gestionBD/abmConsignatario.html.twig', 
+                            ['form' => $form->createView(), 'consignatarios' => $consignatarios]);
+    }
+
+    /**
+     * @Route("/addrto", name="bd_add_entity_remito")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntityRemitoAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $remitos = $em->getRepository(Remito::class)->findAll();
+
+        $remito = new Remito();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\RemitoType::class, 
+                                  $remito, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 7))]);
+        return $this->render('@GestionFaena/gestionBD/abmRemito.html.twig', 
+                            ['form' => $form->createView(), 'remitos' => $remitos]);
+    }
+
+    /**
+     * @Route("/addanxo", name="bd_add_entity_anexo")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntityAnexoAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $anexos = $em->getRepository(Anexo::class)->findAll();
+
+        $anexo = new Anexo();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\AnexoType::class, 
+                                  $anexo, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 8))]);
+        return $this->render('@GestionFaena/gestionBD/abmAnexo.html.twig', 
+                            ['form' => $form->createView(), 'anexos' => $anexos]);
+    }
+
+    /**
      * @Route("/saveEntExt/{ee}", name="save_entidad_externa", methods={"POST"})
      */
     public function saveEntidadExterna($ee, Request $request)
@@ -225,7 +301,100 @@ class GestionOpcionesSistemaController extends Controller
             }  
             return $this->render('@GestionFaena/gestionBD/abmCargador.html.twig', 
                                 ['cargadores' => $cargadores, 'form' => $fCarg->createView()]);
-        }        
+        } 
+        elseif ($ee == 5)
+        {
+            $sucursal = new Sucursal();
+            $sucursales = $entityManager->getRepository(Sucursal::class)->findAll();
+            $fSuc = $this->createForm(\GestionFaenaBundle\Form\gestionBD\SucursalType::class, 
+                                      $sucursal, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 5))]);
+            $fSuc->handleRequest($request);
+            if ($fSuc->isValid())
+            {
+                $entityManager->persist($sucursal);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Sucursal almacenada exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_sucursal');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmSucursal.html.twig', 
+                                ['sucursales' => $sucursales, 'form' => $fSuc->createView()]);
+        } 
+        elseif ($ee == 6)
+        {
+
+            $consignatarios = $entityManager->getRepository(Consignatario::class)->findAll();
+
+            $consignatario = new Consignatario();
+            $fCons = $this->createForm(\GestionFaenaBundle\Form\gestionBD\ConsignatarioType::class, 
+                                      $consignatario, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 6))]);
+            $fCons->handleRequest($request);
+            if ($fCons->isValid())
+            {
+                $entityManager->persist($consignatario);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Consignatario almacenado exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_consignatario');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmConsignatario.html.twig', 
+                                ['consignatarios' => $consignatarios, 'form' => $fCons->createView()]);
+        }
+        elseif ($ee == 7)
+        {
+
+            $remitos = $entityManager->getRepository(Remito::class)->findAll();
+
+            $remito = new Remito();
+            $fRem = $this->createForm(\GestionFaenaBundle\Form\gestionBD\RemitoType::class, 
+                                      $remito, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 7))]);
+            $fRem->handleRequest($request);
+            if ($fRem->isValid())
+            {
+                $entityManager->persist($remito);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Remito almacenado exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_remito');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmRemito.html.twig', 
+                                ['form' => $fRem->createView(), 'remitos' => $remitos]);
+        }
+        elseif ($ee == 8)
+        {
+            $anexos = $entityManager->getRepository(Anexo::class)->findAll();
+
+            $anexo = new Anexo();
+            $fRem = $this->createForm(\GestionFaenaBundle\Form\gestionBD\AnexoType::class, 
+                                      $anexo, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 7))]);
+            $fRem->handleRequest($request);
+            if ($fRem->isValid())
+            {
+                $entityManager->persist($anexo);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Anexo almacenado exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_anexo');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmAnexo.html.twig', 
+                                ['form' => $fRem->createView(), 'anexos' => $anexos]);
+        }               
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -72,7 +72,6 @@ abstract class ProcesoFaena
      */
     private $activo = true; 
 
-
     /**
      *
      * @ORM\Column(name="permanente", type="boolean", options={"default":false})
@@ -147,11 +146,32 @@ abstract class ProcesoFaena
      */
     private $pasos;
 
+    /**
+     * @ORM\Column(name="generaVentas", type="boolean", options={"default":false})
+     */
+    private $generaVentas = false; //para el proceso de camaras indica si el proceso genera ventas (Sucursales, Clientes, Exportaciones etc)
+
+    /**
+     * @ORM\OneToMany(targetEntity="ConceptoVenta", mappedBy="procesoFaena")
+     */
+    private $ventas;
+
     //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
     public function existeArticuloDefinidoManejoStock(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
     {
         foreach ($this->manejosStock as $stock) {
             if ($stock->getArticulo() == $articulo)
+                return $stock;
+        }
+        return null;
+    }
+
+
+    //dado un Articulo devuelve si el mismo se encuentra definido para manejar el stock - Devuelve un objeto FactorCalculo
+    public function existeArticuloConIdDefinidoManejoStock($idArticulo)
+    {
+        foreach ($this->manejosStock as $stock) {
+            if ($stock->getArticulo()->getId() == $idArticulo)
                 return $stock;
         }
         return null;
@@ -313,6 +333,7 @@ abstract class ProcesoFaena
         $this->manejosStock = new \Doctrine\Common\Collections\ArrayCollection();
         $this->ajustes = new \Doctrine\Common\Collections\ArrayCollection();
         $this->pasos = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->ventas = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -805,5 +826,63 @@ abstract class ProcesoFaena
     public function getPasos()
     {
         return $this->pasos;
+    }
+
+    /**
+     * Set generaVentas
+     *
+     * @param boolean $generaVentas
+     *
+     * @return ProcesoFaena
+     */
+    public function setGeneraVentas($generaVentas)
+    {
+        $this->generaVentas = $generaVentas;
+
+        return $this;
+    }
+
+    /**
+     * Get generaVentas
+     *
+     * @return boolean
+     */
+    public function getGeneraVentas()
+    {
+        return $this->generaVentas;
+    }
+
+    /**
+     * Add venta
+     *
+     * @param \GestionFaenaBundle\Entity\ConceptoVenta $venta
+     *
+     * @return ProcesoFaena
+     */
+    public function addVenta(\GestionFaenaBundle\Entity\ConceptoVenta $venta)
+    {
+        $this->ventas[] = $venta;
+
+        return $this;
+    }
+
+    /**
+     * Remove venta
+     *
+     * @param \GestionFaenaBundle\Entity\ConceptoVenta $venta
+     */
+    public function removeVenta(\GestionFaenaBundle\Entity\ConceptoVenta $venta)
+    {
+        $this->ventas->removeElement($venta);
+    }
+
+    /**
+     * Get ventas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getVentas()
+    {
+        return $this->ventas;
     }
 }

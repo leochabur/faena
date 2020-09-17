@@ -1,0 +1,83 @@
+<?php
+
+namespace GestionFaenaBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ConceptoVenta
+ *
+ * @ORM\Table(name="sp_gst_conc_vta")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\ConceptoVentaRepository")
+ */
+class ConceptoVenta
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="entidadExterna", type="string", length=255)
+     */
+    private $entidadExterna;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="ProcesoFaena", inversedBy="ventas") 
+    * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
+    */      
+    private $procesoFaena;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento") 
+    * @ORM\JoinColumn(name="id_concepto", referencedColumnName="id")
+    */      
+    private $concepto;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atr_abst", referencedColumnName="id")
+    */      
+    private $atributo;
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set entidadExterna
+     *
+     * @param string $entidadExterna
+     *
+     * @return ConceptoVenta
+     */
+    public function setEntidadExterna($entidadExterna)
+    {
+        $this->entidadExterna = $entidadExterna;
+
+        return $this;
+    }
+
+    /**
+     * Get entidadExterna
+     *
+     * @return string
+     */
+    public function getEntidadExterna()
+    {
+        return $this->entidadExterna;
+    }
+}
+
