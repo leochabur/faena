@@ -19,4 +19,15 @@ class DetalleSolicitudRepository extends \Doctrine\ORM\EntityRepository
 			        ->getQuery()
 			        ->getOneOrNullResult(); 
 	} 
+
+	public function getDetalleConTropaYProducto(\GestionSigcerBundle\Entity\TropaSolicitud $tropa, $producto) 
+	{ 
+	    return $this->createQueryBuilder('d')
+	    			->where('d.tropa= :tropa')
+	    			->andWhere('d.articulo = :articulo')
+	    			->setParameter('tropa', $tropa)
+	    			->setParameter('articulo', $producto)
+			        ->getQuery()
+			        ->getOneOrNullResult(); 
+	} 
 }

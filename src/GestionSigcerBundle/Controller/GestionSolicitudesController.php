@@ -478,8 +478,10 @@ class GestionSolicitudesController extends Controller
                   $detalle = null;
                   if (!$creoTropa) //sino creo una tropa nueva es porque ya existe una, de ser asi debe buscar si existe un detalle asignado a la misma para asi sumar los valores y no generar una nueva
                   {
-                      $detalle = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropa($tropa); 
+                      $pr = $data['producto'];
+                      $detalle = $em->getRepository(DetalleSolicitud::class)->getDetalleConTropaYProducto($tropa, $pr); 
                   }
+
                   $cant = $hoja->getCellByColumnAndRow(1,$i)->getValue();
                   $bruto = $hoja->getCellByColumnAndRow(3,$i)->getValue();
                   $neto = $hoja->getCellByColumnAndRow(2,$i)->getValue();
