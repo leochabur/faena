@@ -32,6 +32,11 @@ class ConceptoMovimiento
     private $concepto;
 
     /**
+     * @ORM\Column(name="resumido", type="string", length=255, nullable=true)
+     */
+    private $resumido;
+    
+    /**
      * @ORM\Column(name="transforma", type="boolean", nullable=true, options={"default" : false})
      */
     private $transforma;
@@ -116,5 +121,29 @@ class ConceptoMovimiento
     public function getTransforma()
     {
         return $this->transforma;
+    }
+
+    /**
+     * Set resumido
+     *
+     * @param string $resumido
+     *
+     * @return ConceptoMovimiento
+     */
+    public function setResumido($resumido)
+    {
+        $this->resumido = $resumido;
+
+        return $this;
+    }
+
+    /**
+     * Get resumido
+     *
+     * @return string
+     */
+    public function getResumido()
+    {
+        return $this->resumido;
     }
 }

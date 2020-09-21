@@ -572,10 +572,12 @@ class GestionFaenaController extends Controller
 
         $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
         $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
+
         if (!$conceptoMovimiento)
         {
           throw new \Exception("no se encuentra el concepto del movimiento");
         }
+
         $articuloBase = $proceso->getProcesoFaena()->getArticuloBase();
         if (!$articuloBase)  
         {
@@ -651,7 +653,6 @@ class GestionFaenaController extends Controller
                                     'csub' => $cantSubcates,
                                     'articulo' => $articulo,
                                     'stock' => $stock));
-        
     }
 
     /**
@@ -737,7 +738,7 @@ class GestionFaenaController extends Controller
                 $em->persist($valorS);
                 $em->flush();
 
-                return new JsonResponse(['status' => true]);
+                return new JsonResponse(['status' => true, 'idm' => $valorS->getId()]);
             }
             catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
         }
@@ -745,10 +746,14 @@ class GestionFaenaController extends Controller
         {
           try
           {
+             if (!is_numeric($value))
+             {
+                return new JsonResponse(['status' => false, 'message' => 'Debe introducir un valor numerico']);
+             }
              $valor = $em->find(ValorNumerico::class, $val);
-             $valor->setValor($value);
-
-             $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
+             $valor->setValor((-1)*$value);
+             /*
+            // $ajuste = ($articulo->getPresentacionKg()?$articulo->getPresentacionKg():1);
              $valorAjustado = (-1)*$value;//($ajuste*$value);
 
              $entrada = $valor->getMovimiento();
@@ -763,10 +768,10 @@ class GestionFaenaController extends Controller
 
                 $valorAsoc = $salida->getValorWhitAtribute($atributoAbstractoBase->getAtributo());
                 $valorAsoc->setValor($valorAjustado);
-             }
+             }*/
              $em->flush();
-             $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiaria, $articuloBase, $faena);
-             return new JsonResponse(['status' => true, 'stb' => $stock['cantidad']]);
+            // $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiaria, $articuloBase, $faena);
+             return new JsonResponse(['status' => true]);
            }
            catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
         }
@@ -828,7 +833,7 @@ class GestionFaenaController extends Controller
             $val = $movimiento->getValorWhitAtribute($manejoStock->getAtributo());
             $valor = $val->getDataValue();
             $valor*= ($valor < 0?-1:1);
-            $salidas[$v[0]->getEntidadExterna()->getId()][$v['article']] = ['id' => $movimiento->getId(), 'data' => $valor];
+            $salidas[$v[0]->getEntidadExterna()->getId()][$v['article']] = ['id' => $val->getId(), 'data' => $valor];
         }
 
 
@@ -844,25 +849,6 @@ class GestionFaenaController extends Controller
         $cantSubcates = [];
         foreach ($articulos as $art)
         {   
-          //if ($articulo->getArticulosClasificables()->contains($art))
-         // {
-          /*    $procesoFaena = $proceso->getProcesoFaena();
-
-              $factor = $procesoFaena->existeArticuloDefinidoManejoStock($art); //obtiene si el articulo se encuentra en el proceso para realizar el manejo de stock
-              $valor = 0;
-              if ($factor)
-              {
-                  $movimiento = $proceso->getMovimientosArticulo($art, $faena);
-                  if ($movimiento)
-                  {
-                    $val = $movimiento->getValorWhitAtribute($factor->getAtributo());
-                    if ($val)
-                    {
-                      $valor = $val;
-                    }
-                  }
-              }*/
-              ////finaliza recuperacion
               $idCat = $art->getCategoria()->getId();
               $idSub = $art->getSubcategoria()->getId();
               if (!array_key_exists($idCat, $cantCateg))
@@ -891,10 +877,9 @@ class GestionFaenaController extends Controller
               }
 
               $data[$idCat][$idSub][] = [0 => $art];
-           // }
         }
         $em->flush();
-        return $this->render('@GestionFaena/faena/registrarVentas.html.twig', 
+        return $this->render('@GestionFaena/faena/registrarVentasAP.html.twig', 
                             array( 'proceso' => $proceso, 
                                    'faena' => $faena, 
                                    'articulos' => $data, 
@@ -941,6 +926,7 @@ class GestionFaenaController extends Controller
         if ($proceso->getProcesoFaena()->getRomanea())
         {
             $repoMov = $em->getRepository(MovimientoStock::class);
+
             $clasificables = $repoMov->getStockArticulosClasificablesPorProcesoParaFaena($proceso->getProcesoFaena(), $faena);
 
             $iniciales = $repoMov->getStockArticulosPorProcesoAnteriorAFaena($proceso->getProcesoFaena(), $faena);
@@ -978,8 +964,10 @@ class GestionFaenaController extends Controller
             $articulos = $em->getRepository(Articulo::class)->getListaArticulosConCategoria();
             $cantCateg = [];
             $cantSubcates = [];
+            $arrayArticulos = [];
             foreach ($articulos as $art)
             {   
+                $arrayArticulos[$art->getId()] = $art;
                 $procesoFaena = $proceso->getProcesoFaena();
 
                 $factor = $procesoFaena->existeArticuloDefinidoManejoStock($art); //obtiene si el articulo se encuentra en el proceso para realizar el manejo de stock
@@ -1017,7 +1005,9 @@ class GestionFaenaController extends Controller
                 }
                 $cantSubcates[$idCat][$idSub]++;
                 $categorias[$idCat] = $art->getCategoria();
+
                 $subcategorias[$idSub] = $art->getSubcategoria();
+
                 if (!array_key_exists($idCat, $data))
                 {
                   $data[$idCat] = [];
@@ -1030,7 +1020,37 @@ class GestionFaenaController extends Controller
                 $data[$idCat][$idSub][] = [0 => $art, 1 => $valor];
             }
             $em->flush();
-            return $this->render('@GestionFaena/faena/adminProcFanDayRomanea.html.twig', 
+            $ventasTotales = [];            
+            $movimientosVenta = $repoMov->getAllMovimientosConConcepto($proceso, $faena);
+            $procFaena = $proceso->getProcesoFaena();
+            $conceptos = $procFaena->getConceptosOfVentas();
+            $totalVentas = [];
+            foreach ($movimientosVenta as $vta)
+            {
+                $art = $arrayArticulos[$vta['idArt']];
+                $stock = $procesoFaena->existeArticuloDefinidoManejoStock($art);
+                if ($stock)
+                {
+                  $mov = $vta[0];
+                  $value = $mov->getValorWhitAtribute($stock->getAtributo());
+                  if (!array_key_exists($vta['idConc'], $ventasTotales))
+                  {
+                    $ventasTotales[$vta['idConc']] = [];
+                  }
+                  if (!array_key_exists($vta['idArt'], $totalVentas))
+                  {
+                    $totalVentas[$vta['idArt']] = 0;
+                  }
+                  $totalVentas[$vta['idArt']]+= $value->getDataValue();
+                  if (!array_key_exists($vta['idArt'], $ventasTotales[$vta['idConc']]))
+                  {
+                    $ventasTotales[$vta['idConc']][$vta['idArt']] = 0;
+                  }
+                  $ventasTotales[$vta['idConc']][$vta['idArt']]+= $value->getDataValue();
+
+                }
+            }
+            return $this->render('@GestionFaena/faena/adminProcFanDayRomaneaAp.html.twig', 
                                 array( 'proceso' => $proceso, 
                                        'form' => $form->createView(), 
                                        'faena' => $faena, 
@@ -1042,6 +1062,9 @@ class GestionFaenaController extends Controller
                                         'clasificables' => $clasificables,
                                         'si' => $stockInicial,
                                         'sf' => $stockFinal,
+                                        'ventasTotales' => $ventasTotales,
+                                        'conceptos' => $conceptos,
+                                        'totVtas' => $totalVentas,
                                         'ventas' => $this->getFormIngresarVenta($proceso, $faena)->createView()));
         }
 

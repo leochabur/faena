@@ -1,0 +1,222 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<style type="text/css">
+
+</style>
+<br>
+<hr>
+<p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }}</p>
+
+
+<div class="card">
+	<div class="card-header">
+		<div class="h5">
+			Articulos pendientes de clasificar
+			<hr>
+		</div>
+			<ul class="list-group">
+				{% for c in clasificables %}
+					  <li class="list-group-item d-flex justify-content-between align-items-center">
+					    {{ c.nombre }}:  {{ c.cantidad }} 
+					    <span class="badge" title="Clasificar">
+					    		<a href="{{ path('clasifiar_articulo_base', {proc : proceso.id, fd : faena.id, art : c.idArt})}}"><i class="far fa-calendar-check fa-2x"></i></a></span>
+					  </li>
+				{% endfor %}
+			</ul>
+  	</div>
+	<div class="card-body">
+		<span class="h5">
+			Registrar Salidas
+		</span>
+		{{ form_start(ventas, {'attr':{'novalidate':'novalidate'}})  }}
+		<div class="form-row">
+			{{ form_widget(ventas.conceptoVenta, {'attr' : {'class' : 'form-control col-lg-3'}}) }}
+		</div>
+		<div class="form-row">
+			{{ form_widget(ventas.asignar) }}
+		</div>
+		{{ form_end(ventas) }}
+	</div>
+</div>
+{% endblock fos_user_content %}
+{% block out_container %}
+<br>
+<div class="card">
+	<div class="card-header">
+		<div class="h5">
+			Existencias Totales
+		</div>
+  	</div>
+	<div class="card-body">
+		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-success"><< Volver</a>
+		<table id="myTable" class="table table-bordered table-sm table-fit table-hover table-striped" cellspacing="0"
+  width="100%">
+			<thead>
+				<tr>
+					<th rowspan="3">
+
+					</th>
+					{% for c in cates %}
+						<th class="text-center" colspan="{{ ccat[c.id] }}">
+							{{ c }}
+						</th>
+					{% endfor %}
+				</tr>
+				<tr>
+
+					{% for kc, sub in  csub %}
+						{% for ks, vs in sub %}
+							<th class="text-center" colspan="{{ vs }}">
+								{{ subcates[ks] }}
+							</th>
+						{% endfor %}
+					{% endfor %}
+				</tr>
+				<tr>
+					{% for key, art in articulos %}
+						{% for ks, sub in art %} 
+							{% for k, v in sub %}
+								<th class="col-lg-12">
+									<span class=" mr-3 ml-3">{{ v[0].nombreResumido }}</span>
+								</th>
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="green accent-1">
+						Stock Inicial
+					</td>
+						{% for key, art in articulos %}
+							{% for ks, sub in art %} 
+								{% for k, v in sub %}
+									<td class="col-lg-12 green accent-1"> 							
+										{% if si[v[0].id]  is defined%}
+											<input readonly class="green accent-2 text-right form-control form-control-sm col-lg-12" value="{{ si[v[0].id] }}"/>
+										{% else %}
+											<input readonly class="green accent-2 text-right form-control form-control-sm col col-lg-12"/>
+										{% endif %}						
+									</td>
+								{% endfor %}
+							{% endfor %}
+						{% endfor %}
+				</tr>
+				{% for c in conceptos %}
+					<tr>
+						<td>
+							{{ c.resumido }}
+						</td>
+							{% for key, art in articulos %}
+								{% for ks, sub in art %} 
+									{% for k, v in sub %}
+										<td class="col-lg-12"> 							
+											{%  if ventasTotales[c.id][v[0].id] is defined  %}
+												<input readonly class="text-right form-control form-control-sm col-lg-12" value="{{ ventasTotales[c.id][v[0].id] }}"/>
+											{% else %}
+												<input readonly class="text-right form-control form-control-sm col col-lg-12"/>
+											{% endif %}						
+										</td>
+									{% endfor %}
+								{% endfor %}
+							{% endfor %}
+					</tr>
+				{% endfor %}
+				<tr>
+					<td class="deep-orange lighten-4">
+						DESPACHADO
+					</td>
+					{% for key, art in articulos %}
+						{% for ks, sub in art %} 
+							{% for k, v in sub %}
+								{% set valV = '' %}
+								{% if totVtas[v[0].id] is defined %}
+									{% set valV = totVtas[v[0].id] %}
+								{% endif %}
+
+								<td class="col-lg-12 deep-orange lighten-4"> 							
+									{% if sf[v[0].id]  is defined%}
+										<input readonly class="deep-orange lighten-2 text-right form-control form-control-sm col-lg-12" value="{{ valV }}"/>
+									{% else %}
+										<input readonly class="deep-orange lighten-2 text-right form-control form-control-sm col col-lg-12"/>
+									{% endif %}						
+								</td>
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>
+						Produccion
+					</td>
+					{% for key, art in articulos %}
+						{% for ks, sub in art %} 
+							{% for k, v in sub %}
+								{% set valV = '' %}
+								{% if v[1] != null %}
+									{% set valV = v[1].data %}
+								{% endif %}
+
+								<td class="col-lg-12"> 							
+									{% if sf[v[0].id]  is defined%}
+										<input readonly class="text-right form-control form-control-sm col-lg-12" value="{{ valV }}"/>
+									{% else %}
+										<input readonly class="text-right form-control form-control-sm col col-lg-12"/>
+									{% endif %}						
+								</td>
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>
+						Stock Final
+					</td>
+					{% for key, art in articulos %}
+						{% for ks, sub in art %} 
+							{% for k, v in sub %}
+								<td class="col-lg-12"> 							
+									{% if sf[v[0].id]  is defined%}
+										<input readonly class="text-right form-control form-control-sm col-lg-12" value="{{ sf[v[0].id] }}"/>
+									{% else %}
+										<input readonly class="text-right form-control form-control-sm col col-lg-12"/>
+									{% endif %}						
+								</td>
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				</tr>
+			</tbody>
+		</table>
+	
+	</div>
+</div>
+
+
+
+{% endblock out_container %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+
+$('#myTable').DataTable({
+"scrollX": true,
+"ordering": false,
+"paging": false,
+"searching": false
+});
+
+
+
+	{% if tipo is defined %}
+		{% if tipo == 'M' %}
+		$(".type option[value='{{ tipo }}']").attr('selected','selected');
+
+		{% endif %}
+	{% endif %}
+</script>
+
+{% endblock %}

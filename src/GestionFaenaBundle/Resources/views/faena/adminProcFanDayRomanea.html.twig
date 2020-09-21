@@ -1,6 +1,23 @@
 {% extends "FOSUserBundle::layout.html.twig" %}
 
 {% block fos_user_content %}
+<style type="text/css">
+.rotate {
+    height: 140px;
+    white-space: nowrap;
+	width: 0;
+	
+    > div {
+      transform: 
+        translate(0px, 110px)
+        rotate(-90deg);
+    }
+    > div > span {
+      border-bottom: 1px solid #ccc;
+      padding: 5px 10px;
+    }
+  }
+</style>
 <br>
 <hr>
 <p class="h5 card-title">Proceso: {{ proceso }} - Fecha: {{ faena }}</p>
@@ -44,13 +61,17 @@
 		</div>
   	</div>
 	<div class="card-body">
-		<table class="table table-bordered table-sm table-fit">
+		<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-success"><< Volver</a>
+		<table class="table table-bordered table-sm table-fit table-hover">
 			<thead>
 				<tr>
 					<th></th>
 					<th></th>
 					<th></th>
 					<th>Stock Inicial</th>
+					{% for c in conceptos %}
+						<th>{{ c.resumido }}</th>
+					{% endfor %}
 					<th>Produccion</th>
 					<th>Stock Final</th>
 				</tr>
@@ -96,25 +117,35 @@
 										</td>
 										<td>
 											{% if si[v[0].id]  is defined%}
-												<input readonly class="form-control form-control-sm align-center col-4" value="{{ si[v[0].id] }}"/>
+												<input readonly class="text-right form-control form-control-sm align-center col-lg-10" value="{{ si[v[0].id] }}"/>
 											{% else %}
-												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+												<input readonly class="text-right form-control form-control-sm align-center col-lg-10" value="0"/>
 											{% endif %}
 										</td>
+										{% for c in conceptos %}
+											<td>
+												{% if ventasTotales[c.id][v[0].id] is defined %}
+													<input readonly class="text-right form-control form-control-sm align-center col-lg-10" value="{{ ventasTotales[c.id][v[0].id] }}"/>													
+												{% else %}
+													<input readonly class="text-right form-control form-control-sm align-center col-lg-10"/>		
+												{% endif %}
+
+											</td>												
+										{% endfor %}
 										<td>
 											<div class="row">
-												<div class="col">
-													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm align-center update col-7" value="{{ valV }}"/>
+												<div class="col-lg-10">
+													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm align-center update" value="{{ valV }}"/>
 												</div>
-												<div class="col">
+												<div class="col-lg-2">
 												</div>
 											</div>
 										</td>	
 										<td>
 											{% if sf[v[0].id]  is defined%}
-												<input readonly class="form-control form-control-sm align-center col-4" value="{{ sf[v[0].id] }}"/>
+												<input readonly class="form-control form-control-sm align-center col-lg-10" value="{{ sf[v[0].id] }}"/>
 											{% else %}
-												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+												<input readonly class="form-control form-control-sm align-center col-lg-10" value="0"/>
 											{% endif %}
 										</td>								
 									</tr>
@@ -126,25 +157,35 @@
 										</td>
 										<td>
 											{% if si[v[0].id]  is defined%}
-												<input readonly class="form-control form-control-sm align-center col-4" value="{{ si[v[0].id] }}"/>
+												<input readonly class="text-right form-control form-control-sm align-center col-lg-10" value="{{ si[v[0].id] }}"/>
 											{% else %}
-												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+												<input readonly class="text-right form-control form-control-sm align-center col-lg-10" value="0"/>
 											{% endif %}
 										</td>
+										{% for c in conceptos %}
+											<td>
+												{% if ventasTotales[c.id][v[0].id] is defined %}
+													<input readonly class="text-right form-control form-control-sm align-center col-lg-10" value="{{ ventasTotales[c.id][v[0].id] }}"/>													
+												{% else %}
+													<input readonly class="text-right form-control form-control-sm align-center col-lg-10"/>		
+												{% endif %}
+
+											</td>												
+										{% endfor %}
 										<td class="align-middle">
 											<div class="row">
-												<div class="col">
-													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm align-center update col-7" value="{{ valV }}"/>
+												<div class="col-lg-10">
+													<input readonly type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm align-center update" value="{{ valV }}"/>
 												</div>
-												<div class="col">
+												<div class="col-lg-2">
 												</div>
 											</div>
 										</td>
 										<td>
 											{% if sf[v[0].id]  is defined%}
-												<input readonly class="form-control form-control-sm align-center col-4" value="{{ sf[v[0].id] }}"/>
+												<input readonly class="form-control form-control-sm align-center col-lg-10" value="{{ sf[v[0].id] }}"/>
 											{% else %}
-												<input readonly class="form-control form-control-sm align-center col-4" value="0"/>
+												<input readonly class="form-control form-control-sm align-center col-lg-10" value="0"/>
 											{% endif %}
 										</td>	
 									</tr>
@@ -155,7 +196,7 @@
 
 			</tbody>
 		</table>
-	<a href="{{ path('bd_view_procesos_faena_diaria', {fan : faena.id}) }}" class="btn btn-success"><< Volver</a>
+	
 	</div>
 </div>
 

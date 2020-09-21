@@ -32,6 +32,11 @@ class ConceptoMovimiento
     private $concepto;
 
     /**
+     * @ORM\Column(name="resumido", type="string", length=255, nullable=true)
+     */
+    private $resumido;
+    
+    /**
      * @ORM\Column(name="transforma", type="boolean", nullable=true, options={"default" : false})
      */
     private $transforma;

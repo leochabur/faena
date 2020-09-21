@@ -31,52 +31,51 @@
   	</div>
 	<div class="card-body">
 		<a href="{{ path('bd_adm_proc_fan_day', {proc : proceso.id, fd : faena.id}) }}" class="btn btn-success"><< Volver</a>
-		<table class="table table-bordered">
+		<table id="myTable" class="table table-bordered table-sm table-fit table-hover table-striped" cellspacing="0"
+  width="100%">
 			<thead>
 				<tr>
-					<th class="header" scope="col">Categoria</th>
-					<th class="header" scope="col">Subcategoria</th>
-					<th class="header" scope="col">Articulo</th>
-					{% for e in entidades %}
-						<th class="header" scope="col">{{ e }}</th>
+					<th rowspan="3">
+
+					</th>
+					{% for c in cates %}
+						<th class="text-center" colspan="{{ ccat[c.id] }}">
+							{{ c }}
+						</th>
+					{% endfor %}
+				</tr>
+				<tr>
+
+					{% for kc, sub in  csub %}
+						{% for ks, vs in sub %}
+							<th class="text-center" colspan="{{ vs }}">
+								{{ subcates[ks] }}
+							</th>
+						{% endfor %}
+					{% endfor %}
+				</tr>
+				<tr>
+					{% for key, art in articulos %}
+						{% for ks, sub in art %} 
+							{% for k, v in sub %}
+								<th class="col-lg-12">
+									<span class=" mr-3 ml-3">{{ v[0].nombreResumido }}</span>
+								</th>
+							{% endfor %}
+						{% endfor %}
 					{% endfor %}
 				</tr>
 			</thead>
 
 			<tbody>
 				
-				{% for key, art in articulos %}
-					{% if loop.index0 is divisible by(2) %}
-					    {% set color = ' light-blue lighten-3' %}
-					{% else %}
-						{% set color = 'light-blue lighten-2' %}						
-					{% endif %}
-					<tr class="{{ color }}">
-						<td class="align-middle" rowspan="{{ ccat[key] }}">
-							{{  cates[key] }}
-						</td>
-						{% set count = 0 %}
-
-						{% for ks, sub in art %} 
-
-							{% if count == 0 %}
-								<td class="align-middle" rowspan="{{ csub[key][ks] }}">
-									{{ subcates[ks] }}
-								</td>
-								{% set count = 1 %}
-							{% else %}
-								<tr class="{{ color }}">
-									<td class="align-middle" rowspan="{{ csub[key][ks] }}">
-										{{ subcates[ks] }}
-									</td>
-							{% endif %}
-							{% set count2 = 0 %}
-							{% for k, v in sub %}
-								{% if count2 == 0 %}
-										<td>
-											{{ v[0].nombreResumido }}
-										</td>
-										{% for e in entidades %}
+				{% for e in entidades %}
+					<tr>
+						<td>{{ e }}</td>
+						{% for key, art in articulos %}
+							{% for ks, sub in art %} 
+								{% for k, v in sub %}
+									<td>
 											{% set idV = 0 %}
 											{% set valV = '' %}
 											{% if salidas[e.id][v[0].id] is defined %}
@@ -84,58 +83,26 @@
 												{% set valV = salidas[e.id][v[0].id].data %}
 												
 											{% endif %}
-											<td>
-												<div class="row">
-													<div class="col-12">
-														<input type="text" 
-															   data-idv="{{ idV }}" 
-															   data-proc="{{ proceso.id }}" 
-															   data-art="{{ v[0].id }}"  
-															   data-ent="{{ e.id }}"
-															   class="form-control form-control-sm align-center update" 
-															   value="{{ valV }}"/>
-													</div>
-													<div class="col">
-													</div>
+											<div class="row">
+												<div class="col-12">
+													<input type="text" 
+														   data-idv="{{ idV }}" 
+														   data-proc="{{ proceso.id }}" 
+														   data-art="{{ v[0].id }}"  
+														   data-ent="{{ e.id }}"
+														   class="form-control form-control-sm align-center update" 
+														   value="{{ valV }}"/>
 												</div>
-											</td>	
-										{% endfor %}								
-									</tr>
-									{% set count2 = 1 %}
-								{% else %}
-									<tr class="{{ color }}">
-										<td>
-											{{ v[0].nombreResumido }}
-										</td>
-										{% for e in entidades %}
-											{% set idV = 0 %}
-											{% set valV = '' %}
-											{% if salidas[e.id][v[0].id] is defined %}
-												{% set idV = salidas[e.id][v[0].id].id %}
-												{% set valV = salidas[e.id][v[0].id].data %}												
-											{% endif %}
-											<td class="align-middle">
-												<div class="row align-middle">
-													<div class="col-12 align-middle">
-														<input type="text" 
-															   data-idv="{{ idV }}" 
-															   data-proc="{{ proceso.id }}" 
-															   data-art="{{ v[0].id }}" 
-															   data-ent="{{ e.id }}"
-															   class="align-middle form-control form-control-sm align-center update" 
-															   value="{{ valV }}"/>
-													</div>
-													<div class="col">
-													</div>
+												<div class="col">
 												</div>
-											</td>
-										{% endfor %}
-									</tr>
-								{% endif %}
+											</div>
+									</td>
+								{% endfor %}
 							{% endfor %}
 						{% endfor %}
-				{% endfor %}
 
+					</tr>
+				{% endfor %}
 			</tbody>
 		</table>
 	</div>
@@ -148,6 +115,12 @@
 {% block javascripts %}
 
 <script type="text/javascript">
+$('#myTable').DataTable({
+"scrollX": true,
+"ordering": false,
+"paging": false,
+"searching": false
+});
 
 
 	$('.update').keypress(function(event) {
@@ -158,21 +131,22 @@
 											var route = "{{ path ('bd_adm_proc_registrar_venta', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id, cv : concepto.id, ent : '_ENT'})}}";
 											var btn = $(this);
 											var ruta = route.replace('_PROC', btn.data('proc')).replace('_ART', btn.data('art')).replace('_VAL', btn.data('idv')).replace('_ENT', btn.data('ent'));
-											input.parent().siblings('div').html('');
+											input.removeClass('green');
+											input.removeClass('red');
 											$.post(ruta,
 												   {data : btn.val()},
 												  function(response)
 												  {
 												  	if (response.status)
 												  	{
-												  		input.parent().siblings('div').html('<i class="far fa-check-circle fa-2x"></i>');
+												  		input.addClass('green');
 														input.trigger("keypress", [9]);
 														input.data('idv', response.idm);
 												  	}
 												  	else
 												  	{
 
-												  		input.parent().siblings('div').html('<i class="far fa-times-circle fa-2x"></i>');
+												  		input.addClass('red');
 												  		alert(response.message);
 												  	}
 												  }
