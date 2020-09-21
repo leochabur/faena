@@ -145,7 +145,7 @@ class GestionOpcionesSistemaController extends Controller
     public function addEntitySucursalAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $sucursales = $em->getRepository(Sucursal::class)->findAll();
+        $sucursales = $em->getRepository(Sucursal::class)->getActivos();
 
         $sucursal = new Sucursal();
         $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\SucursalType::class, 
@@ -163,7 +163,7 @@ class GestionOpcionesSistemaController extends Controller
     public function addEntityConsignatarioAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $consignatarios = $em->getRepository(Consignatario::class)->findAll();
+        $consignatarios = $em->getRepository(Consignatario::class)->getActivos();
 
         $consignatario = new Consignatario();
         $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\ConsignatarioType::class, 
@@ -181,7 +181,7 @@ class GestionOpcionesSistemaController extends Controller
     public function addEntityRemitoAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $remitos = $em->getRepository(Remito::class)->findAll();
+        $remitos = $em->getRepository(Remito::class)->getActivos();
 
         $remito = new Remito();
         $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\RemitoType::class, 
@@ -199,7 +199,7 @@ class GestionOpcionesSistemaController extends Controller
     public function addEntityAnexoAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $anexos = $em->getRepository(Anexo::class)->findAll();
+        $anexos = $em->getRepository(Anexo::class)->getActivos();
 
         $anexo = new Anexo();
         $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\AnexoType::class, 
