@@ -13,6 +13,8 @@ use GestionFaenaBundle\Entity\gestionBD\Sucursal;
 use GestionFaenaBundle\Entity\gestionBD\Consignatario; 
 use GestionFaenaBundle\Entity\gestionBD\Remito; 
 use GestionFaenaBundle\Entity\gestionBD\Anexo; 
+use GestionFaenaBundle\Entity\gestionBD\Reparto; 
+use GestionFaenaBundle\Entity\gestionBD\Exportacion; 
 
 class ConceptoVentaType extends AbstractType
 {
@@ -24,7 +26,12 @@ class ConceptoVentaType extends AbstractType
         $proceso = $options['proceso'];
         $builder->add('entidadExterna',
                     ChoiceType::class, 
-                     ['choices' => ['Anexo'=> Anexo::class, 'Remito'=> Remito::class, 'Sucursal'=> Sucursal::class, 'Consignatario'=> Consignatario::class]])
+                     ['choices' => ['Anexo'=> Anexo::class, 
+                                    'Remito'=> Remito::class, 
+                                    'Sucursal'=> Sucursal::class, 
+                                    'Consignatario'=> Consignatario::class,
+                                    'Exportacion' => Exportacion::class,
+                                    'Reparto' => Reparto::class]])
                 ->add('procesoFaena', 
                       EntityType::class, 
                       [

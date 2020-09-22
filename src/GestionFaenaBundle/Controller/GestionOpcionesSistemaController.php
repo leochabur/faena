@@ -15,6 +15,8 @@ use GestionFaenaBundle\Entity\gestionBD\Sucursal;
 use GestionFaenaBundle\Entity\gestionBD\Consignatario;
 use GestionFaenaBundle\Entity\gestionBD\Remito;
 use GestionFaenaBundle\Entity\gestionBD\Anexo;
+use GestionFaenaBundle\Entity\gestionBD\Reparto;
+use GestionFaenaBundle\Entity\gestionBD\Exportacion;
 use GestionFaenaBundle\Entity\opciones\InformeProceso;
 
 class GestionOpcionesSistemaController extends Controller
@@ -211,6 +213,42 @@ class GestionOpcionesSistemaController extends Controller
     }
 
     /**
+     * @Route("/addrpto", name="bd_add_entity_reparto")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntityRepartoAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $repartos = $em->getRepository(Reparto::class)->getActivos();
+
+        $reparto = new Reparto();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\RepartoType::class, 
+                                  $reparto, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 9))]);
+        return $this->render('@GestionFaena/gestionBD/abmReparto.html.twig', 
+                            ['form' => $form->createView(), 'repartos' => $repartos]);
+    }
+
+    /**
+     * @Route("/addexpo", name="bd_add_entity_exportacion")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addEntityExportacionAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $exportaciones = $em->getRepository(Exportacion::class)->getActivos();
+
+        $exportacion = new Exportacion();
+        $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\ExportacionType::class, 
+                                  $exportacion, 
+                                  ['method' => 'POST',
+                                   'action' => $this->generateUrl('save_entidad_externa', array('ee' => 10))]);
+        return $this->render('@GestionFaena/gestionBD/abmExportacion.html.twig', 
+                            ['form' => $form->createView(), 'exportaciones' => $exportaciones]);
+    }
+
+    /**
      * @Route("/saveEntExt/{ee}", name="save_entidad_externa", methods={"POST"})
      */
     public function saveEntidadExterna($ee, Request $request)
@@ -394,7 +432,55 @@ class GestionOpcionesSistemaController extends Controller
             }  
             return $this->render('@GestionFaena/gestionBD/abmAnexo.html.twig', 
                                 ['form' => $fRem->createView(), 'anexos' => $anexos]);
-        }               
+        }    
+        elseif ($ee == 9)
+        {
+            $em = $this->getDoctrine()->getManager();
+            $repartos = $em->getRepository(Reparto::class)->getActivos();
+
+            $reparto = new Reparto();
+            $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\RepartoType::class, 
+                                      $reparto, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 9))]);
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+                $entityManager->persist($reparto);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Reparto almacenado exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_reparto');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmReparto.html.twig', 
+                                ['form' => $form->createView(), 'repartos' => $repartos]);
+        }              
+        elseif ($ee == 10)
+        {
+            $em = $this->getDoctrine()->getManager();
+            $exportaciones = $em->getRepository(Exportacion::class)->getActivos();
+
+            $exportacion = new Exportacion();
+            $form = $this->createForm(\GestionFaenaBundle\Form\gestionBD\ExportacionType::class, 
+                                      $exportacion, 
+                                      ['method' => 'POST',
+                                       'action' => $this->generateUrl('save_entidad_externa', array('ee' => 10))]);
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+                $entityManager->persist($exportacion);
+                $entityManager->flush();
+                $this->addFlash(
+                        'sussecc',
+                        'Entidad exportacion almacenada exitosamente!'
+                    );
+                return $this->redirectToRoute('bd_add_entity_exportacion');
+            }  
+            return $this->render('@GestionFaena/gestionBD/abmExportacion.html.twig', 
+                                ['form' => $form->createView(), 'exportaciones' => $exportaciones]);
+        }   
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

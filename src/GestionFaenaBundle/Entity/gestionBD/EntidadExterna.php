@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\EntidadExternaRepository")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
- * @ORM\DiscriminatorMap({1:"EntidadExterna",2: "Granja", 3: "Transportista", 4: "Cargador", 5: "Sucursal", 6: "Consignatario", 7: "Remito", 8: "Anexo"})
+ * @ORM\DiscriminatorMap({1:"EntidadExterna",2: "Granja", 3: "Transportista", 4: "Cargador", 5: "Sucursal", 6: "Consignatario", 7: "Remito", 8: "Anexo", 9: "Reparto", 10: "Exportacion"})
  */
 abstract class EntidadExterna
 {
