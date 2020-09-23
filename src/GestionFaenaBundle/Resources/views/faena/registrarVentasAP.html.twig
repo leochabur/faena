@@ -2,18 +2,53 @@
 
 {% block fos_user_content %}
 <style type="text/css">
-        thead tr th { 
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #ffffff;
-        }
-    
-        .table-responsive { 
-            height:200px;
-            overflow:scroll;
-        }
 
+.table-container-x 
+{
+	max-width: 100%;
+	overflow-x: scroll;
+}
+
+.table-container-y 
+{
+	max-height: 600px;
+	overflow-y: scroll;
+}
+
+.sticky 
+{
+  position: sticky;
+  top: 0;
+  background: #ccc;
+  z-index:9999;
+}
+
+table thead tr th
+{
+	background: #ccc;
+}
+
+table td
+{
+	min-width:100px;
+	background: #ccc;
+}
+
+.col0
+{
+	background: #ccc;
+	position: sticky;
+	top:0;
+	left:0;
+	z-index: 9999;
+}
+.sticky2
+{
+	position: sticky;
+	left: 0;
+	z-index: 9999;
+  	background: #fff;
+}
 
 </style>
 
@@ -31,80 +66,89 @@
   	</div>
 	<div class="card-body">
 		<a href="{{ path('bd_adm_proc_fan_day', {proc : proceso.id, fd : faena.id}) }}" class="btn btn-success"><< Volver</a>
-		<table id="myTable" class="table table-bordered table-sm table-fit table-hover table-striped" cellspacing="0"
-  width="100%">
-			<thead>
-				<tr>
-					<th rowspan="3">
+		<br>
+		<div class='table-container-x'>
+		<div class='table-container-y'>
+			<table id="myTable" class="table table-bordered table-hover table-sm table-striped" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th class=" col0">
 
-					</th>
-					{% for c in cates %}
-						<th class="text-center" colspan="{{ ccat[c.id] }}">
-							{{ c }}
 						</th>
-					{% endfor %}
-				</tr>
-				<tr>
-
-					{% for kc, sub in  csub %}
-						{% for ks, vs in sub %}
-							<th class="text-center" colspan="{{ vs }}">
-								{{ subcates[ks] }}
+						{% for c in cates %}
+							<th class="text-center sticky" colspan="{{ ccat[c.id] }}">
+								{{ c }}
 							</th>
 						{% endfor %}
-					{% endfor %}
-				</tr>
-				<tr>
-					{% for key, art in articulos %}
-						{% for ks, sub in art %} 
-							{% for k, v in sub %}
-								<th class="col-lg-12">
-									<span class=" mr-3 ml-3">{{ v[0].nombreResumido }}</span>
+					</tr>
+					<tr>
+						<th class="col0">
+
+						</th>
+						{% for kc, sub in  csub %}
+							{% for ks, vs in sub %}
+								<th class="text-center sticky" colspan="{{ vs }}">
+									{{ subcates[ks] }}
 								</th>
 							{% endfor %}
 						{% endfor %}
-					{% endfor %}
-				</tr>
-			</thead>
-
-			<tbody>
-				
-				{% for e in entidades %}
+					</tr>
 					<tr>
-						<td>{{ e }}</td>
+						<th class=" col0">
+
+						</th>
 						{% for key, art in articulos %}
 							{% for ks, sub in art %} 
 								{% for k, v in sub %}
-									<td>
-											{% set idV = 0 %}
-											{% set valV = '' %}
-											{% if salidas[e.id][v[0].id] is defined %}
-												{% set idV = salidas[e.id][v[0].id].id %}
-												{% set valV = salidas[e.id][v[0].id].data %}
-												
-											{% endif %}
-											<div class="row">
-												<div class="col-12">
-													<input type="text" 
-														   data-idv="{{ idV }}" 
-														   data-proc="{{ proceso.id }}" 
-														   data-art="{{ v[0].id }}"  
-														   data-ent="{{ e.id }}"
-														   class="form-control form-control-sm align-center update" 
-														   value="{{ valV }}"/>
-												</div>
-												<div class="col">
-												</div>
-											</div>
-									</td>
+									<th class="col-lg-12 sticky">
+										<span class=" mr-3 ml-3">{{ v[0].nombreResumido }}</span>
+									</th>
 								{% endfor %}
 							{% endfor %}
 						{% endfor %}
-
 					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+				</thead>
+
+				<tbody>
+					
+					{% for e in entidades %}
+						<tr>
+							<td class="sticky2">{{ e }}</td>
+							{% for key, art in articulos %}
+								{% for ks, sub in art %} 
+									{% for k, v in sub %}
+										<td>
+												{% set idV = 0 %}
+												{% set valV = '' %}
+												{% if salidas[e.id][v[0].id] is defined %}
+													{% set idV = salidas[e.id][v[0].id].id %}
+													{% set valV = salidas[e.id][v[0].id].data %}
+													
+												{% endif %}
+												<div class="row">
+													<div class="col-12">
+														<input type="text" 
+															   data-idv="{{ idV }}" 
+															   data-proc="{{ proceso.id }}" 
+															   data-art="{{ v[0].id }}"  
+															   data-ent="{{ e.id }}"
+															   class="form-control form-control-sm align-center update" 
+															   value="{{ valV }}"/>
+													</div>
+													<div class="col">
+													</div>
+												</div>
+										</td>
+									{% endfor %}
+								{% endfor %}
+							{% endfor %}
+
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
 	</div>
 </div>
 
@@ -115,12 +159,7 @@
 {% block javascripts %}
 
 <script type="text/javascript">
-$('#myTable').DataTable({
-"scrollX": true,
-"ordering": false,
-"paging": false,
-"searching": false
-});
+
 
 
 	$('.update').keypress(function(event) {
