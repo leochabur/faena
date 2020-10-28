@@ -156,6 +156,12 @@ abstract class ProcesoFaena
      */
     private $ventas;
 
+    /**
+     * @ORM\Column(name="admiteCombinado", type="boolean", options={"default":false})
+     */
+    private $admiteCombinado = false; //para el caso del proceso de congeamiento que debe hacer un movimiento combinado ya que saca articulos abstractos e ingresa en la camara productos concretos
+
+
     public function getConceptosOfVentas()
     {
         $conceptos = new \Doctrine\Common\Collections\ArrayCollection();
@@ -894,5 +900,29 @@ abstract class ProcesoFaena
     public function getVentas()
     {
         return $this->ventas;
+    }
+
+    /**
+     * Set admiteCombinado
+     *
+     * @param boolean $admiteCombinado
+     *
+     * @return ProcesoFaena
+     */
+    public function setAdmiteCombinado($admiteCombinado)
+    {
+        $this->admiteCombinado = $admiteCombinado;
+
+        return $this;
+    }
+
+    /**
+     * Get admiteCombinado
+     *
+     * @return boolean
+     */
+    public function getAdmiteCombinado()
+    {
+        return $this->admiteCombinado;
     }
 }

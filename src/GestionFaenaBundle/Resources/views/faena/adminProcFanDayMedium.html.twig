@@ -63,24 +63,6 @@
 			Existencias Totales
 			<hr>
 		</div>
-    	{#{ form_start(formDetalle) }}
-    	<div class="form-row">
-    		<div class="col-3">
-    				{{ form_label(formDetalle.tipoMovimiento) }}
-    				{{ form_widget(formDetalle.tipoMovimiento, {'attr' : {'class' : 'type'}}) }}
-    		</div>
-    		<div class="col-3">
-    				{{ form_label(formDetalle.articulos) }}
-    				{{ form_widget(formDetalle.articulos) }}
-    		</div>
-    		<div class="col">
-    			<div class="mt-4">
-    				{{ form_widget(formDetalle.load, {'attr' : {'class' : 'btn btn-success btn-sm enviar'}}) }}
-    			</div>
-    				
-    		</div>
-    	</div>
-    	{{ form_end(formDetalle) }#}
   	</div>
 	<div class="card-body">
 	{% if headers is defined %}
@@ -123,6 +105,12 @@
  		 							   href="{{ path('bd_adm_get_detalle_movimientos_proceso', { proc : proceso.id, fd : faena.id, art : kart }) }}">
   											<button class="btn btn-warning btn-sm">Ver Movimientos</button>
   									</a>
+  									{% if  proceso.procesoFaena.getAdmiteCombinado %}
+	 		 							<a class="dropdown-item"  
+	 		 							   href="{{ path('bd_adm_romanea_articulos_proceso_medium', { proc : proceso.id, fd : faena.id, art : kart }) }}">
+	  											<button class="btn btn-danger btn-sm">Registrar Salida</button>
+	  									</a>
+  									{% endif %}
   						</div>
 							{% if formsDelete is defined %}
 								<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify fa-1x"></i></a>
