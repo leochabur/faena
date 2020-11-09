@@ -161,6 +161,27 @@ abstract class ProcesoFaena
      */
     private $admiteCombinado = false; //para el caso del proceso de congeamiento que debe hacer un movimiento combinado ya que saca articulos abstractos e ingresa en la camara productos concretos
 
+    /**
+     * @ORM\OneToMany(targetEntity="GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso", mappedBy="proceso")
+     */
+    private $atributosArticulo;
+
+
+    public function atributoAsignadoAArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+                                              \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
+    {
+        $define = 'N';
+        foreach ($this->atributosArticulo as $aa)
+        {
+            if ($aa->getArticulo() == $articulo)
+            {
+                return $aa->getAtributos()->contains($atributo);
+            }
+        }
+        return $define;
+
+    }
+
 
     public function getConceptosOfVentas()
     {
@@ -350,6 +371,7 @@ abstract class ProcesoFaena
         $this->ajustes = new \Doctrine\Common\Collections\ArrayCollection();
         $this->pasos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->ventas = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->atributosArticulo = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -924,5 +946,39 @@ abstract class ProcesoFaena
     public function getAdmiteCombinado()
     {
         return $this->admiteCombinado;
+    }
+
+    /**
+     * Add atributosArticulo
+     *
+     * @param \GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo
+     *
+     * @return ProcesoFaena
+     */
+    public function addAtributosArticulo(\GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo)
+    {
+        $this->atributosArticulo[] = $atributosArticulo;
+
+        return $this;
+    }
+
+    /**
+     * Remove atributosArticulo
+     *
+     * @param \GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo
+     */
+    public function removeAtributosArticulo(\GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo)
+    {
+        $this->atributosArticulo->removeElement($atributosArticulo);
+    }
+
+    /**
+     * Get atributosArticulo
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAtributosArticulo()
+    {
+        return $this->atributosArticulo;
     }
 }

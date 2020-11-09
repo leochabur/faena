@@ -35,6 +35,8 @@ use GestionFaenaBundle\Entity\faena\ValorExterno;
 use GestionFaenaBundle\Entity\PasoProcesoRealizado;
 use GestionFaenaBundle\Entity\PasoProceso;
 use GestionFaenaBundle\Entity\faena\MovimientoAutomatico;
+use GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso;
+use GestionFaenaBundle\Form\faena\AtributoPorArticuloPorProcesoType;
 use GestionFaenaBundle\Entity\gestionBD\Granja;
 use GestionFaenaBundle\Entity\gestionBD\Articulo;
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
@@ -59,6 +61,43 @@ use Symfony\Component\Validator\Validation;
 
 class GestionFaenaController extends Controller
 {
+
+  //////////////configura las caracteristicas de los articuslo que se veran en la vista del proceso faena
+      /**
+     * @Route("/setatrxproc", name="bd_add_atributo_por_proceso")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addAtributoPorArticuloPorProceso()
+    {
+        $atributo = new AtributoPorArticuloPorProceso();
+        $form = $this->createForm(AtributoPorArticuloPorProcesoType::class, 
+                                $atributo, ['action' => $this->generateUrl('bd_add_atributo_por_proceso_procesar'),'method' => 'POST']);
+        return $this->render('@GestionFaena/faena/addAtributosXArticuloXProceso.html.twig', array('form' => $form->createView()));
+    }
+
+      /**
+     * @Route("/setatrxprocesar", name="bd_add_atributo_por_proceso_procesar", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addAtributoPorArticuloPorProcesoProcesar(Request $request)
+    {
+        $atributo = new AtributoPorArticuloPorProceso();
+        $form = $this->createForm(AtributoPorArticuloPorProcesoType::class, 
+                                $atributo, ['action' => $this->generateUrl('bd_add_faena_diaria_procesar'),'method' => 'POST']);
+        $form->handleRequest($request);
+        if ($form->isValid())
+        {
+          $em = $this->getDoctrine()->getManager();
+          $em->persist($atributo);
+          $em->flush();
+          return $this->redirectToRoute('bd_add_atributo_por_proceso');
+        }
+        return $this->render('@GestionFaena/faena/addAtributosXArticuloXProceso.html.twig', array('form' => $form->createView()));
+    }
+
+  //////////////////////////////////////////
+
+
     /**
      * @Route("/addFanDay", name="bd_add_faena_diaria")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
@@ -1280,30 +1319,37 @@ class GestionFaenaController extends Controller
                   if ($valor->isNumeric())
                   {
                     $atributo = ($valor->getAtributoAbstracto()?$valor->getAtributoAbstracto():$valor->getAtributo()->getAtributoAbstracto());
-                    if ($valor->getMostrar())
-                    {      
-                      $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => true];
-                    }
-                    if (!array_key_exists($atributo->getId(), $body[$art->getId()]))
+                    $define = $proceso->getProcesoFaena()->atributoAsignadoAArticulo($art, $atributo);
+                    if (($define == 'N') || ($define))
                     {
-                          $body[$art->getId()][$atributo->getId()] = 0;
-                    }
-                    if ($valor->getAtributo())
-                    {
-                        if ($valor->getAcumula())
-                        {
-                            $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
-                            $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
-                        }
-                    }
-                    else
-                    {
-                      if ($valor->getMostrar())
-                      {
-                        $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
-                        $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
-                      }
-                    }                  
+                          if ($valor->getMostrar())
+                          {      
+                            
+                            
+                            $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => true];
+                            
+                          }
+                          if (!array_key_exists($atributo->getId(), $body[$art->getId()]))
+                          {
+                                $body[$art->getId()][$atributo->getId()] = 0;
+                          }
+                          if ($valor->getAtributo())
+                          {
+                              if ($valor->getAcumula())
+                              {
+                                  $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
+                                  $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
+                              }
+                          }
+                          else
+                          {
+                            if ($valor->getMostrar())
+                            {
+                              $body[$art->getId()][$atributo->getId()]+= $valor->getData(true);
+                              $rounded[$art->getId()][$atributo->getId()] = $valor->getDecimales();
+                            }
+                          }  
+                      }                
                   }                  
               }
             }

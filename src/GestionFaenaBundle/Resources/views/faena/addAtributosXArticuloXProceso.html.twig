@@ -1,0 +1,21 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Definir Atributos Por Articulo Por Proceso</span>
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+		{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+		{{ form_widget(form) }}
+		{{ form_end(form) }}
+
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+{% endblock %}
