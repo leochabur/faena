@@ -63,10 +63,9 @@ class ArticuloAtributoConcepto
     private $articuloOrigenTransformacion; //para el caso de el movimiento Transformar Stock, define cual es el articulo de origen que se va a transformar
     
     /**
-     * Get id
-     *
-     * @return int
+     * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\faena\MovimientoAutomatico", mappedBy="desencadenante")
      */
+    private $desencadenado;
 
 
     public function getFormaCalculoAutomatico()
@@ -340,5 +339,29 @@ class ArticuloAtributoConcepto
     public function getArticuloOrigenTransformacion()
     {
         return $this->articuloOrigenTransformacion;
+    }
+
+    /**
+     * Set desencadenado
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoAutomatico $desencadenado
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setDesencadenado(\GestionFaenaBundle\Entity\faena\MovimientoAutomatico $desencadenado = null)
+    {
+        $this->desencadenado = $desencadenado;
+
+        return $this;
+    }
+
+    /**
+     * Get desencadenado
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoAutomatico
+     */
+    public function getDesencadenado()
+    {
+        return $this->desencadenado;
     }
 }

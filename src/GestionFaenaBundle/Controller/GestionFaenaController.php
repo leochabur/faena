@@ -291,11 +291,13 @@ class GestionFaenaController extends Controller
     }
 
 
-    private function getFormBeginMovStockAction(ProcesoFaenaDiaria $proceso, $fd)
+    private function getFormBeginMovStockAction(ProcesoFaenaDiaria $proceso, $fd, $complete = true)
     {
 
-        $form = $this->createFormBuilder()
-                      ->add('tipoMovimiento', EntityType::class, ['class' => TipoMovimientoConcepto::class, 
+        $form = $this->createFormBuilder();
+        if ($complete)
+        {
+                   $form->add('tipoMovimiento', EntityType::class, ['class' => TipoMovimientoConcepto::class, 
                                                                   'required' => true,
                                                                   'placeholder' => 'Selecciones un movimiento...',
                                                                   'constraints' => [new NotNull(array('message' => "Debe seleccionar un movimiento!!"))]
@@ -313,11 +315,12 @@ class GestionFaenaController extends Controller
                                                               'data' => $proceso->getId()
                                                           ])
                         ->add('guardar', SubmitType::class, ['label' => 'Siguiente >>']);
-                        if (count($proceso->getProcesoFaena()->getAutomaticos()))
-                        {
-                          $form->add('automatic', SubmitType::class, ['label' => 'Generar Movimientos >>']);
-                        }
-                        $form->setAction($this->generateUrl('bd_adm_proc_fan_day_procesar', ['proc' => $proceso->getId(), 'fd' => $fd]));
+          }
+          if (count($proceso->getProcesoFaena()->getAutomaticos()))
+          {
+            $form->add('automatic', SubmitType::class, ['label' => 'Generar Movimientos >>']);
+          }
+          $form->setAction($this->generateUrl('bd_adm_proc_fan_day_procesar', ['proc' => $proceso->getId(), 'fd' => $fd]));
                         
         return $form->getForm();
         //'constraints' => [new NotNull(array('message' => "Debe seleccionar un concepto!!"))]
@@ -374,7 +377,8 @@ class GestionFaenaController extends Controller
       $procFaena = $proceso->getProcesoFaena();
 
       $grupoAutoomatico = $em->find(GrupoMovimientosAutomatico::class, $gpo);
-      $automaticos = $grupoAutoomatico->getAutomaticos();
+      $automaticos = $automaticos = $grupoAutoomatico->getAutomaticos();
+      
       try
       {
           foreach ($automaticos as $movAut) 
@@ -420,7 +424,7 @@ class GestionFaenaController extends Controller
       $formsAutomaticos = [];
       foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
       {
-          $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso, $faena, $grupo)->createView();
+              $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso, $faena, $grupo)->createView();     
       }
       return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
                           ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso, 'realizados' => $realizados]);
@@ -1071,8 +1075,12 @@ class GestionFaenaController extends Controller
 
                 }
             }
+         
+            $formMovimientos = $this->getFormBeginMovStockAction($proceso, $faena->getId(), false);
+
             return $this->render('@GestionFaena/faena/adminProcFanDayRomaneaAp.html.twig', 
                                 array( 'proceso' => $proceso, 
+                                       'formMovimientos' => $formMovimientos->createView(),
                                        'form' => $form->createView(), 
                                        'faena' => $faena, 
                                        'articulos' => $data, 
@@ -1216,7 +1224,10 @@ class GestionFaenaController extends Controller
               $formsAutomaticos = [];
               foreach ($proceso->getProcesoFaena()->getAutomaticos() as $grupo)
               {
+                if (!$grupo->getEliminado())
+                {
                   $formsAutomaticos[$grupo->getId()] = $this->getFormExecuteAutomaticMove($proceso, $faena, $grupo)->createView();
+                }
               }
               return $this->render('@GestionFaena/faena/generarMovimientosAutomaticos.html.twig', 
                                   ['formsAuto' => $formsAutomaticos, 'faena' => $faena, 'proceso' => $proceso, 'realizados' => $realizados]);
@@ -1307,7 +1318,7 @@ class GestionFaenaController extends Controller
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getPermanente() && ($mov->getType() == 2)) || ($proceso->getProcesoFaena()->getGeneraTransito()))
+            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getPermanente() && (in_array($mov->getType(), [2,3]))) || ($proceso->getProcesoFaena()->getGeneraTransito()))
             {
               $art = $mov->getArtProcFaena()->getArticulo();
               if (!array_key_exists($art->getId(), $body))
@@ -1574,7 +1585,7 @@ class GestionFaenaController extends Controller
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getPermanente() && ($mov->getType() == 2)) || ($proceso->getProcesoFaena()->getGeneraTransito()))
+            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getPermanente() && (in_array($mov->getType(), [2,3]))) || ($proceso->getProcesoFaena()->getGeneraTransito()))
             {
                 $computar = true;
                 $acumular = false;
@@ -1926,22 +1937,11 @@ class GestionFaenaController extends Controller
               ///Ya puede generar la salida del stcok del articulo base
               $salida = new SalidaStock();
               $salida->setFaenaDiaria($faena);
-              //$salida->addValore($valorAtr);
               $salida->setProcesoFnDay($proceso);
               $salida->setArtProcFaena($artAtrConSalida);
 
 
-             /* $valorAtr = new ValorNumerico();
-              $valorAtr->setAtributoAbstracto($valorAtributo->getAtributo()->getAtributoAbstracto());
-              $valorAtr->setValor($valorAtributo->getValor());
-              $valorAtr->setUnidadMedida($valorAtributo->getUnidadMedida());
-              $valorAtr->setMostrar($valorAtributo->getAtributo()->getMostrar());
-              $valorAtr->setDecimales($valorAtributo->getAtributo()->getDecimales());
-              $valorAtr->setAcumula($valorAtributo->getAtributo()->getAcumula());
-              $salida->addValore($valorAtr);*/
               foreach ($movimiento->getValores() as $valor) {
-
-                 // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
                   $valorAtr = new ValorNumerico();
                   $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
                   $valorAtr->setValor($valor->getValor());
@@ -1966,9 +1966,8 @@ class GestionFaenaController extends Controller
            //   $entrada->addValore($valorAtr);
               $entrada->setProcesoFnDay($proceso);
               $entrada->setArtProcFaena($artAtrConEntrada);
-              foreach ($movimiento->getValores() as $valor) {
-
-                 // $valorAtributo = $movimiento->getValorWhitAtribute($articuloManejaStock->getAtributo());
+              foreach ($movimiento->getValores() as $valor) 
+              {
                   $valorAtr = new ValorNumerico();
                   $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
                   $dataValue = $valor->getValor();
@@ -2328,7 +2327,29 @@ class GestionFaenaController extends Controller
         {
             try
             {
-              $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em, $request);
+              $proceso = $this->procesarTransformarStock($proceso, $articulo, $concepto, $faena, $em, $request);
+
+              $movimiento = $articulo->getDesencadenado(); //De existir levanta cual es el movimiento que se debe realizar seguidamente
+
+              if ($movimiento)
+              {
+                  $auto = $movimiento->getArticuloAtributoConcepto();
+
+                  $instance = $auto->getConcepto()->getTipoMovimiento()->getInstancia();
+                  if ($instance == 4)
+                  {
+                    $proceso = $this->procesarTransformarStock($proceso, $auto, $auto->getConcepto(), $faena, $em);
+                  }
+                  elseif($instance == 5)
+                  {
+                    $var = (bool)true;
+                    $proceso = $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em, $movimiento, null, true);
+                  }
+                  elseif (in_array($instance, [2,3])) 
+                  {
+                    $proceso = $this->procesarEntradaSalidaStock($proceso, $auto, $auto->getConcepto(), $faena, $instance, $em);               
+                  }
+              }
               $proceso->setUltimoMovimiento(new \DateTime());
               $this->registrarPasoRealizado($grupo, $proceso->getProcesoFaena(), $proceso, $faena, $em);
               $em->flush();

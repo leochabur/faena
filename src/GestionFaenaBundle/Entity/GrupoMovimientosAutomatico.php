@@ -59,6 +59,12 @@ class GrupoMovimientosAutomatico
      */
     private $manual = false; //indica si el movimiento debe realizarce de manera manual o totalmente automatico
 
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
+     */
+    private $eliminado = false; 
+
+
     public function getMovimientoManual()
     {
         if (count($this->automaticos))
@@ -266,5 +272,29 @@ class GrupoMovimientosAutomatico
     public function getPasoProceso()
     {
         return $this->pasoProceso;
+    }
+
+    /**
+     * Set eliminado
+     *
+     * @param boolean $eliminado
+     *
+     * @return GrupoMovimientosAutomatico
+     */
+    public function setEliminado($eliminado)
+    {
+        $this->eliminado = $eliminado;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminado
+     *
+     * @return boolean
+     */
+    public function getEliminado()
+    {
+        return $this->eliminado;
     }
 }

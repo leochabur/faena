@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
  * @ORM\DiscriminatorMap({1:"ValorAtributo",2:"ValorNumerico", 3:"ValorTexto", 4:"ValorExterno"})
+ * @ORM\HasLifecycleCallbacks()
  */
 abstract class ValorAtributo
 {
@@ -59,6 +60,21 @@ abstract class ValorAtributo
         return ($this->atributo?$this->atributo->getNombre():'SN');
     }
 */
+    /**
+     * @ORM\PrePersist
+     */
+    public function updateAtributoAbstracto()
+    {
+        if (!$this->atributoAbstracto)
+        {
+            if ($this->atributo)
+            {
+                $this->atributoAbstracto = $this->atributo->getAtributoAbstracto();
+            }
+        }
+    }
+
+
     public abstract function isValid();
 
     public abstract function getDataValue();

@@ -46,11 +46,24 @@ class MovimientoAutomatico
     */      
     private $procesoDestinoDefault;
 
+    /**
+    * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto", inversedBy="desencadenado") 
+    * @ORM\JoinColumn(name="id_proc_des", referencedColumnName="id", nullable=true)
+    */   
+    private $desencadenante; //para los moviemientos que se deben generar despues de otros de manera automatica
+
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
+     */
+    private $eliminado = false; 
+    
 
     public function getVistaEdicion()
     {
         return $this->articuloAtributoConcepto->getVistaEdicion();
     }
+
+    
     /**
      * Get id
      *
@@ -155,5 +168,53 @@ class MovimientoAutomatico
     public function getGrupo()
     {
         return $this->grupo;
+    }
+
+    /**
+     * Set desencadenante
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $desencadenante
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setDesencadenante(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $desencadenante = null)
+    {
+        $this->desencadenante = $desencadenante;
+
+        return $this;
+    }
+
+    /**
+     * Get desencadenante
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto
+     */
+    public function getDesencadenante()
+    {
+        return $this->desencadenante;
+    }
+
+    /**
+     * Set eliminado
+     *
+     * @param boolean $eliminado
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setEliminado($eliminado)
+    {
+        $this->eliminado = $eliminado;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminado
+     *
+     * @return boolean
+     */
+    public function getEliminado()
+    {
+        return $this->eliminado;
     }
 }

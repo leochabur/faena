@@ -21,6 +21,7 @@ class GrupoMovimientosAutomaticoType extends AbstractType
                 ->add('nombre')
                 ->add('detalle')
                 ->add('manual')
+                ->add('eliminado')
                 ->add('procesoFaena',
                     EntityType::class, 
                       [

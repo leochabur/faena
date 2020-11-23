@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * MovimientoAutomatico
  *
- * @ORM\Table(name="faena_movimiento_automatico")
+ * @ORM\Table(name="sp_gpo_mov_auto")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\MovimientoAutomaticoRepository")
  */
 class MovimientoAutomatico
@@ -46,6 +46,17 @@ class MovimientoAutomatico
     */      
     private $procesoDestinoDefault;
 
+    /**
+    * @ORM\OneToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto", inversedBy="desencadenado") 
+    * @ORM\JoinColumn(name="id_proc_des", referencedColumnName="id", nullable=true)
+    */   
+    private $desencadenante; //para los moviemientos que se deben generar despues de otros de manera automatica
+
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
+     */
+    private $eliminado = false; 
+    
 
     public function getVistaEdicion()
     {
@@ -110,30 +121,6 @@ class MovimientoAutomatico
     }
 
     /**
-     * Set procesoFaena
-     *
-     * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena
-     *
-     * @return MovimientoAutomatico
-     */
-    public function setProcesoFaena(\GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena = null)
-    {
-        $this->procesoFaena = $procesoFaena;
-
-        return $this;
-    }
-
-    /**
-     * Get procesoFaena
-     *
-     * @return \GestionFaenaBundle\Entity\ProcesoFaena
-     */
-    public function getProcesoFaena()
-    {
-        return $this->procesoFaena;
-    }
-
-    /**
      * Set procesoDestinoDefault
      *
      * @param \GestionFaenaBundle\Entity\ProcesoFaena $procesoDestinoDefault
@@ -155,5 +142,53 @@ class MovimientoAutomatico
     public function getProcesoDestinoDefault()
     {
         return $this->procesoDestinoDefault;
+    }
+
+    /**
+     * Set grupo
+     *
+     * @param \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupo
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setGrupo(\GestionFaenaBundle\Entity\GrupoMovimientosAutomatico $grupo = null)
+    {
+        $this->grupo = $grupo;
+
+        return $this;
+    }
+
+    /**
+     * Get grupo
+     *
+     * @return \GestionFaenaBundle\Entity\GrupoMovimientosAutomatico
+     */
+    public function getGrupo()
+    {
+        return $this->grupo;
+    }
+
+    /**
+     * Set desencadenante
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $desencadenante
+     *
+     * @return MovimientoAutomatico
+     */
+    public function setDesencadenante(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $desencadenante = null)
+    {
+        $this->desencadenante = $desencadenante;
+
+        return $this;
+    }
+
+    /**
+     * Get desencadenante
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto
+     */
+    public function getDesencadenante()
+    {
+        return $this->desencadenante;
     }
 }

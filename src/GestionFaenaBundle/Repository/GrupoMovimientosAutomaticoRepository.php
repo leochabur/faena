@@ -19,9 +19,11 @@ class GrupoMovimientosAutomaticoRepository extends \Doctrine\ORM\EntityRepositor
 	                               FROM GestionFaenaBundle:GrupoMovimientosAutomatico g 
 	                               JOIN GestionFaenaBundle:PasoProceso pp WITH pp.grupoMovimiento = g
 	                               JOIN GestionFaenaBundle:PasoProcesoRealizado ppr WITH ppr.paso = pp
-	                               WHERE ppr.procesoFaenaDiaria = :proceso AND 
-	                               		 ppr.faenaDiaria = :faena')
+	                               WHERE ppr.procesoFaenaDiaria = :proceso AND g.eliminado = :eliminado AND
+	                               		 ppr.faenaDiaria = :faena
+	                                GROUP BY g')
 			        ->setParameter('proceso', $proceso)
+			        ->setParameter('eliminado', false)
 			        ->setParameter('faena', $faena)
 			        ->getResult(); 
 	}  

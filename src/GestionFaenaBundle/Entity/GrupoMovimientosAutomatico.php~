@@ -59,6 +59,12 @@ class GrupoMovimientosAutomatico
      */
     private $manual = false; //indica si el movimiento debe realizarce de manera manual o totalmente automatico
 
+    /**
+     * @ORM\Column(name="eliminado", type="boolean", options={"default":false})
+     */
+    private $eliminado = false; 
+
+
     public function getMovimientoManual()
     {
         if (count($this->automaticos))

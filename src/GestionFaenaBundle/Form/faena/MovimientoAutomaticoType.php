@@ -26,6 +26,7 @@ class MovimientoAutomaticoType extends AbstractType
         $builder->add('ordenEjecucion', 
                       TextType::class,
                       ['data' => ($this->proceso->getAutomaticos()->count()+1)])
+                ->add('eliminado')
                 ->add('guardar', SubmitType::class, ['label' => '+'])
                 ->addEventListener(FormEvents::PRE_SET_DATA, [$this, 'onPreSetData']);
     }
@@ -39,6 +40,19 @@ class MovimientoAutomaticoType extends AbstractType
                     EntityType::class, [
                                       'class' => 'GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto',         
                                       'choice_label' => 'vistaEdicion',                    
+                                      'query_builder' => function (EntityRepository $er) use ($proceso){
+                                                                                                        return $er->createQueryBuilder('a')
+                                                                                                                  ->join('a.concepto', 'c')
+                                                                                                                  ->join('c.procesoFaena', 'p')
+                                                                                                                  ->where('a.activo = :activo')
+                                                                                                                  ->setParameter('activo', true);
+                                                                                                        }
+                 ])
+            ->add('desencadenante', 
+                    EntityType::class, [
+                                      'class' => 'GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto',         
+                                      'choice_label' => 'vistaEdicion',            
+                                      'required' => false,        
                                       'query_builder' => function (EntityRepository $er) use ($proceso){
                                                                                                         return $er->createQueryBuilder('a')
                                                                                                                   ->join('a.concepto', 'c')
