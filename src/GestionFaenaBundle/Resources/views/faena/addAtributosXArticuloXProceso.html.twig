@@ -13,7 +13,33 @@
 		{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 		{{ form_widget(form) }}
 		{{ form_end(form) }}
+<hr>
+		<table class="table table-striped table-bordered table-hover table-sm ">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Proceso</th>
+					<th>Articulo</th>
+					<th>Atributo</th>
 
+					<th></th>
+				</tr>				
+			</thead>
+			<tbody>
+				{% for l in lista %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ l.proceso }}</td>
+						<td>{{ l.articulo }}</td>
+						<td>{{ l.atributosList }}</td>
+						
+						<td>
+							<a href="{{ path('bd_add_atributo_por_proceso_delete', { id : l.id })}}" class="btn btn-danger btn-sm">Eliminar</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 {% endblock fos_user_content %}
 
 {% block javascripts %}

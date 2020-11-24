@@ -63,16 +63,32 @@ class GestionFaenaController extends Controller
 {
 
   //////////////configura las caracteristicas de los articuslo que se veran en la vista del proceso faena
+
+      /**
+     * @Route("/setatrxdel/{id}", name="bd_add_atributo_por_proceso_delete")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteAtributoPorArticuloPorProceso($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $atributo = $em->getRepository(AtributoPorArticuloPorProceso::class)->find($id);
+        $em->remove($atributo);
+        $em->flush();
+        return $this->redirectToRoute('bd_add_atributo_por_proceso');
+    }
+
       /**
      * @Route("/setatrxproc", name="bd_add_atributo_por_proceso")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addAtributoPorArticuloPorProceso()
     {
+        $em = $this->getDoctrine()->getManager();
+        $lista = $em->getRepository(AtributoPorArticuloPorProceso::class)->findAll();
         $atributo = new AtributoPorArticuloPorProceso();
         $form = $this->createForm(AtributoPorArticuloPorProcesoType::class, 
                                 $atributo, ['action' => $this->generateUrl('bd_add_atributo_por_proceso_procesar'),'method' => 'POST']);
-        return $this->render('@GestionFaena/faena/addAtributosXArticuloXProceso.html.twig', array('form' => $form->createView()));
+        return $this->render('@GestionFaena/faena/addAtributosXArticuloXProceso.html.twig', array('lista' => $lista, 'form' => $form->createView()));
     }
 
       /**

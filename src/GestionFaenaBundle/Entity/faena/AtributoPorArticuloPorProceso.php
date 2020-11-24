@@ -41,6 +41,19 @@ class AtributoPorArticuloPorProceso
      * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
      */
     private $proceso;
+
+
+
+    public function getAtributosList()
+    {
+        $l = '';
+        foreach ($this->atributos as $atribut)
+        {
+            $l.=' - '.$atribut;
+        }
+        return $l;
+    }
+
     /**
      * Get id
      *
