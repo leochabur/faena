@@ -109,12 +109,19 @@ class ArticuloAtributoConcepto
 
     public function getVistaEdicion()
     {
+
+        $procDest = '';
+        foreach ($this->procesosDestino as $pd) 
+        {
+            $procDest.=$pd.', ';
+        }
+
         $destino = "";
         if ($this->articuloOrigenTransformacion)
         {
             $destino = " (".$this->articuloOrigenTransformacion.")";
         }
-        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino;
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino."($procDest)";
     }
 
     public function getId()
