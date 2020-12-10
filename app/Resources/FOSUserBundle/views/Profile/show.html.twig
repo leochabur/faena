@@ -2,4 +2,9 @@
 
 {% block fos_user_content %}
 {% include "FOSUserBundle:Profile:show_content.html.twig" %}
+<ul>
+{% for p in app.user.procesos %}
+	<li>{{ p }}</li>
+{% endfor %}
+</ul>
 {% endblock fos_user_content %}
