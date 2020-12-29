@@ -393,12 +393,12 @@ class GestionFaenaController extends Controller
       $procFaena = $proceso->getProcesoFaena();
 
       $grupoAutoomatico = $em->find(GrupoMovimientosAutomatico::class, $gpo);
-      $automaticos = $automaticos = $grupoAutoomatico->getAutomaticos();
-      
+      $automaticos = $grupoAutoomatico->getAutomaticos();
+   //   throw new \Exception("HASTA ACXA PASO ".$automaticos->count());
       try
       {
-          foreach ($automaticos as $movAut) 
-          {
+          foreach ($automaticos as $movAut)
+          {              
               $auto = $movAut->getArticuloAtributoConcepto();
               if (!$proceso->realizoMovimientoConArticuloAtriutoConcepto($auto))
               {
@@ -409,7 +409,9 @@ class GestionFaenaController extends Controller
                   }
                   elseif($instance == 5)
                   {
+                    //throw new \Exception("HASTA ACXA PASO instance 5");
                     $var = (bool)true;
+
                     $proceso = $this->procesarTransferirStock($proceso, $auto, $auto->getConcepto(), $faena, $em, $movAut, null, $var);
                   }
                   elseif (in_array($instance, [2,3])) 
@@ -419,14 +421,16 @@ class GestionFaenaController extends Controller
               }
               else
               {
-                $this->addFlash('errorLoad', "El movimiento ".$auto->getVistaEdicion().", ya se ha realizado!");
+                $this->addFlash('errorLoad', ["El movimiento ".$auto->getVistaEdicion().", ya se ha realizado!"]);
+                //$this->addFlash('error', "El movimiento ".$auto->getVistaEdicion().", ya se ha realizado!");
               }                             
           }
           $this->registrarPasoRealizado($grupoAutoomatico, $proceso->getProcesoFaena(), $proceso, $faena, $em);
           $em->flush(); 
       }
       catch(\Exception $e){
-                            $this->addFlash('errorLoad', $e->getMessage());
+                            $this->addFlash('errorLoad', [$e->getMessage()]);
+                            //throw $e;
                           }
       $proceso = $faena->getProceso($grupoAutoomatico->getProcesoFaena()->getId());
 
