@@ -1,0 +1,182 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+<style type="text/css">
+           
+  .table-scroll {
+    position:relative;
+    max-width:100%;
+    margin:auto;
+    overflow:hidden;
+  }
+  .table-wrap {
+    width:100%;
+    overflow:auto;
+  }
+  .table-scroll table {
+    width:100%;
+    margin:auto;
+    border-collapse:separate;
+    border-spacing:0;
+  }
+  .table-scroll th, .table-scroll td {
+    padding:5px 10px;
+
+    background:#fff;
+    white-space:nowrap;
+    vertical-align:top;
+  }
+  .table-scroll thead, .table-scroll tfoot {
+    background:#f9f9f9;
+  }
+  .clone {
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none;
+  }
+  .clone th, .clone td {
+    visibility:hidden
+  }
+  .clone td, .clone th {
+    border-color:transparent
+  }
+  .clone tbody th {
+    visibility:visible;
+  }
+  .clone .fixed-side {
+    visibility:visible;
+  }
+  .clone thead, .clone tfoot{background:transparent;}
+  .dropdown:hover>.dropdown-menu {
+  display: block;
+}
+
+.dropdown>.dropdown-toggle:active {
+  /*Without this, clicking will make it sticky*/
+    pointer-events: none;
+}
+
+</style>
+{% endblock %}
+{% block fos_user_content %}
+  {{ parent() }}
+<br>
+<hr>
+<span class="h5 card-title">Comprobantes venta generados</span>
+<hr>
+{% include '@GestionFaena/messages.html.twig'  %}
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+          <div class="form-row">
+            <div class="col-lg-4 col-sm-12">
+              {{ form_widget(form.fecha, { 'attr' : {'class' : 'form-control form-control-sm mt-2'}}) }}
+            </div>
+            <div class="col-lg-4 col-sm-12">
+              {{ form_widget(form.cargar, { 'attr' : { 'class' : 'btn btn-sm  btn-primary' }}) }}
+            </div>
+          </div>
+{{ form_end(form) }}
+<hr>
+
+{% if comprobantes is defined %}
+<div class="row mt-2 mb-2">
+  <div class="col-lg-2 col-sm-12 border ml-3 mr-2 blue lighten-5">
+      Finalizado
+  </div>
+  <div class="col-lg-2 col-sm-12 border ml-2 orange lighten-4">
+      Pendientes
+  </div>
+</div>
+    <table class="table table-striped table-bordered table-hover table-sm">
+      <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Numero</th>
+            <th>Destino</th>
+            <th>Observaciones</th>
+            <th>Articulos O</th>      
+            <th>Articulos R</th>        
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>        
+          {% for cmp in comprobantes %}
+              {% set color = 'orange lighten-4' %}
+              {% if cmp.finalizado %}
+                  {% set color ='blue lighten-5' %}
+              {% endif %}
+              <tr>
+                <td>{{ cmp.fecha|date('d/m/Y') }}</td>
+                <td>{{ "%06d" | format(cmp.numero) }}</td>
+                <td>{{ cmp.entidad }}</td>
+                <td>{{ cmp.comentario }}</td>   
+                <td>{{ cmp.itemOficial }}</td>  
+                <td></td>
+                <td>
+<div class="dropdown">
+<button type="button" class="btn btn-primary btn-floating btn-sm">
+  <i class="fas fa-cog"></i>
+</button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="{{  path('vtas_imprimir_comprobante', { cmp : cmp.id }) }}">Imprimir Remito</a>
+    <a class="dropdown-item" href="#">Imprimir Orden Carga</a>
+    <a class="dropdown-item" href="#">Ver Detalle</a>
+  </div>
+</div>
+                  
+                  </td>     
+              </tr>
+          {% endfor %}
+        </tbody>
+    </table>  
+{% endif %}
+<br>
+<br>
+{% endblock fos_user_content %}
+{% block javascripts %}
+
+<script type="text/javascript">
+
+  $(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');  
+  $('.deletecmp').click(function(event){
+                                        event.preventDefault();
+                                        var a = $(this);
+                                        bootbox.confirm({                                        
+                                                        message: 'Seguro '+a.data('action')+' el comprobante correspondiente a '+a.data('index')+'?',
+                                                        size: "large",
+                                                        buttons: {
+                                                                  confirm: {
+                                                                      label: 'Si',
+                                                                      className: 'btn-success'
+                                                                  },
+                                                                  cancel: {
+                                                                      label: 'No',
+                                                                      className: 'btn-danger'
+                                                                  }
+                                                              },
+                                                              callback: function (result) {
+                                                                  if (result)
+                                                                  {
+                                                                      $.post(a.attr('href'),
+                                                                             function (data)
+                                                                             {
+                                                                                if (!data.error)
+                                                                                {
+                                                                                   location.reload();
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                  alert(data.message);
+                                                                                }
+                                                                             });
+                                                                  }
+                                                              }
+                                        });
+
+  });
+
+
+</script>
+
+{% endblock  %}

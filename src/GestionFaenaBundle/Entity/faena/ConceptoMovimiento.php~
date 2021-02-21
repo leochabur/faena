@@ -122,4 +122,28 @@ class ConceptoMovimiento
     {
         return $this->transforma;
     }
+
+    /**
+     * Set resumido
+     *
+     * @param string $resumido
+     *
+     * @return ConceptoMovimiento
+     */
+    public function setResumido($resumido)
+    {
+        $this->resumido = $resumido;
+
+        return $this;
+    }
+
+    /**
+     * Get resumido
+     *
+     * @return string
+     */
+    public function getResumido()
+    {
+        return $this->resumido;
+    }
 }

@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Reparto extends EntidadExterna
 {
-
+    protected function getIsCliente()
+    {
+        return true;
+    }
 }
 

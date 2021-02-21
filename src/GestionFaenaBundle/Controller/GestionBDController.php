@@ -72,6 +72,14 @@ use GestionFaenaBundle\Entity\faena\MovimientoAutomatico;
 use GestionFaenaBundle\Form\faena\MovimientoAutomaticoType;
 use GestionFaenaBundle\Entity\ConceptoVenta;
 use GestionFaenaBundle\Form\ConceptoVentaType; 
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use GestionFaenaBundle\Entity\gestionBD\Remito;
+use GestionFaenaBundle\Entity\gestionBD\Consignatario;
+use GestionFaenaBundle\Entity\gestionBD\Exportacion;
+use GestionFaenaBundle\Entity\gestionBD\Sucursal;
+use GestionFaenaBundle\Entity\gestionBD\Anexo;
+use GestionFaenaBundle\Entity\gestionBD\Reparto;
+use GestionVentasBundle\Entity\options\EntidadExternaConcepto;
 
 class GestionBDController extends Controller
 {
@@ -1052,7 +1060,92 @@ class GestionBDController extends Controller
                                   'auto' => $this->getFormSetAutomaticMov($proceso, $movAuto)->createView(),
                                   'base' => $this->getFormSetArticuloBaseProceso($proceso)->createView(),
                                   'atrBase' => $this->getFormSetAtributoBaseProceso($proceso)->createView(),
-                                  'formConcepto' => $this->getFormAddConceptoVenta(new ConceptoVenta(), $proceso)->createView()));
+                                  'formConcepto' => $this->getFormAddConceptoVenta(new ConceptoVenta(), $proceso)->createView(),
+                                  'fventas' => $this->getFormSetAtributosVenta($proceso)->createView()));
+    }
+
+    /**
+     * @Route("/config/addatrvta/{proc}", name="bd_add_atributo_venta", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function setOpcionesVenta($proc, Request $request)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $proceso = $entityManager->find(ProcesoFaena::class, $proc);
+
+        $form = $this->getFormSetAtributosVenta($proceso);
+        $form->handleRequest($request);
+
+        $data = $form->getData();
+        if ($form->getClickedButton() === $form->get('chAtributo'))
+        {
+            $proceso->setAtributoVenta($data['atributo']);
+          //  return new Response(".".print_r($this->getSubclassesOf(EntidadExternaType::class)));
+        }
+        elseif ($form->getClickedButton() === $form->get('chArticulo'))
+        {
+            $entidad = new EntidadExternaConcepto();
+            $entidad->setProceso($proceso);
+            $entidad->setEntidad($data['entidades']);
+            $entidad->setConcepto($data['conceptos']);
+            $entityManager->persist($entidad);
+        }
+        elseif ($form->getClickedButton() === $form->get('chUnidad'))
+        {
+            $proceso->setUnidadMedidaventa($data['unidades']);
+        }
+
+        $entityManager->flush();
+        return $this->redirectToRoute('bd_edit_procesos', ['proccess' => $proc]);
+        
+    }
+
+    private  function getSubclassesOf($parent) 
+    {
+        $result = ['Remito' => Remito::class,
+                   'Reparto' => Reparto::class,
+                   'Anexo' => Anexo::class,
+                   'Consignatario' => Consignatario::class,
+                   'Exportacion' => Exportacion::class,
+                   'Sucursal' => Sucursal::class
+                    ];
+        return $result;
+    }
+
+    private function getFormSetAtributosVenta($proceso)
+    {
+        $form =    $this->createFormBuilder()
+                        ->add('atributo', 
+                               EntityType::class, [
+                              'class' => 'GestionFaenaBundle:gestionBD\AtributoAbstracto',
+                              'data' => $proceso->getAtributoVenta(),
+                              'required' => false
+                                ])
+                        ->add('entidades', 
+                               ChoiceType::class,
+                               [
+                                'choices' => $this->getSubclassesOf(''),
+                                'required' => true
+                               ]
+                              )
+                        ->add('conceptos', 
+                               EntityType::class, [
+                              'class' => 'GestionFaenaBundle:faena\ConceptoMovimiento',
+                              'required' => true
+                                ])
+                        ->add('unidades', 
+                               EntityType::class, [
+                              'class' => 'GestionFaenaBundle:gestionBD\UnidadMedida',
+                              'required' => false,
+                              'data' => $proceso->getUnidadMedidaventa(),
+                                ])
+                        ->add('chAtributo', SubmitType::class, ['label' => 'Atributo'])
+                        ->add('chArticulo', SubmitType::class, ['label' => 'Articulo'])
+                        ->add('chUnidad', SubmitType::class, ['label' => 'Unidad'])
+                        ->setAction($this->generateUrl('bd_add_atributo_venta', array('proc' => $proceso->getId())))  
+                        ->setMethod('POST')               
+                        ->getForm();
+        return $form;
     }
 
     private function getFormAddPasoGrupoMovimiento($grupo, $proceso)

@@ -1,0 +1,52 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+{% include '@GestionFaena/messages.html.twig'  %}
+
+<div class="">
+    <span class="h5">Destinatarios Ventas</span>
+    <hr>
+    <table class="table table-striped table-bordered table-hover table-sm ">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Razon Social</th>
+            <th>Rubro</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for f in entes %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ f }}</td>                  
+              <td>
+                {{ form_start(forms[f.id], { 'novalidate' : 'novalidate'})}}
+                {{ form_widget(forms[f.id].grupo, {'attr' : {'class' : 'form-control-sm form-control changegpo'}})  }}
+                {{ form_end(forms[f.id]) }}
+              </td>                
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock fos_user_content %}
+{% block javascripts %}
+<script type="text/javascript">
+    
+    $(document).ready(function(){
+ 
+      $('.changegpo').change(function(){
+                                            var a = $(this);
+                                            var f = a.closest('form');
+                                            $.post(f.attr('action'),
+                                                   f.serialize(),
+                                                   function(data)
+                                                   {
+                                                      console.log(data);
+                                                   });
+
+      });
+    });
+
+</script>
+{% endblock %}

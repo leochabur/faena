@@ -1,145 +1,186 @@
 <nav class="navbar navbar-expand-lg navbar-dark  primary-color">
-
+  
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse container" id="navbarTogglerDemo01">
     <ul class="navbar-nav mr-auto">
-
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle active btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Configuracion Sistema
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          {% if is_granted('ROLE_ADMIN') %}
-            <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Admin. Procesos</a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir Proceso</a>
+      {% if perfilFaena %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle active btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Configuracion Sistema
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              {% if is_granted('ROLE_ADMIN') %}
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Admin. Procesos</a>
                   <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':1})}}">Proceso Inicio</a></li>
-                    <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':2})}}">Proceso Medio</a></li>
-                    <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':3})}}">Proceso Fin</a></li>
-                    <li><a class="dropdown-item" href="{{ path('bd_add_atributo_por_proceso')}}">Configurar</a></li>
+                    <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Definir Proceso</a>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':1})}}">Proceso Inicio</a></li>
+                        <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':2})}}">Proceso Medio</a></li>
+                        <li><a class="dropdown-item" href="{{ path('bd_add_proceso', {'type':3})}}">Proceso Fin</a></li>
+                        <li><a class="dropdown-item" href="{{ path('bd_add_atributo_por_proceso')}}">Configurar</a></li>
+                      </ul>
+                    </li>
+                    <li><a class="dropdown-item" href="{{ path('bd_view_procesos') }}">Ver Procesos</a></li>
+                             
                   </ul>
                 </li>
-                <li><a class="dropdown-item" href="{{ path('bd_view_procesos') }}">Ver Procesos</a></li>
-                         
-              </ul>
-            </li>
 
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Gestionar Articulos</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{{path('bd_add_articulo')}}">Nuevo Articulo</a></li>
-              <li><a class="dropdown-item" href="{{ path('bd_add_articulo_atributo_concepto') }}">Definir Articulos</a></li>
-              <li><a class="dropdown-item" href="{{ path('bd_editar_articulo') }}">Configurar Articulos</a></li>
-            </ul>
-          </li>
-          {% endif %}
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones BD</a>
-            <ul class="dropdown-menu">
-              {% if is_granted('ROLE_ADMIN') %}
-                <li><a class="dropdown-item" href="{{path('bd_add_atributo_abstracto')}}">Nuevo Atributo Abstracto</a></li>
-                <li><a class="dropdown-item" href="{{ path('bd_add_concepto_movimiento') }}">Nuevo Concepto Movimiento</a></li>
-                <li><a class="dropdown-item" href="{{path('bd_add_concepto_movimiento_proceso')}}">Asignar Concepto a proceso</a></li>
-                <li><a class="dropdown-item" href="{{path('bd_view_concepto_movimiento_proceso')}}">Ver Definicion de Conceptos</a></li>
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Gestionar Articulos</a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{path('bd_add_articulo')}}">Nuevo Articulo</a></li>
+                  <li><a class="dropdown-item" href="{{ path('bd_add_articulo_atributo_concepto') }}">Definir Articulos</a></li>
+                  <li><a class="dropdown-item" href="{{ path('bd_editar_articulo') }}">Configurar Articulos</a></li>
+                </ul>
+              </li>
               {% endif %}
-              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones del Sistema</a>
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones BD</a>
                 <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_cargador') }}">Nuevo Cargador</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_unidad_medida') }}">Nueva Unidad de Medida</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_granja') }}">Nueva Granja</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_transportista') }}">Nuevo Transportista</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_ciudad') }}">Nueva Ciudad</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_categoria_articulo') }}">Nueva Categoria</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_subcategoria_articulo') }}">Nueva Subcategoria</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_sucursal') }}">Nueva Sucursal</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_consignatario') }}">Nuevo Consignatario</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_remito') }}">Nuevo Remito</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_anexo') }}">Nuevo Anexo</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_reparto') }}">Nuevo Reparto</a></li>
-                      <li><a class="dropdown-item" href="{{ path('bd_add_entity_exportacion') }}">Nueva Entidad Exportacion</a></li>
+                  {% if is_granted('ROLE_ADMIN') %}
+                    <li><a class="dropdown-item" href="{{path('bd_add_atributo_abstracto')}}">Nuevo Atributo Abstracto</a></li>
+                    <li><a class="dropdown-item" href="{{ path('bd_add_concepto_movimiento') }}">Nuevo Concepto Movimiento</a></li>
+                    <li><a class="dropdown-item" href="{{path('bd_add_concepto_movimiento_proceso')}}">Asignar Concepto a proceso</a></li>
+                    <li><a class="dropdown-item" href="{{path('bd_view_concepto_movimiento_proceso')}}">Ver Definicion de Conceptos</a></li>
+                  {% endif %}
+                  <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones del Sistema</a>
+                    <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_cargador') }}">Nuevo Cargador</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_unidad_medida') }}">Nueva Unidad de Medida</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_granja') }}">Nueva Granja</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_transportista') }}">Nuevo Transportista</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_ciudad') }}">Nueva Ciudad</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_categoria_articulo') }}">Nueva Categoria</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_subcategoria_articulo') }}">Nueva Subcategoria</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_sucursal') }}">Nueva Sucursal</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_consignatario') }}">Nuevo Consignatario</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_remito') }}">Nuevo Remito</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_anexo') }}">Nuevo Anexo</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_reparto') }}">Nuevo Reparto</a></li>
+                          <li><a class="dropdown-item" href="{{ path('bd_add_entity_exportacion') }}">Nueva Entidad Exportacion</a></li>
+                    </ul>
+                  </li>
+                  {% if is_granted('ROLE_ADMIN') %}
+                  <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
+                    <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="{{ path('bd_add_informe_proceso') }}">Nueva definicion de informe</a></li>
+                    </ul>
+                  </li>
+                {% endif %}
                 </ul>
               </li>
               {% if is_granted('ROLE_ADMIN') %}
-              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
-                <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="{{ path('bd_add_informe_proceso') }}">Nueva definicion de informe</a></li>
-                </ul>
-              </li>
-            {% endif %}
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Informe I</a>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{path('bd_add_informe_proceso')}}">Definir informe</a></li>
+                        <li><a class="dropdown-item" href="{{path('informe_list_informes')}}">Configurar Informe</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              {% endif %}
             </ul>
           </li>
-          {% if is_granted('ROLE_ADMIN') %}
-            <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Configurar informes</a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Informe I</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Faena Diaria
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Administrar</a>
+                <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{{ path('bd_add_faena_diaria') }}">Iniciar Nueva</a></li>
+                      <li><a class="dropdown-item" href="{{ path('bd_view_faena') }}">Ver Faenas</a></li>
+                </ul>
+              </li>
+
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Estado del dia</a></li>
+                  <li><a class="dropdown-item" href="#">Estado historico</a></li>
+                </ul>
+              </li>
+              <li><a class="dropdown-item" href="{{ path('vtas_incorporar_ventas_a_faena') }}">Incorporar Ventas</a></li>
+            </ul>
+          </li>
+      {% endif %}
+      {% if perfilVenta %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Ventas
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                <li><a class="dropdown-item" href="{{ path('vtas_generate') }}">Registrar</a></li>
+
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
                   <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{path('bd_add_informe_proceso')}}">Definir informe</a></li>
-                    <li><a class="dropdown-item" href="{{path('informe_list_informes')}}">Configurar Informe</a></li>
+                    <li><a class="dropdown-item" href="#">Estado del dia</a></li>
+                    <li><a class="dropdown-item" href="#">Estado historico</a></li>
                   </ul>
                 </li>
               </ul>
             </li>
-          {% endif %}
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Faena Diaria
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Administrar</a>
-            <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{{ path('bd_add_faena_diaria') }}">Iniciar Nueva</a></li>
-                  <li><a class="dropdown-item" href="{{ path('bd_view_faena') }}">Ver Faenas</a></li>
-            </ul>
-          </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Configuraciones Ventas
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Estado del dia</a></li>
-              <li><a class="dropdown-item" href="#">Estado historico</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Sistema SIGCER
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{{ path('bd_ventas_nuevo_grupo_ventas') }}">Grupos Venta</a></li>
+                <li><a class="dropdown-item" href="{{ path('bd_set_grupo_entidad') }}">Destinatarios Venta</a></li>
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Estado del dia</a></li>
+                    <li><a class="dropdown-item" href="#">Estado historico</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+      {% endif %}
+      {% if perfilFaena %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Sistema SIGCER
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 
-          <li><a class="dropdown-item" href="{{ path('sigcer_add_grupos_solicitudes') }}">Administrar Solicitudes</a></li>
-          <li><a class="dropdown-item" href="{{ path('sigcer_find_solicitud') }}">Buscar Solicitudes</a></li>
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones</a>
-            <ul class="dropdown-menu">
-               <li><a class="dropdown-item" href="{{ path('sigcer_add_zona') }}">Alta Zona</a></li>
-              <li><a class="dropdown-item" href="{{ path('sigcer_add_pais_origen') }}">Alta Pais Destino</a></li>
-              <li><a class="dropdown-item" href="{{ path('sigcer_add_envase') }}">Alta Envase</a></li>
-              <li><a class="dropdown-item" href="{{ path('sigcer_add_cliente') }}">Alta Cliente</a></li>
-              <li><a class="dropdown-item" href="{{ path('sigcer_add_camion') }}">Alta Camion</a></li>
-              <li><a class="dropdown-item" href="{{ path('sigcer_add_producto') }}">Alta Producto</a></li>
+              <li><a class="dropdown-item" href="{{ path('sigcer_add_grupos_solicitudes') }}">Administrar Solicitudes</a></li>
+              <li><a class="dropdown-item" href="{{ path('sigcer_find_solicitud') }}">Buscar Solicitudes</a></li>
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Opciones</a>
+                <ul class="dropdown-menu">
+                   <li><a class="dropdown-item" href="{{ path('sigcer_add_zona') }}">Alta Zona</a></li>
+                  <li><a class="dropdown-item" href="{{ path('sigcer_add_pais_origen') }}">Alta Pais Destino</a></li>
+                  <li><a class="dropdown-item" href="{{ path('sigcer_add_envase') }}">Alta Envase</a></li>
+                  <li><a class="dropdown-item" href="{{ path('sigcer_add_cliente') }}">Alta Cliente</a></li>
+                  <li><a class="dropdown-item" href="{{ path('sigcer_add_camion') }}">Alta Camion</a></li>
+                  <li><a class="dropdown-item" href="{{ path('sigcer_add_producto') }}">Alta Producto</a></li>
+                </ul>
+              </li>
             </ul>
           </li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Informes
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <li><a class="dropdown-item" href="{{ path('informes_ver_existencias') }}">Ver existencias</a></li>
-          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Administrar Usuarios</a>
-            <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{{ path('fos_user_registration_register') }}">Nuevo Usuario</a></li>
-                  <li><a class="dropdown-item" href="{{path('conf_add_proc_user')}}">Asignar Procesos</a></li>
-                  <li><a class="dropdown-item" href="{{path('informes_definir_informe')}}">Definir Calculo</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Informes
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item" href="{{ path('informes_ver_existencias') }}">Ver existencias</a></li>
+              <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Administrar Usuarios</a>
+                <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{{ path('fos_user_registration_register') }}">Nuevo Usuario</a></li>
+                      <li><a class="dropdown-item" href="{{path('conf_add_proc_user')}}">Asignar Procesos</a></li>
+                      <li><a class="dropdown-item" href="{{path('informes_definir_informe')}}">Definir Calculo</a></li>
+                </ul>
+              </li>
             </ul>
           </li>
-        </ul>
-      </li>
+      {% endif %}
     </ul>
-    <ul class="navbar-nav ml-auto nav-flex-icons">
+    <ul class="navbar-nav ml-auto nav-flex-icons ">
+      <li class="nav-item dropdown indicator">
+
+      </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown"
           aria-haspopup="true" aria-expanded="false">

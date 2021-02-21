@@ -24,6 +24,7 @@ class ArticuloType extends AbstractType
                 ->add('orden')
                 ->add('articuloBase')
                 ->add('clasificable')
+                ->add('descVenta')
                 ->add('guardar', SubmitType::class);
     }/**
      * {@inheritdoc}

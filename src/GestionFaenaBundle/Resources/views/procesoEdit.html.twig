@@ -499,6 +499,62 @@
 				  </div>
 		  </div>
 		</div>
+		<div class="row">
+		  <div class="col">
+				<div class="card">
+				  <div class="card-header">
+				     Atributos Ventas
+				  </div>
+				  <div class="card-body">
+
+				  	{{ form_start(fventas) }}
+				  		<div class="form-row align-items-center">
+				  			<div class=" col-lg-2 col">
+				  				{{ form_widget(fventas.atributo, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-lg-2 mt-1">
+				  				{{ form_widget(fventas.chAtributo, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  			<div class=" col-lg-2 col">
+				  				{{ form_widget(fventas.conceptos, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class=" col-lg-2 col">
+				  				{{ form_widget(fventas.entidades, {'attr' : {'class' : 'form-control-sm'}}) }}
+				  			</div>
+				  			<div class="col-lg-1 mt-1">
+				  				{{ form_widget(fventas.chArticulo, {'attr' : {'class' : 'btn btn-sm btn-success btn-block'}}) }}
+				  			</div>
+				  		</div>
+				  	
+				  	{{ form_end(fventas) }}		
+				  <hr>
+						<table class="table table-striped table-bordered table-hover table-sm ">
+									<thead>
+										<tr>
+											<th>Entidad Externa</th>
+											<th>Concepto Movimiento</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for aj in proccess.entidadesConcepto %}
+												<tr>
+													<td>
+											
+															{{ aj.entidad }}
+													
+													</td>
+													<td>{{ aj.concepto }}</td>
+													<td class="text-center"></td>
+												</tr>
+										{% endfor %}
+									</tbody>
+						</table>
+				  </div>
+				  
+				  </div>
+		  </div>
+		</div>
 		{% endif %}
 
 <div class="modal fade" id="modalSubscriptionForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"

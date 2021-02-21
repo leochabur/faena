@@ -7,7 +7,8 @@
         "psr-4": {
             "AppBundle\\": "src/AppBundle",
             "GestionFaenaBundle\\": "src/GestionFaenaBundle",
-            "GestionSigcerBundle\\": "src/GestionSigcerBundle"
+            "GestionSigcerBundle\\": "src/GestionSigcerBundle",
+            "GestionVentasBundle\\": "src/GestionVentasBundle"            
         },
         "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
     },

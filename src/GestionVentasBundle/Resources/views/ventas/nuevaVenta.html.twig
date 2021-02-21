@@ -1,0 +1,64 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Nuevo Comprobante de Venta</span>
+<hr>
+
+{% include '@GestionFaena/messages.html.twig'  %}
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class' : 'updvta'}}) }}
+          <div class="form-row">
+            <div class="col-lg-4 col-sm-12">
+              {{ form_label(form.fecha) }}
+              {{ form_widget(form.fecha, {'attr' : {'class' : 'date' }}) }}
+            </div>
+            <div class="col-lg-8 col-sm-12">
+              {{ form_label(form.cliente) }}
+              {{ form_widget(form.cliente) }}
+            </div>
+          </div>
+          <div class="form-row mt-4">
+            <div class="col-lg-12 col-sm-12">
+              {{ form_label(form.comentario) }}
+              {{ form_widget(form.comentario) }}
+            </div>
+          </div>
+          <div class="form-row mt-4">
+            <div class="col-lg-12 col-sm-12">
+              {{ form_widget(form.siguiente) }}
+            </div>
+          </div>
+{{ form_end(form) }}
+<div class="text-center loading">
+  <div class="spinner-border" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>
+{% endblock fos_user_content %}
+{% block out_container %}
+  <hr>
+  <div id="detalle">
+  </div>
+{% endblock out_container %}
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+          $('.loading').hide();
+          $('.date').change(function(event){
+                                            $('#detalle').empty();
+                                            $('.loading').show();
+                                            $.post("{{ path('vtas_detalle_ventas_fecha') }}",
+                                                   $('.updvta').serialize(),
+                                                   function(data){
+                                                                  $('.loading').hide();
+                                                                  $('#detalle').html(data);
+                                                   });
+          });
+          {% if fecha is defined %}
+            $('.date').trigger('change');
+          {% endif %}
+</script>
+
+{% endblock  %}

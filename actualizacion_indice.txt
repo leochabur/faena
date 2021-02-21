@@ -1,0 +1,2 @@
+ALTER TABLE `gestionfaena`.`sp_st_cbte_vta_st` MODIFY COLUMN `id` INTEGER NOT NULL AUTO_INCREMENT,
+ MODIFY COLUMN `numero` INTEGER NOT NULL;

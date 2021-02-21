@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="{{ asset('resources/css/style.css') }}" rel="stylesheet">
   
   <link href="{{ asset('resources/css/addons/datatables.min.css') }}" rel="stylesheet">
+
     
     <!-- Latest compiled and minified JavaScript -->
 
@@ -53,8 +54,14 @@
 </head>
 
 <body>
+
+
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    {% include '::topnav.html.twig' %}
+{% set perfilFaena = app.user.perfilFaena %}
+{% set perfilVenta = app.user.perfilVenta %}
+    {% if show_nav is not defined %}
+      {% include '::topnav.html.twig' %}
+    {% endif %}
 {% endif %}
 
 <div class="container-fluid content">
@@ -73,26 +80,53 @@
 <script src="{{ asset('resources/js/bootbox.all.min.js') }}"></script>
 <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
 <script type='text/javascript' src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script>
+
 {% block javascripts %}{% endblock %}
 <script type="text/javascript">
-$('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
-  if (!$(this).next().hasClass('show')) {
-    $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
-  }
-  var $subMenu = $(this).next(".dropdown-menu");
-  $subMenu.toggleClass('show');
+
+  $(document).ready(function()
+  {
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+      {% if perfilFaena %}
+        function verificar() {
+            value = $('#value').text();
+            $.ajax({
+                type: "POST",
+                url: "{{ path('vtas_ultimos_comprobantes_venta') }}",
+                success: function(data) {
+                    if (data.exists)
+                    {
+                      $('.indicator').html('<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" ria-expanded="false"><i class="fas fa-envelope fa-lg"></i><span class="badge rounded-pill badge-notification bg-danger">'+data.cant+'</span></a><div class="dropdown-menu dropdown-menu-right dropdown-default"aria-labelledby="navbarDropdownMenuLink-333"><a class="dropdown-item">Cerrar sesion</a></div>');
+                    }
+                    else
+                    {
+                      $('.indicator').empty();
+                    }
+                }
+            });
+        }
+        setInterval(verificar, 120000);
+      {% endif %}
+    {% endif %}
+    $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+      if (!$(this).next().hasClass('show')) {
+        $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+      }
+      var $subMenu = $(this).next(".dropdown-menu");
+      $subMenu.toggleClass('show');
 
 
-  $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
-    $('.dropdown-submenu .show').removeClass("show");
-  });
+      $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+        $('.dropdown-submenu .show').removeClass("show");
+      });
 
 
-  return false;
-});
+      return false;
+    });
     {% for js in app.session.flashbag.get('javascript') %}
     {% autoescape false %}{{ js }}{% endautoescape %}
     {% endfor %}
+  });
 </script>
 </body>
 </html>

@@ -33,6 +33,14 @@ services:
         class: GestionFaenaBundle\Services\fpdf\FPDF
         public: true
         arguments: ["null"]
+
+    app.pdf:
+        class: GestionFaenaBundle\Services\fpdf\PDF
+        public: true
+        arguments: ["null"]
+
+    app.faena_controller:
+        class: GestionFaenaBundle\Controller\GestionFaenaController
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:
     #     arguments:

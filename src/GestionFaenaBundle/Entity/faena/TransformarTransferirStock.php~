@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TransformarTransferirStock extends MovimientoStock
 {
+    //En el proceso de congelamiento, los articulos abstractos que se incorporan al stock salen ya romaneados a la camara
     public function __toString()
     {
         return "Transformar-Transferir";
@@ -45,4 +46,3 @@ class TransformarTransferirStock extends MovimientoStock
         $this->setVisible(false);
     }
 }
-

@@ -25,6 +25,14 @@ class User extends BaseUser
      */
     private $procesos;
     
+    /**
+     * @ORM\ManyToMany(targetEntity="Perfil")
+     * @ORM\JoinTable(name="usuarios_perfiles"),
+     *      joinColumns={@ORM\JoinColumn(name="id_usuario", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_perfil", referencedColumnName="id")}
+     *      )
+     */
+    private $perfiles;
 
     public function __construct()
     {
@@ -32,4 +40,43 @@ class User extends BaseUser
     }
 
 
+
+    /**
+     * Add proceso
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $proceso
+     *
+     * @return User
+     */
+    public function addProceso(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+    {
+        $this->procesos[] = $proceso;
+
+        return $this;
+    }
+
+    /**
+     * Remove proceso
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $proceso
+     */
+    public function removeProceso(\GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+    {
+        $this->procesos->removeElement($proceso);
+    }
+
+    /**
+     * Get procesos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getProcesos()
+    {
+        return $this->procesos;
+    }
+
+    public function clearProcesos()
+    {
+        $this->procesos->clear();
+    }
 }

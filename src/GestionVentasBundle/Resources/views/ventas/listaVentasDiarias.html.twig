@@ -1,0 +1,162 @@
+
+
+
+{% block stylesheets %}
+<style type="text/css">
+           
+  .table-scroll {
+    position:relative;
+    max-width:100%;
+    margin:auto;
+    overflow:hidden;
+  }
+  .table-wrap {
+    width:100%;
+    overflow:auto;
+  }
+  .table-scroll table {
+    width:100%;
+    margin:auto;
+    border-collapse:separate;
+    border-spacing:0;
+  }
+  .table-scroll th, .table-scroll td {
+    padding:5px 10px;
+
+    background:#fff;
+    white-space:nowrap;
+    vertical-align:top;
+  }
+  .table-scroll thead, .table-scroll tfoot {
+    background:#f9f9f9;
+  }
+  .clone {
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none;
+  }
+  .clone th, .clone td {
+    visibility:hidden
+  }
+  .clone td, .clone th {
+    border-color:transparent
+  }
+  .clone tbody th {
+    visibility:visible;
+  }
+  .clone .fixed-side {
+    visibility:visible;
+  }
+  .clone thead, .clone tfoot{background:transparent;}
+</style>
+{% endblock %}
+{% block out_container %}
+<span class="h5 card-title">Comprobantes Fecha: {{ fecha|date('d/m/Y') }}</span>
+<hr>
+
+<div class="row mt-2 mb-2">
+  <div class="col-lg-2 col-sm-12 border ml-3 mr-2 blue lighten-5">
+      Finalizado
+  </div>
+  <div class="col-lg-2 col-sm-12 border ml-2 orange lighten-4">
+      Pendientes
+  </div>
+</div>
+<div id="table-scroll" class="table-scroll">
+  <div class="table-wrap">
+  <table class="table table-striped table-bordered table-hover table-sm main-table">
+    <thead>
+      <tr>
+          <th class="fixed-side" rowspan="2">Destinatario</th>
+          <th rowspan="2">Numero</th>
+          <th rowspan="2"></th>          
+          
+          {% for a in articulos %}
+              <th colspan="{{ tipos|length  }}"> {{ a.nombreVenta }}</th>
+          {% endfor %}        
+      </tr>
+      <tr>
+          {% for a in articulos %}
+            {% for t in tipos %}
+              <th>{{ t.codigo }}</th>
+            {% endfor %}
+          {% endfor %}
+      </tr>
+      </thead>
+      <tbody>        
+        {% for cmp in comprobantes %}
+            {% set color = 'orange lighten-4' %}
+            {% if cmp.finalizado %}
+                {% set color ='blue lighten-5' %}
+            {% endif %}
+            <tr class="color {{ color }}">
+              <th class="fixed-side {{ color }}">{{ cmp.entidad }}</th>
+              <td>{{ "%06d" | format(cmp.numero) }}</td>
+              <td>
+                    <a href="{{ path('vtas_agregar_articulos', { id : cmp.id }) }}"><i class="far fa-edit" title="Modificar"></i></a>
+                    <a href="{{ path('vtas_delete_comprobante_venta', { id : cmp.id }) }}" data-action="eliminar" data-index="{{ cmp.entidad}}" class="deletecmp"><i class="far fa-trash-alt" title="Eliminar"></i></a>
+                    <a href="{{ path('vtas_finalizar_comprobante_venta', { id : cmp.id }) }}" data-action="finalizar" data-index="{{ cmp.entidad}}" class="deletecmp"><i class="far fa-check-square" title="Confirmar"></i></a>
+              </td>             
+              {% for art in articulos %}
+                  {% for tpo in tipos %}
+                    <td>
+                      {{ data[cmp.id][art.id][tpo.id] }}
+                    </td>
+                  {% endfor %}
+              {% endfor %}
+            </tr>
+        {% endfor %}
+      </tbody>
+  </table>  
+</div>
+</div>
+<br>
+<br>
+{% endblock out_container %}
+{% block javascripts %}
+
+<script type="text/javascript">
+
+  $(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');  
+  $('.deletecmp').click(function(event){
+                                        event.preventDefault();
+                                        var a = $(this);
+                                        bootbox.confirm({                                        
+                                                        message: 'Seguro '+a.data('action')+' el comprobante correspondiente a '+a.data('index')+'?',
+                                                        size: "large",
+                                                        buttons: {
+                                                                  confirm: {
+                                                                      label: 'Si',
+                                                                      className: 'btn-success'
+                                                                  },
+                                                                  cancel: {
+                                                                      label: 'No',
+                                                                      className: 'btn-danger'
+                                                                  }
+                                                              },
+                                                              callback: function (result) {
+                                                                  if (result)
+                                                                  {
+                                                                      $.post(a.attr('href'),
+                                                                             function (data)
+                                                                             {
+                                                                                if (!data.error)
+                                                                                {
+                                                                                   location.reload();
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                  alert(data.message);
+                                                                                }
+                                                                             });
+                                                                  }
+                                                              }
+                                        });
+
+  });
+
+
+</script>
+
+{% endblock  %}

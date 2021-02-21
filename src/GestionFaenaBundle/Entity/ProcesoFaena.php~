@@ -166,6 +166,41 @@ abstract class ProcesoFaena
      */
     private $atributosArticulo;
 
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atr_abst_venta", referencedColumnName="id", nullable=true)
+    */      
+    private $atributoVenta;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\UnidadMedida") 
+    * @ORM\JoinColumn(name="id_unit_mdda_venta", referencedColumnName="id", nullable=true)
+    */      
+    private $unidadMedidaventa;
+
+    /**
+    * @ORM\OneToMany(targetEntity="GestionVentasBundle\Entity\options\EntidadExternaConcepto", mappedBy="proceso")
+    */      
+    private $entidadesConcepto;
+
+
+    public function atributoAsignadoAArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+                                              \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
+    {
+        $define = 'N';
+        foreach ($this->atributosArticulo as $aa)
+        {
+            if ($aa->getArticulo() == $articulo)
+            {
+                return $aa->getAtributos()->contains($atributo);
+            }
+        }
+        return $define;
+
+    }
+
+
     public function getConceptosOfVentas()
     {
         $conceptos = new \Doctrine\Common\Collections\ArrayCollection();
@@ -355,6 +390,7 @@ abstract class ProcesoFaena
         $this->pasos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->ventas = new \Doctrine\Common\Collections\ArrayCollection();
         $this->atributosArticulo = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->entidadesConcepto = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -929,5 +965,97 @@ abstract class ProcesoFaena
     public function getAdmiteCombinado()
     {
         return $this->admiteCombinado;
+    }
+
+    /**
+     * Add atributosArticulo
+     *
+     * @param \GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo
+     *
+     * @return ProcesoFaena
+     */
+    public function addAtributosArticulo(\GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo)
+    {
+        $this->atributosArticulo[] = $atributosArticulo;
+
+        return $this;
+    }
+
+    /**
+     * Remove atributosArticulo
+     *
+     * @param \GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo
+     */
+    public function removeAtributosArticulo(\GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso $atributosArticulo)
+    {
+        $this->atributosArticulo->removeElement($atributosArticulo);
+    }
+
+    /**
+     * Get atributosArticulo
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAtributosArticulo()
+    {
+        return $this->atributosArticulo;
+    }
+
+    /**
+     * Set atributoVenta
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoVenta
+     *
+     * @return ProcesoFaena
+     */
+    public function setAtributoVenta(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoVenta = null)
+    {
+        $this->atributoVenta = $atributoVenta;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoVenta
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto
+     */
+    public function getAtributoVenta()
+    {
+        return $this->atributoVenta;
+    }
+
+    /**
+     * Add entidadesConcepto
+     *
+     * @param \GestionVentasBundle\Entity\options\EntidadExternaConcepto $entidadesConcepto
+     *
+     * @return ProcesoFaena
+     */
+    public function addEntidadesConcepto(\GestionVentasBundle\Entity\options\EntidadExternaConcepto $entidadesConcepto)
+    {
+        $this->entidadesConcepto[] = $entidadesConcepto;
+
+        return $this;
+    }
+
+    /**
+     * Remove entidadesConcepto
+     *
+     * @param \GestionVentasBundle\Entity\options\EntidadExternaConceptoRepository $entidadesConcepto
+     */
+    public function removeEntidadesConcepto(\GestionVentasBundle\Entity\options\EntidadExternaConcepto $entidadesConcepto)
+    {
+        $this->entidadesConcepto->removeElement($entidadesConcepto);
+    }
+
+    /**
+     * Get entidadesConcepto
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getEntidadesConcepto()
+    {
+        return $this->entidadesConcepto;
     }
 }

@@ -1,0 +1,201 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<style type="text/css">
+
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:before {
+bottom: .5em;
+}
+
+</style>
+<br>
+<hr>
+<span class="h5 card-title">Agregar Articulos</span>
+<div class="row mt-4">
+  <div class="col-lg-4">
+    Fecha: {{ comprobante.fecha|date('d/m/Y') }}
+  </div>
+  <div class="col-lg-4">
+    Destinatario: {{ comprobante.entidad }}
+  </div>
+</div>
+{% if comprobante.confirmado %}
+    <div class="row mt-4">
+        <div class="col-lg-4 fs-5 text-danger">
+          El formulario ya ha sido impreso
+        </div>
+    </div>
+{% endif %}
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+  <table class="table table-striped table-bordered table-hover table-sm " id="table-items">
+    <thead>
+      <tr>
+        <th rowspan="2"  scope="col">Articulo</th>
+        <th colspan="{{ tipos|length  }}"  scope="col">Tipo</th>
+      </tr>
+      <tr>
+        {% for t in tipos %}
+          <th  scope="col">{{ t.codigo }}</th>
+        {% endfor %}
+      </tr>
+      </thead>
+      <tbody>
+        {% set i = 1 %}
+        {% for kvta, vvta in ventas %}
+          <tr>
+              <td>
+
+                {{ articulos[kvta] }}
+
+              </td>
+
+              {% for t in tipos %}
+                  {% set class =  "update col-lg-6 form-control-sm " ~ i %}
+                  <td class="w-auto">
+
+                    {{ form_start(vvta[t.id], {'attr': {'novalidate': 'novalidate', 'class': 'fupdate'}}) }}
+                    {{ form_widget(vvta[t.id].cantidad, {'attr' : {'data-index' : i, 'class' : class }}) }}
+                    {{ form_end(vvta[t.id]) }}
+                  </td>
+                  {% set i = i + 1 %}
+              {% endfor %}
+
+          </tr>
+        {% endfor %}
+      </tbody>
+  </table>  
+  <hr>
+  <div class="form-row">
+      <div class="col-lg-3 col-sm-12">
+          {{ form_start(back, {'attr': {'novalidate': 'novalidate', 'class' : 'back'}}) }}
+          {{ form_widget(back.back) }}
+          {{ form_end(back) }}
+      </div>
+      <div class="col-lg-2 col-sm-12">
+          <a class='btn btn-success finalice' href='{{ path('vtas_finalizar_comprobante_venta', { id : comprobante.id }) }}'>Finalizar</a>
+      </div>
+  </div>
+  
+{% endblock fos_user_content %}
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+          $('#table-items').DataTable({
+                                      "scrollY": "200px",
+                                      "scrollCollapse": true,
+                                      "ordering": false,
+                                      "paging": false,
+                                      "searching": false,
+                                      "scrollY": "400px",
+                                      "language": {
+                                                      "info": ""
+                                                  }
+          });
+
+          $('.finalice').click(function(event){
+                                                event.preventDefault();
+                                                var a = $(this);
+                                                bootbox.confirm({                                        
+                                                        message: 'Seguro finalizar el comprobante de venta?',
+                                                        size: "large",
+                                                        buttons: {
+                                                                  confirm: {
+                                                                      label: 'Si',
+                                                                      className: 'btn-success'
+                                                                  },
+                                                                  cancel: {
+                                                                      label: 'No',
+                                                                      className: 'btn-danger'
+                                                                  }
+                                                              },
+                                                              callback: function (result) {
+                                                                  if (result)
+                                                                  {
+                                                                      $.post(a.attr('href'),
+                                                                             function (data)
+                                                                             {
+                                                                                if (!data.error)
+                                                                                {
+                                                                                   $('.back').trigger('submit');
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                  alert(data.message);
+                                                                                }
+                                                                             });
+                                                                  }
+                                                              }
+                                        });
+          });
+
+          $('.dataTables_length').addClass('bs-select');
+
+          $('.update').focusout(function(event){
+                                            event.preventDefault();
+                                            var input = $(this);
+                                            var form = input.closest('form');
+                                            if (input.val())
+                                            {
+                                              $.post(form.attr('action'),
+                                                     form.serialize(),
+                                                     function(data)
+                                                     {
+                                                         if (!data.error)
+                                                         {
+                                                          input.addClass('green 50');
+                                                         }
+                                                         else{
+                                                              input.addClass('red 50');
+                                                              alert(data.message);
+                                                         }
+                                                     });            
+                                            }
+             
+          });
+
+          $('.fupdate').submit(function(event){
+                                            event.preventDefault();
+                                            var form = $(this);
+                                            var input = form.find( ":text" );
+                                            if (input.val())
+                                            {
+                                              $.post(form.attr('action'),
+                                                     form.serialize(),
+                                                     function(data)
+                                                     {
+                                                       if (!data.error)
+                                                         {
+                                                          input.addClass('green 50');
+                                                          var i = input.data('index')+1;
+
+                                                          $('.'+i).focus();
+                                                         }
+                                                         else{
+                                                          input.addClass('red 50');
+                                                          alert(data.message);
+                                                         }
+                                                     });            
+                                            }
+             
+          });
+
+});
+</script>
+
+{% endblock  %}

@@ -35,4 +35,18 @@ class ProcesoFaenaRepository extends \Doctrine\ORM\EntityRepository
                     ->setParameter('proceso', $proceso)
                     ->getResult();
     }
+
+    //Devuelve el proceso faena que admite imputar ventas (Gestion Camaras)
+    public function getProcesoVenta()
+    {
+        return $this->createQueryBuilder('p')
+                    ->where('p.permanente = :permanente')
+                    ->andWhere('p.generaVentas = :genera')
+                    ->andWhere('p.activo = :actvo')
+                    ->setParameter('permanente', true)
+                    ->setParameter('genera', true)
+                    ->setParameter('actvo', true)
+                    ->getQuery()
+                    ->getOneOrNullResult(); 
+    }
 }

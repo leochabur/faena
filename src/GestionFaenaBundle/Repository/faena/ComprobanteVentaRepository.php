@@ -10,4 +10,58 @@ namespace GestionFaenaBundle\Repository\faena;
  */
 class ComprobanteVentaRepository extends \Doctrine\ORM\EntityRepository
 {
+	
+	public function getComprobantesVenta(\DateTime $fecha) 
+	{ 
+			return $this->createQueryBuilder('c')
+						->join('c.entidad', 'e')
+						->where('c.fecha = :fecha')
+						->andWhere('c.eliminado = :eliminado')
+						->setParameter('fecha', $fecha)
+						->setParameter('eliminado', false)
+						->orderBy('e.valor')
+						->getQuery()
+						->getResult();
+	} 
+
+	public function getComprobantesVentaFinalizados(\DateTime $fecha) 
+	{ 
+			return $this->createQueryBuilder('c')
+						->join('c.entidad', 'e')
+						->where('c.fecha = :fecha')
+						->andWhere('c.eliminado = :eliminado')
+						->andWhere('c.finalizado = :finalizado')
+						->setParameter('fecha', $fecha)
+						->setParameter('eliminado', false)
+						->setParameter('finalizado', true)
+						->orderBy('e.valor')
+						->getQuery()
+						->getResult();
+	} 
+
+	public function getComprobanteConEntidadYFecha(\DateTime $fecha, $entidad) 
+	{ 
+			return $this->createQueryBuilder('c')
+						->where('c.fecha = :fecha')
+						->andWhere('c.eliminado = :eliminado')
+						->andWhere('c.entidad = :entidad')
+						->setParameter('fecha', $fecha)
+						->setParameter('eliminado', false)
+						->setParameter('entidad', $entidad)
+						->getQuery()
+						->getOneOrNullResult();
+	} 
+
+	public function getUltimosComprobantesVenta() 
+	{ 
+			return $this->createQueryBuilder('c')
+						->where('c.finalizado = :finalizado')
+						->andWhere('c.eliminado = :eliminado')
+						->andWhere('c.confirmado = :confirmado')
+						->setParameter('finalizado', true)
+						->setParameter('eliminado', false)
+						->setParameter('confirmado', false)
+						->getQuery()
+						->getResult();
+	} 
 }

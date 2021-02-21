@@ -13,5 +13,10 @@ use Doctrine\ORM\Mapping as ORM;
 class Anexo extends EntidadExterna
 {
 
+    protected function getIsCliente()
+    {
+        return true;
+    }
+
 }
 

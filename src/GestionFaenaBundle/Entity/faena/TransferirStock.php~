@@ -47,4 +47,5 @@ class TransferirStock extends MovimientoCompuesto
         $this->setVisible(false);
     }
 
+
 }

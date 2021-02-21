@@ -19,6 +19,12 @@ class ValorExterno extends ValorAtributo
     */      
     private $entidadExterna;
 
+
+    public function getDataValue()
+    {
+        return $this->entidadExterna;
+    }
+
     /**
      * Set entidadExterna
      *

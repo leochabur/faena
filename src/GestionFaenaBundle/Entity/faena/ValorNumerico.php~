@@ -46,6 +46,12 @@ class ValorNumerico extends ValorAtributo
      */
     private $promedia;
 
+
+    public function getDataValue()
+    {
+        return $this->valor;
+    }
+
     /**
      * Set valor
      *

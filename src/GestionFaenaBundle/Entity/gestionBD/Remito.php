@@ -13,5 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
 class Remito extends EntidadExterna
 {
 
+    protected function getIsCliente()
+    {
+        return true;
+    }
 }
 

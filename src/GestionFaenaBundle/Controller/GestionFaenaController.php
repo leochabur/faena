@@ -507,7 +507,7 @@ class GestionFaenaController extends Controller
                   return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un articulo base en el proceso']);
                 }
 
-                $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimiento($articulo, 
+                $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimientoAction($articulo, 
                                                                                     $conceptoMovimiento, 
                                                                                     EntradaStock::getInstance(),
                                                                                     $procesoFaena,
@@ -545,7 +545,7 @@ class GestionFaenaController extends Controller
 
 
                 //debe generar ahora la salida de stock del articulo base
-                $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articuloBase, 
+                $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimientoAction($articuloBase, 
                                                                                     $conceptoMovimiento, 
                                                                                     SalidaStock::getInstance(),
                                                                                     $procesoFaena,
@@ -749,7 +749,7 @@ class GestionFaenaController extends Controller
                 $entidad = $em->getRepository($conceptoVenta->getEntidadExterna())->find($ent);
 
                 //debe generar ahora la salida de stock del articulo base
-                $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articulo, 
+                $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimientoAction($articulo, 
                                                                                     $conceptoMovimiento, 
                                                                                     SalidaStock::getInstance(),
                                                                                     $procesoFaena,
@@ -1943,7 +1943,7 @@ class GestionFaenaController extends Controller
               }
 
               //1º: Recupera del proceso, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
-              $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimiento($articuloBase,
+              $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimientoAction($articuloBase,
                                                                                   $articulo->getConcepto()->getConcepto(),
                                                                                   SalidaStock::getInstance(),
                                                                                   $proceso->getProcesoFaena(),
@@ -1976,7 +1976,7 @@ class GestionFaenaController extends Controller
               $proceso->addMovimiento($salida);
               ///Una vez realizada la salida delstock del articulo base, debe proceder a realizar la entrada del articulo destino (Corazon)
               //1º: Recupera del proceso, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
-              $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimiento($articuloDestino,
+              $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimientoAction($articuloDestino,
                                                                                   $articulo->getConcepto()->getConcepto(),
                                                                                   EntradaStock::getInstance(),
                                                                                   $proceso->getProcesoFaena(),
@@ -2124,7 +2124,7 @@ class GestionFaenaController extends Controller
                 try
                 {
                     //1º: Recupera del proceso destino, el ArticuloAtributoConcepto para el TipoMovimiento-> Entrada Stock
-                    $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
+                    $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimientoAction($articulo->getArticulo(),
                                                                                         $articulo->getConcepto()->getConcepto(),
                                                                                         EntradaStock::getInstance(),
                                                                                         $procesoDestino->getProcesoFaena(),
@@ -2217,7 +2217,7 @@ class GestionFaenaController extends Controller
 
                 try{
                     //1º: Recupera del proceso origen, el ArticuloAtributoConcepto para el TipoMovimiento-> Salida Stock
-                    $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimiento($articulo->getArticulo(),
+                    $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimientoAction($articulo->getArticulo(),
                                                                                         $articulo->getConcepto()->getConcepto(),
                                                                                         SalidaStock::getInstance(),
                                                                                         $procesoOrigen,
@@ -2420,11 +2420,12 @@ class GestionFaenaController extends Controller
         
     }
 
-    private function getArticuloAtributoConceptoForMovimiento(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+    public static function getArticuloAtributoConceptoForMovimientoAction(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
                                                               \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto,
                                                               $instanceOfTipoMovimiento,
                                                               \GestionFaenaBundle\Entity\ProcesoFaena $proceso,
-                                                              $em) 
+                                                              $em,
+                                                               $response = false) 
     //para los parametro dados, devuelve un ArticuloAtributoConcepto si existe, sino crea uno
     {
           try{
@@ -2457,6 +2458,10 @@ class GestionFaenaController extends Controller
                 $artAtrCon->setConcepto($conMovProc);
                 $artAtrCon->setArticulo($articulo);
                 $em->persist($artAtrCon);
+              }
+              if ($response)
+              {
+                  return new Response($artAtrCon);
               }
               return $artAtrCon;
             }

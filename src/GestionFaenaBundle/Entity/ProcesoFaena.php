@@ -167,6 +167,24 @@ abstract class ProcesoFaena
     private $atributosArticulo;
 
 
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto") 
+    * @ORM\JoinColumn(name="id_atr_abst_venta", referencedColumnName="id", nullable=true)
+    */      
+    private $atributoVenta;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\UnidadMedida") 
+    * @ORM\JoinColumn(name="id_unit_mdda_venta", referencedColumnName="id", nullable=true)
+    */      
+    private $unidadMedidaventa;
+
+    /**
+    * @ORM\OneToMany(targetEntity="GestionVentasBundle\Entity\options\EntidadExternaConcepto", mappedBy="proceso")
+    */      
+    private $entidadesConcepto;
+
+
     public function atributoAsignadoAArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
                                               \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
     {
@@ -372,6 +390,7 @@ abstract class ProcesoFaena
         $this->pasos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->ventas = new \Doctrine\Common\Collections\ArrayCollection();
         $this->atributosArticulo = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->entidadesConcepto = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -980,5 +999,87 @@ abstract class ProcesoFaena
     public function getAtributosArticulo()
     {
         return $this->atributosArticulo;
+    }
+
+    /**
+     * Set atributoVenta
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoVenta
+     *
+     * @return ProcesoFaena
+     */
+    public function setAtributoVenta(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributoVenta = null)
+    {
+        $this->atributoVenta = $atributoVenta;
+
+        return $this;
+    }
+
+    /**
+     * Get atributoVenta
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto
+     */
+    public function getAtributoVenta()
+    {
+        return $this->atributoVenta;
+    }
+
+    /**
+     * Add entidadesConcepto
+     *
+     * @param \GestionVentasBundle\Entity\options\EntidadExternaConcepto $entidadesConcepto
+     *
+     * @return ProcesoFaena
+     */
+    public function addEntidadesConcepto(\GestionVentasBundle\Entity\options\EntidadExternaConcepto $entidadesConcepto)
+    {
+        $this->entidadesConcepto[] = $entidadesConcepto;
+
+        return $this;
+    }
+
+    /**
+     * Remove entidadesConcepto
+     *
+     * @param \GestionVentasBundle\Entity\options\EntidadExternaConceptoRepository $entidadesConcepto
+     */
+    public function removeEntidadesConcepto(\GestionVentasBundle\Entity\options\EntidadExternaConcepto $entidadesConcepto)
+    {
+        $this->entidadesConcepto->removeElement($entidadesConcepto);
+    }
+
+    /**
+     * Get entidadesConcepto
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getEntidadesConcepto()
+    {
+        return $this->entidadesConcepto;
+    }
+
+    /**
+     * Set unidadMedidaventa
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\UnidadMedida $unidadMedidaventa
+     *
+     * @return ProcesoFaena
+     */
+    public function setUnidadMedidaventa(\GestionFaenaBundle\Entity\gestionBD\UnidadMedida $unidadMedidaventa = null)
+    {
+        $this->unidadMedidaventa = $unidadMedidaventa;
+
+        return $this;
+    }
+
+    /**
+     * Get unidadMedidaventa
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\UnidadMedida
+     */
+    public function getUnidadMedidaventa()
+    {
+        return $this->unidadMedidaventa;
     }
 }

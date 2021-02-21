@@ -12,7 +12,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
  * @ORM\DiscriminatorMap({1:"EntidadExterna",2: "Granja", 3: "Transportista", 4: "Cargador", 5: "Sucursal", 6: "Consignatario", 7: "Remito", 8: "Anexo", 9: "Reparto", 10: "Exportacion"})
+ * @ORM\HasLifecycleCallbacks()
  */
+
 abstract class EntidadExterna
 {
     /**
@@ -32,6 +34,35 @@ abstract class EntidadExterna
      */
     private $valor;
 
+    /**
+    * @ORM\ManyToOne(targetEntity="RubroEntidad", inversedBy="entidades") 
+    * @ORM\JoinColumn(name="id_rub_ent", referencedColumnName="id", nullable=true)
+    */   
+    private $rubro;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="activa", type="boolean", options={"default":true})
+     */
+    private $activa = true;
+
+    /**
+     * @var cliente
+     *
+     * @ORM\Column(name="cliente", type="boolean", options={"default":true})
+     */
+    private $cliente;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setIsCliente()
+    {
+        $this->setCliente($this->getIsCliente());
+    }
+
+    protected abstract function getIsCliente();
 
     public function getRenspa()
     {
@@ -75,5 +106,77 @@ abstract class EntidadExterna
     public function __toString()
     {
         return $this->valor;
+    }
+
+    /**
+     * Set activa
+     *
+     * @param boolean $activa
+     *
+     * @return EntidadExterna
+     */
+    public function setActiva($activa)
+    {
+        $this->activa = $activa;
+
+        return $this;
+    }
+
+    /**
+     * Get activa
+     *
+     * @return boolean
+     */
+    public function getActiva()
+    {
+        return $this->activa;
+    }
+
+    /**
+     * Set rubro
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\RubroEntidad $rubro
+     *
+     * @return EntidadExterna
+     */
+    public function setRubro(\GestionFaenaBundle\Entity\gestionBD\RubroEntidad $rubro = null)
+    {
+        $this->rubro = $rubro;
+
+        return $this;
+    }
+
+    /**
+     * Get rubro
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\RubroEntidad
+     */
+    public function getRubro()
+    {
+        return $this->rubro;
+    }
+
+    /**
+     * Set cliente
+     *
+     * @param boolean $cliente
+     *
+     * @return EntidadExterna
+     */
+    public function setCliente($cliente)
+    {
+        $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    /**
+     * Get cliente
+     *
+     * @return boolean
+     */
+    public function getCliente()
+    {
+        return $this->cliente;
     }
 }

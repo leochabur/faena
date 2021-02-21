@@ -17,5 +17,10 @@ class Consignatario extends EntidadExterna
     {
         return $this->getValor();
     }
+    
+    protected function getIsCliente()
+    {
+        return true;
+    }
 }
 

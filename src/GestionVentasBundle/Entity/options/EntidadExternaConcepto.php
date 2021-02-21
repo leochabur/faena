@@ -1,0 +1,124 @@
+<?php
+
+namespace GestionVentasBundle\Entity\options;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * EntidadExternaConcepto
+ *
+ * @ORM\Table(name="sp_opc_ent_ext_conc")
+ * @ORM\Entity(repositoryClass="GestionVentasBundle\Repository\options\EntidadExternaConceptoRepository")
+ */
+class EntidadExternaConcepto
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="entidad", type="string", length=255, unique=true)
+     */
+    private $entidad;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\faena\ConceptoMovimiento") 
+    * @ORM\JoinColumn(name="id_con_mvto", referencedColumnName="id")
+    */      
+    private $concepto;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\ProcesoFaena", inversedBy="entidadesConcepto") 
+    * @ORM\JoinColumn(name="id_proc_fan", referencedColumnName="id")
+    */      
+    private $proceso;
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set entidad
+     *
+     * @param string $entidad
+     *
+     * @return EntidadExternaConcepto
+     */
+    public function setEntidad($entidad)
+    {
+        $this->entidad = $entidad;
+
+        return $this;
+    }
+
+    /**
+     * Get entidad
+     *
+     * @return string
+     */
+    public function getEntidad()
+    {
+        return $this->entidad;
+    }
+
+    /**
+     * Set concepto
+     *
+     * @param \GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto
+     *
+     * @return EntidadExternaConcepto
+     */
+    public function setConcepto(\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto = null)
+    {
+        $this->concepto = $concepto;
+
+        return $this;
+    }
+
+    /**
+     * Get concepto
+     *
+     * @return \GestionFaenaBundle\Entity\faena\ConceptoMovimiento
+     */
+    public function getConcepto()
+    {
+        return $this->concepto;
+    }
+
+    /**
+     * Set proceso
+     *
+     * @param \GestionFaenaBundle\Entity\ProcesoFaena $proceso
+     *
+     * @return EntidadExternaConcepto
+     */
+    public function setProceso(\GestionFaenaBundle\Entity\ProcesoFaena $proceso = null)
+    {
+        $this->proceso = $proceso;
+
+        return $this;
+    }
+
+    /**
+     * Get proceso
+     *
+     * @return \GestionFaenaBundle\Entity\ProcesoFaena
+     */
+    public function getProceso()
+    {
+        return $this->proceso;
+    }
+}

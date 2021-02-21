@@ -10,4 +10,26 @@ namespace GestionFaenaBundle\Repository\gestionBD;
  */
 class EntidadExternaRepository extends \Doctrine\ORM\EntityRepository
 {
+
+	public function getEntidadesVenta() 
+	{ 
+			return $this->createQueryBuilder('e')
+						->where('e.activa = :activa')
+						->setParameter('activa', true)
+						->orderBy('e.valor')
+						->getQuery()
+						->getResult();
+	} 
+
+	public function getClientes() 
+	{ 
+			return $this->createQueryBuilder('e')
+						->where('e.activa = :activa')
+						->andWhere('e.cliente = :cliente')
+						->setParameter('activa', true)
+						->setParameter('cliente', true)
+						->orderBy('e.valor')
+						->getQuery()
+						->getResult();
+	} 
 }

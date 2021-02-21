@@ -1,0 +1,107 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\gestionBD;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * RubroEntidad
+ *
+ * @ORM\Table(name="sp_gst_rub_ent_ext")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\gestionBD\RubroEntidadRepository")
+ */
+
+class RubroEntidad
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="rubro", type="string", length=255, unique=true)
+     */
+    private $rubro;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="activo", type="boolean")
+     */
+    private $activo = true;
+
+    /**
+    *@ORM\OneToMany(targetEntity="EntidadExterna", mappedBy="rubro")
+    */
+    private $entidades;
+
+    public function __toString()
+    {
+        return strtoupper($this->rubro);
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set rubro
+     *
+     * @param string $rubro
+     *
+     * @return RubroEntidad
+     */
+    public function setRubro($rubro)
+    {
+        $this->rubro = $rubro;
+
+        return $this;
+    }
+
+    /**
+     * Get rubro
+     *
+     * @return string
+     */
+    public function getRubro()
+    {
+        return $this->rubro;
+    }
+
+    /**
+     * Set activo
+     *
+     * @param boolean $activo
+     *
+     * @return RubroEntidad
+     */
+    public function setActivo($activo)
+    {
+        $this->activo = $activo;
+
+        return $this;
+    }
+
+    /**
+     * Get activo
+     *
+     * @return bool
+     */
+    public function getActivo()
+    {
+        return $this->activo;
+    }
+}
+

@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Exportacion extends EntidadExterna
 {
-
+    protected function getIsCliente()
+    {
+        return true;
+    }
 }
 

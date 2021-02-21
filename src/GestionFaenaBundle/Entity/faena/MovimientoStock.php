@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\MovimientoStockRepository")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
- * @ORM\DiscriminatorMap({1:"MovimientoStock",2: "EntradaStock", 3: "SalidaStock", 4: "TransformarStock", 5: "TransferirStock", 6:"MovimientoCompuesto", 7:"TransformarTransferirStock", 8:"ComprobanteVenta"})
+ * @ORM\DiscriminatorMap({1:"MovimientoStock",2: "EntradaStock", 3: "SalidaStock", 4: "TransformarStock", 5: "TransferirStock", 6:"MovimientoCompuesto", 7:"TransformarTransferirStock", 8:"ComprobanteVenta", 9:"OrdenCarga"})
  * @ORM\HasLifecycleCallbacks()
  */
 abstract class MovimientoStock
@@ -28,21 +28,21 @@ abstract class MovimientoStock
 
     /**
     * @ORM\ManyToOne(targetEntity="ProcesoFaenaDiaria", inversedBy="movimientos") 
-    * @ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_proc_fan_day", referencedColumnName="id", nullable=true)
     * @Assert\NotNull
     */      
     private $procesoFnDay;
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\FaenaDiaria") 
-    * @ORM\JoinColumn(name="id_fan_day", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_fan_day", referencedColumnName="id", nullable=true)
     * @Assert\NotNull
     */      
     private $faenaDiaria; //utilizado porque al poder compartir movimientos de distintas faenas debo poder identificar a cual corresponde
 
     /**
     * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto") 
-    * @ORM\JoinColumn(name="id_art_proc_fan", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_art_proc_fan", referencedColumnName="id", nullable=true)
     * @Assert\NotNull(message="Debe seleccionar un articulo!!")
     */      
     private $artProcFaena;
@@ -78,6 +78,18 @@ abstract class MovimientoStock
     */      
     private $movimientoAsociado;  //para el caso de las transferencias
 
+    /**
+    * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User") 
+    * @ORM\JoinColumn(name="id_usr_up", referencedColumnName="id", nullable=true)
+    */      
+    private $userAlta;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User") 
+    * @ORM\JoinColumn(name="id_usr_down", referencedColumnName="id", nullable=true)
+    */      
+    private $userBaja;
+    
     /**
      * @Assert\IsFalse(
      *     message = "El tipo de movimiento requiere que defina cual articulo se transformara!!"
@@ -490,5 +502,53 @@ abstract class MovimientoStock
     public function getMovimientoAsociado()
     {
         return $this->movimientoAsociado;
+    }
+
+    /**
+     * Set userAlta
+     *
+     * @param \AppBundle\Entity\User $userAlta
+     *
+     * @return MovimientoStock
+     */
+    public function setUserAlta(\AppBundle\Entity\User $userAlta = null)
+    {
+        $this->userAlta = $userAlta;
+
+        return $this;
+    }
+
+    /**
+     * Get userAlta
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUserAlta()
+    {
+        return $this->userAlta;
+    }
+
+    /**
+     * Set userBaja
+     *
+     * @param \AppBundle\Entity\User $userBaja
+     *
+     * @return MovimientoStock
+     */
+    public function setUserBaja(\AppBundle\Entity\User $userBaja = null)
+    {
+        $this->userBaja = $userBaja;
+
+        return $this;
+    }
+
+    /**
+     * Get userBaja
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUserBaja()
+    {
+        return $this->userBaja;
     }
 }
