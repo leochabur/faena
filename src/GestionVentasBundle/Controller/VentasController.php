@@ -749,17 +749,21 @@ class VentasController extends Controller
 
         $items = $em->getRepository(ItemCarga::class)->getItemsOrdenCarga($ordenCarga); //recupera todos los items oficiales del comprobante
 
-        //recupera la cantidad de comprobantes generados para las entidades con rubr igual al rubro de la Orden de Carga, sino coincide, quiere ecir que existen comprobantes que aun no han sido ingresados
-        $comprobantes = $em->getRepository(ComprobanteVenta::class)
-                           ->getComprobantesVentaOfRubroEntidad($ordenCarga->getFecha(), $ordenCarga->getRubro());
 
-        if (count($comprobantes) > $ordenCarga->getComprobantes()->count())
+        if ($ordenCarga->getRubro()) //
         {
-            $this->addFlash(
-                  'error',
-                  'Existen comprobantes de venta que aun no han sido incorporados'
-              );
-            return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $ordenCarga->getFecha()->getTimestamp()]);
+                //recupera la cantidad de comprobantes generados para las entidades con rubr igual al rubro de la Orden de Carga, sino coincide, quiere ecir que existen comprobantes que aun no han sido ingresados
+                $comprobantes = $em->getRepository(ComprobanteVenta::class)
+                                   ->getComprobantesVentaOfRubroEntidad($ordenCarga->getFecha(), $ordenCarga->getRubro());
+
+                if (count($comprobantes) > $ordenCarga->getComprobantes()->count())
+                {
+                    $this->addFlash(
+                          'error',
+                          'Existen comprobantes de venta que aun no han sido incorporados'
+                      );
+                    return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $ordenCarga->getFecha()->getTimestamp()]);
+                }
         }
 
         $pdf = $this->get('app.pdf');
