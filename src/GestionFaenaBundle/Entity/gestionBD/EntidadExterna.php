@@ -105,7 +105,7 @@ abstract class EntidadExterna
 
     public function __toString()
     {
-        return $this->valor;
+        return strtoupper($this->valor);
     }
 
     /**

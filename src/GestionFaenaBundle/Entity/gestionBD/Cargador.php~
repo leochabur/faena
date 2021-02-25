@@ -12,5 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Cargador extends EntidadExterna
 {
-
+    protected function getIsCliente()
+    {
+        return false;
+    }
 }

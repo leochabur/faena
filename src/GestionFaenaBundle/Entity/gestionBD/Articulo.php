@@ -42,13 +42,6 @@ class Articulo
     /**
      * @var string
      *
-     * @ORM\Column(name="grupo", type="integer", nullable=true, options={"default" = 1})
-     */
-    private $grupo; //utilizado para la clasificacion de las ventas en la impresion
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="nombreResumido", type="string", length=255, nullable=true)
      */
     private $nombreResumido;
@@ -560,29 +553,5 @@ class Articulo
     public function getDescVenta()
     {
         return $this->descVenta;
-    }
-
-    /**
-     * Set grupo
-     *
-     * @param string $grupo
-     *
-     * @return Articulo
-     */
-    public function setGrupo($grupo)
-    {
-        $this->grupo = $grupo;
-
-        return $this;
-    }
-
-    /**
-     * Get grupo
-     *
-     * @return string
-     */
-    public function getGrupo()
-    {
-        return $this->grupo;
     }
 }

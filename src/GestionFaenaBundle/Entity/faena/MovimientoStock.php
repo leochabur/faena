@@ -89,7 +89,20 @@ abstract class MovimientoStock
     * @ORM\JoinColumn(name="id_usr_down", referencedColumnName="id", nullable=true)
     */      
     private $userBaja;
+
+    /**
+     * @ORM\Column(name="fecha_alta", type="datetime", nullable=true)
+    */      
+    private $fechaAlta;
+
+    /**
+     * @ORM\Column(name="fecha_baja", type="datetime", nullable=true)
+    */      
+    private $fechaBaja;
     
+
+    private $tokenStorage;
+
     /**
      * @Assert\IsFalse(
      *     message = "El tipo de movimiento requiere que defina cual articulo se transformara!!"
@@ -379,6 +392,7 @@ abstract class MovimientoStock
      */
     public function setVisiblePrePersist()
     {
+        $this->fechaAlta = new \DateTime();
         $this->updateVisible();
     }
 
@@ -550,5 +564,53 @@ abstract class MovimientoStock
     public function getUserBaja()
     {
         return $this->userBaja;
+    }
+
+    /**
+     * Set fechaAlta
+     *
+     * @param \DateTime $fechaAlta
+     *
+     * @return MovimientoStock
+     */
+    public function setFechaAlta($fechaAlta)
+    {
+        $this->fechaAlta = $fechaAlta;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaAlta
+     *
+     * @return \DateTime
+     */
+    public function getFechaAlta()
+    {
+        return $this->fechaAlta;
+    }
+
+    /**
+     * Set fechaBaja
+     *
+     * @param \DateTime $fechaBaja
+     *
+     * @return MovimientoStock
+     */
+    public function setFechaBaja($fechaBaja)
+    {
+        $this->fechaBaja = $fechaBaja;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaBaja
+     *
+     * @return \DateTime
+     */
+    public function getFechaBaja()
+    {
+        return $this->fechaBaja;
     }
 }

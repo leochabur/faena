@@ -64,6 +64,23 @@ class ComprobanteVenta extends MovimientoStock
     private $userConfirm;
 
     /**
+     * @ORM\Column(name="fechaConfirm", type="datetime", nullable=true)
+    */      
+    private $fechaConfirmacion;
+
+
+    /**
+    * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User") 
+    * @ORM\JoinColumn(name="id_usr_fin", referencedColumnName="id", nullable=true)
+    */      
+    private $userFinalizacion;
+
+    /**
+     * @ORM\Column(name="fechaFin", type="datetime", nullable=true)
+    */      
+    private $fechaFinalizacion;
+
+    /**
     * @ORM\ManyToOne(targetEntity="OrdenCarga", inversedBy="comprobantes") 
     * @ORM\JoinColumn(name="id_ord_cga", referencedColumnName="id", nullable=true)
     */      
@@ -137,7 +154,7 @@ class ComprobanteVenta extends MovimientoStock
 
     public function getType()
     {
-
+        
     }
 
     /**

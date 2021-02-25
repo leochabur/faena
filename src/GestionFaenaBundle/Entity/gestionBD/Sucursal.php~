@@ -20,6 +20,10 @@ class Sucursal extends EntidadExterna
      */
     private $direccion;
 
+    protected function getIsCliente()
+    {
+        return true;
+    }
 
     /**
      * Set direccion

@@ -33,6 +33,8 @@ class SubcategoriaArticulo
      */
     private $orden;
 
+    
+
     public function __toString()
     {
         return $this->subcategoria;

@@ -3,11 +3,15 @@ namespace GestionFaenaBundle\Services\fpdf;
 
 class PDF extends FPDF
 {
-	private $comprobante, $logo, $numero = 1;
+	private $entidad, $fecha, $logo, $oc, $transporte, $numero;
 
-	public function setComprobante($comprobante)
+	public function setData($entidad, $fecha, $numero, $oc, $transporte)
 	{
-		$this->comprobante = $comprobante;
+		$this->entidad = $entidad;
+		$this->fecha = $fecha;
+		$this->numero = $numero;
+		$this->oc = $oc;
+		$this->transporte = $transporte;
 	}
 
 	public function setLogo($logo)
@@ -26,22 +30,33 @@ class PDF extends FPDF
 
 	 	$this->SetFont('Arial','',12);
 
-	 	$this->text($x+60, $y, 'ORIGINAL');
+	 	if ($this->oc)
+	 	{
+	 		$this->text($x+60, $y, 'USO EXCLUSIVO DE CAMARA');
+	 	}
+	 	else
+	 	{
+	 		$this->text($x+60, $y, 'ORIGINAL');
+	 	}
 	 	$this->SetFont('Arial','',10);
-	 	$this->text($x+60, $y+4, 'Pagina '.$this->numero);
+	 	$this->text($x+60, $y+4, 'Pagina '.$this->PageNo().'/{nb}');
 	 	$this->SetFont('Arial','',15);
-	 	$this->text($x+60, $y+12, $this->comprobante->getEntidad());
+	 	$this->text($x+60, $y+12, $this->entidad);
 
 	 	$this->SetFont('Arial','',10);
 	 	$this->text($x, $y+12, 'REMITO INTERNO');
 	 	$this->text($x+150, $y+12, 'FECHA');
 	 	$this->Rect($x-1, $y-5, 170, 18);
 	 	$this->Rect($x-1, $y+13, 170, 5);
-	 	$this->text($x+150, $y+17, $this->comprobante->getFecha()->format('d/m/Y'));
-	 	$numero = str_pad($this->comprobante->getNumero(), 10, "0", STR_PAD_LEFT);
-	 	$this->text($x, $y+17, ("N ".$numero));
+	 	$this->text($x+150, $y+17, $this->fecha->format('d/m/Y'));
 
-		$x+= 173;
+	 	$this->text($x, $y+17, ("N ".$this->numero));
+
+	 	$x+= 173;
+
+	 	if (!$this->oc)
+	 	{
+		
 
 	    // Logo
 	 	$this->Image($this->logo,$x+140,6,30);
@@ -50,19 +65,20 @@ class PDF extends FPDF
 
 	 	$this->text($x+60, $y, 'DUPLICADO');
 	 	$this->SetFont('Arial','',10);
-	 	$this->text($x+60, $y+4, 'Pagina '.$this->numero);
+	 	$this->text($x+60, $y+4, 'Pagina '.$this->PageNo().'/{nb}');
 	 	$this->SetFont('Arial','',15);
-	 	$this->text($x+60, $y+12, $this->comprobante->getEntidad());
+	 	$this->text($x+60, $y+12, $this->entidad);
 
 	 	$this->SetFont('Arial','',10);
 	 	$this->text($x, $y+12, 'REMITO INTERNO');
 	 	$this->text($x+150, $y+12, 'FECHA');
 	 	$this->Rect($x-1, $y-5, 170, 18);
 	 	$this->Rect($x-1, $y+13, 170, 5);
-	 	$this->text($x+150, $y+17, $this->comprobante->getFecha()->format('d/m/Y'));
-	 	$numero = str_pad($this->comprobante->getNumero(), 10, "0", STR_PAD_LEFT);
-	 	$this->text($x, $y+17, ("N ".$numero));
-	    $this->Ln(20);
+	 	$this->text($x+150, $y+17, $this->fecha->format('d/m/Y'));
+	 	$this->text($x, $y+17, ("N ".$this->numero));
+	    
+		}
+		$this->Ln(20);
 	}
 
 	// Page footer
@@ -97,8 +113,11 @@ class PDF extends FPDF
 	 	$this->Rect($x+40, $y+7, 86, 10);
 	 	$this->text($x+43, $y+21, 'Numero');
 	 	$this->text($x+43, $y+25, 'Vehiculo');
+	 	$this->text($x+55, $y+23, $this->transporte);
 	 	$this->Rect($x+40, $y+17, 86, 10);
 
+	 	if (!$this->oc)
+	 	{
 	 	$x-=41;
 	 	$x+=173;
 	 	$this->SetFont('Arial','',10);
@@ -125,7 +144,9 @@ class PDF extends FPDF
 	 	$this->Rect($x+40, $y+7, 86, 10);
 	 	$this->text($x+43, $y+21, 'Numero');
 	 	$this->text($x+43, $y+25, 'Vehiculo');
+	 	$this->text($x+55, $y+23, $this->transporte);
 	 	$this->Rect($x+40, $y+17, 86, 10);
+	 	}
 
 	}
 }

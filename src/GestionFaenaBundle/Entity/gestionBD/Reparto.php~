@@ -17,3 +17,4 @@ class Reparto extends EntidadExterna
         return true;
     }
 }
+

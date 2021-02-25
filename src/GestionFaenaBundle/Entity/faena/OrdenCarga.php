@@ -21,6 +21,7 @@ class OrdenCarga extends MovimientoStock
 
     /**
      * @ORM\OneToMany(targetEntity="ComprobanteVenta", mappedBy="ordenCarga")
+     * @ORM\OrderBy({"numero" = "ASC"})
      */
     private $comprobantes;
 
@@ -38,6 +39,12 @@ class OrdenCarga extends MovimientoStock
     * @ORM\JoinColumn(name="id_rub_ent", referencedColumnName="id", nullable=true)
     */   
     private $rubro;
+
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Transportista") 
+    * @ORM\JoinColumn(name="id_transpt", referencedColumnName="id", nullable=true)
+    */   
+    private $transportista;
 
     /**
      * @var bool
@@ -220,5 +227,38 @@ class OrdenCarga extends MovimientoStock
     public function getEntidades()
     {
         return $this->entidades;
+    }
+
+    /**
+     * Set transportista
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Transportista $transportista
+     *
+     * @return OrdenCarga
+     */
+    public function setTransportista(\GestionFaenaBundle\Entity\gestionBD\Transportista $transportista = null)
+    {
+        $this->transportista = $transportista;
+
+        return $this;
+    }
+
+    /**
+     * Get transportista
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\Transportista
+     */
+    public function getTransportista()
+    {
+        return $this->transportista;
+    }
+
+    public function getTitularTransporte()
+    {
+        if ($this->transportista)
+        {
+            return $this->transportista->getTitular();
+        }
+        return ;
     }
 }

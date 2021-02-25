@@ -36,6 +36,12 @@ class Granja extends EntidadExterna
     */      
     private $ciudad;
 
+
+    protected function getIsCliente()
+    {
+        return false;
+    }
+
     /**
      * Set propia
      *

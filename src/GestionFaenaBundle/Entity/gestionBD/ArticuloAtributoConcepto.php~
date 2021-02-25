@@ -109,12 +109,19 @@ class ArticuloAtributoConcepto
 
     public function getVistaEdicion()
     {
+
+        $procDest = '';
+        foreach ($this->procesosDestino as $pd) 
+        {
+            $procDest.=$pd.', ';
+        }
+
         $destino = "";
         if ($this->articuloOrigenTransformacion)
         {
             $destino = " (".$this->articuloOrigenTransformacion.")";
         }
-        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino;
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino."($procDest)";
     }
 
     public function getId()
@@ -339,5 +346,29 @@ class ArticuloAtributoConcepto
     public function getArticuloOrigenTransformacion()
     {
         return $this->articuloOrigenTransformacion;
+    }
+
+    /**
+     * Set desencadenado
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoAutomatico $desencadenado
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function setDesencadenado(\GestionFaenaBundle\Entity\faena\MovimientoAutomatico $desencadenado = null)
+    {
+        $this->desencadenado = $desencadenado;
+
+        return $this;
+    }
+
+    /**
+     * Get desencadenado
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoAutomatico
+     */
+    public function getDesencadenado()
+    {
+        return $this->desencadenado;
     }
 }

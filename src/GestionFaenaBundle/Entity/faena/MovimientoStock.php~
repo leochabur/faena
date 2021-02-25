@@ -89,6 +89,16 @@ abstract class MovimientoStock
     * @ORM\JoinColumn(name="id_usr_down", referencedColumnName="id", nullable=true)
     */      
     private $userBaja;
+
+    /**
+     * @ORM\Column(name="fecha_alta", type="datetime", nullable=true)
+    */      
+    private $fechaAlta;
+
+    /**
+     * @ORM\Column(name="fecha_baja", type="datetime", nullable=true)
+    */      
+    private $fechaBaja;
     
     /**
      * @Assert\IsFalse(
@@ -379,6 +389,7 @@ abstract class MovimientoStock
      */
     public function setVisiblePrePersist()
     {
+        $this->fechaAlta = new \DateTime();
         $this->updateVisible();
     }
 

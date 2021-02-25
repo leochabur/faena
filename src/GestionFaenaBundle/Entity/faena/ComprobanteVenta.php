@@ -64,6 +64,23 @@ class ComprobanteVenta extends MovimientoStock
     private $userConfirm;
 
     /**
+     * @ORM\Column(name="fechaConfirm", type="datetime", nullable=true)
+    */      
+    private $fechaConfirmacion;
+
+
+    /**
+    * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User") 
+    * @ORM\JoinColumn(name="id_usr_fin", referencedColumnName="id", nullable=true)
+    */      
+    private $userFinalizacion;
+
+    /**
+     * @ORM\Column(name="fechaFin", type="datetime", nullable=true)
+    */      
+    private $fechaFinalizacion;
+
+    /**
     * @ORM\ManyToOne(targetEntity="OrdenCarga", inversedBy="comprobantes") 
     * @ORM\JoinColumn(name="id_ord_cga", referencedColumnName="id", nullable=true)
     */      
@@ -364,5 +381,77 @@ class ComprobanteVenta extends MovimientoStock
     public function getOrdenCarga()
     {
         return $this->ordenCarga;
+    }
+
+    /**
+     * Set fechaConfirmacion
+     *
+     * @param \DateTime $fechaConfirmacion
+     *
+     * @return ComprobanteVenta
+     */
+    public function setFechaConfirmacion($fechaConfirmacion)
+    {
+        $this->fechaConfirmacion = $fechaConfirmacion;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaConfirmacion
+     *
+     * @return \DateTime
+     */
+    public function getFechaConfirmacion()
+    {
+        return $this->fechaConfirmacion;
+    }
+
+    /**
+     * Set fechaFinalizacion
+     *
+     * @param \DateTime $fechaFinalizacion
+     *
+     * @return ComprobanteVenta
+     */
+    public function setFechaFinalizacion($fechaFinalizacion)
+    {
+        $this->fechaFinalizacion = $fechaFinalizacion;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaFinalizacion
+     *
+     * @return \DateTime
+     */
+    public function getFechaFinalizacion()
+    {
+        return $this->fechaFinalizacion;
+    }
+
+    /**
+     * Set userFinalizacion
+     *
+     * @param \AppBundle\Entity\User $userFinalizacion
+     *
+     * @return ComprobanteVenta
+     */
+    public function setUserFinalizacion(\AppBundle\Entity\User $userFinalizacion = null)
+    {
+        $this->userFinalizacion = $userFinalizacion;
+
+        return $this;
+    }
+
+    /**
+     * Get userFinalizacion
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUserFinalizacion()
+    {
+        return $this->userFinalizacion;
     }
 }

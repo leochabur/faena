@@ -96,7 +96,7 @@
               <td>
                     <a href="{{ path('vtas_agregar_articulos', { id : cmp.id }) }}"><i class="far fa-edit" title="Modificar"></i></a>
                     <a href="{{ path('vtas_delete_comprobante_venta', { id : cmp.id }) }}" data-action="eliminar" data-index="{{ cmp.entidad}}" class="deletecmp"><i class="far fa-trash-alt" title="Eliminar"></i></a>
-                    <a href="{{ path('vtas_finalizar_comprobante_venta', { id : cmp.id }) }}" data-action="finalizar" data-index="{{ cmp.entidad}}" class="deletecmp"><i class="far fa-check-square" title="Confirmar"></i></a>
+                    <a href="{{ path('vtas_finalizar_comprobante_venta', { id : cmp.id }) }}" data-action="finalizar" data-index="{{ cmp.entidad}}" class="deletecmp"><i class="far fa-check-square" title="Finalizar"></i></a>
               </td>             
               {% for art in articulos %}
                   {% for tpo in tipos %}

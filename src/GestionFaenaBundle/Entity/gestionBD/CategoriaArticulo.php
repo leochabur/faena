@@ -33,6 +33,12 @@ class CategoriaArticulo
      */
     private $orden;
 
+    /**
+     * @ORM\Column(name="grupo", type="integer", nullable=true, options={"default" = 1})
+     */
+    private $grupo; //utilizado para la clasificacion de las ventas en la impresion
+
+
     public function __toString()
     {
         return $this->categoria;
@@ -94,5 +100,29 @@ class CategoriaArticulo
     public function getOrden()
     {
         return $this->orden;
+    }
+
+    /**
+     * Set grupo
+     *
+     * @param integer $grupo
+     *
+     * @return CategoriaArticulo
+     */
+    public function setGrupo($grupo)
+    {
+        $this->grupo = $grupo;
+
+        return $this;
+    }
+
+    /**
+     * Get grupo
+     *
+     * @return integer
+     */
+    public function getGrupo()
+    {
+        return $this->grupo;
     }
 }

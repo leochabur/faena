@@ -32,6 +32,7 @@ use GestionFaenaBundle\Entity\faena\SalidaStock;
 use GestionFaenaBundle\Controller\GestionFaenaController;
 use GestionFaenaBundle\Entity\faena\ValorNumerico;
 use GestionFaenaBundle\Entity\faena\OrdenCarga;
+use Psr\Log\LoggerInterface;
 
 /**
  * @Route("/ventas")
@@ -455,7 +456,8 @@ class VentasController extends Controller
     			return new JsonResponse(['error' => true, 'message' => 'El comprobante no tiene cargado ningun articulo!']);
     		}
 	    	$comprobante->setFinalizado(true);
-	    	$comprobante->setUserConfirm($this->getUser());
+            $comprobante->setFechaFinalizacion(new \DateTime());
+	    	$comprobante->setUserFinalizacion($this->getUser());
 	    	$em->flush();
 	    	return new JsonResponse(['error' => false]);
     	}
@@ -480,28 +482,39 @@ class VentasController extends Controller
     public function incorporarVentasAFaena(Request $request)
     {        
 
+        $du = $request->query->get('du');
+        $fecha = null;
+        if($du)
+        {
+            $fecha = new \DateTime();
+            $fecha->setTimestamp($du);
+        }
+
+
         $form = $this->createFormBuilder()
                      ->add('fecha', 
                           DateType::class, 
                           ['widget' => 'single_text',
                            'required' => true,
+                           'data' => $fecha,
                            'constraints' => [
                                                     new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
                                              ]
                            ])
                       ->add('cargar', SubmitType::class, ['label' => 'Cargar'])
                       ->getForm();
-        if ($request->isMethod('POST'))
+        if ($request->isMethod('POST') || ($fecha))
         {
             $em = $this->getDoctrine()->getManager();
             $form->handleRequest($request);
-            if ($form->isValid())
+            if ($form->isValid() || $fecha)
             {
                 $data = $form->getData();
+                $fechaConsulta = ($fecha?$fecha:$data['fecha']);
                 $repository = $em->getRepository(ComprobanteVenta::class);
-                $comprobantes = $repository->getComprobantesVentaFinalizados($data['fecha']);
-
-                return $this->render('@GestionVentas/ventas/incorporarVentas.html.twig', ['form' => $form->createView(), 'comprobantes' => $comprobantes]); 
+                $comprobantes = $repository->getComprobantesVentaFinalizados($fechaConsulta);
+                $options = ['form' => $form->createView(), 'comprobantes' => $comprobantes];
+                return $this->render('@GestionVentas/ventas/incorporarVentas.html.twig', $options); 
             }
         }
 
@@ -520,10 +533,25 @@ class VentasController extends Controller
         //obtiene la faena diaria de la fecha del comprobante
         $faenaDiaria = $em->getRepository(FaenaDiaria::class)->getFaenaConFecha($comprobante->getFecha());
 
+        if (!$comprobante->getItemOficial())
+        {
+            $this->addFlash(
+                  'error',
+                  'No es posible generar el remito para el comprobante '.str_pad($comprobante->getNumero(), 6, "0", STR_PAD_LEFT).'!!'
+              );
+            return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $comprobante->getFecha()->getTimestamp()]);
+        }
+
         if (!$faenaDiaria)
         {
-            return new Response('no existen faenas');
+            $this->addFlash(
+                  'error',
+                  'No existe una faena iniciada para el '.$comprobante->getFecha()->format('d/m/Y'.'!')
+              );
+            return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $comprobante->getFecha()->getTimestamp()]);
         }
+
+
 
         //recupera el ProcesoFaena que admite se generen ventas (Gestion Camaras)
         $procesoFaena = $em->getRepository(ProcesoFaena::class)->getProcesoVenta();
@@ -536,7 +564,10 @@ class VentasController extends Controller
         $conceptoMovimiento = $entidadConcepto->getConcepto();
 
         //Buscar si existe una orden de carga generada para la entidad del comprobante
-        $ordenCarga = $em->getRepository(OrdenCarga::class)->findOrdenCargaEntidad($comprobante->getEntidad(), $faenaDiaria);
+        $ordenCarga = $em->getRepository(OrdenCarga::class)->findOrdenCargaEntidad($comprobante->getEntidad(), $faenaDiaria, $comprobante);
+
+     /*   if (!$ordenCarga)
+            return new Response('OK '.$comprobante->getEntidad()->getRubro()->getId());*/
 
         $ingresar = true;
         if (!$ordenCarga) 
@@ -550,6 +581,8 @@ class VentasController extends Controller
             $ordenCarga->addEntidade($comprobante->getEntidad());
             //de existir agrega el rubro, esto se utiliza cuando varias entidades se agrupan en una misma orden
             $ordenCarga->setRubro($comprobante->getEntidad()->getRubro());
+
+            $ordenCarga->setFaenaDiaria($faenaDiaria);
             $comprobante->setConfirmado(true);
             $em->persist($ordenCarga);
         }
@@ -560,6 +593,7 @@ class VentasController extends Controller
                 $comprobante->setConfirmado(true);
                 $comprobante->setUserConfirm($this->getUser());
                 $ordenCarga->addComprobante($comprobante);
+                $ordenCarga->addEntidade($comprobante->getEntidad());
             }
             else
             {
@@ -595,56 +629,319 @@ class VentasController extends Controller
                 $em->persist($salida);
             }
         }
+        if ($ingresar)
+        {
+            $comprobante->setOrdenCarga($ordenCarga);
+            $comprobante->setArtProcFaena($artAtrCon);
+            $comprobante->setFaenaDiaria($faenaDiaria);
+            $comprobante->setProcesoFnDay($procesoFaenaDiaria);
+        }
         $em->flush();
 
         $items = $em->getRepository(ItemCarga::class)->itemsAImprimir($comprobante, 1); //recupera todos los items oficiales del comprobante
 
         $pdf = $this->get('app.pdf');
         $pdf->setLogo($this->get('kernel')->getRootDir() . '/../web/resources/img/logo2.jpg');
-        $pdf->setComprobante($comprobante);
+        $pdf->setData($comprobante->getEntidad(), $comprobante->getFecha(), str_pad($comprobante->getNumero(), 10, "0", STR_PAD_LEFT), 0, '');
         $pdf->AliasNbPages();
 
         
-        $pdf->SetAutoPageBreak(false,0);  
+        $pdf->SetAutoPageBreak(true,33);  
         $pdf->AddPage('L', 'legal'); 
         $pdf = $this->paintData($pdf, $items);
       //  $pdf->AddPage('P', 'A4'); 
         return new Response($pdf->Output(), 200, array('Content-Type' => 'application/pdf'));  
     }
 
-    private function paintData($pdf, $items)
+    private function paintData($pdf, $items, $oc = 0)
     {
         $last = 0;
         $unidades = $kilos = 0;
-        $x = $pdf->getX();
+        $xdesp = 173;
+        $x = $pdf->getX()-4;
+        
         $y = $pdf->getY()+5;
         foreach ($items as $it)
         {
-            $art = $it->getArticulo();
-            $gpo = $art->getGrupo();
+            $item = null;
+            $cantAux = null;
+            if (is_array($it))
+            {
+                $item = $it[0];
+                $cantAux = $it['cantidad'];
+            }
+            else
+            {
+                $item = $it;
+                $cantAux = $it->getCantidad();
+            }
 
-                if (($last !== $gpo) && ($last))
+            $art = $item->getArticulo();
+            $gpo = $art->getCategoria()->getGrupo();
+            $pdf->setX($x);
+            if (($last !== $gpo) && ($last))
+            {
+                $pdf->cell(40, 7, '', 0,0,'L');
+                $pdf->cell(70, 7, 'TOTAL GRUPO: '.$last.' ->', 0,0,'L');
+                $pdf->cell(30, 7, $unidades, 0,0,'L');
+                
+                
+                if (!$oc)
                 {
-                    $pdf->text($x+40, $y, 'TOTAL GRUPO: '.$last.' ->');
-                    $pdf->text($x+80, $y, $unidades);
-                    $pdf->text($x+120, $y, $kilos.' Kilos');
-                    $unidades = $kilos = 0;
-                    $y+=5;
+                    $pdf->cell(30, 7, $kilos.' KILOS', 0,0,'R');
+                    $pdf->setX($x+$xdesp);
+                    $pdf->cell(40, 7, '', 0,0,'L');
+                    $pdf->cell(70, 7, 'TOTAL GRUPO: '.$last.' ->', 0,0,'L');
+                    $pdf->cell(30, 7, $unidades, 0,0,'L');
+                    $pdf->cell(30, 7, $kilos.' KILOS', 0,1,'R');
                 }
+                else
+                {
+                    $pdf->cell(30, 7, $kilos.' KILOS', 0,1,'R');
+                }
+                $pdf->setX($x);
+
+                $unidades = $kilos = 0;
+            }
             
-            $pdf->text($x, $y, $it->getArticulo()->getCodigoInterno());
-            $pdf->text($x+25, $y, $it->getArticulo());
-            $pdf->text($x+120, $y, $it->getCantidad());
-            $unidades+= $it->getCantidad();
-            $kilos+= ($it->getCantidad() * $it->getArticulo()->getPresentacionKg());
+            $pdf->cell(25, 7, $item->getArticulo()->getCodigoInterno(), 0,0,'L');
+            $pdf->cell(115, 7, strtoupper($item->getArticulo()), 0,0,'L');            
+
+            if (!$oc)
+            {
+                $pdf->cell(30, 7, $cantAux, 0, 0,'R');
+                $pdf->setX($x+$xdesp);
+                $pdf->cell(25, 7, $item->getArticulo()->getCodigoInterno(), 0,0,'L');
+                $pdf->cell(115, 7, strtoupper($it->getArticulo()), 0,0,'L');
+                $pdf->cell(30, 7, $cantAux, 0, 1,'R');
+            }
+            else
+            {
+                $pdf->cell(30, 7, $cantAux, 0, 1,'R');
+            }
+            $pdf->setX($x);
+
+            $unidades+= $cantAux;
+            $kilos+= ($cantAux * $item->getArticulo()->getPresentacionKg());
             $last = $gpo;
-            $y+=5;
         }
-        $pdf->text($x+40, $y, 'TOTAL GRUPO: '.$last.' ->');
-        $pdf->text($x+80, $y, $unidades);
-        $pdf->text($x+120, $y, $kilos.' Kilos');
+        $pdf->setX($x);
+        $pdf->cell(40, 7, '', 0,0,'L');
+        $pdf->cell(70, 7, 'TOTAL GRUPO: '.$last.' ->', 0,0,'L');
+        $pdf->cell(30, 7, $unidades, 0,0,'L');
+        $pdf->cell(30, 7, $kilos.' KILOS', 0,0,'R');
+        $pdf->setX($x+$xdesp);
+        $pdf->cell(40, 7, '', 0,0,'L');
+        $pdf->cell(70, 7, 'TOTAL GRUPO: '.$last.' ->', 0,0,'L');
+        $pdf->cell(30, 7, $unidades, 0,0,'L');
+        $pdf->cell(30, 7, $kilos.' KILOS', 0,0,'R');
         return $pdf;
     }
 
+    /**
+     * @Route("/printoc/{oc}", name="vtas_imprimir_orden_carga")
+     */
+    public function imrpimirOrdenCarga($oc)
+    {
+        $em = $this->getDoctrine()->getManager();
 
+        $ordenCarga = $em->find(OrdenCarga::class, $oc);
+
+        $items = $em->getRepository(ItemCarga::class)->getItemsOrdenCarga($ordenCarga); //recupera todos los items oficiales del comprobante
+
+        //recupera la cantidad de comprobantes generados para las entidades con rubr igual al rubro de la Orden de Carga, sino coincide, quiere ecir que existen comprobantes que aun no han sido ingresados
+        $comprobantes = $em->getRepository(ComprobanteVenta::class)
+                           ->getComprobantesVentaOfRubroEntidad($ordenCarga->getFecha(), $ordenCarga->getRubro());
+
+        if (count($comprobantes) > $ordenCarga->getComprobantes()->count())
+        {
+            $this->addFlash(
+                  'error',
+                  'Existen comprobantes de venta que aun no han sido incorporados'
+              );
+            return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $ordenCarga->getFecha()->getTimestamp()]);
+        }
+
+        $pdf = $this->get('app.pdf');
+
+        $entidad = ($ordenCarga->getRubro()?$ordenCarga->getRubro():$ordenCarga->getComprobantes()->first()->getEntidad());
+
+        $numero = "";
+        foreach ($ordenCarga->getComprobantes() as $cmp)
+        {
+            if ($numero)
+            {
+                $numero.=" - ";
+            }
+
+            $numero.= str_pad($cmp->getNumero(), 10, "0", STR_PAD_LEFT);
+        }
+
+        $trx = $ordenCarga->getTitularTransporte();
+        $pdf->setData($entidad, $ordenCarga->getFecha(), $numero, 1, $trx);
+
+
+
+        $pdf->setLogo($this->get('kernel')->getRootDir() . '/../web/resources/img/logo2.jpg');
+
+        $pdf->AliasNbPages();
+
+        
+        $pdf->SetAutoPageBreak(true,33);  
+        $pdf->AddPage('P', 'legal'); 
+        $pdf = $this->paintData($pdf, $items, 1);
+      //  $pdf->AddPage('P', 'A4'); 
+        return new Response($pdf->Output(), 200, array('Content-Type' => 'application/pdf'));  
+    }
+
+    /**
+     * @Route("/viewdeta/{cmp}/{tpo}", name="vtas_view_detalle_cmbte")
+     */
+    public function viewDetalleComprobante($cmp, $tpo = 1)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $repository = $em->getRepository(ComprobanteVenta::class);
+        $comprobante = $repository->find($cmp);
+
+        $next = $repository->proximoComprobante($comprobante);
+        $back = $repository->anteriorComprobante($comprobante);
+
+        $types = $em->getRepository(TipoVenta::class)->findAll();
+        $tipos = [];
+        foreach ($types as $t)
+        {
+            $tipos[$t->getId()] = $t->getCodigo();
+        }
+
+
+        $data = [];
+
+        $articulos = [];
+
+        $logger = $this->get('logger');
+        foreach ($comprobante->getItems() as $it)
+        {
+            $art = $it->getArticulo();
+            $articulos[$art->getId()] = $art;
+
+            if (!array_key_exists($art->getId(), $data))
+            {
+                $data[$art->getId()] = [];
+            }
+            $data[$art->getId()][$it->getTipoVenta()->getId()] = $it->getCantidad();
+
+            $logger->info('TIPO VENTA '.$it->getTipoVenta()->getId());
+        }
+
+        $logger->info(' '.json_encode($data));
+        $logger->info(' '.json_encode($articulos));
+        asort($articulos);
+        $options = ['cht' => $tpo, 'comprobante' => $comprobante, 'tipos' => $tipos, 'data' => $data, 'articulos' => $articulos];
+        if ($next)
+        {
+            $options['next'] = $next;
+        }
+        if ($back)
+        {
+            $options['back'] = $back;
+        }
+        if ($comprobante->getOrdenCarga())
+        {
+            $form = $this->getFormTransportista($comprobante->getOrdenCarga());
+            $options['form'] = $form->createView();
+        }        
+        return $this->render('@GestionVentas/ventas/detalleComprobante.html.twig', $options);
+
+    }
+
+    private function getFormTransportista($ordenCarga)
+    {
+        $form =$this->createFormBuilder()
+                    ->add('transporte', 
+                          EntityType::class, [
+                          'data' => $ordenCarga->getTransportista(),
+                          'class' => 'GestionFaenaBundle:gestionBD\Transportista',    
+                          'required' => false,  
+                          'choice_label' => 'titular',                    
+                          'query_builder' => function (EntityRepository $er) {
+                                                                                return $er->createQueryBuilder('t')
+                                                                                          ->where('t.activa = :activa')
+                                                                                          ->setParameter('activa', true)
+                                                                                          ->orderBy('t.valor');
+                                                                             },
+                    ]) 
+                    ->setAction($this->generateUrl('vtas_cambiar_transportista_oc', ['oc' => $ordenCarga->getId()]))  
+                    ->setMethod('POST')               
+                    ->getForm();
+        return $form;
+    }
+
+
+    /**
+     * @Route("/chtransoc/{oc}", name="vtas_cambiar_transportista_oc")
+     */
+    public function cambiarTransportistas($oc, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $repository = $em->getRepository(OrdenCarga::class);
+        $ordenCarga = $repository->find($oc);
+
+        $form = $this->getFormTransportista($ordenCarga);
+        $form->handleRequest($request);
+        $data = $form->getData();
+        $transportista = $data['transporte'];
+        $ordenCarga->setTransportista($transportista);
+        $em->flush();
+
+        return new JsonResponse(['status' => true, 'transp' => $transportista->getTitular()]);
+    }
+
+    /**
+     * @Route("/historicovta", name="vtas_historico_ventas", methods={"POST", "GET"})
+     */
+    public function generateHistoricoVentas(Request $request)
+    {
+        $form = $this->getFormHistoricoVenta();
+
+        if ($request->isMethod('POST'))
+        {
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+                $data = $form->getData();
+                $comprobantes = $this->getDoctrine()
+                                     ->getManager()
+                                     ->getRepository(ComprobanteVenta::class)
+                                     ->getComprobantesVentaFinalizados($data['desde'], $data['hasta']);
+                return $this->render('@GestionVentas/ventas/historicoVentas.html.twig', ['form' => $form->createView(),'comprobantes' => $comprobantes]);
+            }
+        }
+        return $this->render('@GestionVentas/ventas/historicoVentas.html.twig', ['form' => $form->createView()]);
+    }
+
+    private function getFormHistoricoVenta()
+    {
+        $form =$this->createFormBuilder()
+                    ->add('desde', 
+                          DateType::class, 
+                          ['widget' => 'single_text',
+                           'required' => true,
+                           'constraints' => [
+                                                    new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
+                                             ]
+                           ])
+                    ->add('hasta', 
+                          DateType::class, 
+                          ['widget' => 'single_text',
+                           'required' => true,
+                           'constraints' => [
+                                                    new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
+                                             ]
+                           ])
+                    ->add('cargar', SubmitType::class, ['label' => 'Cargar'])    
+                    ->setAction($this->generateUrl('vtas_historico_ventas'))  
+                    ->setMethod('POST')               
+                    ->getForm();
+        return $form;
+    }
 }

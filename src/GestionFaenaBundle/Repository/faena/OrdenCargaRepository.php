@@ -13,16 +13,34 @@ class OrdenCargaRepository extends \Doctrine\ORM\EntityRepository
 
     //Devuelve una orden de carga -de existir- que tenga como alguno de los destinatarios la entidad recibida, para la faena recibida como parametro
     public function findOrdenCargaEntidad(\GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidad, 
-    									  \GestionFaenaBundle\Entity\FaenaDiaria $faena)
+    									  \GestionFaenaBundle\Entity\FaenaDiaria $faena,
+                                          \GestionFaenaBundle\Entity\faena\ComprobanteVenta $comprobante)
     {
         return $this->getEntityManager()
             		->createQuery('SELECT o
 	                               FROM GestionFaenaBundle:faena\OrdenCarga o 
-	                               WHERE  o.eliminado = :eliminado AND o.faenaDiaria =:faena AND ((:entidad MEMBER OF o.entidades) OR (o.rubro = :rubro))')
+	                               WHERE  o.eliminado = :eliminado AND 
+                                          o.faenaDiaria =:faena AND 
+                                          ((:comprobante MEMBER OF o.comprobantes) OR (o.rubro = :rubro))')
             		->setParameter('faena', $faena)
                 	->setParameter('eliminado', false)
-                	->setParameter('entidad', $entidad)
-                	->setParameter('rubro', $entidad->getRubro())
+                	->setParameter('comprobante', $comprobante)
+                    ->setParameter('rubro', $entidad->getRubro())
             		->getOneOrNullResult();
     }
+
+    public function getOrdenCarga(\GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidad, 
+                                   \GestionFaenaBundle\Entity\FaenaDiaria $faena,
+                                    \GestionFaenaBundle\Entity\faena\ComprobanteVenta $comprobante)
+    { 
+        $q = $this->createQueryBuilder('o')
+                   ->where('o.eliminado = :eliminado')
+                   ->andWhere('o.faenaDiaria =:faena')
+                   ->andWhere(':comprobante MEMBER OF o.comprobantes')
+                   ->setParameter('faena', $faena)
+                   ->setParameter('eliminado', false)
+                   ->setParameter('comprobante', $comprobante);
+        return $q->getQuery()
+                  ->getOneOrNullResult(); 
+    } 
 }

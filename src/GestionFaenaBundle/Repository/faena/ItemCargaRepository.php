@@ -24,10 +24,41 @@ class ItemCargaRepository extends \Doctrine\ORM\EntityRepository
 	    	  ->setParameter('oficial', $oficial);
 	    }
 	    return $q->setParameter('comprobante', $comprobante)
-		          ->orderBy('art.grupo', 'ASC')
-		          ->addOrderBy('cat.orden')
-		          ->addOrderBy('art.nombre')
+		          ->addOrderBy('cat.grupo')
+		          ->addOrderBy('art.codigoInterno')
 		          ->getQuery()
 		          ->getResult(); 
 	} 
+
+	public function itemsOrdenCargaAImprimir(\GestionFaenaBundle\Entity\faena\OrdenCarga $orden) 
+	{ 
+	    $q = $this->createQueryBuilder('it')
+	    		   ->join('it.articulo', 'art')
+	    		   ->join('art.categoria', 'cat')
+	    		   ->join('it.comprobante', 'comp')
+	    		   ->where('comp.ordenCarga = :orden')
+	    		   ->andWhere('comp.eliminado = :eliminado')
+				   ->setParameter('orden', $orden)
+	    		  ->setParameter('eliminado', false)
+		          ->addOrderBy('cat.grupo')
+		          ->addOrderBy('art.codigoInterno')
+		          ->getQuery()
+		          ->getResult(); 
+	} 
+
+    public function getItemsOrdenCarga(\GestionFaenaBundle\Entity\faena\OrdenCarga $orden)
+    {
+        return $this->getEntityManager()
+            		->createQuery('SELECT it, SUM(it.cantidad) as cantidad 
+                                   FROM GestionFaenaBundle:faena\ItemCarga it 
+                                   JOIN it.articulo art
+                                   JOIN it.comprobante comp
+                                   JOIN art.categoria cat
+                               	   WHERE comp.eliminado = :eliminado AND comp.ordenCarga = :orden 
+                               	   GROUP BY art.id
+                               	   ORDER BY cat.grupo, art.codigoInterno')
+				    ->setParameter('orden', $orden)
+	    		    ->setParameter('eliminado', false)
+            		->getResult();
+    }
 }

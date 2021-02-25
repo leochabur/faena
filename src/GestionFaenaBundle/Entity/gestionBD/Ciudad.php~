@@ -32,7 +32,6 @@ class Ciudad
      */
     private $ciudad;
 
-
     /**
      * Get id
      *

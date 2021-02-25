@@ -114,10 +114,9 @@
 
                 <li><a class="dropdown-item" href="{{ path('vtas_generate') }}">Registrar</a></li>
 
-                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Informes</a>
                   <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Estado del dia</a></li>
-                    <li><a class="dropdown-item" href="#">Estado historico</a></li>
+                    <li><a class="dropdown-item" href="{{ path('vtas_historico_ventas') }}">Historico Ventas</a></li>
                   </ul>
                 </li>
               </ul>
@@ -130,12 +129,6 @@
 
                 <li><a class="dropdown-item" href="{{ path('bd_ventas_nuevo_grupo_ventas') }}">Grupos Venta</a></li>
                 <li><a class="dropdown-item" href="{{ path('bd_set_grupo_entidad') }}">Destinatarios Venta</a></li>
-                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Estados de procesos</a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Estado del dia</a></li>
-                    <li><a class="dropdown-item" href="#">Estado historico</a></li>
-                  </ul>
-                </li>
               </ul>
             </li>
       {% endif %}

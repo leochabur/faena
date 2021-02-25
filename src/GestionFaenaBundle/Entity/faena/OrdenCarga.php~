@@ -21,6 +21,7 @@ class OrdenCarga extends MovimientoStock
 
     /**
      * @ORM\OneToMany(targetEntity="ComprobanteVenta", mappedBy="ordenCarga")
+     * @ORM\OrderBy({"numero" = "ASC"})
      */
     private $comprobantes;
 
@@ -40,12 +41,26 @@ class OrdenCarga extends MovimientoStock
     private $rubro;
 
     /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\gestionBD\Transportista") 
+    * @ORM\JoinColumn(name="id_transpt", referencedColumnName="id", nullable=true)
+    */   
+    private $transportista;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="impresa", type="boolean")
      */
     private $impresa = false;
 
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->entidades = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->comprobantes = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * Set fecha
@@ -84,6 +99,18 @@ class OrdenCarga extends MovimientoStock
     public function getType()
     {
 
+    }
+
+    public function existeComprobanteCargado(\GestionFaenaBundle\Entity\faena\ComprobanteVenta $comprobante)
+    {
+        foreach ($this->comprobantes as $comp)
+        {
+            if ((!$comp->getEliminado()) && ($comp->getId() == $comprobante->getId()))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -166,5 +193,39 @@ class OrdenCarga extends MovimientoStock
     public function getRubro()
     {
         return $this->rubro;
+    }
+
+    /**
+     * Add entidade
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidade
+     *
+     * @return OrdenCarga
+     */
+    public function addEntidade(\GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidade)
+    {
+        $this->entidades[] = $entidade;
+
+        return $this;
+    }
+
+    /**
+     * Remove entidade
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidade
+     */
+    public function removeEntidade(\GestionFaenaBundle\Entity\gestionBD\EntidadExterna $entidade)
+    {
+        $this->entidades->removeElement($entidade);
+    }
+
+    /**
+     * Get entidades
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getEntidades()
+    {
+        return $this->entidades;
     }
 }

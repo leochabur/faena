@@ -18,3 +18,4 @@ class Remito extends EntidadExterna
         return true;
     }
 }
+

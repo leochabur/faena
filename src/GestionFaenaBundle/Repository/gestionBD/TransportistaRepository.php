@@ -10,4 +10,13 @@ namespace GestionFaenaBundle\Repository\gestionBD;
  */
 class TransportistaRepository extends \Doctrine\ORM\EntityRepository
 {
+	public function getActivos() 
+	{ 
+			return $this->createQueryBuilder('t')
+						->where('t.activo = :activo')
+						->setParameter('activo', true)
+						->orderBy('t.titular')
+						->getQuery()
+						->getResult();
+	} 
 }

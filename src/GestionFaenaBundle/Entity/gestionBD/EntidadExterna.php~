@@ -12,7 +12,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="integer")
  * @ORM\DiscriminatorMap({1:"EntidadExterna",2: "Granja", 3: "Transportista", 4: "Cargador", 5: "Sucursal", 6: "Consignatario", 7: "Remito", 8: "Anexo", 9: "Reparto", 10: "Exportacion"})
+ * @ORM\HasLifecycleCallbacks()
  */
+
 abstract class EntidadExterna
 {
     /**
@@ -33,7 +35,7 @@ abstract class EntidadExterna
     private $valor;
 
     /**
-    * @ORM\ManyToOne(targetEntity="RubroEntidad") 
+    * @ORM\ManyToOne(targetEntity="RubroEntidad", inversedBy="entidades") 
     * @ORM\JoinColumn(name="id_rub_ent", referencedColumnName="id", nullable=true)
     */   
     private $rubro;
@@ -52,6 +54,15 @@ abstract class EntidadExterna
      */
     private $cliente;
 
+    /**
+     * @ORM\PrePersist
+     */
+    public function setIsCliente()
+    {
+        $this->setCliente($this->getIsCliente());
+    }
+
+    protected abstract function getIsCliente();
 
     public function getRenspa()
     {
@@ -143,5 +154,29 @@ abstract class EntidadExterna
     public function getRubro()
     {
         return $this->rubro;
+    }
+
+    /**
+     * Set cliente
+     *
+     * @param boolean $cliente
+     *
+     * @return EntidadExterna
+     */
+    public function setCliente($cliente)
+    {
+        $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    /**
+     * Get cliente
+     *
+     * @return boolean
+     */
+    public function getCliente()
+    {
+        return $this->cliente;
     }
 }
