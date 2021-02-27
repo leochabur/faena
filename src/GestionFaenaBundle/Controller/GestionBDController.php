@@ -636,6 +636,7 @@ class GestionBDController extends Controller
                         ->add('posicion', IntegerType::class, ['data' => $atr->getPosicion()])
                         ->add('mostrar', CheckboxType::class, ['label' => false, 'data' => $atr->getMostrar()])
                         ->add('redondea', CheckboxType::class, ['label' => false, 'data' => $atr->getRedondea()])
+                        ->add('admiteCero', CheckboxType::class, ['label' => false, 'data' => $atr->getAdmiteCero()])
                         ->add('atributoBase', EntityType::class, ['class' => AtributoAbstracto::class, 'data' => $atr->getAtributoBase()])
                         ->add('espejo', CheckboxType::class, ['label' => false, 'data' => $atr->getEspejo()])
                         ->add('mostrarAlCargar', CheckboxType::class, ['label' => false, 'data' => $atr->getMostrarAlCargar()])
@@ -727,6 +728,7 @@ class GestionBDController extends Controller
         $atributo->setAtributoBase($data['atributoBase']);
         $atributo->setEspejo($data['espejo']);
         $atributo->setRedondea($data['redondea']);
+        $atributo->setAdmiteCero($data['admiteCero']);
         if ($atributo->manejaDecimales())
         {            
             $atributo->setDecimales($data['decimales']);

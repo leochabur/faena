@@ -116,6 +116,14 @@ abstract class Atributo
      */
     private $redondea = false; // si debe redondear el numero
     
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="admiteCero", type="boolean", options={"default":false}, nullable=true)
+     */
+    private $admiteCero = false; //para el caso que se desee realizar un movimiento y quede trackeado
+
+
     public function getNumeroOrden()
     {
         return ($this->posicion?$this->posicion:$this->id);

@@ -19,6 +19,7 @@
 				<th>Atributo</th>
 				<th>Tipo</th>
 				<th>Acumula</th>
+				<th>Admite Cero</th>
 				<th>Promedia</th>
 				<th>Redondea</th>
 				<th>Espejo</th>
@@ -40,6 +41,7 @@
 						<td title="{{ atrib.calculo }}"><a href="{{ path('bd_editar_factor_calculo', {atr : atrib.id})}}">{{ atrib }}</a></td>
 						<td title="{{ atrib.calculo }}">{{ atrib.tipo }}</td>
 						<td class="text-center">{{ form_widget(atr.acumula, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
+						<td class="text-center">{{ form_widget(atr.admiteCero, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td class="text-center">{{ form_widget(atr.promedia, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td class="text-center">{{ form_widget(atr.redondea, {'attr' : {'class' : 'form-control-sm'}}) }}</td>
 						<td class="text-center">{{ form_widget(atr.espejo, {'attr' : {'class' : 'form-control-sm'}}) }}</td>

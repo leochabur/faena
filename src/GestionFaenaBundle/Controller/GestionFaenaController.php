@@ -2245,7 +2245,10 @@ class GestionFaenaController extends Controller
                 }
                 elseif($valorAtributo->getValor() == 0)
                 {
-                  throw new \Exception("La cantidad a transferir debe ser mayor a 0!!");
+                  if (!$valorAtributo->getAtributo()->getAdmiteCero())
+                  {
+                    throw new \Exception("La cantidad a transferir debe ser mayor a 0!!");
+                  }
                 }
 
                 $salida = new SalidaStock();
@@ -2428,11 +2431,24 @@ class GestionFaenaController extends Controller
                                                                $response = false) 
     //para los parametro dados, devuelve un ArticuloAtributoConcepto si existe, sino crea uno
     {
+        //  $logger = $this->get('logger');
           try{
               //busca si existe el articulo atributo concepto para 
               $repositoryAAC = $em->getRepository(ArticuloAtributoConcepto::class);
               $artAtrCon = $repositoryAAC->findArticuloAtributoConcepto($articulo, $concepto, $instanceOfTipoMovimiento, $proceso);
               
+          /*    if (count($artAtrCon))
+              {
+                $artAtrCon = $artAtrCon[0];
+                $logger->info('CANTIDAD '.$artAtrCon->getId());
+              }*
+             // $logger->info('CANTIDAD '.$artAtrCon->getId());
+           /*   foreach ($artAtrCon as $a)
+              {
+                $logger->info('IDEDETE '.$a->getId());
+
+              }*/
+             // return;
               if (!$artAtrCon) //no existe el articulo, debe generar uno nuevo
               {
                 //debe buscar primero si ya existe el concepto para la transferencia
@@ -2465,7 +2481,12 @@ class GestionFaenaController extends Controller
               }
               return $artAtrCon;
             }
-            catch (\Exception $e) { throw new \Exception("Instancia: $instanceOfTipoMovimiento - Articulo: ".$articulo->getId()." - Concepto: ".$concepto->getId()."  Proceso: ".$proceso->getId()); }
+            catch (\Exception $e) { 
+
+
+                //  $logger->info('ESTO ES UN ERRORETE '.$e->getMessage());
+
+                  throw new \Exception("Instancia: $instanceOfTipoMovimiento - Articulo: ".$articulo->getId()." - Concepto: ".$concepto->getId()."  Proceso: ".$proceso->getId()); }
     }
 
 
