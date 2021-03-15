@@ -405,18 +405,18 @@ class GestionBDController extends Controller
     ///////////////////////////
 
     /**
-     * @Route("/config/editarticulo/{art}", name="bd_editar_articulo_basico", methods={"POST", "GET"})
+     * @Route("/update/editarticulo/{art}", name="bd_editar_articulo_basico", methods={"POST", "GET"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function editarArticulo($art)
     {
         $articulo = $this->getDoctrine()->getManager()->find(Articulo::class, $art);
         $form = $this->getFormABMArticulo($articulo, 'bd_editar_articulo_procesar', ['art' => $art]);
-        return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('edit' => true, 'form' => $form->createView()));
+        return $this->render('@GestionFaena/gestionBD/articuloABM.html.twig', array('edited' => true, 'edit' => true, 'form' => $form->createView()));
     }
 
     /**
-     * @Route("/config/editartprocesar/{art}", name="bd_editar_articulo_procesar", methods={"POST"})
+     * @Route("/update/editartprocesar/{art}", name="bd_editar_articulo_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioEditArticulo($art, Request $request)
@@ -439,7 +439,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/config/addArt", name="bd_add_articulo")
+     * @Route("/update/addArt", name="bd_add_articulo")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function addArticuloAction()
@@ -451,7 +451,7 @@ class GestionBDController extends Controller
     }
 
     /**
-     * @Route("/config/addArtProc", name="bd_add_articulo_procesar", methods={"POST"})
+     * @Route("/update/addArtProc", name="bd_add_articulo_procesar", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function procesarFormularioArticulo(Request $request)
@@ -477,7 +477,7 @@ class GestionBDController extends Controller
 
     private function getFormABMArticulo($articulo, $url, $params = [])
     {
-        return $this->createForm(ArticuloType::class, $articulo, ['action' => $this->generateUrl($url, $params),'method' => 'POST']);
+        return $this->createForm(ArticuloType::class, $articulo, ['user' => $this->getUser(), 'action' => $this->generateUrl($url, $params),'method' => 'POST']);
     }
 
     /**

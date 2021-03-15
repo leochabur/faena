@@ -4,59 +4,62 @@
 {% block fos_user_content %}
 <div class="container">
 <br>
-<p class="h5 card-title">{% if edit is defined %}Editar Articulo {% else %} Nuevo articulo {% endif %}</p>
-<hr>
-{% for message in app.flashes('sussecc') %}
-<div class="alert alert-success" role="alert">
-{{ message }}
-</div>
-{% endfor %}
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-<div class="form-row">
-	<div class="col col-lg-2">
-		{{ form_label(form.codigoInterno, 'Codigo Interno') }}
-		{{ form_widget(form.codigoInterno) }}
-	</div>
-	<div class="col col-lg-4">
-		{{ form_label(form.nombre) }}
-		{{ form_widget(form.nombre) }}
-	</div>
-	<div class="col col-lg-2">
-		{{ form_label(form.nombreResumido, 'Nombre Corto') }}
-		{{ form_widget(form.nombreResumido) }}
-	</div>
-  <div class="col col-lg-2">
-    {{ form_label(form.descVenta, 'Nombre Venta') }}
-    {{ form_widget(form.descVenta) }}
-  </div>
-</div>
-<div class="form-row">
-  <div class="col col-lg-2">
-    {{ form_label(form.orden, 'Orden Aparicion') }}
-    {{ form_widget(form.orden) }}
-  </div>
-	<div class="col col-lg-4">
-		{{ form_label(form.categoria, 'Categoria') }}
-		{{ form_widget(form.categoria) }}
-	</div>
-	<div class="col col-lg-4">
-		{{ form_label(form.subcategoria, 'Subcategoria') }}
-		{{ form_widget(form.subcategoria) }}
-	</div>
-</div>
-<div class="form-row">
-	<div class="col col-lg-4">
-		{{ form_label(form.presentacionKg, 'Presentacion KG') }}
-		{{ form_widget(form.presentacionKg) }}
-	</div>
-	<div class="col col-lg-4">
-		{{ form_label(form.presentacionUnidad, 'Presentacion Unidad') }}
-		{{ form_widget(form.presentacionUnidad) }}
-	</div>
-</div>
-{{ form_widget(form.guardar) }}
-{{ form_end(form) }}
-
+  {% if  app.user.isPerfilFaena or edited is defined%}
+      <p class="h5 card-title">{% if edit is defined %}Editar Articulo {% else %} Nuevo articulo {% endif %}</p>
+      <hr>
+      {% for message in app.flashes('sussecc') %}
+      <div class="alert alert-success" role="alert">
+      {{ message }}
+      </div>
+      {% endfor %}
+      {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+      <div class="form-row">
+      	<div class="col col-lg-2">
+      		{{ form_label(form.codigoInterno, 'Codigo Interno') }}
+      		{{ form_widget(form.codigoInterno) }}
+      	</div>
+      	<div class="col col-lg-4">
+      		{{ form_label(form.nombre) }}
+      		{{ form_widget(form.nombre) }}
+      	</div>
+      	<div class="col col-lg-2">
+      		{{ form_label(form.nombreResumido, 'Nombre Corto') }}
+      		{{ form_widget(form.nombreResumido) }}
+      	</div>
+        <div class="col col-lg-2">
+          {{ form_label(form.descVenta, 'Nombre Venta') }}
+          {{ form_widget(form.descVenta) }}
+        </div>
+      </div>
+      {% if form.orden is defined%}
+          <div class="form-row">
+            <div class="col col-lg-2">
+              {{ form_label(form.orden, 'Orden Aparicion') }}
+              {{ form_widget(form.orden) }}
+            </div>
+          	<div class="col col-lg-4">
+          		{{ form_label(form.categoria, 'Categoria') }}
+          		{{ form_widget(form.categoria) }}
+          	</div>
+          	<div class="col col-lg-4">
+          		{{ form_label(form.subcategoria, 'Subcategoria') }}
+          		{{ form_widget(form.subcategoria) }}
+          	</div>
+          </div>
+      {% endif %}
+      <div class="form-row">
+      	<div class="col col-lg-4">
+      		{{ form_label(form.presentacionKg, 'Presentacion KG') }}
+      		{{ form_widget(form.presentacionKg) }}
+      	</div>
+      	<div class="col col-lg-4">
+      		{{ form_label(form.presentacionUnidad, 'Presentacion Unidad') }}
+      		{{ form_widget(form.presentacionUnidad) }}
+      	</div>
+      </div>
+      {{ form_widget(form.guardar) }}
+      {{ form_end(form) }}
+{% endif %}
 {% if not edit is defined %}
     <br>
     <span class="h5">Articulos Existentes</span>
@@ -66,7 +69,10 @@
           <tr>
             <th>#</th>
             <th>Codigo</th>
-            <th>Nombre</th>
+            <th>Nombre Faena</th>
+            {% if app.user.isPerfilVenta %}
+                <th>Nombre Venta</th>
+            {% endif %}
             <th>Nom. Red.</th>
             <th>Categoria</th>
             <th>Subategoria</th>
@@ -81,6 +87,9 @@
               <td>{{ loop.index }}</td>
               <td>{{ f.codigoInterno }}</td>             
               <td>{{ f.nombre }}</td>  
+              {% if app.user.isPerfilVenta %}
+                  <td>{{ f.descVenta }}</td>  
+              {% endif %}
               <td>{{ f.nombreResumido }}</td> 
               <td>{{ f.categoria }}</td> 
               <td>{{ f.subcategoria }}</td> 
