@@ -1,0 +1,51 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+<style type="text/css">
+
+
+</style>
+{% endblock %}
+{% block fos_user_content %}
+  {{ parent() }}
+<br>
+<hr>
+<span class="h5 card-title">Pendientes incorporar</span>
+<hr>
+{% include '@GestionFaena/messages.html.twig'  %}
+
+
+{% if comprobantes is defined %}
+    <!--table class="table table-striped table-bordered table-hover table-sm fs-6"-->
+    <table id="dt-vertical-scroll" class="table table-striped table-bordered table-hover table-sm" cellspacing="0" width="100%">
+      <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Numero</th>
+            <th>Destino</th>
+            <th>Observaciones</th>
+            <th>Articulos O</th>      
+            <th>Articulos R</th>        
+        </tr>
+        </thead>
+        <tbody>        
+          {% for cmp in comprobantes %}
+
+              <tr>
+                <td>{{  cmp.fecha|date('d/m/Y') }}</td>
+                <td>{{ "%06d" | format(cmp.numero) }}</td>
+                <td>{{ cmp.entidad }}</td>
+                <td>{{ cmp.comentario }}</td>   
+                <td class="text-right">{{ cmp.itemOficial }}</td>  
+                <td class="text-right">{{ cmp.itemNoOficial }}</td>  
+              </tr>
+          {% endfor %}
+        </tbody>
+    </table>  
+{% endif %}
+
+
+
+{% endblock fos_user_content %}
+{% block javascripts %}
+{% endblock  %}

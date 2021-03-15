@@ -99,7 +99,12 @@ abstract class MovimientoStock
      * @ORM\Column(name="fecha_baja", type="datetime", nullable=true)
     */      
     private $fechaBaja;
-    
+
+    /**
+     * @ORM\Column(name="procesado", type="boolean", options={"default":true})
+     */
+    private $procesado = false; //para el caso del proceso Transityo Congelado indica si los movimientos ya fueron enviados a la Camara
+
 
     private $tokenStorage;
 
@@ -612,5 +617,29 @@ abstract class MovimientoStock
     public function getFechaBaja()
     {
         return $this->fechaBaja;
+    }
+
+    /**
+     * Set procesado
+     *
+     * @param boolean $procesado
+     *
+     * @return MovimientoStock
+     */
+    public function setProcesado($procesado)
+    {
+        $this->procesado = $procesado;
+
+        return $this;
+    }
+
+    /**
+     * Get procesado
+     *
+     * @return boolean
+     */
+    public function getProcesado()
+    {
+        return $this->procesado;
     }
 }

@@ -96,7 +96,7 @@
                 success: function(data) {
                     if (data.exists)
                     {
-                      $('.indicator').html('<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" ria-expanded="false"><i class="fas fa-envelope fa-lg"></i><span class="badge rounded-pill badge-notification bg-danger">'+data.cant+'</span></a><div class="dropdown-menu dropdown-menu-right dropdown-default"aria-labelledby="navbarDropdownMenuLink-333"><a class="dropdown-item">Cerrar sesion</a></div>');
+                      $('.indicator').html('<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" ria-expanded="false"><i class="fas fa-envelope fa-lg"></i><span class="badge rounded-pill badge-notification bg-danger">'+data.cant+'</span></a><div class="dropdown-menu dropdown-menu-right dropdown-default"aria-labelledby="navbarDropdownMenuLink-333"><a href="{{ path('vtas_comprobantes_pendientes') }}" class="dropdown-item">Ver pendientes</a></div>');
                     }
                     else
                     {

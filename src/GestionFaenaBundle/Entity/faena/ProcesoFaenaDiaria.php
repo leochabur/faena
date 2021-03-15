@@ -37,6 +37,7 @@ class ProcesoFaenaDiaria
 
     /**
      * @ORM\OneToMany(targetEntity="MovimientoStock", mappedBy="procesoFnDay")
+     * @ORM\OrderBy({"fechaAlta" = "DESC"})
      */
     private $movimientos;
 

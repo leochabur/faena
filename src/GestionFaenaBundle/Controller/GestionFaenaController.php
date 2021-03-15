@@ -1664,38 +1664,43 @@ class GestionFaenaController extends Controller
                   $body[$i] = ['tipo' => $mov.$nombreFaena, 'conc' => $mov->getArtProcFaena()->getConcepto()->getConcepto()."$from"];
                   $body[$i]['id'] = $mov->getId();
                   $body[$i]['trx'] = $idTrx;
+                  $body[$i]['proc'] = $mov->getProcesado();
                   foreach ($mov->getValores() as $valor) 
                   {
                       $atributo = ($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto());
-                      if ($valor->getMostrar())
-                      {                            
-                          $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric(), 'decimales' => 2];
-                      }
+                      $define = $proceso->getProcesoFaena()->atributoAsignadoAArticulo($articulo, $atributo);
+                      if (($define == 'N') || ($define))
+                      {
+                          if ($valor->getMostrar())
+                          {                            
+                              $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric(), 'decimales' => 2];
+                          }
 
-                      $rounded[$atributo->getId()] = $valor->getDecimales();
-
-                      $body[$i][$atributo->getId()] = $valor->getData()."";
-                      $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
-                      if ($acumular)
-                      {                        
                           $rounded[$atributo->getId()] = $valor->getDecimales();
-                          if (!array_key_exists($atributo->getId(), $totales))
-                          {
-                              $totales[$atributo->getId()] = 0;
-                          }
 
-                          if ($valor->getAtributo())
-                          {
-                            if ($valor->getAcumula())
-                            {
-                              $totales[$atributo->getId()]+= $valor->getData();
-                            }
-                          }
-                          else
-                          {
-                            $totales[$atributo->getId()]+= $valor->getData();
-                          }
-                      }                     
+                          $body[$i][$atributo->getId()] = $valor->getData()."";
+                          $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
+                          if ($acumular)
+                          {                        
+                              $rounded[$atributo->getId()] = $valor->getDecimales();
+                              if (!array_key_exists($atributo->getId(), $totales))
+                              {
+                                  $totales[$atributo->getId()] = 0;
+                              }
+
+                              if ($valor->getAtributo())
+                              {
+                                if ($valor->getAcumula())
+                                {
+                                  $totales[$atributo->getId()]+= $valor->getData();
+                                }
+                              }
+                              else
+                              {
+                                $totales[$atributo->getId()]+= $valor->getData();
+                              }
+                          }        
+                    }             
                   }                          
                   $i++;
                 }
@@ -2056,6 +2061,125 @@ class GestionFaenaController extends Controller
         $proceso->addMovimiento($movimiento);
         return $proceso;
     }
+
+    /**
+     * @Route("/nextmove/{id}", name="bd_adm_next_move")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function avanzarMovimiento($id) //para el proceso de Transito Congelado avanza los articulos al proceso de camara donde seran romaneados
+    {
+      try
+      {
+        $em = $this->getDoctrine()->getManager();
+
+        //MOVIMIENTO ORIGINAL
+        $movimiento = $em->find(MovimientoStock::class, $id);
+        $procesoFaenaDiaria = $movimiento->getProcesoFnDay();
+        $procesoFaena = $procesoFaenaDiaria->getProcesoFaena();        
+        $articuloAtributoConcepto =  $movimiento->getArtProcFaena();
+        $conceptoMovimientoProceso = $articuloAtributoConcepto->getConcepto();
+        $faena = $movimiento->getFaenaDiaria();
+
+        //para que no aparezca el ingreso desde el proceso origen - EJ si se incorporo un cajon de pollo congelado de empaque, una vez se avanze el mismo a camaras no debera aparecer en el listado por eso se marca como procesado
+        $movimiento->setProesado(true);
+        $procesoDestino = $procesoFaena->getProcesosDestinoDefault();
+        if (!$procesoDestino)
+        {
+            return new JsonResponse(['status' => false, 'message' => 'El proceso '.$procesoFaena.' no tiene configurado un proceso destino por defecto!']);
+        }
+
+        $articuloManejaStock = $procesoDestino->existeArticuloDefinidoManejoStock($articuloAtributoConcepto->getArticulo());
+        if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
+        {
+           return new JsonResponse(['status' => false, 'message' => "El articulo ".$articuloAtributoConcepto->getArticulo()." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock"]);
+        }
+
+        //Busca en la FaenaDiaria correspondiente el ProcesoFaenaDiaria correspondiente al ProcesoFanea
+        $procesoFaenaDiariaDestino = $faena->getProceso($procesoDestino->getId());
+        if (!$procesoFaenaDiariaDestino) //no esta configurado el articulo para manejar el stock
+        {
+            return new JsonResponse(['status' => false, 'message' => 'El proceso de destino es inexistente!!!']);
+        }
+
+        //del movimiento actual recupera el ARTATRCONC sino lo crea
+        $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimientoAction($articuloAtributoConcepto->getArticulo(),
+                                                                                 $conceptoMovimientoProceso->getConcepto(),
+                                                                                 SalidaStock::getInstance(),
+                                                                                 $procesoFaena,
+                                                                                 $em);
+
+        $artAtrConTrx = $this->getArticuloAtributoConceptoForMovimientoAction($articuloAtributoConcepto->getArticulo(),
+                                                                              $conceptoMovimientoProceso->getConcepto(),
+                                                                              TransferirStock::getInstance(),
+                                                                              $procesoFaena,
+                                                                              $em);
+        $transferencia = new TransferirStock(); 
+        $transferencia->setArtProcFaena($artAtrConTrx);
+        $transferencia->setProcesoFnDay($procesoFaenaDiaria);
+        $transferencia->setFaenaDiaria($faena);
+        $transferencia->setVisible(false);
+        $transferencia->setProcesado(true);
+
+        $salida = new SalidaStock();
+        $salida->setFaenaDiaria($faena);
+        $salida->setProcesoFnDay($procesoFaenaDiaria);
+        $salida->setArtProcFaena($artAtrConOrigen); 
+        $salida->setProcesado(true);
+
+
+        //debe recuperar el ProcesoFaenaDiaria correspondiente a la faena y al proceso de Destino
+        //$procesoFaenaDiariaDestino = $em->getRepository(ProcesoFaenaDiaria::class)->getProcesoFaenaDiariaWhitProcess($procesoDestino);
+
+        $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimientoAction($articuloAtributoConcepto->getArticulo(),
+                                                                                   $conceptoMovimientoProceso->getConcepto(),
+                                                                                   EntradaStock::getInstance(),
+                                                                                   $procesoDestino,
+                                                                                   $em);
+        $entrada = new EntradaStock();
+        $entrada->setFaenaDiaria($faena);
+        $entrada->setProcesoFnDay($procesoFaenaDiariaDestino);
+        $entrada->setArtProcFaena($artAtrConDestino);
+        $entrada->setProcesado(true);
+
+        ///copia los valores del movimiento orginial a los nuevos movimientos
+        foreach ($movimiento->getValores() as $valor)
+        {
+           // if (!$valor->getAtributo())
+         //   throw new \Exception("valor ".$valor->getId());
+            $valorAtr = new ValorNumerico();
+            $valorAtr->setAtributoAbstracto(($valor->getAtributo()?$valor->getAtributo()->getAtributoAbstracto():$valor->getAtributoAbstracto()));
+            $dataValue = $valor->getValor();
+            $valorAtr->setValor($dataValue);
+            $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+            $valorAtr->setMostrar(true);
+            $valorAtr->setDecimales(0);
+            $valorAtr->setAcumula(true);
+
+            $vSalida = clone $valorAtr;
+            $vEntrada = clone $valorAtr;
+            $vTrx = clone $valorAtr;
+            $salida->addValore($vSalida);
+            $entrada->addValore($vEntrada);
+            $transferencia->addValore($vTrx);
+        }
+        
+        $em->persist($transferencia);
+        $em->persist($entrada);
+        $em->persist($salida);
+        $transferencia->setMovimientoDestino($entrada);
+        $transferencia->setMovimientoOrigen($salida);              
+        $em->persist($transferencia);
+        $procesoFaenaDiaria->addMovimiento($transferencia);
+        $procesoFaenaDiaria->setUltimoMovimiento(new \DateTime());
+        $em->flush();
+        return new JsonResponse(['status' => true]);
+      }
+      catch (\Exception $e)
+      {
+            return new JsonResponse(['status' => false, 'message' => 'Se produjo un error al procesar la solicitud!!']);
+      }
+    }
+
 
     private function procesarTransferirStock(ProcesoFaenaDiaria $proceso,
                                               ArticuloAtributoConcepto $articulo,

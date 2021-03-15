@@ -32,6 +32,7 @@ use GestionFaenaBundle\Entity\faena\SalidaStock;
 use GestionFaenaBundle\Controller\GestionFaenaController;
 use GestionFaenaBundle\Entity\faena\ValorNumerico;
 use GestionFaenaBundle\Entity\faena\OrdenCarga;
+use GestionFaenaBundle\Entity\faena\ConceptoMovimiento;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -561,7 +562,7 @@ class VentasController extends Controller
 
         $entidadConcepto = $em->getRepository(EntidadExternaConcepto::class)->getEntidadOfClass(get_class($comprobante->getEntidad()), $procesoFaena);
 
-        $conceptoMovimiento = $entidadConcepto->getConcepto();
+        $conceptoMovimientoVenta = $entidadConcepto->getConcepto();
 
         //Buscar si existe una orden de carga generada para la entidad del comprobante
         $ordenCarga = $em->getRepository(OrdenCarga::class)->findOrdenCargaEntidad($comprobante->getEntidad(), $faenaDiaria, $comprobante);
@@ -601,17 +602,76 @@ class VentasController extends Controller
             }
         }
 
+        $artAtrCon = null;
+
+        $conceptoMovimientoNO = null;
+
+        $artAtrConGenerados = array();
+
         foreach ($comprobante->getItems() as $it)
         {
+            if ($it->getTipoVenta()->getOficial())
+            {
+                $conceptoMovimiento = $conceptoMovimientoVenta;
+            }
+            else
+            {
+                if (!$conceptoMovimientoNO)
+                {
+                    $entidadConceptoNO = $em->getRepository(EntidadExternaConcepto::class)
+                                               ->getEntidadOfClass($it->getTipoVenta()->getEntidadAsociada(), $procesoFaena);
+                    $conceptoMovimientoNO = $entidadConceptoNO->getConcepto();
+                }
+                $conceptoMovimiento = $conceptoMovimientoNO;
+            }
 
             if ($ingresar)
             {
-                $artAtrCon = GestionFaenaController::getArticuloAtributoConceptoForMovimientoAction( 
-                                                                                                   $it->getArticulo(),
-                                                                                                    $conceptoMovimiento,
-                                                                                                    SalidaStock::getInstance(),
-                                                                                                   $procesoFaena,
-                                                                                                    $em);
+                //como esta dentro de una transaccion intenta generar dos atributos concepto un por oficial y uno por rayado, ya que no encuentra el segundo por que todavia no se materializo en la BD, va a comparar si el que se creo es igual al ultimo
+                
+            //    throw new \Exception("Clase ".get_class($conceptoMovimiento));
+
+                $artAtrCon = $this->existeArtAtrCon($artAtrConGenerados, 
+                                                    SalidaStock::getInstance(), 
+                                                    $it->getArticulo(), 
+                                                    $conceptoMovimiento, 
+                                                    $procesoFaena);
+                if (!$artAtrCon)
+                {
+                    $artAtrCon = GestionFaenaController::getArticuloAtributoConceptoForMovimientoAction($it->getArticulo(),
+                                                                                                        $conceptoMovimiento,
+                                                                                                        SalidaStock::getInstance(),
+                                                                                                        $procesoFaena,
+                                                                                                        $em);
+                    $artAtrConGenerados[] = $artAtrCon;
+                }
+
+                /*
+                if ($artAtrCon)
+                { //si ya existe verifica que no tenga los mismos parametros para no crear dos iguales
+                    if (!(($artAtrCon->getConcepto()->getConcepto() == $conceptoMovimiento) &&
+                          ($artAtrCon->getArticulo() == $it->getArticulo()) &&
+                          ($artAtrCon->getConcepto()->getTipoMovimiento()->getInstancia() == SalidaStock::getInstance()) &&
+                          ($artAtrCon->getConcepto()->getProcesoFaena() == $procesoFaena)))
+                    {
+                        $artAtrCon = GestionFaenaController::getArticuloAtributoConceptoForMovimientoAction( 
+                                                                                                           $it->getArticulo(),
+                                                                                                            $conceptoMovimiento,
+                                                                                                            SalidaStock::getInstance(),
+                                                                                                           $procesoFaena,
+                                                                                                            $em);
+                    }
+                }
+                else
+                {
+                    $artAtrCon = GestionFaenaController::getArticuloAtributoConceptoForMovimientoAction( 
+                                                                                   $it->getArticulo(),
+                                                                                    $conceptoMovimiento,
+                                                                                    SalidaStock::getInstance(),
+                                                                                   $procesoFaena,
+                                                                                    $em);
+                }*/
+
                 $salida = new SalidaStock();
                 $salida->setFaenaDiaria($faenaDiaria);
                 $salida->setProcesoFnDay($procesoFaenaDiaria);
@@ -651,6 +711,25 @@ class VentasController extends Controller
         $pdf = $this->paintData($pdf, $items);
       //  $pdf->AddPage('P', 'A4'); 
         return new Response($pdf->Output(), 200, array('Content-Type' => 'application/pdf'));  
+    }
+
+    private function existeArtAtrCon($articulos, 
+                                     $instance, 
+                                     Articulo $articulo, 
+                                     ConceptoMovimiento $conceptoMovimiento, 
+                                     ProcesoFaena $procesoFaena)
+    {
+        foreach ($articulos as $artAtrCon)
+        {
+            if (($artAtrCon->getConcepto()->getConcepto() == $conceptoMovimiento) &&
+                ($artAtrCon->getArticulo() == $articulo) &&
+                ($artAtrCon->getConcepto()->getTipoMovimiento()->getInstancia() == $instance) &&
+                ($artAtrCon->getConcepto()->getProcesoFaena() == $procesoFaena))
+            {
+                return $artAtrCon;
+            }
+        }
+        return null;
     }
 
     private function paintData($pdf, $items, $oc = 0)
@@ -944,6 +1023,90 @@ class VentasController extends Controller
                            ])
                     ->add('cargar', SubmitType::class, ['label' => 'Cargar'])    
                     ->setAction($this->generateUrl('vtas_historico_ventas'))  
+                    ->setMethod('POST')               
+                    ->getForm();
+        return $form;
+    }
+
+    /**
+     * @Route("/vtapend", name="vtas_comprobantes_pendientes")
+     */
+    public function verComprobantesPendientes(Request $request)
+    {        
+        $comprobantes = $this->getDoctrine()->getManager()->getRepository(ComprobanteVenta::class)->getUltimosComprobantesVenta();
+
+        return $this->render('@GestionVentas/ventas/ventasPendientes.html.twig', ['comprobantes' => $comprobantes]); 
+    }
+
+    /**
+     * @Route("/resart", name="vtas_resumen_ventas_por_articulo", methods={"POST", "GET"})
+     */
+    public function getFormResumenXArticulos(Request $request)
+    {
+        $form = $this->getFormResumenVentasPorArticulo();
+        if ($request->isMethod('POST'))
+        {
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+                $em = $this->getDoctrine()->getManager();
+                $data = $form->getData();
+                $repository = $em->getRepository(ItemCarga::class);
+                $items = $repository->itemsEnFecha($data['fecha'], ($data['tipo']?$data['tipo']:null));
+
+                $data = array();
+                $cantEntidad = array();
+                $last = null;
+                $tipos = array();
+                foreach ($items as $it)
+                {
+                    $comprobante = $it->getComprobante();
+                    $tipos[$it->getTipoVenta()->getId()] = $it->getTipoVenta();
+                    if (!array_key_exists($comprobante->getEntidad()->getId(), $data))
+                    {
+                        $data[$comprobante->getEntidad()->getId()] = array('entidad' => $comprobante->getEntidad(),
+                                                                           'fecha' => $comprobante->getFecha()->format('d/m/Y'),
+                                                                           'numero' => $comprobante->getNumero(),
+                                                                           'items' => array(),
+                                                                           'record' => 0);
+                    }
+
+                    if (!array_key_exists($it->getArticulo()->getId(), $data[$comprobante->getEntidad()->getId()]['items']))
+                    {
+                        $data[$comprobante->getEntidad()->getId()]['record']++;
+                        $data[$comprobante->getEntidad()->getId()]['items'][$it->getArticulo()->getId()] = array('art' => $it->getArticulo());
+                    }
+
+                    $data[$comprobante->getEntidad()->getId()]['items'][$it->getArticulo()->getId()][$it->getTipoVenta()->getId()] = $it->getCantidad();
+
+                }
+
+                return $this->render('@GestionVentas/ventas/resumenXArticulo.html.twig', ['tipos' => $tipos,'items' => $data, 'form' => $form->createView()]); 
+
+            }
+        }
+
+        return $this->render('@GestionVentas/ventas/resumenXArticulo.html.twig', ['form' => $form->createView()]); 
+    }
+
+    private function getFormResumenVentasPorArticulo()
+    {
+        $form =$this->createFormBuilder()
+                    ->add('fecha', 
+                          DateType::class, 
+                          ['widget' => 'single_text',
+                           'required' => true,
+                           'constraints' => [
+                                                    new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
+                                             ]
+                           ])
+                    ->add('tipo', 
+                          EntityType::class, [
+                          'class' => TipoVenta::class,
+                          'placeholder' => 'Todos',    
+                          'data' => null                     
+                    ])
+                    ->add('cargar', SubmitType::class, ['label' => 'Cargar'])    
                     ->setMethod('POST')               
                     ->getForm();
         return $form;

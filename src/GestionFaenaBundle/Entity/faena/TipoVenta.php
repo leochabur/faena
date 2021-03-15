@@ -46,6 +46,18 @@ class TipoVenta
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="entidadAsociada", type="string", length=255, nullable=true)
+     */
+    private $entidadAsociada; //para el caso de las ventas en rayado almacena cual es la entidad que se debe asociar al concepto
+
+    public function __toString()
+    {
+        return strtoupper($this->codigo);
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -125,5 +137,29 @@ class TipoVenta
     public function getOficial()
     {
         return $this->oficial;
+    }
+
+    /**
+     * Set entidadAsociada
+     *
+     * @param string $entidadAsociada
+     *
+     * @return TipoVenta
+     */
+    public function setEntidadAsociada($entidadAsociada)
+    {
+        $this->entidadAsociada = $entidadAsociada;
+
+        return $this;
+    }
+
+    /**
+     * Get entidadAsociada
+     *
+     * @return string
+     */
+    public function getEntidadAsociada()
+    {
+        return $this->entidadAsociada;
     }
 }

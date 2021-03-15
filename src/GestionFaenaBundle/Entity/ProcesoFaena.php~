@@ -184,6 +184,10 @@ abstract class ProcesoFaena
     */      
     private $entidadesConcepto;
 
+    /**
+     * @ORM\Column(name="isTransito", type="boolean", options={"default":false})
+     */
+    private $isTransito = false; //para el caso del proceso de Transito Congelado, solo va a permitir avanzar los productos al proximo proceso
 
     public function atributoAsignadoAArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
                                               \GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
@@ -1057,5 +1061,29 @@ abstract class ProcesoFaena
     public function getEntidadesConcepto()
     {
         return $this->entidadesConcepto;
+    }
+
+    /**
+     * Set unidadMedidaventa
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\UnidadMedida $unidadMedidaventa
+     *
+     * @return ProcesoFaena
+     */
+    public function setUnidadMedidaventa(\GestionFaenaBundle\Entity\gestionBD\UnidadMedida $unidadMedidaventa = null)
+    {
+        $this->unidadMedidaventa = $unidadMedidaventa;
+
+        return $this;
+    }
+
+    /**
+     * Get unidadMedidaventa
+     *
+     * @return \GestionFaenaBundle\Entity\gestionBD\UnidadMedida
+     */
+    public function getUnidadMedidaventa()
+    {
+        return $this->unidadMedidaventa;
     }
 }

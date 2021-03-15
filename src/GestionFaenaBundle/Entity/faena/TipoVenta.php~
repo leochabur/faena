@@ -46,6 +46,14 @@ class TipoVenta
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="entidadAsociada", type="string", length=255, nullable=true)
+     */
+    private $entidadAsociada; //para el caso de las ventas en rayado almacena cual es la entidad que se debe asociar al concepto
+
+
+    /**
      * Get id
      *
      * @return int

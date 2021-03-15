@@ -48,40 +48,49 @@
 			<tbody>
 				
 				{% for m in body %}
-					<tr>
-					<td>{{ loop.index }}</td>
-					{% for k, h in headers %}
-						{% if h['numeric'] %}
-							{% set align = 'text-right' %}
-						{% else %}
-							{% set align = 'text-left' %}
-						{% endif %}
-						<td class="{{ align }}">
-							{% if m[k] is defined %}
-								{{ m[k] }}
+					{% if not m.proc %}
+						<tr>
+						<td>{{ loop.index }}</td>
+						{% for k, h in headers %}
+							{% if h['numeric'] %}
+								{% set align = 'text-right' %}
+							{% else %}
+								{% set align = 'text-left' %}
 							{% endif %}
+							<td class="{{ align }}">
+								{% if m[k] is defined %}
+									{{ m[k] }}
+								{% endif %}
+							</td>
+						{% endfor %}
+						{% set trx = m.trx %}
+						<td>
+								{% if formsDelete is defined %}
+									<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify fa-1x"></i></a>
+									<div class="dropdown-menu">
+										{% if not proceso.procesoFaena.isTransito %}
+		 		 							<a class="dropdown-item {% if trx %} disabled {% endif %}"  
+		 		 							   href="{{ path('bd_adm_mov_st_edit',{mov : m.id, proc : proceso.id, art : m.art.id , fanday : faena.id}) }}">
+		  											<button class="btn btn-warning btn-sm {% if trx %} disabled {% endif %}">Editar</button>
+		  									</a>
+		  								{% elseif not m.proc %}
+
+		 		 							<a class="dropdown-item btn btn-warning btn-sm nextproc" data-index="{{ loop.index }}" 
+		 		 							   href="{{ path('bd_adm_next_move', { id : m.id}) }}">Enviar a {{ proceso.procesoFaena.procesosDestinoDefault }}
+		  									</a>
+		  								{% endif %}
+	  									{% if is_granted('ROLE_ADMIN') and not proceso.procesoFaena.isTransito %}
+		  									<div class="dropdown-item">
+		  												{{ form_start(formsDelete[m.id], {'attr' : {'class' : 'sendDelete'}}) }}
+												    	{{ form_widget(formsDelete[m.id].delete, {'attr' : {'data-mov' : m.id, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
+												    	{{ form_end(formsDelete[m.id]) }}
+		  									</div>
+		  								{% endif %}
+									</div>
+								{% endif %}
 						</td>
-					{% endfor %}
-					{% set trx = m.trx %}
-					<td>
-							{% if formsDelete is defined %}
-								<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify fa-1x"></i></a>
-								<div class="dropdown-menu">
- 		 							<a class="dropdown-item {% if trx %} disabled {% endif %}"  
- 		 							   href="{{ path('bd_adm_mov_st_edit',{mov : m.id, proc : proceso.id, art : m.art.id , fanday : faena.id}) }}">
-  											<button class="btn btn-warning btn-sm {% if trx %} disabled {% endif %}">Editar</button>
-  									</a>
-  									{% if is_granted('ROLE_ADMIN') %}
-	  									<div class="dropdown-item">
-	  												{{ form_start(formsDelete[m.id], {'attr' : {'class' : 'sendDelete'}}) }}
-											    	{{ form_widget(formsDelete[m.id].delete, {'attr' : {'data-mov' : m.id, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
-											    	{{ form_end(formsDelete[m.id]) }}
-	  									</div>
-	  								{% endif %}
-								</div>
-							{% endif %}
-					</td>
-					</tr>
+						</tr>
+					{% endif %}
 				{% endfor %}
 				{% if totales is defined %}			
 						<tr>
@@ -115,6 +124,40 @@
 {% block javascripts %}
 
 <script type="text/javascript">
+
+	$('.nextproc').click(function (event){
+											event.preventDefault();
+											var a = $(this);
+											bootbox.confirm({
+											    message: 'Seguro enviar a GESTIONAR CAMARAS el item '+a.data('index')+'?',
+											    size: "large",
+											    buttons: {
+											        confirm: {
+											            label: 'Si',
+											            className: 'btn-success'
+											        },
+											        cancel: {
+											            label: 'No',
+											            className: 'btn-danger'
+											        }
+											    },
+											    callback: function (result) {
+											        if (result)
+											        {
+											        	$.post(a.attr('href'),
+											        		   function (data){										        		   				
+											        		   					 if (data.status)
+											        		   					 {
+											        		   					 	location.reload();
+											        		   					 }
+											        		   					 else{
+											        		   					 	alert(data.message);
+											        		   					 }
+											        		   });
+											        }
+											    }
+											});
+	});
 
 	$('.btnDelete').click(function(event){
 											event.preventDefault();

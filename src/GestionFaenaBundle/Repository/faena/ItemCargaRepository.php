@@ -61,4 +61,29 @@ class ItemCargaRepository extends \Doctrine\ORM\EntityRepository
 	    		    ->setParameter('eliminado', false)
             		->getResult();
     }
+
+	public function itemsEnFecha(\DateTime $fecha, $oficial = null) 
+	{ 
+	    $q = $this->createQueryBuilder('it')
+	    		   ->join('it.articulo', 'art')
+	    		   ->join('art.categoria', 'cat')
+	    		   ->join('it.tipoVenta', 'tpo')
+	    		   ->join('it.comprobante', 'cmp')
+	    		   ->join('cmp.entidad', 'ent')
+	    		   ->where('cmp.fecha = :fecha')
+	    		   ->andWhere('cmp.finalizado = :finalizado')
+	    		   ->andWhere('cmp.eliminado = :eliminado');
+	    if ($oficial != null)
+	    {
+	    	$q->andWhere('tpo = :oficial')
+	    	  ->setParameter('oficial', $oficial);
+	    }
+	    return $q->setParameter('fecha', $fecha)
+	    		  ->setParameter('finalizado', true)
+	    		  ->setParameter('eliminado', false)
+		          ->addOrderBy('ent.valor')
+		          ->addOrderBy('art.codigoInterno')
+		          ->getQuery()
+		          ->getResult(); 
+	} 
 }
