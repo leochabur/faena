@@ -265,7 +265,7 @@ class VentasController extends Controller
                      ->setMethod('POST')               
                      ->getForm();
 
-        return $this->render('@GestionVentas/ventas/agregarItems.html.twig', ['comprobante' => $comprobante,
+        return $this->render('@GestionVentas/ventas/agregarItemsApaisado.html.twig', ['comprobante' => $comprobante,
     																		  'ventas' => $formVentas,
     																		  'articulos' => $listaArticulos,
     																		  'tipos' => $tiposItem,
@@ -536,14 +536,14 @@ class VentasController extends Controller
         //obtiene la faena diaria de la fecha del comprobante
         $faenaDiaria = $em->getRepository(FaenaDiaria::class)->getFaenaConFecha($comprobante->getFecha());
 
-        if (!$comprobante->getItemOficial())
+     /*   if (!$comprobante->getItemOficial())
         {
             $this->addFlash(
                   'error',
                   'No es posible generar el remito para el comprobante '.str_pad($comprobante->getNumero(), 6, "0", STR_PAD_LEFT).'!!'
               );
             return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $comprobante->getFecha()->getTimestamp()]);
-        }
+        }*/
 
         if (!$faenaDiaria)
         {
@@ -648,31 +648,6 @@ class VentasController extends Controller
                     $artAtrConGenerados[] = $artAtrCon;
                 }
 
-                /*
-                if ($artAtrCon)
-                { //si ya existe verifica que no tenga los mismos parametros para no crear dos iguales
-                    if (!(($artAtrCon->getConcepto()->getConcepto() == $conceptoMovimiento) &&
-                          ($artAtrCon->getArticulo() == $it->getArticulo()) &&
-                          ($artAtrCon->getConcepto()->getTipoMovimiento()->getInstancia() == SalidaStock::getInstance()) &&
-                          ($artAtrCon->getConcepto()->getProcesoFaena() == $procesoFaena)))
-                    {
-                        $artAtrCon = GestionFaenaController::getArticuloAtributoConceptoForMovimientoAction( 
-                                                                                                           $it->getArticulo(),
-                                                                                                            $conceptoMovimiento,
-                                                                                                            SalidaStock::getInstance(),
-                                                                                                           $procesoFaena,
-                                                                                                            $em);
-                    }
-                }
-                else
-                {
-                    $artAtrCon = GestionFaenaController::getArticuloAtributoConceptoForMovimientoAction( 
-                                                                                   $it->getArticulo(),
-                                                                                    $conceptoMovimiento,
-                                                                                    SalidaStock::getInstance(),
-                                                                                   $procesoFaena,
-                                                                                    $em);
-                }*/
 
                 $salida = new SalidaStock();
                 $salida->setFaenaDiaria($faenaDiaria);
@@ -700,19 +675,29 @@ class VentasController extends Controller
         }
         $em->flush();
 
-        $items = $em->getRepository(ItemCarga::class)->itemsAImprimir($comprobante, 1); //recupera todos los items oficiales del comprobante
+        if ($comprobante->getItemOficial())
+        {
+            $items = $em->getRepository(ItemCarga::class)->itemsAImprimir($comprobante, 1); //recupera todos los items oficiales del comprobante
 
-        $pdf = $this->get('app.pdf');
-        $pdf->setLogo($this->get('kernel')->getRootDir() . '/../web/resources/img/logo2.jpg');
-        $pdf->setData($comprobante->getEntidad(), $comprobante->getFecha(), str_pad($comprobante->getNumero(), 10, "0", STR_PAD_LEFT), 0, '');
-        $pdf->AliasNbPages();
+            $pdf = $this->get('app.pdf');
+            $pdf->setLogo($this->get('kernel')->getRootDir() . '/../web/resources/img/logo2.jpg');
+            $pdf->setData($comprobante->getEntidad(), $comprobante->getFecha(), str_pad($comprobante->getNumero(), 10, "0", STR_PAD_LEFT), 0, '');
+            $pdf->AliasNbPages();
 
-        
-        $pdf->SetAutoPageBreak(true,33);  
-        $pdf->AddPage('L', 'legal'); 
-        $pdf = $this->paintData($pdf, $items);
-      //  $pdf->AddPage('P', 'A4'); 
-        return new Response($pdf->Output(), 200, array('Content-Type' => 'application/pdf'));  
+            
+            $pdf->SetAutoPageBreak(true,33);  
+            $pdf->AddPage('L', 'legal'); 
+            $pdf = $this->paintData($pdf, $items);
+            return new Response($pdf->Output(), 200, array('Content-Type' => 'application/pdf'));  
+        }
+        else
+        {
+             $this->addFlash(
+                  'success',
+                  'Comprobante ingresado exitosamente'
+              );
+            return $this->redirectToRoute('vtas_incorporar_ventas_a_faena', ['du' => $comprobante->getFecha()->getTimestamp()]);
+        }
     }
 
     private function existeArtAtrCon($articulos, 
@@ -1155,25 +1140,30 @@ class VentasController extends Controller
                             return $this->redirectToRoute('vtas_load_files');
                         }
 
-                        if (!array_key_exists($result[1], $data))
+                        $key = "$result[1]-$result[0]";
+
+                        if (!array_key_exists($key, $data))
                         {
-                            $data[$result[1]] = ['destinatario' => $result[2],
+                            $data[$key] = ['destinatario' => $result[2],
                                                  'fecha' => $result[4],
                                                  'zona' => $result[0],
+                                                 'code' => $result[1], 
                                                  'cant' => 0,
                                                  'items' => []];
                         }
-                        if (!array_key_exists($result[5], $data[$result[1]]['items']))
+
+                        if (!array_key_exists($result[5], $data[$key]['items']))
                         {
-                            $data[$result[1]]['items'][$result[5]] = 0;
+                            $data[$key]['items'][$result[5]] = 0;
                         }
+
                         $articulos[$result[5]] = $result[5];
 
-                        $data[$result[1]]['items'][$result[5]]+=$result[6];
-                        $data[$result[1]]['cant']++;
-                    }
-                   
+                        $data[$key]['items'][$result[5]]+=$result[6];
+                        $data[$key]['cant']++;
+                    }                   
                 }
+
                 fclose($fp);
 
                 $repository = $this->getDoctrine()->getManager()->getRepository(Articulo::class);

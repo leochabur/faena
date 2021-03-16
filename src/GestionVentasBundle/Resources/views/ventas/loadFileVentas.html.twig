@@ -54,10 +54,11 @@
                   <tr class="{{ l % 2 }}">
                     <td rowspan="{{ it.cant }}" class="align-middle">{{ it.fecha }}</td>
                     <td rowspan="{{ it.cant }}" class="align-middle">{{ it.zona }}</td>
-                    <td rowspan="{{ it.cant }}" class="align-middle">{{ k }}</td>
+                    <td rowspan="{{ it.cant }}" class="align-middle">{{ it.code }}</td>
                     <td rowspan="{{ it.cant }}" class="align-middle">{{ it.destinatario }}</td>
                     {% for kv, vta in it.items %}
                         {% if i == 0 %}
+
                             <td>{{ kv }}</td>
                             {% if articulos[kv] is defined %}
                               <td>{{ articulos[kv] }}</td>
@@ -67,7 +68,9 @@
                             <td>{{ vta }}</td>
                             <td class="text-muted">{{ index }}</td>
                           </tr>
+
                         {% else %}
+
                           <tr class="{{ l % 2 }}">
                             <td>{{ kv }}</td>
                             {% if articulos[kv] is defined %}
@@ -78,9 +81,12 @@
                             <td>{{ vta }}</td>
                             <td class="text-muted">{{ index }}</td>
                           </tr>
+
                         {% endif %}
-                        {% set i = 1 %}
+
+                        {% set i = i + 1 %}
                         {% set index = index + 1 %}
+
                     {% endfor %}                
                     {% set l = l + 1 %}
                 {% endfor %}

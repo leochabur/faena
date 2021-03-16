@@ -1,0 +1,239 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<style type="text/css">
+           
+  .table-scroll {
+    position:relative;
+    max-width:100%;
+    margin:auto;
+    overflow:hidden;
+  }
+  .table-wrap {
+    width:100%;
+    overflow:auto;
+  }
+  .table-scroll table {
+    width:100%;
+    margin:auto;
+    border-collapse:separate;
+    border-spacing:0;
+  }
+  .table-scroll th, .table-scroll td {
+    
+
+    background:#fff;
+    white-space:nowrap;
+    vertical-align:top;
+  }
+  .table-scroll thead, .table-scroll tfoot {
+    background:#f9f9f9;
+  }
+  .clone {
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none;
+  }
+  .clone th, .clone td {
+    visibility:hidden
+  }
+  .clone td, .clone th {
+    border-color:transparent
+  }
+  .clone tbody th {
+    visibility:visible;
+  }
+  .clone .fixed-side {
+    visibility:visible;
+  }
+  .clone thead, .clone tfoot{background:transparent;}
+
+.miTablaPersonalizada th{
+  width: 230px;
+  overflow: auto;
+  border: 1px solid;
+}
+
+</style>
+
+<br>
+<hr>
+<span class="h5 card-title">Agregar Articulos</span>
+<div class="row mt-4">
+  <div class="col-lg-4">
+    Fecha: {{ comprobante.fecha|date('d/m/Y') }}
+  </div>
+  <div class="col-lg-4">
+    Destinatario: {{ comprobante.entidad }}
+  </div>
+</div>
+{% if comprobante.confirmado %}
+    <div class="row mt-4">
+        <div class="col-lg-4 fs-5 text-danger">
+          El formulario ya ha sido impreso
+        </div>
+    </div>
+{% endif %}
+<hr>
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+{% endblock %}
+{% block out_container %}
+<div id="table-scroll" class="table-scroll">
+  <div class="table-wrap">
+  <table class="table table-sm main-table">
+    <thead>
+      <tr>
+          <th rowspan="2" class="fixed-side grey lighten-2 border border-primary">Destinatario</th>
+          {% for art in articulos %}
+
+              <th colspan="{{ tipos|length }}" scope="col" class="px-md-5 grey lighten-2 border border-primary">{{  art.nombreVenta }}</th>
+
+          {% endfor %}
+      </tr>
+      <tr>
+            {% for art in articulos %}
+              {% for t in tipos %}
+                  <th scope="col px-md-5" class=" text-center grey lighten-2 border border-primary">{{ t.codigo }}</th>
+              {% endfor %}
+            {% endfor %}
+      </tr>
+      </thead>
+      <tbody>
+        {% set i = 1 %}
+        <tr>
+            <td class="fixed-side border border-primary">{{ comprobante.entidad }}</td>
+            {% for kvta, vvta in ventas %}
+
+                  {% for t in tipos %}
+                      {% set class =  "update form-control-sm " ~ i %}
+                      <td class="border border-primary">
+
+                        {{ form_start(vvta[t.id], {'attr': {'novalidate': 'novalidate', 'class': 'fupdate'}}) }}
+                        {{ form_widget(vvta[t.id].cantidad, {'attr' : {'size' : '100px', 'data-index' : i, 'class' : class }}) }}
+                        {{ form_end(vvta[t.id]) }}
+                      </td>
+                      {% set i = i + 1 %}
+                  {% endfor %}              
+            {% endfor %}
+          </tr>
+      </tbody>
+  </table>  
+</div>
+</div>
+  <hr>
+  <div class="form-row">
+      <div class="col-lg-3 col-sm-12">
+          {{ form_start(back, {'attr': {'novalidate': 'novalidate', 'class' : 'back'}}) }}
+          {{ form_widget(back.back) }}
+          {{ form_end(back) }}
+      </div>
+      <div class="col-lg-2 col-sm-12">
+          <!--a class='btn btn-success finalice' href='{{ path('vtas_finalizar_comprobante_venta', { id : comprobante.id }) }}'>Finalizar</a-->
+      </div>
+  </div>
+  
+{% endblock %}
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+$(document).ready(function () {
+          $(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');  
+
+
+
+          $('.finalice').click(function(event){
+                                                event.preventDefault();
+                                                var a = $(this);
+                                                bootbox.confirm({                                        
+                                                        message: 'Seguro finalizar el comprobante de venta?',
+                                                        size: "large",
+                                                        buttons: {
+                                                                  confirm: {
+                                                                      label: 'Si',
+                                                                      className: 'btn-success'
+                                                                  },
+                                                                  cancel: {
+                                                                      label: 'No',
+                                                                      className: 'btn-danger'
+                                                                  }
+                                                              },
+                                                              callback: function (result) {
+                                                                  if (result)
+                                                                  {
+                                                                      $.post(a.attr('href'),
+                                                                             function (data)
+                                                                             {
+                                                                                if (!data.error)
+                                                                                {
+                                                                                   $('.back').trigger('submit');
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                  alert(data.message);
+                                                                                }
+                                                                             });
+                                                                  }
+                                                              }
+                                        });
+          });
+
+          $('.dataTables_length').addClass('bs-select');
+
+          $('.update').focusout(function(event){
+                                            event.preventDefault();
+                                            var input = $(this);
+                                            var form = input.closest('form');
+                                            if (input.val())
+                                            {
+                                              $.post(form.attr('action'),
+                                                     form.serialize(),
+                                                     function(data)
+                                                     {
+                                                         if (!data.error)
+                                                         {
+                                                          input.addClass('green 50');
+                                                         }
+                                                         else{
+                                                              input.addClass('red 50');
+                                                              alert(data.message);
+                                                         }
+                                                     });            
+                                            }
+             
+          });
+
+          $('.fupdate').submit(function(event){
+                                            event.preventDefault();
+                                            var form = $(this);
+                                            var input = form.find( ":text" );
+                                            if (input.val())
+                                            {
+                                              $.post(form.attr('action'),
+                                                     form.serialize(),
+                                                     function(data)
+                                                     {
+                                                       if (!data.error)
+                                                         {
+                                                          input.addClass('green 50');
+                                                          var i = input.data('index')+1;
+
+                                                          $('.'+i).focus();
+                                                         }
+                                                         else{
+                                                          input.addClass('red 50');
+                                                          alert(data.message);
+                                                         }
+                                                     });            
+                                            }
+             
+          });
+
+});
+</script>
+
+{% endblock  %}
