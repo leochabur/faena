@@ -1,0 +1,75 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+<style type="text/css">
+
+
+</style>
+{% endblock %}
+{% block fos_user_content %}
+  {{ parent() }}
+<br>
+<hr>
+<span class="h5 card-title">Cargar archivo ventas</span>
+<hr>
+{% include '@GestionFaena/messages.html.twig'  %}
+
+  {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="row">
+        
+        <div class="col-lg-6">        
+          {{ form_label(form.archivo) }}
+          {{ form_widget(form.archivo, {'attr' : {'class' : 'form-control'}})  }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">        
+          {{ form_widget(form.cargar, {'attr' : {'class' : 'btn btn-sm btn-success mt-4'}})  }}
+        </div>
+        
+    </div>
+  {{ form_end(form) }}
+    <hr>
+
+    {% if articulos is defined%}
+        <table class="table table-striped table-bordered table-hover table-sm main-table">
+          <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Zona</th>
+                <th>Codigo</th>
+                <th>Destinatario</th>
+                <th>Codigo Art.</th>
+                <th>Cantidad</th>            
+            </tr>
+          </thead>
+                {% for k, it in data %}
+                  {% set i = 0 %}
+                  <tr>
+                    <td rowspan="{{ it.cant }}" class="align-middle">{{ it.fecha }}</td>
+                    <td rowspan="{{ it.cant }}" class="align-middle">{{ it.zona }}</td>
+                    <td rowspan="{{ it.cant }}" class="align-middle">{{ k }}</td>
+                    <td rowspan="{{ it.cant }}" class="align-middle">{{ it.destinatario }}</td>
+                    {% for kv, vta in it.items %}
+                        {% if i == 0 %}
+                            <td>{{ kv }}</td>
+                            <td>{{ vta }}</td>
+                          </tr>
+                        {% else %}
+                          <tr>
+                            <td>{{ kv }}</td>
+                            <td>{{ vta }}</td>
+                          </tr>
+                        {% endif %}
+                        {% set i = 1 %}
+                    {% endfor %}
+                    
+
+                {% endfor %}
+          <tbody>
+
+
+          </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

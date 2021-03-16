@@ -36,4 +36,14 @@ class ArticuloRepository extends \Doctrine\ORM\EntityRepository
                     ->setParameter('eliminado', false)
                     ->getResult();
     } 
+
+    public function getArticulosConCodigos($codigos) 
+    { 
+        return $this->getEntityManager()
+                    ->createQuery('SELECT a
+                                   FROM GestionFaenaBundle:gestionBD\Articulo a 
+                                   WHERE a.codigoInterno IN (:codigos)')
+                    ->setParameter('codigos', $codigos)
+                    ->getResult();
+    } 
 }

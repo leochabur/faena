@@ -34,6 +34,8 @@ use GestionFaenaBundle\Entity\faena\ValorNumerico;
 use GestionFaenaBundle\Entity\faena\OrdenCarga;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimiento;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 
 /**
  * @Route("/ventas")
@@ -1111,4 +1113,99 @@ class VentasController extends Controller
                     ->getForm();
         return $form;
     }
+
+    /**
+     * @Route("/load", name="vtas_load_files", methods={"POST", "GET"})
+     */
+    public function cargarArchivoVentas(Request $request)
+    {
+        $form = $this->getFormCargarArchivoVentas();
+        if ($request->isMethod('POST'))
+        {
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+                $data = $form->getData();
+                $file = $form->get('archivo')->getData();;
+
+                $folder = $this->get('kernel')->getRootDir() . '/../web/ventas/';
+
+                $fileName = 'archivo_ventas.'.$file->guessExtension();
+                $file->move(
+                        $folder,
+                        $fileName
+                    );
+
+                $fp = fopen($folder.$fileName, "r");
+                $data = [];
+                $articulos = [];
+                while (!feof($fp))
+                {
+                    $line = fgets($fp);
+                    if ($line)
+                    {
+                        $result  = explode("\t", $line);
+                        if (!array_key_exists($result[1], $data))
+                        {
+                            $data[$result[1]] = ['destinatario' => $result[2],
+                                                 'fecha' => $result[4],
+                                                 'zona' => $result[0],
+                                                 'cant' => 0,
+                                                 'items' => []];
+                        }
+                        if (!array_key_exists($result[5], $data[$result[1]]['items']))
+                        {
+                            $data[$result[1]]['items'][$result[5]] = 0;
+                        }
+                        $articulos[$result[5]] = "'$result[5]'";
+
+                        $data[$result[1]]['items'][$result[5]]+=$result[6];
+                        $data[$result[1]]['cant']++;
+                    }
+                   
+                }
+                fclose($fp);
+                $listaArticulos = implode(',', $articulos);
+                $repository = $this->getDoctrine()->getManager()->getRepository(Articulo::class);
+                $lista = $repository->getArticulosConCodigos($listaArticulos);
+
+                $listaArticulos = [];
+                foreach ($lista as $a)
+                {
+                    $listaArticulos[$a->getCodigoInterno()] = $a;
+                }
+                return $this->render('@GestionVentas/ventas/loadFileVentas.html.twig', 
+                                     ['form' => $form->createView(),
+                                      'data' => $data,
+                                      'articulos' => $listaArticulos]);
+
+            }
+        }
+        return $this->render('@GestionVentas/ventas/loadFileVentas.html.twig', ['form' => $form->createView()]);
+    }
+
+    private function getFormCargarArchivoVentas()
+    {
+        $form = $this->createFormBuilder()
+                     ->add('archivo', 
+                            FileType::class, [
+                            'label' => 'Seleccione archivo...',
+                            'mapped' => false,
+                            'required' => true,
+                            'constraints' => [
+                                new File([
+                                    'maxSize' => '1024k',
+                                    'mimeTypes' => [
+                                        'text/plain',
+                                    ],
+                                    'mimeTypesMessage' => 'Solo se permiten archivos con extension TXT',
+                                ])
+                            ],
+                        ])
+                     ->add('cargar', SubmitType::class, ['label' => 'Cargar'])    
+                     ->setMethod('POST')               
+                     ->getForm();
+        return $form;
+    }
+
 }

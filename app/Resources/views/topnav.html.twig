@@ -112,7 +112,13 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 
-                <li><a class="dropdown-item" href="{{ path('vtas_generate') }}">Registrar</a></li>
+                <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Registrar</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ path('vtas_generate') }}">Registrar Ventas</a></li>
+                    <li><a class="dropdown-item" href="{{ path('vtas_load_files') }}">Cargar Archivos</a></li>
+                  </ul>
+                </li>
+                
 
                 <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#">Informes</a>
                   <ul class="dropdown-menu">
