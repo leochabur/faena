@@ -1145,6 +1145,16 @@ class VentasController extends Controller
                     if ($line)
                     {
                         $result  = explode("\t", $line);
+
+                        if (!(count($result)== 7))
+                        {
+                            $this->addFlash(
+                                      'error',
+                                      'El contenido del archivo no respeta el formato indicado!!'
+                                  );
+                            return $this->redirectToRoute('vtas_load_files');
+                        }
+
                         if (!array_key_exists($result[1], $data))
                         {
                             $data[$result[1]] = ['destinatario' => $result[2],
@@ -1157,7 +1167,7 @@ class VentasController extends Controller
                         {
                             $data[$result[1]]['items'][$result[5]] = 0;
                         }
-                        $articulos[$result[5]] = "'$result[5]'";
+                        $articulos[$result[5]] = $result[5];
 
                         $data[$result[1]]['items'][$result[5]]+=$result[6];
                         $data[$result[1]]['cant']++;
@@ -1165,14 +1175,15 @@ class VentasController extends Controller
                    
                 }
                 fclose($fp);
-                $listaArticulos = implode(',', $articulos);
+
                 $repository = $this->getDoctrine()->getManager()->getRepository(Articulo::class);
-                $lista = $repository->getArticulosConCodigos($listaArticulos);
 
                 $listaArticulos = [];
-                foreach ($lista as $a)
+
+                foreach ($articulos as $a)
                 {
-                    $listaArticulos[$a->getCodigoInterno()] = $a;
+                    $art = $repository->getArticuloConCodigo($a);
+                    $listaArticulos[$a] = $art;
                 }
                 return $this->render('@GestionVentas/ventas/loadFileVentas.html.twig', 
                                      ['form' => $form->createView(),
@@ -1190,7 +1201,6 @@ class VentasController extends Controller
                      ->add('archivo', 
                             FileType::class, [
                             'label' => 'Seleccione archivo...',
-                            'mapped' => false,
                             'required' => true,
                             'constraints' => [
                                 new File([

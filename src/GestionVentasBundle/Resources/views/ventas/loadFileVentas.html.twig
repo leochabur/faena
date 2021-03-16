@@ -32,7 +32,9 @@
     <hr>
 
     {% if articulos is defined%}
-        <table class="table table-striped table-bordered table-hover table-sm main-table">
+    <span class="h5 card-title">Listado de Ventas a Ingresar</span>
+    <hr>
+        <table class="table table-striped table-hover table-sm main-table">
           <thead>
             <tr>
                 <th>Fecha</th>
@@ -40,12 +42,16 @@
                 <th>Codigo</th>
                 <th>Destinatario</th>
                 <th>Codigo Art.</th>
-                <th>Cantidad</th>            
+                <th>Articulo</th>    
+                <th>Cantidad</th>      
+                <th>#</th>      
             </tr>
           </thead>
+                {% set index = 1 %}
+                {% set l = 0 %}
                 {% for k, it in data %}
                   {% set i = 0 %}
-                  <tr>
+                  <tr class="{{ l % 2 }}">
                     <td rowspan="{{ it.cant }}" class="align-middle">{{ it.fecha }}</td>
                     <td rowspan="{{ it.cant }}" class="align-middle">{{ it.zona }}</td>
                     <td rowspan="{{ it.cant }}" class="align-middle">{{ k }}</td>
@@ -53,18 +59,30 @@
                     {% for kv, vta in it.items %}
                         {% if i == 0 %}
                             <td>{{ kv }}</td>
+                            {% if articulos[kv] is defined %}
+                              <td>{{ articulos[kv] }}</td>
+                            {% else %}
+                              <td></td>
+                            {% endif %}
                             <td>{{ vta }}</td>
+                            <td class="text-muted">{{ index }}</td>
                           </tr>
                         {% else %}
-                          <tr>
+                          <tr class="{{ l % 2 }}">
                             <td>{{ kv }}</td>
+                            {% if articulos[kv] is defined %}
+                              <td>{{  articulos[kv]  }}</td>
+                            {% else %}
+                              <td></td>
+                            {% endif %}
                             <td>{{ vta }}</td>
+                            <td class="text-muted">{{ index }}</td>
                           </tr>
                         {% endif %}
                         {% set i = 1 %}
-                    {% endfor %}
-                    
-
+                        {% set index = index + 1 %}
+                    {% endfor %}                
+                    {% set l = l + 1 %}
                 {% endfor %}
           <tbody>
 
@@ -73,3 +91,11 @@
         </table>
     {% endif %}
 {% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $('.1').addClass('grey lighten-2');
+    $('.0').addClass('grey lighten-1');
+</script>
+{% endblock  %}
