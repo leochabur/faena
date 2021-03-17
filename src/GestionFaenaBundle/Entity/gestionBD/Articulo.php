@@ -77,13 +77,13 @@ class Articulo
 
     /**
     * @ORM\ManyToOne(targetEntity="CategoriaArticulo") 
-    * @ORM\JoinColumn(name="id_categ", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_categ", referencedColumnName="id", nullable=true)
     */      
     private $categoria;
 
     /**
     * @ORM\ManyToOne(targetEntity="SubcategoriaArticulo") 
-    * @ORM\JoinColumn(name="id_subcateg", referencedColumnName="id")
+    * @ORM\JoinColumn(name="id_subcateg", referencedColumnName="id", nullable=true)
     */      
     private $subcategoria;
 

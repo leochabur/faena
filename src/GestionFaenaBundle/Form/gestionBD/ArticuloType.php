@@ -66,13 +66,18 @@ class ArticuloType extends AbstractType
         {
             $form->add('categoria', 
                        EntityType::class, 
-                       ['class' => 'GestionFaenaBundle\Entity\gestionBD\CategoriaArticulo'])
+                       [
+                        'class' => 'GestionFaenaBundle\Entity\gestionBD\CategoriaArticulo',
+                        'required' => false
+                       ])
                 ->add('subcategoria', 
                       EntityType::class, 
-                      ['class' => 'GestionFaenaBundle\Entity\gestionBD\SubcategoriaArticulo'])
+                      ['class' => 'GestionFaenaBundle\Entity\gestionBD\SubcategoriaArticulo',
+                       'required' => false])
                 ->add('articuloBase', 
                       EntityType::class, 
-                      ['class' => 'GestionFaenaBundle\Entity\gestionBD\Articulo'])
+                      ['class' => 'GestionFaenaBundle\Entity\gestionBD\Articulo',
+                       'required' => false])
                  ->add('clasificable')
                  ->add('orden', TextType::class);
         }
