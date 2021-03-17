@@ -62,7 +62,7 @@ class ArticuloType extends AbstractType
                      ];
         }
 
-        if (!$articulo->getId())
+        if (true)
         {
             $form->add('categoria', 
                        EntityType::class, 
