@@ -2081,7 +2081,7 @@ class GestionFaenaController extends Controller
         $faena = $movimiento->getFaenaDiaria();
 
         //para que no aparezca el ingreso desde el proceso origen - EJ si se incorporo un cajon de pollo congelado de empaque, una vez se avanze el mismo a camaras no debera aparecer en el listado por eso se marca como procesado
-        $movimiento->setProesado(true);
+        $movimiento->setProcesado(true);
         $procesoDestino = $procesoFaena->getProcesosDestinoDefault();
         if (!$procesoDestino)
         {
