@@ -602,7 +602,7 @@ class GestionBDController extends Controller
                                                                                                   ->setParameter('auto', false)
                                                                                                   ->orderBy('pfa.nombre, cmf.concepto, art.nombre');
                                                                                                  },
-                                'choice_label' => 'vistaEdicion',
+                                'choice_label' => 'vistaEdicionV2',
                         ])
                         ->add('modificar', SubmitType::class, array('label' => 'Modificar atributos'))    
                         ->add('agregar', SubmitType::class, array('label' => 'Agregar atributos'))               

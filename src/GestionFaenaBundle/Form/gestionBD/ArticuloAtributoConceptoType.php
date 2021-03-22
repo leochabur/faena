@@ -22,7 +22,7 @@ class ArticuloAtributoConceptoType extends AbstractType
                         EntityType::class, 
                         [
                             'class' => 'GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso',
-                            'choice_label' => 'vistaEdicion',
+                            'choice_label' => 'vistaEdicionV2',
                             'query_builder' => function (EntityRepository $er) {
                                                                                     return $er->createQueryBuilder('c')
                                                                                               ->where('c.automatico = :automatico')
