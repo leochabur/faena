@@ -1671,6 +1671,7 @@ class GestionFaenaController extends Controller
                       $define = $proceso->getProcesoFaena()->atributoAsignadoAArticulo($articulo, $atributo);
                       if (($define == 'N') || ($define))
                       {
+
                           if ($valor->getMostrar())
                           {                            
                               $headers[$atributo->getId()] = ['data' => $atributo, 'numeric' => $valor->isNumeric(), 'decimales' => 2];
@@ -1682,6 +1683,7 @@ class GestionFaenaController extends Controller
                           $body[$i]['art'] = $mov->getArtProcFaena()->getArticulo();
                           if ($acumular)
                           {                        
+
                               $rounded[$atributo->getId()] = $valor->getDecimales();
                               if (!array_key_exists($atributo->getId(), $totales))
                               {
@@ -2098,7 +2100,7 @@ class GestionFaenaController extends Controller
         $procesoFaenaDiariaDestino = $faena->getProceso($procesoDestino->getId());
         if (!$procesoFaenaDiariaDestino) //no esta configurado el articulo para manejar el stock
         {
-            return new JsonResponse(['status' => false, 'message' => 'El proceso de destino es inexistente!!!']);
+            return new JsonResponse(['status' => false, 'message' => 'El proceso de '.$procesoDestino.' es inexistente!!!']);
         }
 
         //del movimiento actual recupera el ARTATRCONC sino lo crea
@@ -2139,7 +2141,7 @@ class GestionFaenaController extends Controller
         $entrada->setFaenaDiaria($faena);
         $entrada->setProcesoFnDay($procesoFaenaDiariaDestino);
         $entrada->setArtProcFaena($artAtrConDestino);
-        $entrada->setProcesado(true);
+        $entrada->setProcesado(false);
 
         ///copia los valores del movimiento orginial a los nuevos movimientos
         foreach ($movimiento->getValores() as $valor)

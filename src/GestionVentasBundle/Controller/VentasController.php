@@ -149,14 +149,17 @@ class VentasController extends Controller
     		$fecha = \DateTime::createFromFormat('Ymd', $data['fecha']);
     		$parameters['fecha'] = $fecha;
     	}
-
-    	$form = $this->getFormIngresarVenta($fecha);
+        $url = $this->generateUrl('vtas_generate_procesar');
+    	$form = $this->getFormIngresarVenta($url, $fecha);
     	$parameters['form'] = $form->createView();
         return $this->render('@GestionVentas/ventas/nuevaVenta.html.twig', $parameters);
     }
 
-    private function getFormIngresarVenta($fecha = null)
+    private function getFormIngresarVenta($url, $fecha = null, $comprobante = null)
     {
+        $dataCom = ($comprobante?$comprobante->getComentario(): '');
+        $cliente = ($comprobante?$comprobante->getEntidad(): null);
+        $horario = ($comprobante?$comprobante->getHorarioCarga(): null);
     	$form =$this->createFormBuilder()
     				->add('fecha', 
     					  DateType::class, 
@@ -167,9 +170,15 @@ class VentasController extends Controller
                                                     new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
                                              ]
                            ])
-    				->add('comentario', TextareaType::class)
+    				->add('comentario', TextareaType::class, ['data' => $dataCom])
+                    ->add('horarioCarga',
+                           EntityType::class, [
+                                                'class' => 'GestionFaenaBundle\Entity\faena\HorarioCarga',
+                                                'data' => $horario
+                            ])
                     ->add('cliente', 
                           EntityType::class, [
+                          'data' => $cliente,
                           'class' => EntidadExterna::class,                          
                           'query_builder' => function (EntityRepository $er) {
 																		        return $er->createQueryBuilder('e')
@@ -180,8 +189,8 @@ class VentasController extends Controller
 																						  ->orderBy('e.valor');
 																		     },
                     ])
-                    ->add('siguiente', SubmitType::class, ['label' => 'Siguiente >>'])    
-                    ->setAction($this->generateUrl('vtas_generate_procesar'))  
+                    ->add('siguiente', SubmitType::class, ['label' => ($comprobante?'Modificar' : 'Siguiente >>')])    
+                    ->setAction($url)  
                     ->setMethod('POST')               
                     ->getForm();
         return $form;
@@ -192,7 +201,8 @@ class VentasController extends Controller
      */
     public function procesarGenerarVentaAction(Request $request)
     {
-    	$form = $this->getFormIngresarVenta();
+        $url = $this->generateUrl('vtas_generate_procesar');
+    	$form = $this->getFormIngresarVenta($url);
     	$form->handleRequest($request);
     	if ($form->isValid())
     	{
@@ -214,6 +224,7 @@ class VentasController extends Controller
     		$compVenta = new ComprobanteVenta();
     		$compVenta->setUserAlta($this->getUser());
     		$compVenta->setComentario($data['comentario']);
+            $compVenta->setHorarioCarga($data['horarioCarga']);
     		$compVenta->setFecha($data['fecha']);
     		$compVenta->setEntidad($data['cliente']);
 
@@ -232,6 +243,8 @@ class VentasController extends Controller
     {
     	$em = $this->getDoctrine()->getManager();
     	$comprobante = $em->find(ComprobanteVenta::class, $id);
+
+        $formUpd = $this->getFormIngresarVenta('', $comprobante->getFecha(), $comprobante);
 
     	$repoArticulos = $em->getRepository(Articulo::class);
 
@@ -269,6 +282,7 @@ class VentasController extends Controller
     																		  'ventas' => $formVentas,
     																		  'articulos' => $listaArticulos,
     																		  'tipos' => $tiposItem,
+                                                                              'form' => $formUpd->createView(),
     																		  'back' => $form->createView()]);
     }
 
@@ -365,7 +379,8 @@ class VentasController extends Controller
      */
     public function detalleVentasEnFecha(Request $request)
     {
-    	$form = $this->getFormIngresarVenta();
+        $url = $this->generateUrl('vtas_generate_procesar');
+    	$form = $this->getFormIngresarVenta($url);
     	$form->handleRequest($request);
     	$data = $form->getData();
     	$em = $this->getDoctrine()->getManager();

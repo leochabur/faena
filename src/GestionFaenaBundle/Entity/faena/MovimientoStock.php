@@ -101,7 +101,7 @@ abstract class MovimientoStock
     private $fechaBaja;
 
     /**
-     * @ORM\Column(name="procesado", type="boolean", options={"default":true})
+     * @ORM\Column(name="procesado", type="boolean", options={"default":false})
      */
     private $procesado = false; //para el caso del proceso Transityo Congelado indica si los movimientos ya fueron enviados a la Camara
 

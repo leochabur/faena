@@ -27,6 +27,7 @@ class ArticuloAtributoConceptoType extends AbstractType
                                                                                     return $er->createQueryBuilder('c')
                                                                                               ->where('c.automatico = :automatico')
                                                                                               ->andWhere('c.activo = :activo')
+                                                                                              ->orderBy('c.procesoFaena')
                                                                                               ->setParameter('automatico', false)
                                                                                               ->setParameter('activo', true);
                                                                                 }

@@ -87,6 +87,13 @@ class ComprobanteVenta extends MovimientoStock
     private $ordenCarga;
 
     /**
+    * @ORM\ManyToOne(targetEntity="HorarioCarga") 
+    * @ORM\JoinColumn(name="id_hr_cga", referencedColumnName="id", nullable=true)
+    */      
+    private $horarioCarga;
+
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -453,5 +460,29 @@ class ComprobanteVenta extends MovimientoStock
     public function getUserFinalizacion()
     {
         return $this->userFinalizacion;
+    }
+
+    /**
+     * Set horarioCarga
+     *
+     * @param \GestionFaenaBundle\Entity\faena\HorarioCarga $horarioCarga
+     *
+     * @return ComprobanteVenta
+     */
+    public function setHorarioCarga(\GestionFaenaBundle\Entity\faena\HorarioCarga $horarioCarga = null)
+    {
+        $this->horarioCarga = $horarioCarga;
+
+        return $this;
+    }
+
+    /**
+     * Get horarioCarga
+     *
+     * @return \GestionFaenaBundle\Entity\faena\HorarioCarga
+     */
+    public function getHorarioCarga()
+    {
+        return $this->horarioCarga;
     }
 }

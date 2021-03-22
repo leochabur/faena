@@ -11,50 +11,51 @@
 	</div>
 {% endfor %}
 {% if fatr is not defined %}
-	<div class="card">
-  		<div class="card-body">
-			{% if errors is defined %}
-				<ul>
-					{% for error in errors %}
-					    <li class="list-group-item list-group-item-danger">{{ error.message }}</li>
-					{% endfor %}
-				</ul>
-			{% endif %}
-			{{ form_start(form, {'attr' : {'novalidate' : 'novalidate'}}) }}
-			<div class="row">
-				<div class="col">
-						{{ form_label(form.tipoMovimiento) }}
-						{{ form_widget(form.tipoMovimiento, {'attr' : {'class' : 'tipos'}}) }}
-				</div>
-				<div class="col">
-						{{ form_label(form.conMovProc, 'Concepto de Movimiento') }}
-						{{ form_widget(form.conMovProc, {'attr' : {'class' : 'conceptos'}}) }}
-				</div>
-				<div class="col">
-						{{ form_label(form.artProcFaena, 'Articulo') }}
-						{{ form_widget(form.artProcFaena, {'attr' : {'class' : 'articulos'}}) }}
-				</div>
-				{{ form_widget(form.proceso, {'attr' : {'class' : 'proceso'}}) }}
-			</div>
-			<div class="row">
-				<div class="col-lg-4 col-sm-12">
-						{{ form_widget(form.guardar) }}
-				</div>
-				<div class="col-lg-8 col-sm-12 text-right">
-						<a href="#" data-toggle="modal" data-target="#fullHeightModalRight"><i class="far fa-question-circle fa-2x mt-3"></i></a>
-				</div>
-			</div>
-				{% if form.automatic is defined %}
-				<div class="row">
-					<div class="col">
-							{{ form_widget(form.automatic, {'attr' : {'class' : 'btn btn-warning'}}) }}
+	{% if not proceso.procesoFaena.isTransito %}
+			<div class="card">
+		  		<div class="card-body">
+					{% if errors is defined %}
+						<ul>
+							{% for error in errors %}
+							    <li class="list-group-item list-group-item-danger">{{ error.message }}</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+					{{ form_start(form, {'attr' : {'novalidate' : 'novalidate'}}) }}
+					<div class="row">
+						<div class="col">
+								{{ form_label(form.tipoMovimiento) }}
+								{{ form_widget(form.tipoMovimiento, {'attr' : {'class' : 'tipos'}}) }}
+						</div>
+						<div class="col">
+								{{ form_label(form.conMovProc, 'Concepto de Movimiento') }}
+								{{ form_widget(form.conMovProc, {'attr' : {'class' : 'conceptos'}}) }}
+						</div>
+						<div class="col">
+								{{ form_label(form.artProcFaena, 'Articulo') }}
+								{{ form_widget(form.artProcFaena, {'attr' : {'class' : 'articulos'}}) }}
+						</div>
+						{{ form_widget(form.proceso, {'attr' : {'class' : 'proceso'}}) }}
 					</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-12">
+								{{ form_widget(form.guardar) }}
+						</div>
+						<div class="col-lg-8 col-sm-12 text-right">
+								<a href="#" data-toggle="modal" data-target="#fullHeightModalRight"><i class="far fa-question-circle fa-2x mt-3"></i></a>
+						</div>
+					</div>
+						{% if form.automatic is defined %}
+						<div class="row">
+							<div class="col">
+									{{ form_widget(form.automatic, {'attr' : {'class' : 'btn btn-warning'}}) }}
+							</div>
+						</div>
+					{% endif %}
+					{{ form_end(form) }}
 				</div>
-			{% endif %}
-			{{ form_end(form) }}
-		</div>
-	</div>
-
+			</div>
+	{% endif %}
 {% endif %}
 
 <div class="card">
@@ -96,38 +97,43 @@
 						</td>
 					{% endfor %}
 					{% set trx = m.trx %}
-					<td>
-						<a class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-							<i class="fas fa-align-justify fa-1x"></i>								
-						</a>
-						<div class="dropdown-menu">
- 		 							<a class="dropdown-item"  
- 		 							   href="{{ path('bd_adm_get_detalle_movimientos_proceso', { proc : proceso.id, fd : faena.id, art : kart }) }}">
-  											<button class="btn btn-warning btn-sm">Ver Movimientos</button>
-  									</a>
-  									{% if  proceso.procesoFaena.getAdmiteCombinado %}
-	 		 							<a class="dropdown-item"  
-	 		 							   href="{{ path('bd_adm_romanea_articulos_proceso_medium', { proc : proceso.id, fd : faena.id, art : kart }) }}">
-	  											<button class="btn btn-danger btn-sm">Registrar Salida</button>
-	  									</a>
-  									{% endif %}
-  						</div>
-							{% if formsDelete is defined %}
-								<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify fa-1x"></i></a>
+					<td class="text-center">
+						{% if not proceso.procesoFaena.isTransito %}
+								<a class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+									<i class="fas fa-align-justify fa-1x"></i>								
+								</a>
 								<div class="dropdown-menu">
- 		 							<a class="dropdown-item {% if trx %} disabled {% endif %}"  
- 		 							   href="{{ path('bd_adm_mov_st_edit',{mov : m.id, proc : proceso.id, art : m.art.id , fanday : faena.id}) }}">
-  											<button class="btn btn-warning btn-sm {% if trx %} disabled {% endif %}">Editar</button>
-  									</a>
-  									{% if is_granted('ROLE_ADMIN') %}
-	  									<div class="dropdown-item">
-	  												{{ form_start(formsDelete[m.id], {'attr' : {'class' : 'sendDelete'}}) }}
-											    	{{ form_widget(formsDelete[m.id].delete, {'attr' : {'data-mov' : m.id, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
-											    	{{ form_end(formsDelete[m.id]) }}
-	  									</div>
-	  								{% endif %}
-								</div>
-							{% endif %}
+		 		 							<a class="dropdown-item"  
+		 		 							   href="{{ path('bd_adm_get_detalle_movimientos_proceso', { proc : proceso.id, fd : faena.id, art : kart }) }}">
+		  											<button class="btn btn-warning btn-sm">Ver Movimientos</button>
+		  									</a>
+		  									{% if  proceso.procesoFaena.getAdmiteCombinado %}
+			 		 							<a class="dropdown-item"  
+			 		 							   href="{{ path('bd_adm_romanea_articulos_proceso_medium', { proc : proceso.id, fd : faena.id, art : kart }) }}">
+			  											<button class="btn btn-danger btn-sm">Registrar Salida</button>
+			  									</a>
+		  									{% endif %}
+		  						</div>
+									{% if formsDelete is defined %}
+										<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fas fa-align-justify fa-1x"></i></a>
+										<div class="dropdown-menu">
+		 		 							<a class="dropdown-item {% if trx %} disabled {% endif %}"  
+		 		 							   href="{{ path('bd_adm_mov_st_edit',{mov : m.id, proc : proceso.id, art : m.art.id , fanday : faena.id}) }}">
+		  											<button class="btn btn-warning btn-sm {% if trx %} disabled {% endif %}">Editar</button>
+		  									</a>
+		  									{% if is_granted('ROLE_ADMIN') %}
+			  									<div class="dropdown-item">
+			  												{{ form_start(formsDelete[m.id], {'attr' : {'class' : 'sendDelete'}}) }}
+													    	{{ form_widget(formsDelete[m.id].delete, {'attr' : {'data-mov' : m.id, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
+													    	{{ form_end(formsDelete[m.id]) }}
+			  									</div>
+			  								{% endif %}
+										</div>
+									{% endif %}
+						{% else %}
+							<a class="btn btn-sm btn-warning" href="{{ path('bd_adm_get_detalle_movimientos_proceso', { proc : proceso.id, fd : faena.id, art : kart }) }}">
+		  									Ver >></a>
+						{% endif %}
 					</td>
 					</tr>
 				{% endfor %}

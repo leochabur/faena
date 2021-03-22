@@ -18,10 +18,11 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                                FROM GestionFaenaBundle:faena\MovimientoStock p 
                                JOIN p.artProcFaena artAtrCon
                                JOIN artAtrCon.articulo art
-                               WHERE p.procesoFnDay = :proceso AND p.visible = :visible AND p.eliminado = :eliminado
+                               WHERE p.procesoFnDay = :proceso AND p.visible = :visible AND p.eliminado = :eliminado AND p.procesado = :procesado
                                ORDER BY art.nombre, p.id')
             		->setParameter('proceso', $proceso)
                 ->setParameter('visible', true)
+                ->setParameter('procesado', false)
                 ->setParameter('eliminado', false)
             		->getResult();
     }
