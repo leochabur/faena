@@ -161,7 +161,7 @@ class VentasController extends Controller
         $cliente = ($comprobante?$comprobante->getEntidad(): null);
         $horario = ($comprobante?$comprobante->getHorarioCarga(): null);
     	$form =$this->createFormBuilder()
-    				->add('fecha', 
+    				->add('fechaComprobante', 
     					  DateType::class, 
     					  ['widget' => 'single_text',
     					   'required' => true,
@@ -189,6 +189,7 @@ class VentasController extends Controller
 																						  ->orderBy('e.valor');
 																		     },
                     ])
+                    ->add('fecha', HiddenType::class, ['data' => ($fecha?$fecha->format('Ymd'):null)])
                     ->add('siguiente', SubmitType::class, ['label' => ($comprobante?'Modificar' : 'Siguiente >>')])    
                     ->setAction($url)  
                     ->setMethod('POST')               
@@ -225,7 +226,7 @@ class VentasController extends Controller
     		$compVenta->setUserAlta($this->getUser());
     		$compVenta->setComentario($data['comentario']);
             $compVenta->setHorarioCarga($data['horarioCarga']);
-    		$compVenta->setFecha($data['fecha']);
+    		$compVenta->setFecha($data['fechaComprobante']);
     		$compVenta->setEntidad($data['cliente']);
 
     		
@@ -237,6 +238,46 @@ class VentasController extends Controller
     }
 
     /**
+     * @Route("/updformvta/{id}", name="vtas_update_form_ventas", methods={"POST"})
+     */
+    public function updateFormVentas($id, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $comprobante = $em->find(ComprobanteVenta::class, $id);
+
+        if ($comprobante->getConfirmado())
+        {
+            $this->addFlash(
+                      'error',
+                      'El comprobante ya ha sido impreso!!'
+                  );
+            return $this->redirectToRoute('vtas_agregar_articulos', ['id' => $id]);
+        }
+
+        $url = $this->generateUrl('vtas_update_form_ventas', ['id' => $id]);
+        $form = $this->getFormIngresarVenta($url, $comprobante->getFecha(), $comprobante);
+
+        $form->handleRequest($request);
+
+        if ($form->isValid())
+        {
+            $data = $form->getData();
+            $comprobante->setComentario($data['comentario']);
+            $comprobante->setFecha($data['fechaComprobante']);
+            $comprobante->setEntidad($data['cliente']);
+            $comprobante->setHorarioCarga($data['horarioCarga']);
+            $em->flush();
+            return $this->redirectToRoute('vtas_generate', ['request' => $request], 307);
+        }
+        $this->addFlash(
+                  'error',
+                  'Todos los campos son obligatorios!'
+              );
+        return $this->redirectToRoute('vtas_agregar_articulos', ['id' => $id]);
+    }
+
+
+    /**
  	 * @Route("/addart/{id}", name="vtas_agregar_articulos")
      */
     public function agregarArticulosAComprobanteVentaAction($id)
@@ -244,7 +285,8 @@ class VentasController extends Controller
     	$em = $this->getDoctrine()->getManager();
     	$comprobante = $em->find(ComprobanteVenta::class, $id);
 
-        $formUpd = $this->getFormIngresarVenta('', $comprobante->getFecha(), $comprobante);
+        $url = $this->generateUrl('vtas_update_form_ventas', ['id' => $id]);
+        $formUpd = $this->getFormIngresarVenta($url, $comprobante->getFecha(), $comprobante);
 
     	$repoArticulos = $em->getRepository(Articulo::class);
 
@@ -390,7 +432,7 @@ class VentasController extends Controller
 
     	$articulos = $em->getRepository(Articulo::class)->getListaArticulosConCategoria();
 
-    	$comprobantes = $repository->getComprobantesVenta($data['fecha']);
+    	$comprobantes = $repository->getComprobantesVenta($data['fechaComprobante']);
 
     	$body = [];
 

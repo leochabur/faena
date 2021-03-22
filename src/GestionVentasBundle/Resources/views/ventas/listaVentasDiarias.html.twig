@@ -70,6 +70,7 @@
       <tr>
           <th class="fixed-side" rowspan="2">Destinatario</th>
           <th rowspan="2">Numero</th>
+          <th rowspan="2">Hora Carga</th>
           <th rowspan="2"></th>          
           
           {% for a in articulos %}
@@ -93,6 +94,7 @@
             <tr class="color {{ color }}">
               <th class="fixed-side {{ color }}">{{ cmp.entidad }}</th>
               <td>{{ "%06d" | format(cmp.numero) }}</td>
+              <td>{{ cmp.horarioCarga }}</td>
               <td>
                     <a href="{{ path('vtas_agregar_articulos', { id : cmp.id }) }}"><i class="far fa-edit" title="Modificar"></i></a>
                     <a href="{{ path('vtas_delete_comprobante_venta', { id : cmp.id }) }}" data-action="eliminar" data-index="{{ cmp.entidad}}" class="deletecmp"><i class="far fa-trash-alt" title="Eliminar"></i></a>

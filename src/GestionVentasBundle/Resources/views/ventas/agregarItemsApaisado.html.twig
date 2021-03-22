@@ -58,13 +58,13 @@
 
 <br>
 <hr>
-<span class="h5 card-title">Agregar Articulos</span>
+
 
 {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class' : 'updvta'}}) }}
           <div class="form-row">
             <div class="col-lg-4 col-sm-12">
-              {{ form_label(form.fecha) }}
-              {{ form_widget(form.fecha, {'attr' : {'class' : 'date' }}) }}
+              {{ form_label(form.fechaComprobante) }}
+              {{ form_widget(form.fechaComprobante, {'attr' : {'class' : 'date' }}) }}
             </div>
             <div class="col-lg-5 col-sm-12">
               {{ form_label(form.cliente) }}
@@ -81,6 +81,7 @@
               {{ form_widget(form.comentario) }}
             </div>
           </div>
+          {% include '@GestionFaena/messages.html.twig'  %}
           <div class="form-row mt-4">
             <div class="col-lg-12 col-sm-12">
               {{ form_widget(form.siguiente) }}
@@ -89,18 +90,6 @@
 {{ form_end(form) }}
 
 
-
-
-
-
-<div class="row mt-4">
-  <div class="col-lg-4">
-    Fecha: {{ comprobante.fecha|date('d/m/Y') }}
-  </div>
-  <div class="col-lg-4">
-    Destinatario: {{ comprobante.entidad }}
-  </div>
-</div>
 {% if comprobante.confirmado %}
     <div class="row mt-4">
         <div class="col-lg-4 fs-5 text-danger">
@@ -108,7 +97,6 @@
         </div>
     </div>
 {% endif %}
-<hr>
 {% for message in app.flashes('sussecc') %}
 	<div class="alert alert-success" role="alert">
 	  {{ message }}
@@ -116,6 +104,9 @@
 {% endfor %}
 {% endblock %}
 {% block out_container %}
+  <hr>
+<span class="h5 card-title">Agregar Articulos</span>
+<hr>
 <div id="table-scroll" class="table-scroll">
   <div class="table-wrap">
   <table class="table table-sm main-table">
