@@ -397,4 +397,24 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                     ->getResult();
     }
 
+    public function getMovimientosInformePolloVivo(\DateTime $desde, \DateTime $hasta, \GestionFaenaBundle\Entity\ProcesoFaena $proceso)
+    {
+        return $this->getEntityManager()
+                    ->createQuery('SELECT e
+                                   FROM GestionFaenaBundle:faena\EntradaStock e
+                                   JOIN e.faenaDiaria faena
+                                   JOIN e.procesoFnDay pfd
+                                   JOIN pfd.procesoFaena proceso
+                                   WHERE proceso = :proceso AND
+                                         faena.fechaFaena BETWEEN :desde AND :hasta AND
+                                         e.visible = :visible AND
+                                         e.eliminado = :eliminado')
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('desde', $desde)
+                    ->setParameter('hasta', $hasta)
+                    ->setParameter('visible', true)
+                    ->setParameter('eliminado', false)
+                    ->getResult();
+    }
+
 }

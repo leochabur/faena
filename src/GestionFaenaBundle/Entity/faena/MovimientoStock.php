@@ -126,6 +126,38 @@ abstract class MovimientoStock
     }
 
 
+    public function contieneValorDelAtributoExterno($arrayOfEntidades, $classGroup)
+    {
+        $arrayValues = [];
+        $arrayAux = [];
+        $group = null;
+        foreach ($this->valores as $val)
+        {
+            if (is_object($val->getDataValue()) && get_class($val->getDataValue()) == $classGroup)
+            {
+                $group = $val->getDataValue();
+            }
+
+            if ($val->getAtributo()->getMostrar())
+            {
+                
+                $key = ($val->getAtributo()?$val->getAtributo()->getAtributoAbstracto():$val->getAtributoAbstracto());
+                $arrayValues[$key->getId()] = [0 => $key, 
+                                               1 => $val->getAtributo(),
+                                               2 => $val->getDataValue()];
+            }
+
+            if (get_class($val) == ValorExterno::class)
+            {
+                if (in_array($val->getDataValue(), $arrayOfEntidades)) //tiene configurada la entidad
+                {
+                    $arrayAux[$val->getDataValue()->getId()] = true;
+                }
+            }
+        }
+        return ['status' => (count($arrayAux) == count($arrayOfEntidades)), 'values' => $arrayValues, 'group' => $group];
+    }
+
     public function getValorWhitAtribute(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo, $espejo = false)
     {
         $value = null;

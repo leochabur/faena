@@ -22,6 +22,11 @@ use GestionFaenaBundle\Entity\gestionBD\AtributoMedibleAutomatico;
 use GestionFaenaBundle\Form\gestionBD\AtributoInformableExternoType;
 use GestionFaenaBundle\Form\gestionBD\AtributoInformableArbitrarioType;
 use GestionFaenaBundle\Entity\gestionBD\AtributoInformableExterno;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use GestionFaenaBundle\Entity\gestionBD\Transportista;
+use GestionFaenaBundle\Entity\gestionBD\Granja;
+use GestionFaenaBundle\Entity\gestionBD\Cargador;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use GestionFaenaBundle\Entity\gestionBD\AtributoInformableArbitrario;
 use GestionFaenaBundle\Entity\gestionBD\Atributo;
 use GestionFaenaBundle\Form\ProcesoInicioType;
@@ -933,6 +938,208 @@ class InformesController extends Controller
         $pdf->ln();
       }
       return $pdf;
+    }
+
+    private function getFormInformePolloVivo()
+    {
+        $form = $this->createFormBuilder()
+                    ->add('desde', 
+                          DateType::class, 
+                          ['widget' => 'single_text',
+                           'required' => true,
+                           'constraints' => [
+                                                    new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
+                                             ]
+                           ])
+                    ->add('hasta', 
+                          DateType::class, 
+                          ['widget' => 'single_text',
+                           'required' => true,
+                           'constraints' => [
+                                                    new NotNull(['message' => 'Debe seleccionar una fecha!!!']),
+                                             ]
+                           ])
+                      ->add('transporte', 
+                            EntityType::class, 
+                            ['class' => Transportista::class, 
+                              'required' => false,
+                              'placeholder' => 'Todos...',
+                               'choice_label' => 'titular',
+                             'query_builder' => function (EntityRepository $er) {
+                                                                                        return $er->createQueryBuilder('t')
+                                                                                                  ->orderBy('t.titular', 'ASC');
+                                                                                                }
+                            ])
+                      ->add('agrupar', ChoiceType::class, [
+                                                                    'choices'  => [
+                                                                        'Transportista' => Transportista::class,
+                                                                        'Granja' => Granja::class,
+                                                                        'Cargador' => Cargador::class,
+                                                                    ],
+                                                                ])
+                      ->add('cargador', 
+                            EntityType::class, 
+                            ['class' => Cargador::class, 
+                            'required' => false,
+                            'placeholder' => 'Todos...',
+                             'query_builder' => function (EntityRepository $er) {
+                                                                                        return $er->createQueryBuilder('t')
+                                                                                                  ->orderBy('t.valor', 'ASC');
+                                                                                                }
+                            ])
+                      ->add('granja', 
+                            EntityType::class, 
+                            ['class' => Granja::class, 
+                            'required' => false,
+                            'placeholder' => 'Todos...',
+                             'query_builder' => function (EntityRepository $er) {
+                                                                                        return $er->createQueryBuilder('t')
+                                                                                                  ->orderBy('t.valor', 'ASC');
+                                                                                                }
+                            ])
+
+                        ->add('cargar', SubmitType::class, ['label' => 'Cargar'])
+                        ->getForm();
+        return $form;
+    }
+
+    /**
+     * @Route("/informes/pollovivo", name="informes_pollo_vivo", methods={"POST", "GET"})
+     */
+    public function generarInformePolloVivo(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $proceso = $em->find(ProcesoFaena::class, 1); //horrible---reescribir
+
+        $form = $this->getFormInformePolloVivo();
+        if ($request->isMethod('POST'))
+        {
+          $form->handleRequest($request);
+          $data = $form->getData();
+          $repository = $em->getRepository(MovimientoStock::class);
+          $movimientos = $repository->getMovimientosInformePolloVivo($data['desde'], $data['hasta'], $proceso);
+
+
+          $arrayOfEntidades = [];
+          if ($data['granja'])
+          {
+            $arrayOfEntidades[] = $data['granja'];
+          }
+          if ($data['cargador'])
+          {
+            $arrayOfEntidades[] = $data['cargador'];
+          }
+          if ($data['transporte'])
+          {
+            $arrayOfEntidades[] = $data['transporte'];
+          }
+
+          $classGroup = $data['agrupar']; //representa cual es la clae por la cual debe agrupar los datos (Transporte, Granja, Cargador)
+
+          $header['FECHA'] = ['sort' => 0, 'value' => 'FECHA'];
+          $data = [];
+          $acumulador = [];
+          $i = 0;
+          $dataSort = [];
+          $totales = [];
+
+          foreach ($movimientos as $mov)
+          {
+            $result = $mov->contieneValorDelAtributoExterno($arrayOfEntidades, $classGroup);
+            if ($result['status'])
+            {
+
+                $values = $result['values'];
+
+                $group = $result['group']->getValor();//entidad por la cual agrupar los valores
+
+                if (!array_key_exists($group, $dataSort))
+                {
+                  $dataSort[$group] = [];
+                }
+
+                if (!array_key_exists($group, $totales))
+                {
+                  $totales[$group] = [];
+                }
+
+                $dataSort[$group][$i]['FECHA'] =  ['decimales' => 0, 
+                                                   'value' => $mov->getFaenaDiaria()->getFechaFaena()->format('d/m/Y'), 
+                                                   'align' => false, 
+                                                   'total' => false, 
+                                                   'numeric' => false,
+                                                   'promedia' => false];
+                foreach ($values as $v)
+                {
+                    $numeric = ($v[1]->getType()==1?true:false);
+                    $decimales = ($v[1]->getDecimales()?$v[1]->getDecimales():0);
+                    $dataSort[$group][$i][$v[0]->getId()] = ['decimales' => $decimales, 
+                                                             'value' => $v[2], 
+                                                             'align' => 'true', 
+                                                             'total' => false, 
+                                                             'numeric' => $numeric,
+                                                             'promedia' => false];
+
+                    if ($v[1]->getAcumula())
+                    {
+                        if (!array_key_exists($v[0]->getId(), $totales[$group]))
+                        {
+                          $totales[$group][$v[0]->getId()] = ['decimales' => $decimales, 
+                                                              'value' => 0, 
+                                                              'count' => 0, 
+                                                              'total' => true, 
+                                                              'numeric' => $numeric,
+                                                              'promedia' => $v[1]->getPromedia()];
+                        }
+                        $totales[$group][$v[0]->getId()]['value']+= $v[2];
+                        $totales[$group][$v[0]->getId()]['count']++;
+                    }
+
+                    if (!array_key_exists($v[0]->getId(), $header))
+                    {
+                      $header[$v[0]->getId()] = ['sort' => $v[1]->getPosicion(), 'value' => $v[0]];
+                    }
+                }
+
+                $i++;
+            }
+          }
+          ksort($dataSort);
+          $totalGral['TOTAL GENERAL'] = [];
+          foreach ($totales as $lines) //recorre el array de totales, para calcular si asi se indicara se debe sacar el promedio o no
+          {
+              foreach ($lines as $k => $val)
+              {
+                if(!array_key_exists($k, $totalGral['TOTAL GENERAL']))
+                {
+                    $totalGral['TOTAL GENERAL'][$k] = ['decimales' => $val['decimales'], 
+                                      'value' => 0, 
+                                      'count' => 0, 
+                                      'total' => true, 
+                                      'numeric' => true,
+                                      'promedia' => $val['promedia']];
+                }
+
+                $totalGral['TOTAL GENERAL'][$k]['value']+= ($val['promedia']?($val['value']/$val['count']):$val['value']);
+                $totalGral['TOTAL GENERAL'][$k]['count']++;
+              }
+          }
+
+          foreach ($dataSort as $key => $val)
+          {
+              array_push($dataSort[$key], $totales[$key]);
+          }
+
+          array_push($dataSort, $totalGral);
+
+          return $this->render('@GestionFaena/informes/informePolloVivo.html.twig', 
+                               ['data' => $dataSort, 'header' => $header, 'form' => $form->createView()]);
+
+          return new Response(print_r($data));
+        }
+        return $this->render('@GestionFaena/informes/informePolloVivo.html.twig', ['form' => $form->createView()]);
+
     }
 
 

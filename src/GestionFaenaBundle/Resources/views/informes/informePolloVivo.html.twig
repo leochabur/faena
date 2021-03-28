@@ -1,0 +1,111 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<div class="text-left">
+	<span class="h5 card-title">INFORME POLLO VIVO</span>
+</div>
+<hr>
+      {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+      <div class="form-row">
+      	<div class="col col-lg-4">
+      		{{ form_label(form.desde) }}
+      		{{ form_widget(form.desde) }}
+      	</div>
+      	<div class="col col-lg-4">
+      		{{ form_label(form.hasta) }}
+      		{{ form_widget(form.hasta) }}
+      	</div>
+      </div>
+      <div class="form-row">
+      	<div class="col col-lg-4">
+      		{{ form_label(form.transporte) }}
+      		{{ form_widget(form.transporte) }}
+      	</div>
+      	<div class="col col-lg-4">
+      		{{ form_label(form.cargador) }}
+      		{{ form_widget(form.cargador) }}
+      	</div>
+        <div class="col col-lg-4">
+          {{ form_label(form.granja) }}
+          {{ form_widget(form.granja) }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col col-lg-4">
+          {{ form_label(form.agrupar, 'Agrupar por ...') }}
+          {{ form_widget(form.agrupar) }}
+        </div>
+      </div>
+      <div class="form-row">
+      	<div class="col col-lg-4">
+      		{{ form_widget(form.cargar) }}
+      	</div>
+      </div>
+      {{ form_end(form) }}
+
+      {% if header is defined%}
+        <table class="table table-striped table-bordered table-hover table-sm ">
+          <thead>
+            <tr>
+              {% for h in header %}
+                <th>{{ h.value }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for group in data %}
+
+                {% for line in group %}
+                    <tr>
+                      {% set index = 0 %}
+                      {% for k, h in header %}
+                            {% set fontClass = "" %}    
+
+                            {% if line[k] is defined %}
+
+                              {% if line[k].total %} {# imprime la fila de totales #}
+                                  {% set fontClass = "font-weight-bold text-right" %}
+                              {% endif %}
+
+                              {% if line[k].promedia %}
+                                  <td class="{{ fontClass }}">
+                                    {{ (line[k].value/line[k].count)|number_format(line[k].decimales, ',', '') }}
+                                  </td>
+                              {% else %}
+                                  {% if line[k].numeric %}
+                                      {% set fontClass = "text-right" %}
+                                      {% if line[k].total %}
+                                        {% set fontClass = "text-right font-weight-bold" %}
+                                      {% endif %}
+                                      <td class="{{ fontClass }}">                                    
+                                        {{ line[k].value|number_format(line[k].decimales, ',', '') }}                                    
+                                      </td>
+                                  {% else %}
+                                      <td>                                    
+                                        {{ line[k].value }}                                    
+                                      </td>                                  
+                                  {% endif %}
+                                  
+                              {% endif %}
+
+                            {% else %}
+                              {% if index == 0 %}
+                                <td class="font-weight-bold">TOTAL</td>
+                              {% else %}
+                                <td></td>
+                              {% endif %}
+
+                            {% endif %}
+                            {% set index = 1 %}
+                      {% endfor %}
+                    </tr>
+                {% endfor %}
+
+            {% endfor %}
+
+          </tbody>
+        </table>
+      {% endif %}
+{% endblock fos_user_content %}
