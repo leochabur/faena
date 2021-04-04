@@ -72,8 +72,14 @@ abstract class MovimientoStock
      */
     private $origen;
 
+
     /**
-    * @ORM\OneToOne(targetEntity="MovimientoStock") 
+    * @ORM\OneToOne(targetEntity="MovimientoStock", mappedBy="movimientoAsociado")
+    **/
+    private $movimientoHijo;
+
+    /**
+    * @ORM\OneToOne(targetEntity="MovimientoStock", inversedBy="movimientoHijo") 
     * @ORM\JoinColumn(name="id_mov_asoc", referencedColumnName="id", nullable=true)
     */      
     private $movimientoAsociado;  //para el caso de las transferencias
@@ -101,7 +107,7 @@ abstract class MovimientoStock
     private $fechaBaja;
 
     /**
-     * @ORM\Column(name="procesado", type="boolean", options={"default":true})
+     * @ORM\Column(name="procesado", type="boolean", options={"default":false})
      */
     private $procesado = false; //para el caso del proceso Transityo Congelado indica si los movimientos ya fueron enviados a la Camara
 
@@ -125,6 +131,38 @@ abstract class MovimientoStock
         return false;
     }
 
+
+    public function contieneValorDelAtributoExterno($arrayOfEntidades, $classGroup)
+    {
+        $arrayValues = [];
+        $arrayAux = [];
+        $group = null;
+        foreach ($this->valores as $val)
+        {
+            if (is_object($val->getDataValue()) && get_class($val->getDataValue()) == $classGroup)
+            {
+                $group = $val->getDataValue();
+            }
+
+            if ($val->getAtributo()->getMostrar())
+            {
+                
+                $key = ($val->getAtributo()?$val->getAtributo()->getAtributoAbstracto():$val->getAtributoAbstracto());
+                $arrayValues[$key->getId()] = [0 => $key, 
+                                               1 => $val->getAtributo(),
+                                               2 => $val->getDataValue()];
+            }
+
+            if (get_class($val) == ValorExterno::class)
+            {
+                if (in_array($val->getDataValue(), $arrayOfEntidades)) //tiene configurada la entidad
+                {
+                    $arrayAux[$val->getDataValue()->getId()] = true;
+                }
+            }
+        }
+        return ['status' => (count($arrayAux) == count($arrayOfEntidades)), 'values' => $arrayValues, 'group' => $group];
+    }
 
     public function getValorWhitAtribute(\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo, $espejo = false)
     {
@@ -617,5 +655,29 @@ abstract class MovimientoStock
     public function getFechaBaja()
     {
         return $this->fechaBaja;
+    }
+
+    /**
+     * Set procesado
+     *
+     * @param boolean $procesado
+     *
+     * @return MovimientoStock
+     */
+    public function setProcesado($procesado)
+    {
+        $this->procesado = $procesado;
+
+        return $this;
+    }
+
+    /**
+     * Get procesado
+     *
+     * @return boolean
+     */
+    public function getProcesado()
+    {
+        return $this->procesado;
     }
 }

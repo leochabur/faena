@@ -31,4 +31,18 @@ class ArticuloAtributoConceptoRepository extends \Doctrine\ORM\EntityRepository
             		->setParameter('instance', $instanceOfTipoMovimiento)
             		->getOneOrNullResult();
 	} 
+
+    public function getAllArticulos() 
+    { 
+        return $this->getEntityManager()
+                    ->createQuery('SELECT a
+                                   FROM GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto a 
+                                   JOIN a.concepto concepto
+                                   JOIN concepto.concepto conceptoMovimiento
+                                   JOIN concepto.procesoFaena proceso
+                                   WHERE a.activo = :activo
+                                   ORDER BY proceso.nombre, conceptoMovimiento.concepto')
+                    ->setParameter('activo', true)
+                    ->getResult();
+    } 
 }

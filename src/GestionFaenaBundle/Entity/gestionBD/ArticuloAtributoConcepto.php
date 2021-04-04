@@ -69,6 +69,15 @@ class ArticuloAtributoConcepto
     private $desencadenado;
 
 
+    /**
+     * @ORM\ManyToMany(targetEntity="ArticuloAtributoConcepto")
+     * @ORM\JoinTable(name="sp_st_list_of_art_atr_con",
+     *      joinColumns={@ORM\JoinColumn(name="id_art_ori", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_art_des", referencedColumnName="id")}
+     *      )
+     */
+    private $listeners; //lista de todos los ArticuloAtributoConcepto que escuchan, y ejecutaran acciones cuando este realize alguna accion
+
     public function getFormaCalculoAutomatico()
     {
         $stock = $this->concepto->getProcesoFaena()->existeArticuloDefinidoManejoStock($this->articulo);
@@ -282,6 +291,7 @@ class ArticuloAtributoConcepto
     {
         $this->atributos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->procesosDestino = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->listeners = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -388,5 +398,39 @@ class ArticuloAtributoConcepto
     public function getDesencadenado()
     {
         return $this->desencadenado;
+    }
+
+    /**
+     * Add listener
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $listener
+     *
+     * @return ArticuloAtributoConcepto
+     */
+    public function addListener(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $listener)
+    {
+        $this->listeners[] = $listener;
+
+        return $this;
+    }
+
+    /**
+     * Remove listener
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $listener
+     */
+    public function removeListener(\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $listener)
+    {
+        $this->listeners->removeElement($listener);
+    }
+
+    /**
+     * Get listeners
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getListeners()
+    {
+        return $this->listeners;
     }
 }

@@ -4,6 +4,7 @@ namespace GestionFaenaBundle\Entity\gestionBD;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * ArticuloAtributoConcepto
  *
@@ -68,6 +69,15 @@ class ArticuloAtributoConcepto
     private $desencadenado;
 
 
+    /**
+     * @ORM\ManyToMany(targetEntity="ArticuloAtributoConcepto")
+     * @ORM\JoinTable(name="sp_st_list_of_art_atr_con",
+     *      joinColumns={@ORM\JoinColumn(name="id_art_ori", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_art_des", referencedColumnName="id")}
+     *      )
+     */
+    private $listeners; //lista de todos los ArticuloAtributoConcepto que escuchan, y ejecutaran acciones cuando este realize alguna accion
+
     public function getFormaCalculoAutomatico()
     {
         $stock = $this->concepto->getProcesoFaena()->existeArticuloDefinidoManejoStock($this->articulo);
@@ -122,6 +132,23 @@ class ArticuloAtributoConcepto
             $destino = " (".$this->articuloOrigenTransformacion.")";
         }
         return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino."($procDest)";
+    }
+
+    public function getVistaEdicionV2()
+    {
+
+        $procDest = '';
+        foreach ($this->procesosDestino as $pd) 
+        {
+            $procDest.=$pd.', ';
+        }
+
+        $destino = "";
+        if ($this->articuloOrigenTransformacion)
+        {
+            $destino = " (".$this->articuloOrigenTransformacion.")";
+        }
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()."(". $this->concepto->getId() .") - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino."($procDest)";
     }
 
     public function getId()

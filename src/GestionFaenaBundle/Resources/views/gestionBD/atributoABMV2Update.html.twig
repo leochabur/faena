@@ -12,7 +12,12 @@
 			{{  art.vistaEdicion }}
 		</div>
 	</div>
-
+	<hr>
+		{{ form_start(fupd, {'attr': {'novalidate': 'novalidate', 'class': 'updart'}}) }}
+		{{ form_widget(fupd.articulos, {'attr' : {'class' : 'form-control-sm col-lg-4'}}) }}
+		{{ form_widget(fupd.update, {'attr' : {'class' : 'btn btn-primary btn-sm'}}) }}
+		{{ form_end(fupd) }}
+	<hr>
 	<table class="table table-bordered table-hover table-striped table-sm">
 		<thead>
 			<tr>
@@ -90,6 +95,17 @@
 	{{ parent() }}
 	<script type="text/javascript">
 		$(document).ready(function(){
+
+									$('.updart').submit(function (event){
+																		event.preventDefault();
+																		var form = $(this);
+																		$.post(form.attr('action'),
+																			   form.serialize(),
+																			   function(data){
+																			   					alert(data);
+																			   });
+									});
+
 									$('.back').click(function(){window.history.back();});
 									var route = "{{ path('bd_delete_atributo', {atr : '_ID_ATR'}) }}";
 									$('.editatr').submit(function(event){

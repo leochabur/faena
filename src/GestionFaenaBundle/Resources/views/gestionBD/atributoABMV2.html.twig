@@ -26,12 +26,79 @@
 		</div>
 	</div>
 	{{ form_end(form) }}
-
+	<p id='upgrade' class='mt-5'></p>
+	<p id='listeners' class='mt-2'></p>
 {% endblock fos_user_content %}
 
 {% block javascripts %}
 
 <script type="text/javascript">
+	
+	var select  = $("<select id='select-art' class='form-control' />");
+
+	var btn = $("<button id='add-des' class='btn btn-primary' onClick='clickButton()'>Agregar Listener</button>");
+
+	$.post("{{ path('bd_get_all_articles') }}",
+			function(data){
+
+						$(data).each(function() {
+						 						select.append($("<option>").attr('value',this.id).text(this.articulo));
+						});
+			});
+
+	function clickButton()
+	{
+						   var route = "{{ path('bd_add_listener', { orig :'__ORIGEN', list: '__LISTENER'}) }}";
+						   
+						   var origen = $('.articulos').val();
+						   var listener = $('#select-art').val();
+
+						   route = route.replace('__ORIGEN', origen).replace('__LISTENER', listener);
+						   $.post(route,
+						   		  function(data){
+						   		  				if (!data.status) {
+						   		  					alert(data.message);
+						   		  				}
+						   		  				else
+						   		  				{
+						   		  					$('.articulos').trigger('change');
+						   		  				}
+						   		  });
+	};
+
+	function deleteItem(listen)
+	{
+	   var route = "{{ path('bd_delete_listener', { orig :'__ORIGEN', list: '__LISTENER'}) }}";
+	   var origen = $('.articulos').val();
+	   route = route.replace('__ORIGEN', origen).replace('__LISTENER', listen);
+	   $.post(route,
+	   		 function(data){
+	   		  				if (!data.status) {
+	   		  					alert(data.message);
+	   		  				}
+	   		  				else
+	   		  				{
+	   		  					$('.articulos').trigger('change');
+	   		  				}
+	   		 });
+		
+	};
+
+	$('.articulos').change(function() {
+
+			$('#upgrade').html(select);
+			$('#upgrade').append(btn);
+			let list = $('<ul/>');
+			let art = $(this);
+			let route = "{{ path('bd_listeners', { id : '__ART'}) }}";
+    		$.post(route.replace('__ART', art.val()),
+				   function(data){
+						$(data).each(function() {
+						 						list.append("<li>"+this.articulo+"</li><button onclick='deleteItem("+this.id+")' class='btn btn-sm btn-warning'>Delete</button>");
+						});
+						$('#listeners').html(list);
+				   });
+	});
 
 	$('.btn-delete').click(function(event){
 											event.preventDefault();

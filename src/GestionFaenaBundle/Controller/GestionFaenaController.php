@@ -58,9 +58,61 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Validation;
+use GestionFaenaBundle\Event\MovimientoEvent;
+use GestionFaenaBundle\Event\MovimientoSuscriber;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class GestionFaenaController extends Controller
+class GestionFaenaController extends Controller implements EventSubscriberInterface  
 {
+
+    private $dispatcher;
+    
+    public function __construct()
+    {
+        $this->dispatcher = new EventDispatcher();
+        $this->dispatcher->addSubscriber($this);
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return array(
+                      'movimiento.generar' => array('onMovimientoGenerado'),
+        );
+    }
+
+
+    public function onMovimientoGenerado(MovimientoEvent $event, $em)
+    {
+        $movimiento = $event->getMovimiento();
+        $em = $event->getManager();
+
+        $artAtCon = $movimiento->getArtProcFaena();
+        if ($artAtCon->getListeners()->count())
+        {
+            $destino = $movimiento->getMovimientoDestino(); //Seria la entrada al proceso por ejemplo al Transito Congelado
+            //se asume que cada Articulo solo tiene un listener....se deberia extender facilmente recorriendo el array de  listeners
+            $entrada = new EntradaStock();
+            $entrada->setProcesoFnDay($destino->getProcesoFnDay());
+            $entrada->setFaenaDiaria($destino->getFaenaDiaria());
+            $entrada->setArtProcFaena($artAtCon->getListeners()->first());
+            $entrada->setVisible(true);            
+
+            foreach ($movimiento->getValores() as $valor) {
+                $valorAtr = new ValorNumerico();
+                $valorAtr->setAtributoAbstracto($valor->getAtributo()->getAtributoAbstracto());
+                $valorAtr->setValor($valor->getValor());
+                $valorAtr->setUnidadMedida($valor->getUnidadMedida());
+                $valorAtr->setMostrar($valor->getAtributo()->getMostrar());
+                $valorAtr->setDecimales($valor->getAtributo()->getDecimales());
+                $valorAtr->setAcumula($valor->getAtributo()->getAcumula());
+                $entrada->addValore($valorAtr);
+            }
+            $destino->setVisible(false);
+            $entrada->setMovimientoAsociado($movimiento);
+            $em->persist($entrada);
+        }
+    }
 
   //////////////configura las caracteristicas de los articuslo que se veran en la vista del proceso faena
 
@@ -2419,6 +2471,9 @@ class GestionFaenaController extends Controller
               $em->persist($movimiento);
               $proceso->addMovimiento($movimiento);
               $proceso->setUltimoMovimiento(new \DateTime());
+
+              $evento = new MovimientoEvent($movimiento, $em);
+              $this->dispatcher->dispatch('movimiento.generar', $evento);
            //   if ($automatico)
               //  $em->flush();
               return $proceso;
@@ -2839,6 +2894,10 @@ class GestionFaenaController extends Controller
             $transferencia->getMovimientoOrigen()->setEliminado(true);
             $transferencia->getMovimientoDestino()->setEliminado(true);
             $transferencia->setEliminado(true);
+            if ($transferencia->getMovimientoHijo())
+            {
+              $transferencia->getMovimientoHijo()->setEliminado(true);
+            }
         }
         else
         {

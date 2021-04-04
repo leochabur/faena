@@ -590,6 +590,7 @@ class GestionBDController extends Controller
                         ->add('articulos', 
                               EntityType::class, [
                               'class' => 'GestionFaenaBundle:gestionBD\ArticuloAtributoConcepto',
+                              'required' => false,
                               'query_builder' => function (ArticuloAtributoConceptoRepository $er){
                                                                                         return $er->createQueryBuilder('a')
                                                                                                   ->innerJoin('a.articulo', 'art')
@@ -618,16 +619,137 @@ class GestionBDController extends Controller
             else 
             {
                 $articulo = $data['articulos'];
+                $fuaac = $this->getFormUpdateArticuloOfAAC($articulo->getId());
                 $forms = array();
                 foreach ($articulo->getAtributos() as $atr) 
                 {
                     $forms[$atr->getId()] = $this->getFormUpdateAtributo($atr)->createView();                    
                 }
                 $formAddDest = $this->getFormAddDestinoArtAtrCon($articulo->getId());
-                return $this->render('@GestionFaena/gestionBD/atributoABMV2Update.html.twig', array('formAdd' => $formAddDest->createView(),'art' => $articulo, 'formsAtr' => $forms));
+                return $this->render('@GestionFaena/gestionBD/atributoABMV2Update.html.twig', 
+                                     array('formAdd' => $formAddDest->createView(),
+                                            'art' => $articulo, 
+                                            'fupd' => $fuaac->createView(),
+                                            'formsAtr' => $forms));
             }
         }
         return $this->render('@GestionFaena/gestionBD/atributoABMV2.html.twig', array('form' => $form->createView()));
+    }
+
+    /**
+     * @Route("/config/allart", name="bd_get_all_articles")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function getAllArticulos()
+    { 
+        $em = $this->getDoctrine()->getManager();
+        $repository = $em->getRepository(ArticuloAtributoConcepto::class);
+        $articulos = $repository->getAllArticulos();
+
+        $lista = [];
+
+        foreach ($articulos as $art)
+        {
+            $lista[] = ['id' => $art->getId(), 'articulo' => $art->getVistaEdicion()];
+        }
+
+        return new JsonResponse($lista);
+
+    }
+
+    /**
+     * @Route("/config/addlist/{orig}/{list}", name="bd_add_listener")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function addListenerToArtAtrConc($orig, $list)
+    { 
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $repository = $em->getRepository(ArticuloAtributoConcepto::class);
+            $origen = $repository->find($orig);
+            $listener = $repository->find($list);
+
+            $origen->addListener($listener);
+            $em->flush();
+            return new JsonResponse(['status' => true]);
+        }
+        catch (\Exception $e){
+                                return new JsonResponse(['status' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @Route("/config/dellist/{orig}/{list}", name="bd_delete_listener")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function deleteListenerToArtAtrConc($orig, $list)
+    { 
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $repository = $em->getRepository(ArticuloAtributoConcepto::class);
+            $origen = $repository->find($orig);
+            $listener = $repository->find($list);
+
+            $origen->removeListener($listener);
+            $em->flush();
+            return new JsonResponse(['status' => true]);
+        }
+        catch (\Exception $e){
+                                return new JsonResponse(['status' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @Route("/config/listn/{id}", name="bd_listeners")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function listenerArtAtrConc($id)
+    {     
+        $em = $this->getDoctrine()->getManager();
+        $repository = $em->getRepository(ArticuloAtributoConcepto::class);
+
+
+
+        $aac = $repository->find($id);
+        $articulos = [];
+        foreach ($aac->getListeners() as $l)
+        {
+            $articulos[] = ['id' => $l->getId(), 'articulo' => $l->getVistaEdicion()];
+        }
+
+        return new JsonResponse($articulos);
+    }
+
+
+
+    /**
+     * @Route("/config/updart/{id}", name="bd_actualizar_articulo_of_aac")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function editarArticuloOfAACAction($id, Request $request)
+    {     
+        $em = $this->getDoctrine()->getManager();
+        $aac = $em->find(ArticuloAtributoConcepto::class, $id);
+        $fuaac = $this->getFormUpdateArticuloOfAAC($aac->getId());
+        $fuaac->handleRequest($request);
+        $data = $fuaac->getData();
+        $aac->setArticulo($data['articulos']);
+        $em->flush();
+        return new JsonResponse(['ok' => true]);
+    }
+
+    private function getFormUpdateArticuloOfAAC($art)
+    {        
+        $form =    $this->createFormBuilder(['message' => 'Type your message here'])
+                        ->add('articulos', 
+                              EntityType::class, [
+                                                'class' => 'GestionFaenaBundle:gestionBD\Articulo'
+                                            ]
+                        )
+                        ->add('update', SubmitType::class, array('label' => 'Update'))          
+                        ->setAction($this->generateUrl('bd_actualizar_articulo_of_aac', ['id' => $art]))
+                        ->getForm();
+        return $form;
     }
 
     private function getFormUpdateAtributo($atr)

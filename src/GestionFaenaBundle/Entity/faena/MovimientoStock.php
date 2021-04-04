@@ -72,8 +72,14 @@ abstract class MovimientoStock
      */
     private $origen;
 
+
     /**
-    * @ORM\OneToOne(targetEntity="MovimientoStock") 
+    * @ORM\OneToOne(targetEntity="MovimientoStock", mappedBy="movimientoAsociado")
+    **/
+    private $movimientoHijo;
+
+    /**
+    * @ORM\OneToOne(targetEntity="MovimientoStock", inversedBy="movimientoHijo") 
     * @ORM\JoinColumn(name="id_mov_asoc", referencedColumnName="id", nullable=true)
     */      
     private $movimientoAsociado;  //para el caso de las transferencias
@@ -673,5 +679,29 @@ abstract class MovimientoStock
     public function getProcesado()
     {
         return $this->procesado;
+    }
+
+    /**
+     * Set movimientoHijo
+     *
+     * @param \GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoHijo
+     *
+     * @return MovimientoStock
+     */
+    public function setMovimientoHijo(\GestionFaenaBundle\Entity\faena\MovimientoStock $movimientoHijo = null)
+    {
+        $this->movimientoHijo = $movimientoHijo;
+
+        return $this;
+    }
+
+    /**
+     * Get movimientoHijo
+     *
+     * @return \GestionFaenaBundle\Entity\faena\MovimientoStock
+     */
+    public function getMovimientoHijo()
+    {
+        return $this->movimientoHijo;
     }
 }
