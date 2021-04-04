@@ -25,10 +25,8 @@ class ArticuloAtributoConceptoType extends AbstractType
                             'choice_label' => 'vistaEdicionV2',
                             'query_builder' => function (EntityRepository $er) {
                                                                                     return $er->createQueryBuilder('c')
-                                                                                              ->where('c.automatico = :automatico')
-                                                                                              ->andWhere('c.activo = :activo')
+                                                                                              ->where('c.activo = :activo')
                                                                                               ->orderBy('c.procesoFaena')
-                                                                                              ->setParameter('automatico', false)
                                                                                               ->setParameter('activo', true);
                                                                                 }
                         ])
