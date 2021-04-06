@@ -8,7 +8,7 @@
 <div class="card">
 	<div class="card-header">
 		<div class="h5">
-			Articulo : {{ articulo }} - Stock: <span id="stock">{{ stock.cantidad }}</span>
+			Articulo : {{ articulo }} {% if proceso.procesoFaena.id != 14 %}- Stock: <span id="stock">{{ stock.cantidad }}</span> {% endif %}
 		</div>
   	</div>
 	<div class="card-body">

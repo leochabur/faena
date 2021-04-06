@@ -21,4 +21,15 @@ class ProcesoFaenaDiariaRepository extends \Doctrine\ORM\EntityRepository
             		->setParameter('proceso', $proceso)
             		->getOneOrNullResult();
     }
+
+    public function getProcesoRomaneo()
+    {
+        return $this->getEntityManager()
+                    ->createQuery('SELECT pfd 
+                                   JOIN pfd.procesoFaena pf
+                                   FROM GestionFaenaBundle:faena\ProcesoFaenaDiaria pfd 
+                                   WHERE pf.romanea = :romanea')
+                    ->setParameter('romanea', true)
+                    ->getOneOrNullResult();
+    }
 }

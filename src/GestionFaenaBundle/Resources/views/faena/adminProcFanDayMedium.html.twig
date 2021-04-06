@@ -57,7 +57,50 @@
 			</div>
 	{% endif %}
 {% endif %}
-
+{% if tapar is defined %}
+	<div class="card">
+  		<div class="card-body">
+  			<a class="btn btn-primary" href="{{path('clasifiar_articulo_base', { proc : tapar['proc'], fd : tapar['fd'], art : tapar['art'] }) }}">
+  				Romaenar
+  			</a>
+  		</div>
+  	</div>
+{% endif %}
+{% if nextForm is defined and proceso.procesoFaena.id == 13 %}
+	<div class="card">
+  		<div class="card-body">
+  			{{ form_start(nextForm, {'attr': {'class': 'sendnext'}}) }}
+  			<div class="row">
+  				<div class="col-lg-4">
+  					{{ form_label(nextForm.faenas, 'Faena') }}
+  					{{ form_widget(nextForm.faenas) }}
+  					
+  				</div>
+  				<div class="col-lg-2">
+  					{{ form_label(nextForm.bultos, 'Cant. Bultos') }}
+  					{{ form_widget(nextForm.bultos) }}
+  					
+  				</div>
+  				<div class="col-lg-4 mt-4">
+  					{{ form_widget(nextForm.guardar, {'attr': {'class' : 'next btn btn-primary'}}) }}
+  					
+  				</div>
+  			</div>
+  			{{ form_end(nextForm) }}
+  		</div>
+  	</div>
+{% for message in app.flashes('error') %}
+	<div class="alert alert-danger" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+{% for message in app.flashes('success') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+  	<hr>
+{% endif %}
 <div class="card">
 	<div class="card-header">
 		<div class="h5">
@@ -203,6 +246,33 @@
 {% block javascripts %}
 
 <script type="text/javascript">
+
+	$('.next').click(function(event){
+										event.preventDefault();
+										bootbox.confirm({
+														    message: 'Seguro quitar la cantidad del tunel?',
+														    size: "large",
+														    buttons: {
+														        confirm: {
+														            label: 'Si',
+														            className: 'btn-success'
+														        },
+														        cancel: {
+														            label: 'No',
+														            className: 'btn-danger'
+														        }
+														    },
+														    callback: function (result) {
+														        if (result)
+														        {
+														        	$('.sendnext').trigger('submit');
+														        }
+														    }
+														 });
+
+	});
+
+
 	var tipos = $('.tipos');
 	var conceptos = $('.conceptos');
 	var articulos = $('.articulos');

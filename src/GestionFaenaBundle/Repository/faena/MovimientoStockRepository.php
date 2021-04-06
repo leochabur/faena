@@ -275,6 +275,32 @@ class MovimientoStockRepository extends \Doctrine\ORM\EntityRepository
                     ->getOneOrNullResult();
     }
 
+    public function getStockArticulosProcesoPermanente (\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso,
+                                                       \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    /*para un ProcesoFaenaDiaria devuelve cual es el stock del articulo para la FaenaDiaria*/
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT '' as nombre, sum(valor.valor) as cantidad
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor  
+                                   JOIN valor.movimiento movimiento 
+                                   JOIN movimiento.procesoFnDay procFanDay
+                                   JOIN procFanDay.procesoFaena procesoFaena
+                                   JOIN procesoFaena.manejosStock manejoStock
+                                   JOIN movimiento.artProcFaena artAtrCon                                  
+                                   WHERE (valor.atributoAbstracto = manejoStock.atributo) AND
+                                         (manejoStock.articulo = artAtrCon.articulo) AND 
+                                         (artAtrCon.articulo = :articulo) AND
+                                         (procFanDay = :proceso) AND
+                                         (movimiento.visible = :visible) AND
+                                         (movimiento.eliminado = :eliminado)
+                                    GROUP BY artAtrCon.articulo")
+                    ->setParameter('proceso', $proceso)
+                    ->setParameter('articulo', $articulo)
+                    ->setParameter('visible', true)
+                    ->setParameter('eliminado', false)
+                    ->getOneOrNullResult();
+    }
+
     public function getStockDeArticulosPorProcesoPor(\GestionFaenaBundle\Entity\faena\ProcesoFaenaDiaria $proceso)
     {
         return $this->getEntityManager()

@@ -512,9 +512,29 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
         $value = $request->request->get('data');
 
         $em = $this->getDoctrine()->getManager();
-        $procesoFaenaDiaria = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $procesoFaenaDiariaOrigen = $em->find(ProcesoFaenaDiaria::class, $proc);
+
         $faena = $em->find(FaenaDiaria::class, $fd);
-        $procesoFaena = $procesoFaenaDiaria->getProcesoFaena();
+
+        $procesoFaenaOrigen = $procesoFaenaDiariaOrigen->getProcesoFaena();
+
+        $procesoFaenaDiariaDestino = $procesoFaenaDiariaOrigen;
+
+        $procesoFaenaDestino = $procesoFaenaDiariaDestino->getProcesoFaena();
+
+        if ($procesoFaenaOrigen->getId() == 14) //proceso de TAPADO....VER!!!!
+        {
+            $procesoFaenaDestino = $procesoFaenaOrigen->getProcesosDestinoDefault();
+            if (!$procesoFaenaDestino)
+            {
+              return new JsonResponse(['status' => false, 'message' => 'El proceso '.$procesoFaenaOrigen.' no tiene configurado un proceso por defecto']);
+            }
+
+            $procesoFaenaDiariaDestino = $faena->getProceso($procesoFaenaDestino->getId());
+        }
+
+        
+
 
         $articulo = $em->find(Articulo::class, $art); //el articulo final de la transformacion
 
@@ -533,19 +553,15 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                   return new JsonResponse(['status' => false, 'message' => 'No se ha configurado un concepto para admitir transformaciones']);
                 }
 
-                //Atributo abstracto base definido en el Proceso Faena
-               // $atributoAbstractoBase = $procesoFaena->getAtributoAbstractoBase();
-
-
                 //debe recuperar el atributo del articulo destino de la transformacion
-                $atributoDestino = $procesoFaena->existeArticuloDefinidoManejoStock($articulo);
+                $atributoDestino = $procesoFaenaDestino->existeArticuloDefinidoManejoStock($articulo);
                 if (!$atributoDestino)
                 {
                   return new JsonResponse(['status' => false, 'message' => 'El articulo '.$articulo.' no se encuentra configurado para manejar stock']);
                 }
                 $atributoDestino = $atributoDestino->getAtributo();
 
-                $atributoAbstractoBase = $procesoFaena->existeArticuloDefinidoManejoStock($articuloBase);
+                $atributoAbstractoBase = $procesoFaenaOrigen->existeArticuloDefinidoManejoStock($articuloBase);
                 if (!$atributoAbstractoBase)
                 {
                   return new JsonResponse(['status' => false, 'message' => 'El articulo '.$articuloBase.' no se encuentra configurado para manejar stock']);
@@ -562,7 +578,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                 $artAtrConEntrada = $this->getArticuloAtributoConceptoForMovimientoAction($articulo, 
                                                                                     $conceptoMovimiento, 
                                                                                     EntradaStock::getInstance(),
-                                                                                    $procesoFaena,
+                                                                                    $procesoFaenaDestino,
                                                                                     $em);
 
             //    return new JsonResponse(['status' => false, 'message' => 'Atributo Base '.$atributoDestino]);
@@ -580,7 +596,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                     $em->persist($atributoEntrada);
                 }
                 $entrada = new EntradaStock();
-                $entrada->setProcesoFnDay($procesoFaenaDiaria);
+                $entrada->setProcesoFnDay($procesoFaenaDiariaDestino);
                 $entrada->setFaenaDiaria($faena);
                 $entrada->setArtProcFaena($artAtrConEntrada);
                 $entrada->setVisible(true);
@@ -600,7 +616,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                 $artAtrConSalida = $this->getArticuloAtributoConceptoForMovimientoAction($articuloBase, 
                                                                                     $conceptoMovimiento, 
                                                                                     SalidaStock::getInstance(),
-                                                                                    $procesoFaena,
+                                                                                    $procesoFaenaOrigen,
                                                                                     $em);
                 $atributoSalida = $artAtrConSalida->getAtributoMedibleManualActivo($atributoAbstractoBase);
                 if (!$atributoSalida)//No existe un Atributo generado
@@ -615,7 +631,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                     $em->persist($atributoSalida);
                 }
                 $salida = new SalidaStock();
-                $salida->setProcesoFnDay($procesoFaenaDiaria);
+                $salida->setProcesoFnDay($procesoFaenaDiariaOrigen);
                 $salida->setFaenaDiaria($faena);
                 $salida->setArtProcFaena($artAtrConSalida);
                 $salida->setVisible(true);
@@ -635,7 +651,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
 
                 $entrada->setMovimientoAsociado($salida);
                 $em->flush();
-                $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiaria, $articuloBase, $faena);
+                $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiariaOrigen, $articuloBase, $faena);
                 return new JsonResponse(['status' => true, 'stb' => $stock['cantidad']]);
               }
               catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
@@ -658,13 +674,13 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                 $articuloBase = $salida->getArtProcFaena()->getArticulo();
 
                 ///ahora recupera el atributo abstracto de acuerdo al seteo de manejo de stock
-                $atributoAbstractoBase = $procesoFaena->existeArticuloDefinidoManejoStock($articuloBase);
+                $atributoAbstractoBase = $procesoFaenaOrigen->existeArticuloDefinidoManejoStock($articuloBase);
 
                 $valorAsoc = $salida->getValorWhitAtribute($atributoAbstractoBase->getAtributo());
                 $valorAsoc->setValor($valorAjustado);
              }
              $em->flush();
-             $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiaria, $articuloBase, $faena);
+             $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($procesoFaenaDiariaOrigen, $articuloBase, $faena);
              return new JsonResponse(['status' => true, 'stb' => $stock['cantidad']]);
            }
            catch (\Exception $e){ return new JsonResponse(['status' => false, 'message' => $e->getMessage()]); }
@@ -680,10 +696,23 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
     {
         $em = $this->getDoctrine()->getManager();
         $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+
+        $procesoSend = clone $proceso;
+
         $faena = $em->find(FaenaDiaria::class, $fd);
         $articulo = $em->find(Articulo::class, $art);
 
-        $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($proceso, $articulo, $faena);
+        if ($proceso->getProcesoFaena()->getId() == 14)
+        {
+          $procesoAux = $proceso->getProcesoFaena()->getProcesosDestinoDefault();
+          $proceso = $faena->getProceso($procesoAux->getId());
+
+          $stock = $em->getRepository(MovimientoStock::class)->getStockArticulosProcesoPermanente($proceso, $articulo);
+        }
+        else
+        {
+           $stock = $em->getRepository(MovimientoStock::class)->getStockArticulos($proceso, $articulo, $faena);
+        }
 
         $repoConcepto = $em->getRepository(ConceptoMovimiento::class);
         $conceptoMovimiento = $repoConcepto->getConceptoOfTransformacion();
@@ -759,7 +788,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
         }
         $em->flush();
         return $this->render('@GestionFaena/faena/clasificarArticuloBase.html.twig', 
-                            array( 'proceso' => $proceso, 
+                            array( 'proceso' => $procesoSend, 
                                    'faena' => $faena, 
                                    'articulos' => $data, 
                                    'cates' => $categorias, 
@@ -1373,6 +1402,157 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
           return $this->render('@GestionFaena/faena/adminProcFanDay.html.twig', array('errors' => $errors, 'con' => $concMovimientos, 'totales' =>$totales,'formsDelete' => $formsDelete, 'movs' => $movStock, 'conceptos' => $conceptos, 'datos' => $datos, 'movimientos' => $movimientos, 'proceso' => $proceso, 'form' => $form->createView(), 'faena' => $faena));
     }
 
+    private function getFormAdvanceWithFaena($idProceso, $faena)
+    {
+          $form = $this->createFormBuilder()
+                        ->add('faenas', 
+                              EntityType::class, 
+                              [
+                                'class' => FaenaDiaria::class,
+                                'query_builder' => function (EntityRepository $er){
+                                                                                          return $er->createQueryBuilder('f')
+                                                                                                    ->where('f.isActive = :activa')
+                                                                                                    ->setParameter('activa', true)
+                                                                                                    ->orderBy('f.fechaFaena', 'DESC');
+                                                                                                  },
+                              ])
+                          ->add('bultos', 
+                              TextType::class)
+                          ->add('guardar', SubmitType::class, ['label' => 'Quitar del Tunel'])   
+                          ->setMethod('POST')
+                          ->setAction($this->generateUrl('bd_avanzar_cantidad_tunel', ['proc' => $idProceso, 'fan' => $faena]))
+                          ->getForm();
+          return $form;
+    }
+
+    /**
+     * @Route("/advance/{proc}/{fan}", name="bd_avanzar_cantidad_tunel", methods={"POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function procesarAvanzarSalidaTunel($proc, $fan, Request $request)
+    {
+        $form = $this->getFormAdvanceWithFaena($proc, $fan);
+        $form->handleRequest($request);
+        $data = $form->getData();
+
+        $faena = $data['faenas'];
+
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository(ProcesoFaenaDiaria::class);
+
+        $procesoFaenaDiaria = $repo->find($proc);
+
+        $procesoOrigen = $procesoFaenaDiaria->getProcesoFaena();
+
+        $articulo = $procesoOrigen->getArticuloBase();
+
+        $atributo = $procesoOrigen->getAtributoAbstractoBase();
+
+        $procesoDestino = $procesoOrigen->getProcesosDestinoDefault();
+
+        $conceptoMovimiento = $em->find(ConceptoMovimiento::class, 2);
+
+        $procesoFaenaDiariaOrigen = $faena->getProceso($procesoOrigen->getId());
+      try
+      {
+
+        if (!$procesoDestino)
+        {
+            $this->addFlash('error', 'El proceso '.$procesoOrigen.' no tiene configurado un proceso destino por defecto!');
+            return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+        }
+
+        $articuloManejaStock = $procesoDestino->existeArticuloDefinidoManejoStock($articulo);
+        if (!$articuloManejaStock) //no esta configurado el articulo para manejar el stock
+        {
+            $this->addFlash('error', "El articulo ".$articulo." no se encuentra definido en el proceso ".$procesoDestino." para manejar stock");
+            return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+        }
+
+        //Busca en la FaenaDiaria correspondiente el ProcesoFaenaDiaria correspondiente al ProcesoFanea
+        $procesoFaenaDiariaDestino = $faena->getProceso($procesoDestino->getId());
+        if (!$procesoFaenaDiariaDestino) //no esxiste proceso faena diaria destino
+        {
+            $this->addFlash('error', 'El proceso de '.$procesoDestino.' es inexistente en la faena '.$faena.'!!!');
+             return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+        }
+
+        //del movimiento actual recupera el ARTATRCONC sino lo crea
+        $artAtrConOrigen = $this->getArticuloAtributoConceptoForMovimientoAction($articulo,
+                                                                                 $conceptoMovimiento,
+                                                                                 SalidaStock::getInstance(),
+                                                                                 $procesoOrigen,
+                                                                                 $em);
+
+        $artAtrConTrx = $this->getArticuloAtributoConceptoForMovimientoAction($articulo,
+                                                                              $conceptoMovimiento,
+                                                                              TransferirStock::getInstance(),
+                                                                              $procesoOrigen,
+                                                                              $em);
+        $transferencia = new TransferirStock(); 
+        $transferencia->setArtProcFaena($artAtrConTrx);
+        $transferencia->setProcesoFnDay($procesoFaenaDiariaOrigen);
+        $transferencia->setFaenaDiaria($faena);
+        $transferencia->setVisible(false);
+        $transferencia->setProcesado(true);
+
+        $salida = new SalidaStock();
+        $salida->setFaenaDiaria($faena);
+        $salida->setProcesoFnDay($procesoFaenaDiariaOrigen);
+        $salida->setArtProcFaena($artAtrConOrigen); 
+        $salida->setProcesado(false);
+
+
+        //debe recuperar el ProcesoFaenaDiaria correspondiente a la faena y al proceso de Destino
+        //$procesoFaenaDiariaDestino = $em->getRepository(ProcesoFaenaDiaria::class)->getProcesoFaenaDiariaWhitProcess($procesoDestino);
+
+        $artAtrConDestino = $this->getArticuloAtributoConceptoForMovimientoAction($articulo,
+                                                                                   $conceptoMovimiento,
+                                                                                   EntradaStock::getInstance(),
+                                                                                   $procesoDestino,
+                                                                                   $em);
+        $entrada = new EntradaStock();
+        $entrada->setFaenaDiaria($faena);
+        $entrada->setProcesoFnDay($procesoFaenaDiariaDestino);
+        $entrada->setArtProcFaena($artAtrConDestino);
+        $entrada->setProcesado(false);
+
+
+        $valorAtr = new ValorNumerico();
+        $valorAtr->setAtributoAbstracto($atributo);
+        $dataValue = $data['bultos'];
+        $valorAtr->setValor($dataValue);
+        $valorAtr->setMostrar(true);
+        $valorAtr->setDecimales(0);
+        $valorAtr->setAcumula(true);
+
+            $vSalida = clone $valorAtr;
+            $vEntrada = clone $valorAtr;
+            $vTrx = clone $valorAtr;
+            $salida->addValore($vSalida);
+            $entrada->addValore($vEntrada);
+            $transferencia->addValore($vTrx);
+        
+        
+        $em->persist($transferencia);
+        $em->persist($entrada);
+        $em->persist($salida);
+        $transferencia->setMovimientoDestino($entrada);
+        $transferencia->setMovimientoOrigen($salida);              
+        $em->persist($transferencia);
+        $procesoFaenaDiaria->addMovimiento($transferencia);
+        $procesoFaenaDiaria->setUltimoMovimiento(new \DateTime());
+        $em->flush();
+        $this->addFlash('success', 'Movimiento generado exitosamente');
+        return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+      }
+      catch (\Exception $e)
+      { 
+            $this->addFlash('error', ''.$e->getMessage());
+            return $this->redirectToRoute('bd_adm_proc_fan_day', ['proc' => $proc, 'fd' => $fan]);
+      }
+    }
+
     private function getFormProccessMedium(ProcesoFaenaDiaria $proceso, FaenaDiaria $faena, $typ = null)
     {
         $form = $this->getFormBeginMovStockAction($proceso, $faena->getId());
@@ -1390,8 +1570,12 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
         $rounded = [];
         foreach ($movimientos as $mov) 
         {
-            if (($mov->getFaenaDiaria() == $faena) || ($proceso->getProcesoFaena()->getPermanente() && (in_array($mov->getType(), [2,3]))) || ($proceso->getProcesoFaena()->getGeneraTransito()))
+
+            if (($mov->getFaenaDiaria() == $faena) || 
+                ($proceso->getProcesoFaena()->getPermanente() && (in_array($mov->getType(), [2,3]))) || 
+                ($proceso->getProcesoFaena()->getGeneraTransito()))
             {
+
               $art = $mov->getArtProcFaena()->getArticulo();
               if (!array_key_exists($art->getId(), $body))
               {
@@ -1467,9 +1651,22 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                       'headers' => $headers,
                       'pasos' => $pasos
                   ];
+        if ($proceso->getProcesoFaena()->getIsTransito())
+        {
+            $next = $this->getFormAdvanceWithFaena($proceso->getId(), $faena->getId());
+            $params['nextForm'] = $next->createView();
+        }
+
         if ($typ)
         {
             $params['tipo'] = $typ;
+        }
+        if ($proceso->getProcesoFaena()->getId() == 14) //resolver esto.......
+        {
+            $idFaena = $faena->getId();
+            $idArticulo = $proceso->getProcesoFaena()->getArticuloBase()->getId();
+            $idProceso = $proceso->getId(); 
+            $params['tapar'] = ['fd' => $idFaena, 'art' => $idArticulo, 'proc' => $idProceso];
         }
         return $this->render('@GestionFaena/faena/adminProcFanDayMedium.html.twig', $params);
     }

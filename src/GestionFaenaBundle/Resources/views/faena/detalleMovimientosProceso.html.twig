@@ -75,11 +75,11 @@
 		  									</a>
 		  								{% elseif not m.proc %}
 
-		 		 							<a class="dropdown-item btn btn-warning btn-sm nextproc" data-index="{{ loop.index }}" 
+		 		 						{#	<a class="dropdown-item btn btn-warning btn-sm nextproc" data-index="{{ loop.index }}" 
 		 		 							   href="{{ path('bd_adm_next_move', { id : m.id}) }}">Enviar a {{ proceso.procesoFaena.procesosDestinoDefault }}
-		  									</a>
+		  									</a>#}
 		  								{% endif %}
-	  									{% if is_granted('ROLE_ADMIN') and not proceso.procesoFaena.isTransito %}
+	  									{% if is_granted('ROLE_ADMIN') %}
 		  									<div class="dropdown-item">
 		  												{{ form_start(formsDelete[m.id], {'attr' : {'class' : 'sendDelete'}}) }}
 												    	{{ form_widget(formsDelete[m.id].delete, {'attr' : {'data-mov' : m.id, 'data-trx' : trx, 'data-index' : loop.index, 'class' : 'btn btn-sm btn-danger btnDelete'}}) }}
