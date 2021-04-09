@@ -655,7 +655,7 @@ class InformesController extends Controller
     }
 
     /**
-     * @Route("/informes/gerencia/informeii/{fd}/{proc}", name="informe_informe_dos")
+     * @Route("/informes/informeii/{fd}/{proc}", name="informe_informe_dos")
 
      */
     public function informeDosAction($fd, $proc)
