@@ -1,11 +1,15 @@
 ALTER TABLE `gestionfaena`.`sp_st_cbte_vta_st` MODIFY COLUMN `id` INTEGER NOT NULL AUTO_INCREMENT,
  MODIFY COLUMN `numero` INTEGER NOT NULL;
-
-select *
+select e.nombre as estructura, o.nombre as servicio,
+      hcitacionreal as h_citacion, hsalidaplantareal as h_salida, hllegadaplantareal as h_llegada, hfinservicioreal as h_finalizacion,
+      razon_social as cliente,
+      interno,
+      concat(e1.apellido,', ', e1.nombre) as conductor_1,
+      concat(e2.apellido,', ', e2.nombre) as conductor_2
 from ordenes o
 inner join clientes c on c.id = o.id_cliente and c.id_estructura = o.id_estructura_cliente
 inner join estructuras e on e.id = o.id_estructura
 left join unidades u on u.id = id_micro
-left join empleados e on e.id_empleado = id_chofer_1
-left join empleados e2 on e3.id_empleado = id_chofer_2
+left join empleados e1 on e1.id_empleado = id_chofer_1
+left join empleados e2 on e2.id_empleado = id_chofer_2
 where fservicio between '2021-03-01' and '2021-03-31' and not borrada and not suspendida
