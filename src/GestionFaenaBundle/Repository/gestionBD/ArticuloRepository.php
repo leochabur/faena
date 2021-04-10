@@ -56,4 +56,23 @@ class ArticuloRepository extends \Doctrine\ORM\EntityRepository
                     ->setParameter('codigo', $codigo)
                     ->getOneOrNullResult();
     } 
+
+    public function getArticulosAClasificar(\GestionFaenaBundle\Entity\gestionBD\Articulo $articuloBase) 
+    { 
+        return $this->getEntityManager()
+                    ->createQuery('SELECT a.id as idArticulo, 
+                                          a.nombreResumido as articulo,
+                                          c.id as idCategoria,
+                                          c.categoria as categoria,
+                                          s.id as idSubcategoria,
+                                          s.subcategoria as subcategoria
+                                   FROM GestionFaenaBundle:gestionBD\Articulo a 
+                                   JOIN a.categoria c
+                                   JOIN a.subcategoria s
+                                   WHERE a.articuloBase = :articuloBase AND a.eliminado = :eliminado
+                                   ORDER BY c.orden, s.orden, a.orden, a.id')
+                    ->setParameter('articuloBase', $articuloBase)
+                    ->setParameter('eliminado', false)
+                    ->getResult();
+    } 
 }

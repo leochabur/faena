@@ -689,6 +689,60 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
     }
 
     /**
+     * @Route("/romnear/{proc}/{fd}/{art}", name="romanear_from_tapado")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function romanearArticulosFromTapado($proc, $fd, $art)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $proceso = $em->find(ProcesoFaenaDiaria::class, $proc);
+        $faena = $em->find(FaenaDiaria::class, $fd);
+       // $procesoSend = clone $proceso;
+
+        $repository = $em->getRepository(Articulo::class);
+        $articuloBase = $repository->find($art);
+        $articulos = $repository->getArticulosAClasificar($articuloBase);
+        
+        $data = [];
+
+        foreach ($articulos as $art)
+        {   
+              $idCat = $art['idCategoria'];
+              $idSub = $art['idSubcategoria'];
+              $idArt = $art['idArticulo'];
+
+              if (!array_key_exists($idCat, $data))  //sino aun no existe la categria en el arreglo la inicializo
+              {
+                  $data[$idCat] = ['cant' => 1, 'categoria' => $art['categoria'], 'subcategorias' => []];
+              }
+              else
+              {
+                $data[$idCat]['cant']++;
+              }
+
+              if (!array_key_exists($idSub, $data[$idCat]['subcategorias'])) 
+              {
+                   //como agrega una nueva subcategoria, incrementa el contador en la categoria
+                  $data[$idCat]['subcategorias'][$idSub] = ['cant' => 1, 'subcategoria' => $art['subcategoria'], 'articulos' => []];
+                  
+              }
+              else
+              {
+                  $data[$idCat]['subcategorias'][$idSub]['cant']++;
+              }
+                  
+              $data[$idCat]['subcategorias'][$idSub]['articulos'][$idArt] = $art['articulo'];
+            
+        }
+
+        return $this->render('@GestionFaena/faena/romanearArticuloBase.html.twig', 
+                            array( 'proceso' => $proceso, 
+                                   'articulo' => $articuloBase,
+                                   'faena' => $faena, 
+                                   'articulos' => $data));
+    }
+
+    /**
      * @Route("/clasartbse/{proc}/{fd}/{art}", name="clasifiar_articulo_base")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
@@ -2822,7 +2876,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
               }*
              // $logger->info('CANTIDAD '.$artAtrCon->getId());
            /*   foreach ($artAtrCon as $a)
-              {
+              {$logger = $this->get('logger');
                 $logger->info('IDEDETE '.$a->getId());
 
               }*/
