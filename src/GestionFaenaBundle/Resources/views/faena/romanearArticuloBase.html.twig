@@ -1,5 +1,4 @@
 {% extends "FOSUserBundle::layout.html.twig" %}
-
 {% block fos_user_content %}
 <br>
 <hr>
@@ -10,32 +9,62 @@
 		<div class="h5">
 			Articulo : {{ articulo }} {% if proceso.procesoFaena.id != 14 %}- Stock: <span id="stock">{{ stock.cantidad }}</span> {% endif %}
 		</div>
+		{% set idPallet = 0 %}
+		{% if pallet is defined %}
+			<div class="h5">
+				Pallet: {{ pallet }} - {{ pallet.tipoPallet }}
+			</div>
+			{% set idPallet = pallet.id %}
+		{% endif %}
   	</div>
 	<div class="card-body">
 		<table class="table table-bordered table-sm table-fit">
 			<tbody>
 				
 				{% for k, v in articulos %}
-
+					{% set color = 'blue' %}
+					{% if loop.index % 2 == 0 %}
+						{% set color = 'teal' %}
+					{% endif %}
 					<tr>
-						<td rowspan="{{ v.cant}}">
+						<td rowspan="{{ v.cant}}" class="{{ color }} align-middle">
 							{{ v.categoria }}
 						</td>
 					{% for ks, vs in v.subcategorias %}
-						{% if loop.index > 1 %}
-							<tr>
-						{% endif %}
-						<td rowspan="{{ vs.cant }}">
-							{{vs.subcategoria}}
-						</td>
-
-						{% for ka, va in vs.articulos %}
 							{% if loop.index > 1 %}
 								<tr>
 							{% endif %}
-							<td>
-									{{ va }}
+							<td rowspan="{{ vs.cant }}" class="{{ color }} lighten-2 align-middle">
+								{{vs.subcategoria}}
 							</td>
+
+							{% for ka, va in vs.articulos %}
+								{% if loop.index > 1 %}
+									<tr>
+								{% endif %}
+								<td class="{{ color }} lighten-3">
+										{{ va.art }}
+								</td>
+								<td class="{{ color }} lighten-3">									
+					
+											{{ form_start(va.form, {'attr' : { 'class' : 'form-inline'}}) }}
+											<div class="text-left">
+												{{ form_widget(va.form.cantidad, {'attr' : {'class' : 'col-lg-4 cant'}}) }}									
+												{{ form_widget(va.form.fecha, 
+															  {'attr' : 
+															  			{
+															  				'data-art': ka, 
+															  			 	'data-proc': proceso.id,
+															  			 	'class' : 'col-lg-4 fecha_elaboracion update',
+															  			 	'data-pallet' : idPallet
+															  			 }
+															  	}) 
+												}}
+											</div>
+											<div class="rta">
+											</div>
+											{{ form_end(va.form) }}							
+								</td>
 							</tr>
 
 						{% endfor %}
@@ -56,109 +85,51 @@
 {% block javascripts %}
 
 <script type="text/javascript">
-	var tipos = $('.tipos');
-	var conceptos = $('.conceptos');
-	var articulos = $('.articulos');
-	conceptos.html('');
-	articulos.html('');
-	tipos.change(function() {
-	  var form = $(this).closest('form');
-	  $.ajax({
-			    url : "{{ path('bd_change_tipo_movimiento') }}",
-			    type: "POST",
-			    data : {proceso: form.find('.proceso').val(), tipoMovimiento: $(this).val()},
-			    success: function(data) {
-						articulos.html('');
-		                conceptos.html('<option>Selecciona...</option>');
-		                for (var i = 0, total = data.length; i < total; i++) {
-		                    conceptos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
-			    		}
-			    },
-			    failed: function(data){
-			    	alert('error');
-			    }
-	  		});
-	});
 
-	conceptos.change(function() {
-	  $.ajax({
-			    url : "{{ path('bd_change_concepto_movimiento') }}",
-			    type: "POST",
-			    data : {concepto: $(this).val()},
-			    success: function(data) {
-						articulos.html('<option value="null">Selecciona...</option>');
-		                for (var i = 0, total = data.length; i < total; i++) {
-		                    articulos.append('<option value="' + data[i].id + '">' + data[i].show + '</option>');
-			    		}
-			    }
-	  		});
-	});
+	const route = "{{ path ('bd_adm_proc_romaneo_articulos', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id, base : articulo.id})}}";
 
+	const update = (input) => 
+	{			
+		var ruta = route.replace('_PROC', input.data('proc')).replace('_ART', input.data('art')).replace('_VAL', input.data('idv'));
+		input.parent().siblings('div .rta').html('');
+		const count = input.siblings('.cant').val();
+		const date = input.val();
+		const codigo = input.data('pallet');
+		$.post(ruta,
+			   {data: count, fecha: date, palletiza: 1, idPallet: codigo},
+			   function(response)
+			   {
+				  	if (response.status)
+				  	{
+				  		input.parent().siblings('div .rta').html('<i class="far fa-check-circle fa-2x"></i>');
+						input.trigger("keypress", [9]);
+						$('#stock').html(response.stb);
+				  	}
+				  	else
+				  	{
+
+				  		input.parent().siblings('div .rta').html('<i class="far fa-times-circle fa-2x"></i>');
+				  		alert(response.message);
+				  	}
+			  	}
+		);
+	};
 
 	$('.update').keypress(function(event) {
 									    var keycode = (event.keyCode ? event.keyCode : event.which);
 									    var input = $(this);
 									    if(keycode == '13')
 									    {
-											var route = "{{ path ('bd_adm_proc_romaneo_articulos', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id, base : articulo.id})}}";
-											var btn = $(this);
-											var ruta = route.replace('_PROC', btn.data('proc')).replace('_ART', btn.data('art')).replace('_VAL', btn.data('idv'));
-											input.parent().siblings('div').html('');
-											$.post(ruta,
-												   {data : btn.val()},
-												  function(response)
-												  {
-												  	if (response.status)
-												  	{
-												  		input.parent().siblings('div').html('<i class="far fa-check-circle fa-2x"></i>');
-														input.trigger("keypress", [9]);
-														$('#stock').html(response.stb);
-												  	}
-												  	else
-												  	{
-
-												  		input.parent().siblings('div').html('<i class="far fa-times-circle fa-2x"></i>');
-												  		alert(response.message);
-												  	}
-												  }
-											);
+									    	update(input);
 										}
 											
 	});
 
-	$('.view-art').click(function(){
-									var url = "{{ path('bd_view_art_proc_fan', {'articulo' : 'id_article'}) }}"; 
-									url = url.replace('id_article', $(this).data('id'));
-									$('.modal-body-article').load(url);
-									$('#viewArticle').modal('show');
+	$( ".fecha_elaboracion" ).inputmask({
+							mask: '99/99/2099',
+							showMaskOnHover: true,
+							showMaskOnFocus: true
 	});
-
-	$('.sender').submit(function (event){
-										 event.preventDefault();
-										 var form = $(this);
-										 $.post(form.attr('action'),
-										 		form.serialize(),
-										 		function(data){
-										 						if (data.status)
-										 						{
-
-										 						}
-										 						else
-										 						{
-
-										 						}
-
-
-										 		});
-										
-	});
-
-	{% if tipo is defined %}
-		{% if tipo == 'M' %}
-		$(".type option[value='{{ tipo }}']").attr('selected','selected');
-
-		{% endif %}
-	{% endif %}
 </script>
 
 {% endblock %}

@@ -1,0 +1,106 @@
+<?php
+
+namespace GestionFaenaBundle\Entity\faena;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * TipoPallet
+ *
+ * @ORM\Table(name="sp_st_tpo_pallet")
+ * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\faena\TipoPalletRepository")
+ */
+class TipoPallet
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="tipo", type="string", length=255)
+     */
+    private $tipo;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="capacidad", type="integer")
+     */
+    private $capacidad;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo")
+     * @ORM\JoinTable(name="sp_st_articles_for_tpo_pallet",
+     *      joinColumns={@ORM\JoinColumn(name="id_tpo_pallet", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_art", referencedColumnName="id")}
+     *      )
+     */
+    private $articulos;
+
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set tipo
+     *
+     * @param string $tipo
+     *
+     * @return TipoPallet
+     */
+    public function setTipo($tipo)
+    {
+        $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    /**
+     * Get tipo
+     *
+     * @return string
+     */
+    public function getTipo()
+    {
+        return $this->tipo;
+    }
+
+    /**
+     * Set capacidad
+     *
+     * @param integer $capacidad
+     *
+     * @return TipoPallet
+     */
+    public function setCapacidad($capacidad)
+    {
+        $this->capacidad = $capacidad;
+
+        return $this;
+    }
+
+    /**
+     * Get capacidad
+     *
+     * @return int
+     */
+    public function getCapacidad()
+    {
+        return $this->capacidad;
+    }
+}
+

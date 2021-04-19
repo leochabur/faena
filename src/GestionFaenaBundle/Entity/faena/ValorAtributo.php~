@@ -55,6 +55,13 @@ abstract class ValorAtributo
      */
     private $mostrar;
 
+    /**
+    * @ORM\ManyToOne(targetEntity="GestionFaenaBundle\Entity\FaenaDiaria") 
+    * @ORM\JoinColumn(name="id_fan_day", referencedColumnName="id", nullable=true)
+    */      
+    private $faenaDiaria;
+
+
  /*   public function __toString()
     {
         return ($this->atributo?$this->atributo->getNombre():'SN');

@@ -1,5 +1,6 @@
 {% extends "FOSUserBundle::layout.html.twig" %}
-
+{% set fontawesome, mask = false, false %}
+	
 {% block fos_user_content %}
 <br>
 <hr>
@@ -60,11 +61,55 @@
 {% if tapar is defined %}
 	<div class="card">
   		<div class="card-body">
-  			<a class="btn btn-primary" href="{{path('romanear_from_tapado', { proc : tapar['proc'], fd : tapar['fd'], art : tapar['art'] }) }}">
-  				Romaenar
-  			</a>
+
+  				
+
+					<div class="row">
+					{{ form_start(tapar.formRomanea, {'attr' : {'novalidate': 'novalidate', 'class' : 'form-inline ml-4'}}) }}
+					{{ form_widget(tapar.formRomanea.pallet, {'attr' : {'class' : 'form-control'}}) }}
+					{{ form_widget(tapar.formRomanea.romanear, {'attr' : {'class' : 'btn btn-primary'}}) }}
+					{{ form_end(tapar.formRomanea) }}
+					</div>	
+
+		  			{#<a class="btn btn-primary" href="{{path('romanear_from_tapado', { proc : tapar['proc'], fd : tapar['fd'], art : tapar['art'] }) }}">
+		  				Romaenar
+		  			</a>#}
+		  	
+		  		<div class="row ml-4">
+					<div class="dropdown">
+					  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    Administrar Pallet
+					  </button>
+					  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+					    <a class="dropdown-item open-pallet" href="#">Abrir Pallet</a>
+					    <a class="dropdown-item view-pallet" href="#">Ver pendientes</a>
+					    <a class="dropdown-item" href="#">Ver todos</a>
+					  </div>
+					</div>
+				</div>
+
+			<div class="gst-pallet d-none">
+				<hr>
+				<div class="row">
+				{{ form_start(tapar.palletForm, {'attr' : {'novalidate': 'novalidate', 'class' : 'form-inline ml-4'}}) }}
+				{{ form_widget(tapar.palletForm.tipo, {'attr' : {'class' : 'form-control form-control-sm'}}) }}
+				{{ form_widget(tapar.palletForm.codigo, {'attr' : {'class' : 'form-control form-control-sm ml-2 input-code'}}) }}
+				{{ form_widget(tapar.palletForm.save, {'attr' : {'class' : 'btn btn-sm btn-warning ml-2 save-pallet'}}) }}
+				{{ form_widget(tapar.palletForm.cancelar, {'attr' : {'class' : 'btn btn-sm btn-danger ml-2 cancel-pallet'}}) }}
+				{{ form_end(tapar.palletForm) }}
+				</div>
+				<div class="row alert alert-light d-none text-danger" role="alert" id="pallet-error">
+
+				</div>
+				<div class="row alert alert-light d-none text-success" role="alert" id="pallet-success">
+
+				</div>
+			</div>
   		</div>
+
   	</div>
+
+
 {% endif %}
 {% if nextForm is defined and proceso.procesoFaena.id == 13 %}
 	<div class="card">
@@ -241,11 +286,67 @@
 	  </div>
 	</div>
 
+<div class="modal fade modal-view-pallets" id="modalLoginForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-50 font-weight-bold">Pallets activos</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body body-modal-view mx-3">
+
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock fos_user_content %}
 
 {% block javascripts %}
 
 <script type="text/javascript">
+
+	$('.view-pallet').click(function(event){
+											event.preventDefault();
+											$('.body-modal-view').html('<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
+											$('.body-modal-view').load("{{ path('bd_adm_get_pallet_faena') }}");
+											$('.modal-view-pallets').modal('show');
+	});
+
+	$('.save-pallet').click(function(event){
+											event.preventDefault();
+											const form = $(this).closest('form');
+											$.post(form.attr('action'),
+												   form.serialize(),
+												   function(data){
+												   					if (!data.success)
+												   					{
+												   						$('#pallet-error').html(data.message);
+												   						$('#pallet-error').removeClass('d-none');
+												   						window.setTimeout(()=>{$('#pallet-error').addClass('d-none')}, 2000);
+												   					}
+												   					else
+												   					{
+												   						$('#pallet-success').html(data.message);
+												   						$('#pallet-success').removeClass('d-none');
+												   						$('.cancel-pallet').trigger('click');
+												   						window.setTimeout(()=>{$('#pallet-success').addClass('d-none')}, 2000);
+												   					}
+												   		
+												   });
+
+	});
+
+	$('.open-pallet').click(function(event){
+											$('.gst-pallet').removeClass('d-none');
+	});
+
+	$('.cancel-pallet').click(function(event){
+											event.preventDefault();
+											$('.gst-pallet').addClass('d-none');
+	});
 
 	$('.next').click(function(event){
 										event.preventDefault();

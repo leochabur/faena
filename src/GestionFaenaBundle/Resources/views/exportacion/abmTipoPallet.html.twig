@@ -1,0 +1,99 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block stylesheets %}
+  {{ parent() }}
+  <link href="{{ asset('resources/css/bootstrap-multiselect.css') }}" rel="stylesheet">
+
+  <style type="text/css">
+input::-webkit-input-placeholder {
+    font-size: 5px;
+    line-height: 4;
+}
+  </style>
+{% endblock %}
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">{{ label }} Tipo Pallet</span>
+<hr>
+{% include '@GestionFaena/messages.html.twig'  %}
+{% for message in app.flashes('sussecc') %}
+	<div class="alert alert-success" role="alert">
+	  {{ message }}
+	</div>
+{% endfor %}
+
+<div class="">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-row">
+      <div class="col-lg-4">
+        {{ form_label(form.tipo) }}
+        {{ form_widget(form.tipo) }}
+      </div>
+      <div class="col-lg-2">
+        {{ form_label(form.capacidad) }}
+        {{ form_widget(form.capacidad) }}
+      </div>
+    </div>
+
+      <div class="row ml-1 mt-2">
+        {{ form_label(form.articulos) }}
+      </div>
+      <div class="row ml-1">
+        {{ form_widget(form.articulos, { 'attr' : {'class' : 'select-articulos col-lg-12'}}) }}
+      </div>
+    {% if form.activo is defined %}
+      <div class="row ml-2 mt-2">
+        {{ form_label(form.activo) }}
+        {{ form_widget(form.activo) }}
+      </div>
+    {% endif %}
+    <div class="form-row">
+      <div class="col">
+        {{ form_widget(form.guardar) }}
+      </div>
+    </div>
+	{{ form_end(form) }}
+    <br>
+    {% if tipos is defined %}
+          <span class="h5">Tipos Pallet Existentes</span>
+          <hr>
+          <table class="table table-striped table-bordered table-hover table-sm ">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tipo</th>
+                  <th>Capacidad</th>
+                  <th>Cant Articulos</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for t in tipos %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ t }}</td>   
+                    <td>{{ t.capacidad }}</td>          
+                    <td>{{ t.articulos|length }}</td>
+                    <td> <a href="{{path('exportaciones_editar_tipo_pallet', { id : t.id})}}" class="btn btn-sm btn-primary">Modificar</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+    {% endif %}
+</div>
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+  {{ parent() }}
+    <script src="{{ asset('resources/js/bootstrap-multiselect.js') }}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.select-articulos').multiselect({
+              enableClickableOptGroups: true,
+              buttonWidth: '400px',
+              dropRight: true
+            });
+        });
+    </script>
+{% endblock javascripts %}

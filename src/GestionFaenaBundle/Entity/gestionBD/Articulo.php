@@ -126,6 +126,20 @@ class Articulo
         return ($this->descVenta?$this->descVenta:$this->nombre);
     }
 
+    public function serialize()
+    {
+        $sub = $this->getSubcategoria();
+        $cat = $this->getCategoria();
+        return [    
+                    'categoria' => $cat->getCategoria(),
+                    'subcategoria' => $sub->getSubcategoria(),
+                    'articulo' => $this->nombreResumido,
+                    'idCategoria' => $cat->getId(),
+                    'idSubcategoria' => $sub->getId(),
+                    'idArticulo' => $this->id,
+                ];
+    }
+
 
     /**
      * Get id

@@ -21,7 +21,7 @@ class FaenaDiariaRepository extends \Doctrine\ORM\EntityRepository
 	public function getFaenaConFecha(\DateTime $fecha) { 
 	    return $this->createQueryBuilder('f')
 			        ->where('f.fechaFaena = :fecha')
-			        ->setParameter('fecha', $fecha)
+			        ->setParameter('fecha', $fecha->format('Y-m-d'))
 			        ->getQuery()
 			        ->getOneOrNullResult(); 
 	} 

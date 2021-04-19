@@ -1,0 +1,35 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% set show_nav = false %}
+{% block fos_user_content %}
+
+<div class="">
+          <hr>
+          <table class="table table-striped table-bordered table-hover table-sm ">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Codigo</th>
+                  <th>Tipo</th>
+                  <th>Capacidad</th>
+                  <th>Ocupacion</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for t in pallets %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ t.codigo|upper }}</td>   
+                    <td>{{ t.tipoPallet|upper }}</td>   
+                    <td>{{ t.tipoPallet.capacidad }}</td>   
+                    <td>{{ t.acumulado }}</td>   
+                  </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+
+</div>
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+{% endblock javascripts %}

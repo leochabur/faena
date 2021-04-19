@@ -145,7 +145,7 @@
 											var ruta = route.replace('_PROC', btn.data('proc')).replace('_ART', btn.data('art')).replace('_VAL', btn.data('idv'));
 											input.parent().siblings('div').html('');
 											$.post(ruta,
-												   {data : btn.val()},
+												   {data : btn.val(), palletiza: 0},
 												  function(response)
 												  {
 												  	if (response.status)
