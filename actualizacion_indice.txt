@@ -1,5 +1,4 @@
-ALTER TABLE `gestionfaena`.`sp_st_cbte_vta_st` MODIFY COLUMN `id` INTEGER NOT NULL AUTO_INCREMENT,
- MODIFY COLUMN `numero` INTEGER NOT NULL;
+ALTER TABLE `gestionfaena`.`sp_st_cbte_vta_st` MODIFY COLUMN `id` INTEGER NOT NULL AUTO_INCREMENT,MODIFY COLUMN `numero` INTEGER NOT NULL;
 select e.nombre as estructura, o.nombre as servicio,
       hcitacionreal as h_citacion, hsalidaplantareal as h_salida, hllegadaplantareal as h_llegada, hfinservicioreal as h_finalizacion,
       razon_social as cliente,

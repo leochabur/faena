@@ -123,4 +123,12 @@ class ComprobanteVentaRepository extends \Doctrine\ORM\EntityRepository
 						->getQuery()
 						->getResult();
 	} 
+
+	public function getProximoNumero() 
+	{ 
+        return $this->getEntityManager()
+            		->createQuery('SELECT (MAX(p.numero) + 1) as numero 
+                                   FROM GestionFaenaBundle:faena\ComprobanteVenta p')
+            		->getSingleScalarResult();
+	} 
 }

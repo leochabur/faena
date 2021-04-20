@@ -208,10 +208,11 @@ class VentasController extends Controller
     	if ($form->isValid())
     	{
     		$data = $form->getData();
+            //throw new \Exception(" ".get_class($data['fecha']));
     		$em = $this->getDoctrine()->getManager();
 
     		$repository = $em->getRepository(ComprobanteVenta::class);
-    		$comprobante = $repository->getComprobanteConEntidadYFecha($data['fecha'], $data['cliente']);
+    		$comprobante = $repository->getComprobanteConEntidadYFecha($data['fechaComprobante'], $data['cliente']);
     		if ($comprobante)
     		{
     			$this->addFlash(
@@ -222,13 +223,15 @@ class VentasController extends Controller
     			return $this->render('@GestionVentas/ventas/nuevaVenta.html.twig', ['form' => $form->createView(), 'fecha' => $data['fecha']]); 
     		}
 
+            $proxNumero = $repository->getProximoNumero();
+
     		$compVenta = new ComprobanteVenta();
     		$compVenta->setUserAlta($this->getUser());
     		$compVenta->setComentario($data['comentario']);
             $compVenta->setHorarioCarga($data['horarioCarga']);
     		$compVenta->setFecha($data['fechaComprobante']);
     		$compVenta->setEntidad($data['cliente']);
-
+            $compVenta->setNumero($proxNumero);
     		
     		$em->persist($compVenta);
     		$em->flush();

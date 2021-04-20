@@ -22,7 +22,7 @@ class ComprobanteVenta extends MovimientoStock
 
     /**
      *
-     * @ORM\Column(type="integer", name="numero", nullable=true, columnDefinition="INT AUTO_INCREMENT UNIQUE")
+     * @ORM\Column(type="integer", name="numero", nullable=true)
      */
     private $numero;
 
