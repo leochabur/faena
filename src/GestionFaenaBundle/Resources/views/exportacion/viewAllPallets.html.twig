@@ -1,0 +1,60 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block fos_user_content %}
+<br>
+<hr>
+<span class="h5 card-title">Tipo Pallet</span>
+<hr>
+{% include '@GestionFaena/messages.html.twig'  %}
+
+
+<div class="">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-row">
+      <div class="col-lg-4">
+        {{ form_label(form.pallet) }}
+        {{ form_widget(form.pallet) }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="col">
+        {{ form_widget(form.guardar) }}
+      </div>
+    </div>
+	{{ form_end(form) }}
+    {% if pallet is defined %}
+          <hr>
+          <p class="h5">Codigo Pallet: {{ pallet }}</p>
+          <p class="h5">Tipo Pallet: {{ pallet.tipoPallet }}</p>
+          <p class="h5">Estado Pallet: {% if pallet.completo %} Completo {% else %} Pendiente {% endif %}</p>
+          <hr>
+          <table class="table table-striped table-bordered table-hover table-sm ">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Articulo</th>
+                  <th>Fecha Elaboracion</th>
+                  <th>Cantidad</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for t in pallet.valores %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ t.movimiento.artProcFaena.articulo }}</td>   
+                    <td>{{ t.faenaDiaria.fechaFaena|date('d/m/Y') }}</td>          
+                    <td>{{ t.data }}</td>
+                    <td> <a href="" class="btn btn-sm btn-primary">Modificar</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+    {% endif %}
+</div>
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+
+{% endblock javascripts %}

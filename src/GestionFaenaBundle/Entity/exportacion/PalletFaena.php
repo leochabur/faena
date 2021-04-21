@@ -74,7 +74,7 @@ class PalletFaena
     /**
      * @ORM\Column(name="acumulado", type="integer", options={"default": 0})
      */
-    private $acumulado;
+    private $acumulado = 0;
 
 
     public function __toString()

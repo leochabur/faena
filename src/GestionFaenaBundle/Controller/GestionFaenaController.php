@@ -1909,6 +1909,53 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
 
     }
 
+    /**
+     * @Route("/viewpallets", name="bd_view_all_pallet_faena", methods={"POST", "GET"})
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function getAllPalletsFaen(Request $request)
+    {
+          $form = $this->getFormSelectPallet();
+          $options = [];
+          if ($request->isMethod('POST'))
+          {
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+                $data = $form->getData();
+                $options['pallet'] = $data['pallet'];
+            }
+          }
+          $options['form'] = $form->createView();
+
+          return $this->render('@GestionFaena/exportacion/viewAllPallets.html.twig', $options);
+    }
+
+    private function getFormSelectPallet()
+    {
+        return    $this->createFormBuilder()
+                         ->add('pallet', 
+                              EntityType::class, 
+                              [
+                                'class' => PalletFaena::class,
+                                'constraints' => [new NotNull(array('message' => "Tipo de Pallet Invalido!"))],
+                                'query_builder' => function (EntityRepository $er) {
+                                                                                        return $er->createQueryBuilder('p')
+                                                                                                  ->join('p.tipoPallet', 't')
+                                                                                                  ->where('p.eliminado = :eliminado')
+                                                                                                  ->setParameter('eliminado', false)
+                                                                                                  ->orderBy('t.tipo')
+                                                                                                  ->addOrderBy('p.codigo', 'DESC');
+                                                                                    },
+                                 'group_by' => function($choice, $key, $value) {
+                                                                                    return $choice->getTipoPallet()->getTipo();
+                                                                               },
+                              ])
+                        ->add('guardar', SubmitType::class, ['label' => 'Ver Detalle'])
+                        ->setMethod('POST')   
+                        ->getForm();      
+    }
+
 
     //exclusivamente para el proceso de congelamiento
     /**

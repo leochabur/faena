@@ -62,19 +62,13 @@
 	<div class="card">
   		<div class="card-body">
 
-  				
-
-					<div class="row">
+				<div class="row">
 					{{ form_start(tapar.formRomanea, {'attr' : {'novalidate': 'novalidate', 'class' : 'form-inline ml-4'}}) }}
 					{{ form_widget(tapar.formRomanea.pallet, {'attr' : {'class' : 'form-control'}}) }}
 					{{ form_widget(tapar.formRomanea.romanear, {'attr' : {'class' : 'btn btn-primary'}}) }}
 					{{ form_end(tapar.formRomanea) }}
-					</div>	
+				</div>	
 
-		  			{#<a class="btn btn-primary" href="{{path('romanear_from_tapado', { proc : tapar['proc'], fd : tapar['fd'], art : tapar['art'] }) }}">
-		  				Romaenar
-		  			</a>#}
-		  	
 		  		<div class="row ml-4">
 					<div class="dropdown">
 					  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -83,7 +77,7 @@
 					  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 					    <a class="dropdown-item open-pallet" href="#">Abrir Pallet</a>
 					    <a class="dropdown-item view-pallet" href="#">Ver pendientes</a>
-					    <a class="dropdown-item" href="#">Ver todos</a>
+					    <a class="dropdown-item" target='_blanck' href="{{ path('bd_view_all_pallet_faena') }}">Ver todos</a>
 					  </div>
 					</div>
 				</div>
