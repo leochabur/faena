@@ -20,6 +20,7 @@ class TipoPalletType extends AbstractType
     {
         $builder->add('tipo')
                 ->add('capacidad')
+                ->add('prefijo')
                 ->add('articulos', EntityType::class,
                      [
                         'class' => 'GestionFaenaBundle\Entity\gestionBD\Articulo',

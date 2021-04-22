@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="sp_st_pallet_faena")
  * @ORM\Entity(repositoryClass="GestionFaenaBundle\Repository\exportacion\PalletFaenaRepository")
+ * @ORM\HasLifecycleCallbacks()
  */
 class PalletFaena
 {
@@ -69,11 +70,19 @@ class PalletFaena
      */
     private $completo = false;
 
-
     /**
      * @ORM\Column(name="acumulado", type="integer", options={"default": 0})
      */
-    private $acumulado;
+    private $acumulado = 0;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo")
+     * @ORM\JoinTable(name="sp_st_articulos_for_pallet_faena",
+     *      joinColumns={@ORM\JoinColumn(name="id_pallet", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_art", referencedColumnName="id")}
+     *      )
+     */
+    private $articulos;
 
 
     public function __toString()
@@ -275,5 +284,48 @@ class PalletFaena
     public function getCompleto()
     {
         return $this->completo;
+    }
+
+    /**
+     * Set acumulado
+     *
+     * @param integer $acumulado
+     *
+     * @return PalletFaena
+     */
+    public function setAcumulado($acumulado)
+    {
+        $this->acumulado = $acumulado;
+
+        return $this;
+    }
+
+    /**
+     * Get acumulado
+     *
+     * @return integer
+     */
+    public function getAcumulado()
+    {
+        return $this->acumulado;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function actualizarPallet()
+    {
+        $count = 0;
+        foreach ($this->valores as $val)
+        {
+            $count+= $val->getData(false);
+        }
+        $this->acumulado = $count;
+
+        if ($this->acumulado == $this->tipoPallet->getCapacidad())
+        {
+            $this->completo = true;
+            $this->fechaFinalizacion = new \DateTime();
+        }
     }
 }

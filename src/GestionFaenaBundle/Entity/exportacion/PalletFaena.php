@@ -70,12 +70,22 @@ class PalletFaena
      */
     private $completo = false;
 
-
     /**
      * @ORM\Column(name="acumulado", type="integer", options={"default": 0})
      */
     private $acumulado = 0;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="GestionFaenaBundle\Entity\gestionBD\Articulo")
+     * @ORM\JoinTable(name="sp_st_articulos_for_pallet_faena",
+     *      joinColumns={@ORM\JoinColumn(name="id_pallet", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id_art", referencedColumnName="id")}
+     *      )
+     */
+    private $articulos;
+
+
+    
 
     public function __toString()
     {
@@ -194,6 +204,7 @@ class PalletFaena
     public function __construct()
     {
         $this->valores = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->articulos = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -319,5 +330,39 @@ class PalletFaena
             $this->completo = true;
             $this->fechaFinalizacion = new \DateTime();
         }
+    }
+
+    /**
+     * Add articulo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo
+     *
+     * @return PalletFaena
+     */
+    public function addArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    {
+        $this->articulos[] = $articulo;
+
+        return $this;
+    }
+
+    /**
+     * Remove articulo
+     *
+     * @param \GestionFaenaBundle\Entity\gestionBD\Articulo $articulo
+     */
+    public function removeArticulo(\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo)
+    {
+        $this->articulos->removeElement($articulo);
+    }
+
+    /**
+     * Get articulos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getArticulos()
+    {
+        return $this->articulos;
     }
 }

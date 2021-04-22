@@ -27,6 +27,13 @@ class TipoPallet
     /**
      * @var string
      *
+     * @ORM\Column(name="prefijo", type="string", length=255, nullable=true)
+     */
+    private $prefijo;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="tipo", type="string", length=255)
      * @Assert\NotNull(message="El campo no puede permanecer en blanco!")
      */
@@ -183,5 +190,29 @@ class TipoPallet
     public function getActivo()
     {
         return $this->activo;
+    }
+
+    /**
+     * Set prefijo
+     *
+     * @param string $prefijo
+     *
+     * @return TipoPallet
+     */
+    public function setPrefijo($prefijo)
+    {
+        $this->prefijo = $prefijo;
+
+        return $this;
+    }
+
+    /**
+     * Get prefijo
+     *
+     * @return string
+     */
+    public function getPrefijo()
+    {
+        return $this->prefijo;
     }
 }

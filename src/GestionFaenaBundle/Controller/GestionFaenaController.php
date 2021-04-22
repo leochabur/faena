@@ -37,6 +37,7 @@ use GestionFaenaBundle\Entity\PasoProceso;
 use GestionFaenaBundle\Entity\faena\MovimientoAutomatico;
 use GestionFaenaBundle\Entity\faena\AtributoPorArticuloPorProceso;
 use GestionFaenaBundle\Form\faena\AtributoPorArticuloPorProcesoType;
+use GestionFaenaBundle\Entity\faena\ValorAtributo;
 use GestionFaenaBundle\Entity\gestionBD\Granja;
 use GestionFaenaBundle\Entity\gestionBD\Articulo;
 use GestionFaenaBundle\Entity\gestionBD\Transportista;
@@ -51,6 +52,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Asset\Package;
 use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
 use GestionFaenaBundle\Entity\faena\TipoMovimientoConcepto;
@@ -734,6 +736,56 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
     }
 
     /**
+     * @Route("/viewdet/{pallet}", name="ver_detalle_pallet_faena")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function getDetallePalletFaena($pallet)
+    {   
+        $em = $this->getDoctrine()->getManager();
+        $pallet = $em->find(PalletFaena::class, $pallet);
+        return $this->render('@GestionFaena/exportacion/detallePallet.html.twig', ['pallet' => $pallet]);
+    }
+
+    /**
+     * @Route("/deletevalpallet/{pallet}/{valor}", name="eliminar_movimiento_pallet")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function eliminarMovimientoPallet($pallet, $valor)
+    {   
+        try
+        {
+            $em = $this->getDoctrine()->getManager();
+            $pallet = $em->find(PalletFaena::class, $pallet);
+            if (!$pallet)
+            {
+                return new JsonResponse(['status' => false, 'message' => 'No se pudo encontrar el pallet con codigo '.$pallet]);
+            }
+            $valor = $em->find(ValorAtributo::class, $valor);
+
+            $pallet->removeValore($valor);
+
+            $pallet->setAcumulado(($pallet->getAcumulado() - $valor->getData()));
+            $pallet->setCompleto(false);
+            $movimiento = $valor->getMovimiento();
+            $movAsociado = $movimiento->getMovimientoAsociado();
+
+            $movimiento->setEliminado(true)
+                       ->setUserBaja($this->getUser());
+
+            $movAsociado->setEliminado(true)
+                        ->setUserBaja($this->getUser());
+
+            $em->flush();
+            return new JsonResponse(['status' => true]);
+        }
+        catch (\Exception $e)
+        {
+                              return new JsonResponse(['status' => false, 'message' =>$e->getMessage()]);
+        }
+    }
+
+
+    /**
      * @Route("/romnear/{proc}/{fd}/{art}", name="romanear_from_tapado", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
@@ -754,7 +806,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
 
         if ($pallet)
         {
-            $articulos = $pallet->getTipoPallet()->getArticulos();
+            $articulos = $pallet->getArticulos();
         }  
         else
         {
@@ -1239,16 +1291,30 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                 $valor = 0;
                 if ($factor)
                 {
+                        $movimientos = $proceso->getAllMovimientosArticulo($art, $faena);
+
+                        foreach ($movimientos as $movimiento)
+                        {
+                          $val = $movimiento->getValorWhitAtribute($factor->getAtributo());
+                          if ($val)
+                          {
+                            $valor+= $val->getData();
+                          }
+                        }
+                        
+
                     //$valor = $proceso->getStockArticuloConFaenaDiaria($faena, $art, $factor->getAtributo());
-                    $movimiento = $proceso->getMovimientosArticulo($art, $faena);
-                    if ($movimiento)
-                    {
-                      $val = $movimiento->getValorWhitAtribute($factor->getAtributo());
-                      if ($val)
-                      {
-                        $valor = $val;
-                      }
-                    }
+                  /*  $movimiento = $proceso->getMovimientosArticulo($art, $faena);
+
+
+                        if ($movimiento)
+                        {
+                          $val = $movimiento->getValorWhitAtribute($factor->getAtributo());
+                          if ($val)
+                          {
+                            $valor = $val->getData();
+                          }
+                        }*/
                 }
              //   throw new \Exception("Articulo ".$art."  Factor ".$factor."  Valor ".$valor);
                 ////finaliza recuperacion
@@ -1281,7 +1347,13 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                   $data[$idCat][$idSub] = [];
                 }
 
-                $data[$idCat][$idSub][] = [0 => $art, 1 => $valor];
+                if (!array_key_exists($art->getId(), $data[$idCat][$idSub]))
+                {
+                  $data[$idCat][$idSub][$art->getId()] = [0 => $art, 1 => 0];
+                }
+
+                  $data[$idCat][$idSub][$art->getId()][1]+= $valor;
+                
             }
             $em->flush();
             $ventasTotales = [];            
@@ -1311,7 +1383,6 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                     $ventasTotales[$vta['idConc']][$vta['idArt']] = 0;
                   }
                   $ventasTotales[$vta['idConc']][$vta['idArt']]+= $value->getDataValue();
-
                 }
             }
          
@@ -1829,6 +1900,23 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                         ->getForm();  
     }
 
+    
+    /**
+     * @Route("/artpallet/{tp}", name="bd_get_articulos_tipo_pallet")
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function getArticulosPorTipoPaller($tp)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $tipoPallet = $em->find(TipoPallet::class, $tp);
+        $articulos = [];
+        foreach ($tipoPallet->getArticulos() as $art)
+        {
+            $articulos[] = ['id' => $art->getId(), 'art' => $art.''];
+        }
+        return new JsonResponse($articulos);
+    }
+
     private function getFormAltaPalletFaena()
     {
         return    $this->createFormBuilder()
@@ -1836,12 +1924,22 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                               EntityType::class, 
                               [
                               'class' => TipoPallet::class,
-                              'constraints' => [new NotNull(array('message' => "Tipo de Pallet Invalido!"))]
+                              'constraints' => [new NotNull(array('message' => "Tipo de Pallet Invalido!"))],
+                               'required' => false
                               ])
-                        ->add('codigo', 
-                              TextType::class,
+                         ->add('articulo', 
+                              EntityType::class, 
                               [
-                              'constraints' => [new NotBlank(array('message' => "Codigo invalido!"))]
+                                'class' => Articulo::class,
+                                'choices' => [],
+                                'constraints' => [new NotNull(array('message' => "Tipo de Articulo Invalido!"))]
+                              ]
+                              )
+                        ->add('codigo', 
+                              NumberType::class,
+                              [
+                              'constraints' => [new NotBlank(array('message' => "Codigo invalido!"))],
+                              'invalid_message' => 'Solo se admiten valor numericos en el campo Codigo',
                               ]
                               )
                         ->add('save', SubmitType::class, ['label' => 'Guardar'])
@@ -1852,46 +1950,51 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
     }
 
 
+
+
     /**
-     * @Route("/addpallet", name="bd_adm_add_pallet_faena")
+     * @Route("/addpallet", name="bd_adm_add_pallet_faena", methods={"POST"})
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
     public function savePalletFaena(Request $request)
     {
-      $form = $this->getFormAltaPalletFaena();
-      $form->handleRequest($request);
-      if ($form->isValid())
+
+      $art = $request->request->get('articulo');
+      $code = $request->request->get('code');
+      $tipo = $request->request->get('tipo');
+      if (!($art && $code && $tipo) || !(is_numeric($code)))
       {
-          $em = $this->getDoctrine()->getManager();
-          $repository = $em->getRepository(PalletFaena::class);
-          try
+          return new JsonResponse(['status' => false, 'message' => 'Alguno de los valores es invalido!']);
+      }
+
+      $em = $this->getDoctrine()->getManager();
+      $repository = $em->getRepository(PalletFaena::class);
+      try
+      {
+          $tipoPallet = $em->find(TipoPallet::class, $tipo);
+          $articulo = $em->find(Articulo::class, $art);
+
+          $pallet = $repository->existePalletAbierto($tipoPallet, $code);
+          if ($pallet) //existe pallet abierto debe devolver un error
           {
-              $data = $form->getData();
-
-              $pallet = $repository->existePalletAbierto($data['tipo'], $data['codigo']);
-              if ($pallet) //existe pallet abierto debe devolver un error
-              {
-                  return new JsonResponse(['status' => false, 'message' => 'Existe un pallet con ese codigo!']);
-              }
-
-              $pallet = new PalletFaena();
-              $pallet->setCodigo($data['codigo']);
-              $pallet->setTipoPallet($data['tipo']);
-              $pallet->setFechaCreacion(new \DateTime());
-              $em->persist($pallet);
-              $em->flush();
-              return new JsonResponse(['status' => true, 'message' => 'Pallet generado exitosamente!']);
-
+              return new JsonResponse(['status' => false, 'message' => 'Existe un pallet con ese codigo!']);
           }
-          catch (\Exception $e){
-            return new JsonResponse(['status' => false, 'message' => $e->getMessage()]);
-          }
+
+          $pallet = new PalletFaena();
+          $pallet->setCodigo($tipoPallet->getPrefijo().$code);
+          $pallet->setTipoPallet($tipoPallet);
+          $pallet->setFechaCreacion(new \DateTime());
+          $pallet->addArticulo($articulo);
+          $em->persist($pallet);
+          $em->flush();
+          return new JsonResponse(['status' => true, 'message' => 'Pallet generado exitosamente!']);
+
+      }
+      catch (\Exception $e){
+        return new JsonResponse(['status' => false, 'message' => $e->getMessage()]);
       }
 
-      $errors = '';
-      foreach ($form->getErrors(true, true) as $error) {
-          $errors.= $error->getMessage().' / ';
-      }
+      $errors = 'ERROR 500';
 
       return new JsonResponse(['status' => false, 'message' => $errors]);
     }

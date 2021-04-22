@@ -74,6 +74,14 @@
 
 			</tbody>
 		</table>
+	<hr>
+	<div>
+		<p>Detalle Pallet</p>
+		<div class="det-pallet">
+
+		</div>
+		<hr>
+	</div>
 	<a href="{{ path('bd_adm_proc_fan_day', {proc : proceso.id, fd : faena.id}) }}" class="btn btn-success"><< Volver</a>
 	</div>
 </div>
@@ -85,6 +93,55 @@
 {% block javascripts %}
 
 <script type="text/javascript">
+	
+
+	{% if pallet is defined %}
+		const loadDetalle = ($id) => {
+			$('.det-pallet').html('<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
+			const baseURL = "{{ path('ver_detalle_pallet_faena', { pallet : '_PALLET'}) }}";
+			const realURL = baseURL.replace('_PALLET', $id);
+			$('.det-pallet').load(realURL);
+		};
+
+		loadDetalle({{ pallet.id }});
+
+		const deleteMovimiento = (pallet, valor) => {
+			const baseURLdelete = "{{ path('eliminar_movimiento_pallet', { pallet : '_PALLET', valor: '_VALOR'}) }}";
+			const realURLdelete = baseURLdelete.replace('_PALLET', pallet).replace('_VALOR', valor);
+			
+			bootbox.confirm({
+						    message: 'Seguro eliminar el item?',
+						    size: "large",
+						    buttons: {
+						        confirm: {
+						            label: 'Si',
+						            className: 'btn-success'
+						        },
+						        cancel: {
+						            label: 'No',
+						            className: 'btn-danger'
+						        }
+						    },
+						    callback: function (result) {
+						        if (result)
+						        {
+									$.post(realURLdelete,
+										   function (data){
+										   					if (data.status)
+										   					{
+																loadDetalle(pallet);
+										   					}
+										   					else
+										   					{
+										   						alert(data.message);
+										   					}
+										   });
+						        }
+						    }
+						 });			
+		};
+
+	{% endif %}
 
 	const route = "{{ path ('bd_adm_proc_romaneo_articulos', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id, base : articulo.id})}}";
 
@@ -104,6 +161,9 @@
 				  		input.parent().siblings('div .rta').html('<i class="far fa-check-circle fa-2x"></i>');
 						input.trigger("keypress", [9]);
 						$('#stock').html(response.stb);
+						{% if pallet is defined %}
+							loadDetalle({{ pallet.id }});
+						{% endif %}
 				  	}
 				  	else
 				  	{
