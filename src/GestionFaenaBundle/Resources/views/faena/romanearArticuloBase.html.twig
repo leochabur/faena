@@ -90,8 +90,8 @@
 
 {% endblock fos_user_content %}
 
-{% block scripting %}
-
+{% block javascripts %}
+{{ parent() }}
 <script type="text/javascript">
 	
 
@@ -192,4 +192,4 @@
 	});
 </script>
 
-{% endblock scripting %}
+{% endblock %}
