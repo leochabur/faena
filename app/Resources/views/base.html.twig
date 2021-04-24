@@ -85,7 +85,6 @@
 {% if mask is not defined %}
   <script type='text/javascript' src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script>
 {% endif %}
-{% block javascripts %}{% endblock %}
 <script type="text/javascript">
 
   $(document).ready(function()
@@ -133,5 +132,6 @@
     {% endfor %}
   });
 </script>
+{% block javascripts %}{% endblock %}
 </body>
 </html>

@@ -3,17 +3,18 @@
 
 {% block content %}
 
-    {% if app.request.hasPreviousSession %}
-
-    {% endif %}
-
     <div class="container">
+
         {% block fos_user_content %}
         {% endblock fos_user_content %}
+    
     </div>
+    
     {% block out_container %}
+    
     {% endblock out_container %}
-{% endblock %}
 
-    {% block scripting %}
-    {% endblock scripting %}
+{% endblock content %}
+
+{% block scripting %}
+{% endblock scripting %}

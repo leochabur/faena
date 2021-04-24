@@ -13,6 +13,8 @@ class FaenaDiariaRepository extends \Doctrine\ORM\EntityRepository
 
 	public function findAllFaenas() { 
 	    return $this->createQueryBuilder('f')
+	    			->where('f.isActive = :activa')
+	    			->setParameter('activa', true)
 			        ->addOrderBy('f.fechaFaena', 'DESC')
 			        ->getQuery()
 			        ->getResult(); 

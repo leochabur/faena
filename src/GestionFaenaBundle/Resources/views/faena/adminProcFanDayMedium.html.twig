@@ -63,22 +63,25 @@
   		<div class="card-body">
 
 				<div class="row">
+					<div class="col-lg-6 col-md-12">
 					{{ form_start(tapar.formRomanea, {'attr' : {'novalidate': 'novalidate', 'class' : 'form-inline ml-4'}}) }}
-					{{ form_widget(tapar.formRomanea.pallet, {'attr' : {'class' : 'form-control'}}) }}
-					{{ form_widget(tapar.formRomanea.romanear, {'attr' : {'class' : 'btn btn-primary'}}) }}
+					{{ form_label(tapar.formRomanea.pallet) }}
+					{{ form_widget(tapar.formRomanea.pallet, {'attr' : {'class' : 'ml-2 form-control-sm'}}) }}
+					{{ form_widget(tapar.formRomanea.romanear, {'attr' : {'class' : 'btn btn-primary btn-sm'}}) }}
 					{{ form_end(tapar.formRomanea) }}
-				</div>	
+					</div>
 
-		  		<div class="row ml-4">
-					<div class="dropdown">
-					  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					    Administrar Pallet
-					  </button>
-					  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-					    <a class="dropdown-item open-pallet" href="#">Abrir Pallet</a>
-					    <a class="dropdown-item view-pallet" href="#">Ver pendientes</a>
-					    <a class="dropdown-item" target='_blanck' href="{{ path('bd_view_all_pallet_faena') }}">Ver todos</a>
-					  </div>
+			  		<div class="col-lg-6 col-md-12">
+						<div class="dropdown">
+						  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						    Administrar Pallet
+						  </button>
+						  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						    <a class="dropdown-item open-pallet" href="#">Abrir Pallet</a>
+						    <a class="dropdown-item view-pallet" href="#">Ver pendientes</a>
+						    <a class="dropdown-item" target='_blanck' href="{{ path('bd_view_all_pallet_faena') }}">Ver todos</a>
+						  </div>
+						</div>
 					</div>
 				</div>
 

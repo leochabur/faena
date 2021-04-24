@@ -35,8 +35,8 @@
 </div>
 {% endblock fos_user_content %}
 
-{% block scripting %}
-  
+{% block javascripts %}
+  {{ parent() }}
   <script type="text/javascript">
   {% if pallet is defined %}
       const loadDetalle = ($id) => {
@@ -88,4 +88,4 @@
   {% endif %}
   </script>
 
-{% endblock scripting %}
+{% endblock javascripts %}

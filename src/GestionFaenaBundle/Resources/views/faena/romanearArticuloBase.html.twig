@@ -47,9 +47,9 @@
 								</td>
 								<td class="{{ color }} lighten-3">									
 					
-											{{ form_start(va.form, {'attr' : { 'class' : 'form-inline'}}) }}
+											{{ form_start(va.form, {'attr' : { 'class' : 'form-inline form-romanear'}}) }}
 											<div class="text-left">
-												{{ form_widget(va.form.cantidad, {'attr' : {'class' : 'col-lg-4 cant'}}) }}									
+												{{ form_widget(va.form.cantidad, {'attr' : {'class' : 'col-lg-4 cant field-amount'}}) }}									
 												{{ form_widget(va.form.fecha, 
 															  {'attr' : 
 															  			{
@@ -93,7 +93,15 @@
 {% block javascripts %}
 {{ parent() }}
 <script type="text/javascript">
-	
+
+	$('.field-amount').keypress(function(event) {
+									    var keycode = (event.keyCode ? event.keyCode : event.which);
+									    var input = $(this);
+									    if(keycode == 13)
+									    {
+	            							input.next().focus();
+	            						}
+	        });
 
 	{% if pallet is defined %}
 		const loadDetalle = ($id) => {
@@ -161,6 +169,8 @@
 				  		input.parent().siblings('div .rta').html('<i class="far fa-check-circle fa-2x"></i>');
 						input.trigger("keypress", [9]);
 						$('#stock').html(response.stb);
+						$(".form-romanear").trigger("reset");
+						$('.field-amount').focus();
 						{% if pallet is defined %}
 							loadDetalle({{ pallet.id }});
 						{% endif %}
@@ -190,6 +200,7 @@
 							showMaskOnHover: true,
 							showMaskOnFocus: true
 	});
+
 </script>
 
-{% endblock %}
+{% endblock javascripts %}
