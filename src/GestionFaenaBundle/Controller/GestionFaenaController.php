@@ -1892,7 +1892,16 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                               [
                                 'class' => PalletFaena::class,
                                 'required' => false,
-                                'placeholder' => 'Ninguno'
+                                'placeholder' => 'Ninguno',
+                                'query_builder' => function (EntityRepository $er) {
+                                                        return $er->createQueryBuilder('p')
+                                                                  ->where('p.eliminado = :eliminado')
+                                                                  ->setParameter('eliminado', false)
+                                                                  ->orderBy('p.codigo');
+                                                    },
+                                 'group_by' => function($choice, $key, $value) {
+                                                    return $choice->getTipoPallet()->getTipo();
+                                               },
                               ])
                         ->add('romanear', SubmitType::class, ['label' => 'Romanear'])
                         ->setMethod('POST')   
