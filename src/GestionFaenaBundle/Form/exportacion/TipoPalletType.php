@@ -49,7 +49,7 @@ class TipoPalletType extends AbstractType
         $form = $event->getForm();
         if ($valor->getId())
         {
-        $form->add('activo');
+            $form->add('activo');
         }
     }
 

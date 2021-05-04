@@ -1936,10 +1936,9 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                               ]
                               )
                         ->add('codigo', 
-                              NumberType::class,
+                              TextType::class,
                               [
                               'constraints' => [new NotBlank(array('message' => "Codigo invalido!"))],
-                              'invalid_message' => 'Solo se admiten valor numericos en el campo Codigo',
                               ]
                               )
                         ->add('save', SubmitType::class, ['label' => 'Guardar'])
@@ -1962,7 +1961,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
       $art = $request->request->get('articulo');
       $code = $request->request->get('code');
       $tipo = $request->request->get('tipo');
-      if (!($art && $code && $tipo) || !(is_numeric($code)))
+      if (!($art && $code && $tipo))
       {
           return new JsonResponse(['status' => false, 'message' => 'Alguno de los valores es invalido!']);
       }
@@ -1981,7 +1980,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
           }
 
           $pallet = new PalletFaena();
-          $pallet->setCodigo($tipoPallet->getPrefijo().$code);
+          $pallet->setCodigo($code);
           $pallet->setTipoPallet($tipoPallet);
           $pallet->setFechaCreacion(new \DateTime());
           $pallet->addArticulo($articulo);
