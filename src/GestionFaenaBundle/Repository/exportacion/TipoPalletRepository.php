@@ -15,6 +15,7 @@ class TipoPalletRepository extends \Doctrine\ORM\EntityRepository
 	public function findAllTipoPallets()
 	{
 	    return $this->createQueryBuilder('t')
+	    			->orderBy('t.tipo')
 			        ->getQuery()
 			        ->getResult(); 
 	}
