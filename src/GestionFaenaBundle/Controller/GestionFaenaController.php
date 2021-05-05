@@ -1921,7 +1921,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
         $articulos = [];
         foreach ($tipoPallet->getArticulos() as $art)
         {
-            $articulos[] = ['id' => $art->getId(), 'art' => $art.''];
+            $articulos[] = ['id' => $art->getId(), 'art' => $art.' - '.$art->getCodigoInterno()];
         }
         return new JsonResponse($articulos);
     }
@@ -1940,6 +1940,7 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                               EntityType::class, 
                               [
                                 'class' => Articulo::class,
+                                'choice_label' => 'nombrePallet',
                                 'choices' => [],
                                 'constraints' => [new NotNull(array('message' => "Tipo de Articulo Invalido!"))]
                               ]

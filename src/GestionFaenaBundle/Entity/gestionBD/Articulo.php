@@ -121,6 +121,11 @@ class Articulo
     private $descVenta;
 
 
+    public function getNombrePallet()
+    {
+        return ($this->nombre.' - '.$this->codigoInterno);
+    }
+
     public function getNombreVenta()
     {
         return ($this->descVenta?$this->descVenta:$this->nombre);
