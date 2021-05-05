@@ -85,6 +85,15 @@ class PalletFaena
     private $articulos;
 
 
+    public function getArticulosPallet()
+    {
+        $articulos = "";
+        foreach ($this->articulos as $art)
+        {
+            $articulos.=$art." (".$art->getCodigoInterno().")  ";
+        }
+        return $articulos;
+    }
     
 
     public function __toString()

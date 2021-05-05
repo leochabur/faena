@@ -1896,6 +1896,8 @@ class GestionFaenaController extends Controller implements EventSubscriberInterf
                                 'query_builder' => function (EntityRepository $er) {
                                                         return $er->createQueryBuilder('p')
                                                                   ->where('p.eliminado = :eliminado')
+                                                                  ->andWhere('p.completo = :completo')
+                                                                  ->setParameter('completo', false)
                                                                   ->setParameter('eliminado', false)
                                                                   ->orderBy('p.codigo');
                                                     },

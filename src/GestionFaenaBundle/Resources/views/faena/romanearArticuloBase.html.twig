@@ -6,15 +6,18 @@
 
 <div class="card">
 	<div class="card-header">
-		<div class="h5">
-			Articulo : {{ articulo }} {% if proceso.procesoFaena.id != 14 %}- Stock: <span id="stock">{{ stock.cantidad }}</span> {% endif %}
-		</div>
 		{% set idPallet = 0 %}
 		{% if pallet is defined %}
 			<div class="h5">
-				Pallet: {{ pallet }} - {{ pallet.tipoPallet }}
+				<span>Pallet: {{ pallet }}</span><br>
+				<span class="pt-2">Articulo: {{ pallet.articulosPallet }}</span><br>
+				<span class="pt-2">Capacidad libre: {{ pallet.tipoPallet.capacidad }} Bultos</span>
 			</div>
 			{% set idPallet = pallet.id %}
+		{% else %}
+			<div class="h5">
+				Articulo : {{ articulo }} {% if proceso.procesoFaena.id != 14 %}- Stock: <span id="stock">{{ stock.cantidad }}</span> {% endif %}
+			</div>
 		{% endif %}
   	</div>
 	<div class="card-body">
