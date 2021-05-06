@@ -35,7 +35,16 @@
 							{% if h.visible %}
 								<td class="{% if mov['total'] is defined %}font-weight-bold {% endif %}{% if h.sumariza or h.promedia %}text-right{% endif %}">
 									{% if mov[h.atributo.id] is defined %}
-										{{ mov[h.atributo.id] }}
+										{% if mov['total'] is defined %}
+											{% if h.atributo.id == 4 %}
+												{{ (mov[2] / mov[9])|number_format(3, '.', '') }}
+											{% else %}
+												{{ mov[h.atributo.id] }}
+											{% endif %}
+										{% else %}
+											{{ mov[h.atributo.id] }}
+										{% endif %}
+										
 									{% endif %}
 								</td>
 							{% endif %}

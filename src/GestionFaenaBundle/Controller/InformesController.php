@@ -326,6 +326,7 @@ class InformesController extends Controller
               }
           }
 
+
           $valores = $faena->getValuesForCalculo($calculo);
           $tabla[$calculo->getId()] = [0 => $calculo->getTitulo(), 1 => $calculo->getNombreArticulo(), 2 => []];
 
@@ -444,9 +445,11 @@ class InformesController extends Controller
         $repository = $em->getRepository(MovimientoStock::class);
         $movimientos = $repository->getAllEntradasStockProceso($proceso, $faenaDiaria, $informe);
         
+
+        //Arreglo que contiene los valores de los atribitos seteados en el informe  indexados por el id del Atributo Abstracto
         $detalle = array();
 
-        foreach ($movimientos as $mov) 
+        foreach ($movimientos as $mov)
         {
             $linea = array();
             foreach ($informe->getAtributos() as $atr) 
@@ -489,9 +492,14 @@ class InformesController extends Controller
                   foreach ($line as $key => $value) 
                   {
                     if ($value['action'] == 's')
+                    {
                       $resTotales[$key] = $value['sum'];
+                    }
                     else
+                    {
                       $resTotales[$key] = number_format(($value['sum']/$value['cant']),3);
+                    }
+
                     if (array_key_exists($key, $totalGeneral))
                         $totalGeneral[$key]+= $resTotales[$key];
                     else
@@ -525,17 +533,27 @@ class InformesController extends Controller
           foreach ($line as $key => $value) 
           {
                     if ($value['action'] == 's')
+                    {
                       $resTotales[$key] = $value['sum'];
+                    }
                     else
+                    {
                       $resTotales[$key] = number_format(($value['sum']/$value['cant']), 3);
+                    }
 
                     if (array_key_exists($key, $totalGeneral))
+                    {
                         $totalGeneral[$key]+= $resTotales[$key];
+                    }
                     else
+                    {
                         $totalGeneral[$key] = $resTotales[$key];
+                    }
 
                     if ($value['action'] == 'p')
+                    {
                       $totalGeneral[$key] = number_format(($totalGeneral[$key]/$cant),3);
+                    }
           }
         }
         $result[] = $resTotales;
@@ -853,7 +871,14 @@ class InformesController extends Controller
 
             if (array_key_exists($key, $det))
             {   
-                $data = $det[$key];
+                if ($key == 4)
+                {
+                   $data = number_format(($det[2]/$det[9]), 3, '.', '');
+                }
+                else
+                {
+                  $data = $det[$key];
+                }
             }
             else
             {  
@@ -925,7 +950,14 @@ class InformesController extends Controller
 
           if (array_key_exists($key, $det))
           {   
-              $data = $det[$key];
+                if ($key == 4)
+                {
+                   $data = number_format(($det[2]/$det[9]), 3, '.', '');
+                }
+                else
+                {
+                  $data = $det[$key];
+                }
           }
           else
           {  
