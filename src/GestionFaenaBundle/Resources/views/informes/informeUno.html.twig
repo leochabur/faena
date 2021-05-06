@@ -3,7 +3,7 @@
 <br>
 <hr>
 <div class="text-left">
-	<span class="h5 card-title">INFORME I</span>
+	<span class="h5 card-title">INFORME II</span>
 </div>
 <div class="text-center">
 	<span class="h5 card-title">Faena:  {{ faena.fechaFaena | date('d/m/Y') }}</span>
@@ -35,6 +35,7 @@
 							{% if h.visible %}
 								<td class="{% if mov['total'] is defined %}font-weight-bold {% endif %}{% if h.sumariza or h.promedia %}text-right{% endif %}">
 									{% if mov[h.atributo.id] is defined %}
+
 										{% if mov['total'] is defined %}
 											{% if h.atributo.id == 4 %}
 												{{ (mov[2] / mov[9])|number_format(3, '.', '') }}
