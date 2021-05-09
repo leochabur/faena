@@ -54,10 +54,12 @@
 										</td>
 										<td>
 											<div class="row">
-												<div class="col">
-													<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="form-control form-control-sm align-center update" value="{{ valV }}"/>
+												<div class="col-4">
+													<input type="text" class="field-amount form-control form-control-sm align-center" value="{{ valV }}"/>				
 												</div>
-												<div class="col">
+												<div class="col-2">
+													<button data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}"  class="btn btn-sm btn-warning update">	Guardar
+													</button>
 												</div>
 											</div>
 										</td>									
@@ -70,10 +72,12 @@
 										</td>
 										<td class="align-middle">
 											<div class="row">
-												<div class="col">
-													<input type="text" data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="form-control form-control-sm align-center update" value="{{ valV }}"/>
+												<div class="col-4">
+													<input type="text" class="mt-1 field-amount form-control form-control-sm align-center" value="{{ valV }}"/>
 												</div>
-												<div class="col">
+												<div class="col-2">
+													<button data-idv="{{ idV }}" data-proc="{{ proceso.id }}" data-art="{{ v[0].id }}" class="btn btn-sm btn-warning update">	Guardar
+													</button>
 												</div>
 											</div>
 										</td>
@@ -134,35 +138,56 @@
 	  		});
 	});
 
-
-	$('.update').keypress(function(event) {
+	$('.field-amount').keyup(function(event) {
 									    var keycode = (event.keyCode ? event.keyCode : event.which);
 									    var input = $(this);
-									    if(keycode == '13')
+									    if(keycode == 13)
 									    {
+									    	var btn = $(this);
+											var parent = btn.parent().parent();
+											var input = parent.find('button');	
+											input.focus();
+	            							//alert(input.data('art'));
+	            						}
+	        });
+
+	$('.update').click(function(event) {
+										var btn = $(this);
+										var parent = btn.parent().parent();
+										var input = parent.find('input');									   
+
+									    if($.isNumeric(input.val()))
+									    {
+									    	btn.addClass('invisible');
+
 											var route = "{{ path ('bd_adm_proc_romaneo_articulos', {proc: '_PROC', art : '_ART', val : '_VAL', fd : faena.id, base : articulo.id})}}";
-											var btn = $(this);
+
 											var ruta = route.replace('_PROC', btn.data('proc')).replace('_ART', btn.data('art')).replace('_VAL', btn.data('idv'));
-											input.parent().siblings('div').html('');
+											
 											$.post(ruta,
-												   {data : btn.val(), palletiza: 0},
+												   {data : input.val(), palletiza: 0},
 												  function(response)
 												  {
 												  	if (response.status)
 												  	{
-												  		input.parent().siblings('div').html('<i class="far fa-check-circle fa-2x"></i>');
-														input.trigger("keypress", [9]);
+												  		btn.next().focus();
+												  		btn.parent().html('<i class="far fa-check-circle fa-2x"></i>');
 														$('#stock').html(response.stb);
+
 												  	}
 												  	else
 												  	{
-
-												  		input.parent().siblings('div').html('<i class="far fa-times-circle fa-2x"></i>');
+												  		btn.removeClass('invisible');
 												  		alert(response.message);
 												  	}
 												  }
 											);
 										}
+										else
+										{
+											alert('Valor invalido '+input.val());
+										}
+										
 											
 	});
 
