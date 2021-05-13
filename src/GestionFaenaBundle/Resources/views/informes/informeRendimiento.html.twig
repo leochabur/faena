@@ -1,0 +1,425 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{% block fos_user_content %}
+<br>
+<hr>
+<div class="text-left">
+	<span class="h5 card-title">INFORME RENDIMIENTO</span>
+</div>
+<hr>
+<div class="text-center">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	<div class="form-row">
+		<div class="col-lg-4 text-left">
+		{{ form_label(form.faena) }}
+		{{ form_widget(form.faena) }}
+		</div>
+	</div>
+	<div class="form-row">
+		{{ form_widget(form.cargar) }}
+	</div>
+	{{ form_end(form) }}
+</div>
+{% if faena is defined %}
+<hr>
+<div class="card">
+	  
+	  <div class="card-header h5">
+    Fecha faena: {{ faena }}
+  </div>
+  <div class="card-body">
+		  <div class="card-header h5">
+		    Produccion
+		  </div>
+		  	<div class="row mt-2 ml-2">
+		  		<div class="col-lg-4">
+			    	<span class="card-title"> INGRESOS: <br> 
+			    										<span class="ml-5"><span class="text-muted">{{ total.stock }}</span> KG </span><br> 
+			    										<span class="ml-5"><span class="text-muted">{{ cantidad.stock }}</span> POLLOS</span>
+			    	</span>
+			    </div>
+
+				<div class="col-lg-8">
+					<div class="row">
+						<div class="col-lg-12">
+							<span class="card-title"> DECOMISOS:</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-3 ml-5">ANTE MORTEM: <br>
+							<div class="ml-5"><span class="text-muted">{{ dam.stock|number_format(2,',','') }}</span> KG</div>
+							<div class="ml-5"><span class="text-muted">{{ cantDAM.stock}}</span> POLLOS</div>
+						</div>
+						<div class="col-lg-3">POST MORTEM: <br>
+							<div class="ml-5"><span class="text-muted">{{ kmDPM.stock|number_format(2,',','') }}</span> KG</div>
+							<div class="ml-5"><span class="text-muted">{{ cantDPM.stock}}</span> POLLOS </div>
+						</div>
+						<div class="col-lg-3">TOTAL DECOMISOS: <br>
+							<div class="ml-5"><span class="text-muted">{{ (kmDPM.stock+dam.stock)|number_format(2,',','') }}</span> KG</div>
+							<div class="ml-5"><span class="text-muted">{{ (cantDPM.stock+cantDAM.stock)}}</span> POLLOS </div>
+						</div>
+					</div>
+			    </div>
+		    </div>
+		    				<hr>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-4">
+				    	<span class="card-title"> CAJONES:
+				    	</span>
+				    </div>
+					<div class="col-lg-8">
+						<div class="row">
+							<div class="col-lg-3 ml-5">FRESCO: <br>
+								<div class="ml-5"><span class="text-muted">{{ cajones.f.stock}}</span> Cajones</div>
+								<div class="ml-5"><span class="text-muted">{{ cajones.c.stock * 20}}</span> Kg.</div>
+							</div>
+							<div class="col-lg-3">A CONGELAR: <br>
+								<div class="ml-5"><span class="text-muted">{{ cajones.c.stock}}</span> Cajones</div>
+								<div class="ml-5"><span class="text-muted">{{ cajones.c.stock * 20}}</span> Kg.</div>
+							</div>
+							<div class="col-lg-3">TOTAL: <br>
+								<div class="ml-5"><span class="text-muted">{{ (cajones.f.stock + cajones.c.stock)}}</span> Cajones</div>
+								<div class="ml-5"><span class="text-muted">{{ (cajones.f.stock + cajones.c.stock) * 20}}</span> Kg.</div>
+							</div>
+						</div>
+				    </div>
+				</div>
+		  <div class="card-header mt-4 h5">
+		    MERMAS
+		  </div>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-3">
+				    	<span class="card-title"> MERMA MUERTOS:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+									<span class="text-muted">{{ total.stock|number_format(0,',','.') }}</span>
+							</div>
+							<div class="col-lg-1">
+									-
+							</div>
+							<div class="col-lg-2">
+								<span class="text-muted">{{ (kmDPM.stock+dam.stock)|number_format(0,',','.') }}</span>
+							</div>
+							<div class="col-lg-1">
+									=
+							</div>
+							<div class="col-lg-2">
+								<div class=""><span class="text-muted">{{ (total.stock - (kmDPM.stock + dam.stock))|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+									=>
+							</div>
+							<div class="col-lg-2">
+								<div class=""><span class="text-muted">{{ ((1-((total.stock - (kmDPM.stock + dam.stock))/total.stock))*100)|number_format(3,',','.') }} %</span></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-3">
+				    	<span class="card-title"> MERMA FAENA:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+									<span class="text-muted">{{ (total.stock - (kmDPM.stock + dam.stock))|number_format(0,',','.') }}</span>
+							</div>
+							<div class="col-lg-1">
+									-
+							</div>
+							<div class="col-lg-2">
+								<span class="text-muted">{{ (total.stock - (kmDPM.stock + dam.stock))|number_format(0,',','.') }}</span>
+							</div>
+							<div class="col-lg-1">
+									=
+							</div>
+							<div class="col-lg-2">
+								<div class=""><span class="text-muted"></span></div>
+							</div>
+							<div class="col-lg-1">
+									=>
+							</div>
+							<div class="col-lg-2">
+								<div class=""><span class="text-muted"></span></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-3">
+				    	<span class="card-title"> MERMA GENERAL:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+									<span class="text-muted">{{ total.stock|number_format(0,',','.') }}</span>
+							</div>
+							<div class="col-lg-1">
+									-
+							</div>
+							<div class="col-lg-2">
+								<span class="text-muted">{{ (total.stock - (kmDPM.stock + dam.stock))|number_format(0,',','.') }}</span>
+							</div>
+							<div class="col-lg-1">
+									=
+							</div>
+							<div class="col-lg-2">
+								<div class=""><span class="text-muted">{{ (total.stock - (total.stock - (kmDPM.stock + dam.stock)))|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+									=>
+							</div>
+							<div class="col-lg-2">
+								<div class=""><span class="text-muted">
+												{{  (((total.stock - (total.stock - (kmDPM.stock + dam.stock)))/total.stock)*100)|number_format(3,',','.') }} %
+								</span></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+		  <div class="card-header mt-4 h5">
+		    TROZADO
+		  </div>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-3">
+				    	<span class="card-title"> Transito Inicial:</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<div class="text-right"><span class="text-muted">{{ transitoInicial.stock|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+
+							</div>
+							<div class="col-lg-2">
+								<div class=""></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-3">
+				    	<span class="card-title"> De Produccion:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<div class="text-right"><span class="text-muted">{{ kgAtrozar.stock|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+
+							</div>
+							<div class="col-lg-2">
+								<div class=""></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2 font-weight-bold">
+			  		<div class="col-lg-3">
+			  			<hr>
+				    	<span class="card-title"> TOTAL:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<hr>
+								<div class="text-right"><span class="text-muted">{{ (kgAtrozar.stock + transitoInicial.stock)|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+
+							</div>
+							<div class="col-lg-2">
+								<div class=""></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2">
+			  		<div class="col-lg-3">
+				    	<span class="card-title"> En Transito:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<div class="text-right"><span class="text-muted">{{ kgAtransito.stock|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+
+							</div>
+							<div class="col-lg-2">
+								<div class=""></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2 font-weight-bold">
+			  		<div class="col-lg-3">
+			  			<hr>
+				    	<span class="card-title"> A Transformacion:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<hr>
+								<div class="text-right"><span class="text-muted">{{ (kgAtrozar.stock + transitoInicial.stock - kgAtransito.stock)|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+
+							</div>
+							<div class="col-lg-2">
+								<div class=""></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2 font-weight-bold">
+			  		<div class="col-lg-3">
+			  			<hr>
+				    	<span class="card-title"> Produccion:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<hr>
+								<div class="text-right"><span class="text-muted">{{ (trozadoCamara)|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+
+							</div>
+							<div class="col-lg-2">
+								<div class=""></div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			  	<div class="row mt-2 ml-2 font-weight-bold">
+			  		<div class="col-lg-3">
+			  			<hr>
+				    	<span class="card-title"> MERMA:
+				    	</span>
+				    </div>
+					<div class="col-lg-9">
+						<div class="row">
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+
+							</div>
+							<div class="col-lg-1">
+									
+							</div>
+							<div class="col-lg-2">
+								<hr>
+								<div class="text-right"><span class="text-muted">{{ ((kgAtrozar.stock + transitoInicial.stock - kgAtransito.stock) - trozadoCamara)|number_format(0,',','.') }}</span></div>
+							</div>
+							<div class="col-lg-1">
+								<hr>
+								=>
+							</div>
+							<div class="col-lg-2">
+								<div class="">
+									<hr>
+									<span class="text-muted">
+										{% if (kgAtrozar.stock + transitoInicial.stock - kgAtransito.stock) > 0 %}
+										{{ ((((kgAtrozar.stock + transitoInicial.stock - kgAtransito.stock) - trozadoCamara)/(kgAtrozar.stock + transitoInicial.stock - kgAtransito.stock))*100)|number_format(3,',','.') }} %
+										{% endif %}
+									</span>
+								</div>
+
+							</div>
+						</div>
+				    </div>
+				</div>
+  </div>
+</div>
+{% endif %}
+<br><br>
+
+{% endblock fos_user_content %}

@@ -37,6 +37,8 @@ use GestionFaenaBundle\Entity\ProcesoMedio;
 use GestionFaenaBundle\Entity\ProcesoFin;
 use GestionFaenaBundle\Entity\ProcesoFaena;
 use GestionFaenaBundle\Entity\faena\AtributoConcepto;
+use GestionFaenaBundle\Entity\faena\EntradaStock;
+use GestionFaenaBundle\Entity\faena\TransformarStock;
 use GestionFaenaBundle\Form\faena\AtributoConceptoType;
 use GestionFaenaBundle\Form\faena\ConceptoMovimientoProcesoType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -54,6 +56,7 @@ use GestionFaenaBundle\Entity\gestionBD\FactorCalculo;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use GestionFaenaBundle\Entity\faena\ConceptoMovimientoProceso;
+use GestionFaenaBundle\Entity\faena\ConceptoMovimiento;
 use GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto;
 use GestionFaenaBundle\Form\gestionBD\ArticuloAtributoConceptoType;
 use Symfony\Component\Validator\Constraints\NotNull;
@@ -71,6 +74,7 @@ use GestionFaenaBundle\Entity\faena\MovimientoStock;
 use GestionFaenaBundle\Entity\opciones\AtributoInforme;
 use GestionFaenaBundle\Form\opciones\AtributoInformeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use GestionFaenaBundle\Entity\faena\SalidaStock;
 
 class InformesController extends Controller
 {
@@ -82,6 +86,166 @@ class InformesController extends Controller
                             )
                           )
                         );
+    /**
+     * @Route("/informes/perform", name="informes_rendimientos_faena")
+
+     */
+    public function viewRendimientosFaena(Request $request)
+    {
+        //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY')
+        $form = $this->getFormSelectFaena();
+        if ($request->isMethod('POST')){
+            $form->handleRequest($request);
+            if ($form->isValid())
+            {
+              $data = $form->getData();
+              $em = $this->getDoctrine()->getManager();
+              $repository = $em->getRepository('GestionFaenaBundle\Entity\faena\ValorNumerico');
+
+              $conceptoIngreso = $em->find(ConceptoMovimiento::class, 1); //Recepcion en Playa
+
+              $atributoPeso = $em->find(AtributoAbstracto::class, 2); //Peso Neto
+              $atributoCantidad = $em->find(AtributoAbstracto::class, 9); //Cantidad 
+
+              $kgTotalAves = $repository->getAcumuladoAtributo($data['faena'], $atributoPeso, $conceptoIngreso);
+              if (!$kgTotalAves)
+              {
+                $kgTotalAves['stock'] = 0;
+              }
+
+              $cantTotalAves = $repository->getAcumuladoAtributo($data['faena'], $atributoCantidad, $conceptoIngreso);
+              if (!$cantTotalAves)
+              {
+                $cantTotalAves['stock'] = 0;
+              }
+
+              
+
+              $conceptoDPM = $em->find(ConceptoMovimiento::class, 5); //Decomiso Post Mortem
+
+              $atributoDAM = $em->find(AtributoAbstracto::class, 12); //DAM (Peso)
+              $cantidadDAM = $em->find(AtributoAbstracto::class, 11); //DAM (Aves)
+
+              $stockDAM = $repository->getAcumuladoAtributo($data['faena'], $atributoDAM, $conceptoIngreso);
+              if (!$stockDAM)
+              {
+                $stockDAM['stock'] = 0;
+              }
+
+              $cantDAM = $repository->getAcumuladoAtributo($data['faena'], $cantidadDAM, $conceptoIngreso);
+              if (!$cantDAM)
+              {
+                $cantDAM['stock'] = 0;
+              }
+              $cantDPM = $repository->getAcumuladoAtributo($data['faena'], $atributoCantidad, $conceptoDPM);
+              if (!$cantDPM)
+              {
+                $cantDPM['stock'] = 0;
+              }
+              $kmDPM['stock'] = (($kgTotalAves['stock']-$stockDAM['stock'])/($cantTotalAves['stock']-$cantDAM['stock'])) * $cantDPM['stock'];
+
+
+              $articuloCajonFresco = $em->find(Articulo::class, 104); //Articulo Cajon Pollo Fresco
+              $articuloCajonCongelado = $em->find(Articulo::class, 105); //Articulo Cajon Pollo Congelado
+              $atributoBulto = $em->find(AtributoAbstracto::class, 27); //Bulto
+
+              $procesoEmpaque = $em->find(ProcesoFaena::class, 5);
+
+              $conceptoTransf = $em->find(ConceptoMovimiento::class, 7);
+
+              $cajonesFrescos = $repository->getAcumuladoAtributoParaTipoMovimientoYArticulo($data['faena'], 
+                                                                                            $procesoEmpaque, 
+                                                                                            $articuloCajonFresco, 
+                                                                                            $conceptoTransf,
+                                                                                            $atributoBulto,
+                                                                                            TransformarStock::class);
+              if (!$cajonesFrescos)
+              {
+                $cajonesFrescos['stock'] = 0;
+              }
+              $cajonesCongelados = $repository->getAcumuladoAtributoParaTipoMovimientoYArticulo($data['faena'], 
+                                                                                                $procesoEmpaque, 
+                                                                                                $articuloCajonCongelado, 
+                                                                                                $conceptoTransf,
+                                                                                                $atributoBulto,
+                                                                                                TransformarStock::class);
+              if (!$cajonesCongelados)
+              {
+                $cajonesCongelados['stock'] = 0;
+              }
+
+              $artAtrConceptoTrozado = $em->find(ArticuloAtributoConcepto::class, 146); //AAC para indicar la transferencia de Carcazas desde Empaque a Trozado
+
+              $artAtrTrozadoATransito = $em->find(ArticuloAtributoConcepto::class, 179);
+
+              $kgATrozado = $repository->getAcumuladoAtributoWhitAAC($data['faena'], $artAtrConceptoTrozado, $atributoPeso);
+              if (!$kgATrozado)
+              {
+                $kgATrozado['stock'] = 0;
+              }
+              $kgATransito = $repository->getAcumuladoAtributoWhitAAC($data['faena'], $artAtrTrozadoATransito, $atributoPeso);
+              if (!$kgATransito)
+              {
+                $kgATransito['stock'] = 0;
+              }
+
+
+              $unidadTrozadoFresco = $em->find(Articulo::class, 91); //Unidad de Trozado Fresco
+              $procesoCamara = $em->find(ProcesoFaena::class, 2);
+
+              $romaneoTrozado = $repository->getArticulosTransformados($data['faena'], $unidadTrozadoFresco, $procesoCamara, SalidaStock::class);
+
+              $totalRomaneo = 0;
+
+              foreach ($romaneoTrozado as $r)
+              {
+                $kg = $r[0]->getMovimiento()->getArtProcFaena()->getArticulo()->getPresentacionKg();
+                $totalRomaneo+= ($r['stock'] * $kg*-1);
+              }
+
+              $transitoInicial['stock'] = 0;
+            //  return $this->render('@GestionFaena/informes/informeRendimiento.html.twig', ['form' => $form->createView(), 'stock' => $stock]);
+              return $this->render('@GestionFaena/informes/informeRendimiento.html.twig', 
+                                   ['dam' => $stockDAM, 
+                                    'cantDAM' => $cantDAM,
+                                    'total' => $kgTotalAves, 
+                                    'cantidad' => $cantTotalAves,
+                                    'cantDPM' => $cantDPM,
+                                    'faena' => $data['faena'],
+                                    'kmDPM' => $kmDPM,
+                                    'kgAtrozar' => $kgATrozado,
+                                    'transitoInicial' => $transitoInicial,
+                                    'kgAtransito' => $kgATransito,
+                                    'trozadoCamara' => $totalRomaneo,
+                                    'cajones' => ['f' => $cajonesFrescos, 'c' => $cajonesCongelados], 
+                                    'form' => $form->createView()]);
+            }
+
+        }
+        return $this->render('@GestionFaena/informes/informeRendimiento.html.twig', ['form' => $form->createView()]);
+    }
+
+    private function getFormSelectFaena()
+    {
+        $form = $this->createFormBuilder()
+                      ->add('faena', 
+                            EntityType::class, 
+                            ['class' => FaenaDiaria::class, 
+                             'required' => true,
+                             'constraints' => [new NotNull(array('message' => "Debe seleccionar una faena!!"))],
+                             'query_builder' => function (EntityRepository $er) {
+                                                                                        return $er->createQueryBuilder('p')
+                                                                                                  ->where('p.isActive = :activa')
+                                                                                                  ->setParameter('activa', true)
+                                                                                                  ->orderBy('p.fechaFaena', 'DESC');
+                                                                                                }
+                            ])
+                        ->add('cargar', SubmitType::class, ['label' => 'Cargar Informe'])
+                        ->getForm();
+        return $form;
+    }
+
+
 
     /**
      * @Route("/informes/existencias", name="informes_ver_existencias")

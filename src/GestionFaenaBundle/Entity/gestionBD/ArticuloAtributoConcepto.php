@@ -131,7 +131,7 @@ class ArticuloAtributoConcepto
         {
             $destino = " (".$this->articuloOrigenTransformacion.")";
         }
-        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino."($procDest)";
+        return $this->concepto->getProcesoFaena()." - ".$this->concepto->getConcepto()." - ".$this->articulo."  -  ".$this->concepto->getTipoMovimiento().$destino."($procDest) - ".$this->getId();
     }
 
     public function getVistaEdicionV2()

@@ -10,4 +10,131 @@ namespace GestionFaenaBundle\Repository\faena;
  */
 class ValorNumericoRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getAcumuladoAtributo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, 
+    									\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
+    									\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto)
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT sum(valor.valor) as stock
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   INNER JOIN valor.movimiento mov
+                                   INNER JOIN valor.atributo atributo
+                                   INNER JOIN atributo.atributoAbstracto atributoAbstracto
+                                   INNER JOIN mov.artProcFaena artAtrCon
+                                   INNER JOIN artAtrCon.concepto conMov                                    
+                                   WHERE mov.faenaDiaria = :faena AND 
+                                   		 mov.eliminado = :eliminado AND 
+                                   		 atributoAbstracto = :atributo AND
+                                   		 conMov.concepto = :concepto
+                                   GROUP BY atributoAbstracto")
+                    ->setParameter('faena', $faena)
+                    ->setParameter('concepto', $concepto)
+                    ->setParameter('atributo', $atributo)
+                    ->setParameter('eliminado', false)
+                    ->getOneOrNullResult();
+    }
+
+    public function getAcumuladoAtributoParaTipoMovimientoYArticulo(\GestionFaenaBundle\Entity\FaenaDiaria $faena, 
+					    									\GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena,
+					    									\GestionFaenaBundle\Entity\gestionBD\Articulo $articulo,
+					    									\GestionFaenaBundle\Entity\faena\ConceptoMovimiento $concepto,
+					    									\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo,
+					    									$typeOfMovimiento)
+    {
+
+        return $this->getEntityManager()
+                    ->createQuery("SELECT sum(valor.valor) as stock
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   INNER JOIN valor.movimiento mov
+                                   INNER JOIN valor.atributo atributo
+                                   INNER JOIN mov.procesoFnDay pfd
+                                   INNER JOIN atributo.atributoAbstracto atributoAbstracto
+                                   INNER JOIN mov.artProcFaena artAtrCon
+                                   INNER JOIN artAtrCon.concepto conMov                                    
+                                   WHERE mov.faenaDiaria = :faena AND 
+                                   		 mov.eliminado = :eliminado AND 
+                                   		 atributoAbstracto = :atributo AND
+                                   		 artAtrCon.articulo = :articulo AND
+                                   		 conMov.concepto = :concepto AND
+                                   		 (mov INSTANCE OF $typeOfMovimiento) AND
+                                   		 pfd.procesoFaena = :proceso
+                                   GROUP BY atributoAbstracto")
+                    ->setParameter('faena', $faena)
+                    ->setParameter('concepto', $concepto)
+                    ->setParameter('proceso', $procesoFaena)
+                    ->setParameter('articulo', $articulo)
+                    ->setParameter('atributo', $atributo)
+                    ->setParameter('eliminado', false)
+                    ->getOneOrNullResult();
+       /* return $this->getEntityManager()
+                    ->createQuery("SELECT sum(valor.valor) as stock, MIN(fd.fechaFaena) as fmin, MAX(fd.fechaFaena) as fmax
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   INNER JOIN valor.movimiento mov
+                                   INNER JOIN valor.atributo atributo
+                                   INNER JOIN atributo.atributoAbstracto atributoAbstracto
+                                   INNER JOIN mov.faenaDiaria fd
+                                   INNER JOIN mov.procesoFnDay pfd
+                                   INNER JOIN mov.artProcFaena artAtrCon    
+                                   INNER JOIN artAtrCon.concepto conMov                                  
+                                   WHERE mov.faenaDiaria = :faena AND 
+                                   		 mov.eliminado = :eliminado AND 
+                                   		 artAtrCon.articulo = :articulo AND
+                                   		 pfd.procesoFaena = :procesoFaena AND
+                                   		 conMov.concepto = :concepto AND
+                                   		 atributoAbstracto = :atributo AND
+                                   		 (mov INSTANCE OF $typeOfMovimiento)
+                                   	GROUP BY atributoAbstracto")
+                    ->setParameter('faena', $faena)
+                    ->setParameter('articulo', $articulo)
+                    ->setParameter('procesoFaena', $procesoFaena)
+                    ->setParameter('concepto', $concepto)
+                    ->setParameter('atributo', $atributo)
+                    ->setParameter('eliminado', false)
+                    ->getOneOrNullResult();*/
+    }
+
+    public function getAcumuladoAtributoWhitAAC(\GestionFaenaBundle\Entity\FaenaDiaria $faena, 
+		    									\GestionFaenaBundle\Entity\gestionBD\ArticuloAtributoConcepto $aac,
+		    									\GestionFaenaBundle\Entity\gestionBD\AtributoAbstracto $atributo)
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT sum(valor.valor) as stock
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   INNER JOIN valor.movimiento mov
+                                   INNER JOIN valor.atributo atributo
+                                   INNER JOIN atributo.atributoAbstracto atributoAbstracto                               
+                                   WHERE mov.faenaDiaria = :faena AND 
+                                   		 mov.eliminado = :eliminado AND 
+                                   		 mov.artProcFaena = :aac AND
+                                   		 atributoAbstracto = :atributo
+                                   GROUP BY atributoAbstracto")
+                    ->setParameter('faena', $faena)
+                    ->setParameter('aac', $aac)
+                    ->setParameter('atributo', $atributo)
+                    ->setParameter('eliminado', false)
+                    ->getOneOrNullResult();
+    }
+
+    public function getArticulosTransformados(\GestionFaenaBundle\Entity\FaenaDiaria $faena, 
+		    									\GestionFaenaBundle\Entity\gestionBD\Articulo $origenTrx,
+		    									\GestionFaenaBundle\Entity\ProcesoFaena $procesoFaena,
+		    									$typeOfMovimiento)
+    {
+        return $this->getEntityManager()
+                    ->createQuery("SELECT valor, valor.valor as stock
+                                   FROM GestionFaenaBundle:faena\ValorNumerico valor
+                                   INNER JOIN valor.movimiento mov
+                                   INNER JOIN mov.artProcFaena aac    
+                                   INNER JOIN mov.procesoFnDay pfd                        
+                                   WHERE mov.faenaDiaria = :faena AND 
+                                   		 mov.eliminado = :eliminado AND 
+                                   		 aac.articulo = :origenTrx AND
+                                   		 (mov INSTANCE OF $typeOfMovimiento) AND
+                                   		 pfd.procesoFaena = :proceso")
+                    ->setParameter('faena', $faena)
+                    ->setParameter('eliminado', false)
+                    ->setParameter('origenTrx', $origenTrx)
+                    ->setParameter('proceso', $procesoFaena)
+                    ->getResult();
+    }
 }
