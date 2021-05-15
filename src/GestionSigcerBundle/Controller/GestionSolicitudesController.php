@@ -961,7 +961,7 @@ class GestionSolicitudesController extends Controller
      */
     public function generateXML($gpo, $rgn = 0)
     {
-        $xsd = $this->get('kernel')->getRootDir() . '/../web/resources/multiplesSolicitudesCarnicos.xsd';
+       // $xsd = $this->get('kernel')->getRootDir() . '/../web/resources/multiplesSolicitudesCarnicos.xsd';
 
         $zip = $this->get('kernel')->getRootDir() . '/../web/solxml/';
 
@@ -1155,12 +1155,13 @@ class GestionSolicitudesController extends Controller
                         $files["sol_exp_".$sol->getId().".xml"] = $name;
                     }
                 }
-                $zipName = 'solicitudesExportacionFecha'.$grupo->getFecha()->format('dmY').'.zip';
+                
         }
 
+        $zipName = 'e:/solicitudesExportacionFecha.zip';
         $archivo = new \ZipArchive();
         
-        $archivo->open($zip.$zipName,  \ZipArchive::CREATE|\ZipArchive::OVERWRITE);
+        $archivo->open($zipName,  \ZipArchive::CREATE|\ZipArchive::OVERWRITE);
 
         foreach ($files as $k => $v) 
         {
