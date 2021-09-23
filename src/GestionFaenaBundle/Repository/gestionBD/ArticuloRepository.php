@@ -32,7 +32,7 @@ class ArticuloRepository extends \Doctrine\ORM\EntityRepository
                                    JOIN a.categoria c
                                    JOIN a.subcategoria s
                                    WHERE a.eliminado = :eliminado
-                                   ORDER BY c.orden, s.orden, a.orden, a.id')
+                                   ORDER BY a.categoriaVenta')
                     ->setParameter('eliminado', false)
                     ->getResult();
     } 

@@ -121,6 +121,26 @@ class Articulo
     private $descVenta;
 
 
+    /**
+    * @ORM\ManyToOne(targetEntity="CategoriaArticulo") 
+    * @ORM\JoinColumn(name="id_categ_vta", referencedColumnName="id", nullable=true)
+    */      
+    private $categoriaVenta;
+
+
+    public function setCategoriaVenta(\GestionFaenaBundle\Entity\gestionBD\CategoriaArticulo $categoriaVenta = null)
+    {
+        $this->categoriaVenta = $categoriaVenta;
+
+        return $this;
+    }
+
+    public function getCategoriaVenta()
+    {
+        return $this->categoriaVenta;
+    }
+
+
     public function getNombrePallet()
     {
         return ($this->nombre.' - '.$this->codigoInterno);

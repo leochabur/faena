@@ -103,6 +103,7 @@ class VentasController extends Controller
      * @Route("/config/addgpo", name="bd_ventas_nuevo_grupo_ventas")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      */
+
     public function addGrupoVenta()
     {
         $grupo = new RubroEntidad();
@@ -115,6 +116,7 @@ class VentasController extends Controller
     {
         return $this->createForm(RubroEntidadType::class, $grupo, ['action' => $this->generateUrl('bd_ventas_nuevo_grupo_ventas_procesar'),'method' => 'POST']);
     }
+
 
     /**
      * @Route("/config/addartatconproc", name="bd_ventas_nuevo_grupo_ventas_procesar", methods={"POST"})
@@ -135,6 +137,8 @@ class VentasController extends Controller
         $rubros = $this->getDoctrine()->getManager()->getRepository(RubroEntidad::class)->findAll();
         return $this->render('@GestionVentas/bd/nuevoGrupo.html.twig', array('rubros' => $rubros, 'form' => $form->createView()));
     }
+
+
     /////////////////FIN///////////////////////////////////
     /**
  	 * @Route("/generar", name="vtas_generate")
@@ -419,6 +423,7 @@ class VentasController extends Controller
 
     }
 
+
     /**
  	 * @Route("/detvtaday", name="vtas_detalle_ventas_fecha")
      */
@@ -439,8 +444,12 @@ class VentasController extends Controller
 
     	$body = [];
 
+        $totalPorCategoria = [];
+
     	foreach ($comprobantes as $comp)
     	{
+            $totalPorCategoria[$comp->getId()] = [];
+
     		$body[$comp->getId()] = [];
     		foreach ($articulos as $art)
     		{
@@ -450,6 +459,14 @@ class VentasController extends Controller
     			{
     				$body[$comp->getId()][$art->getId()][$tpo->getId()] = null;
     			}
+
+                if ($art->getCategoriaVenta())
+                {
+                    if (!array_key_exists($art->getCategoriaVenta()->getId(), $totalPorCategoria[$comp->getId()]))
+                    {
+                        $totalPorCategoria[$comp->getId()][$art->getCategoriaVenta()->getId()] = 0;
+                    }
+                }
     		}
 
     		foreach ($comp->getItems() as $it)
@@ -465,6 +482,7 @@ class VentasController extends Controller
     						  'tipos' => $tiposVenta,
     						  'data' => $body]);
     }
+
 
     /**
  	 * @Route("/delete/{id}", name="vtas_delete_comprobante_venta")
